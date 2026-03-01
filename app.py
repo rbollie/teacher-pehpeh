@@ -7,9 +7,18 @@ import streamlit as st
 import time, os, base64, json, random, zlib
 
 # === API KEYS ===
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
-GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
+def _get_key(name):
+    """Get API key from environment or Streamlit secrets"""
+    v=os.environ.get(name,"")
+    if v: return v
+    try:
+        import streamlit as st
+        return st.secrets.get(name,"")
+    except: return ""
+
+OPENAI_API_KEY = _get_key("OPENAI_API_KEY")
+ANTHROPIC_API_KEY = _get_key("ANTHROPIC_API_KEY")
+GOOGLE_API_KEY = _get_key("GOOGLE_API_KEY")
 LOGO_FILENAME = "logo.png"
 
 try:
@@ -77,7 +86,7 @@ def gen_image(prompt):
         try:
             genai.configure(api_key=GOOGLE_API_KEY)
             from google.generativeai import types as gtypes
-            img_model=genai.GenerativeModel("gemini-2.0-flash-exp")
+            img_model=genai.GenerativeModel("gemini-2.5-flash")
             r=img_model.generate_content(
                 f"Generate an educational illustration for an African classroom: {prompt}. Clear, colorful, culturally relevant to West Africa/Liberia. The image should be suitable as a teaching visual aid.",
                 generation_config=genai.types.GenerationConfig(response_mime_type="text/plain")
@@ -277,8 +286,8 @@ def ask_gem(sp,q):
     if not GEM or not GOOGLE_API_KEY: return None
     try:
         genai.configure(api_key=GOOGLE_API_KEY)
-        return genai.GenerativeModel("gemini-1.5-flash",system_instruction=sp).generate_content(q).text
-    except Exception as e: return f"⚠️ {e}"
+        return genai.GenerativeModel("gemini-2.5-flash",system_instruction=sp).generate_content(q).text
+    except Exception as e: return f"⚠️ Gemini: {e}"
 
 def best(sp,q,h=None):
     for fn,nm in [(ask_cl,"Claude"),(ask_gpt,"ChatGPT")]:
