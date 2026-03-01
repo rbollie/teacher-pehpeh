@@ -425,18 +425,38 @@ def main():
     show_logo(country)
     st.markdown('<p style="text-align:center;color:#8899BB;font-size:.95rem;margin-bottom:.6rem">Curating Personalized Content to Support Underresourced Teachers<br>ChatGPT &bull; Claude &bull; Gemini</p>',unsafe_allow_html=True)
 
-    # Connection
+    # Unified status bar
     if conn:
-        if conn["quality"]=="none": st.markdown(f'<div style="padding:.5rem 1rem;border-radius:6px;background:rgba(239,83,80,.15);border-left:4px solid #EF5350;color:#EF9A9A;margin-bottom:.6rem">{conn["emoji"]} <strong>OFFLINE</strong> — Practice Quiz available!</div>',unsafe_allow_html=True)
+        keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
+        act=[n for k,n in [(OPENAI_API_KEY,"ChatGPT"),(ANTHROPIC_API_KEY,"Claude"),(GOOGLE_API_KEY,"Gemini")] if k]
+        img_models=[]
+        if OPENAI_API_KEY: img_models.append("DALL-E")
+        if GOOGLE_API_KEY: img_models.append("Imagen")
+        # Network section
+        if conn["quality"]=="none":
+            net_html=f'<span style="color:#EF5350">🔴 <strong>OFFLINE</strong></span>'
+        elif conn["quality"] in ("high","medium"):
+            net_html=f'<span style="color:#81C784">{conn["emoji"]} <strong>{conn["label"]}</strong> ({conn["latency_ms"]}ms)</span>'
         else:
-            c="rgba(76,175,80,.1);border-left:4px solid #4CAF50;color:#81C784" if conn["quality"] in ("high","medium") else "rgba(255,167,38,.1);border-left:4px solid #FFA726;color:#FFB74D"
-            st.markdown(f'<div style="padding:.5rem 1rem;border-radius:6px;background:{c};margin-bottom:.6rem">{conn["emoji"]} <strong>{conn["label"]}</strong> ({conn["latency_ms"]}ms)</div>',unsafe_allow_html=True)
+            net_html=f'<span style="color:#FFB74D">{conn["emoji"]} <strong>{conn["label"]}</strong> ({conn["latency_ms"]}ms)</span>'
+        # Models section
+        if act:
+            models_html=f'<span style="color:#7BB8F5">🤖 <strong>{len(act)}</strong>: {" · ".join(act)}</span>'
+        else:
+            models_html='<span style="color:#EF9A9A">🤖 No models</span>'
+        # Image models section
+        if img_models:
+            img_html=f'<span style="color:#C9A0DC">🎨 {" · ".join(img_models)}</span>'
+        else:
+            img_html=""
+        # Divider
+        div='<span style="color:#3a4a6a;margin:0 10px;font-size:1.1rem">│</span>'
+        bar_parts=[net_html, models_html]
+        if img_html: bar_parts.append(img_html)
+        st.markdown(f'<div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:10px;padding:8px 16px;font-size:.85rem;display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:.8rem">{div.join(bar_parts)}</div>',unsafe_allow_html=True)
     if st.sidebar.button("🔄 Re-check"): st.session_state.conn_checked=False; st.rerun()
-
-    keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
-    act=[n for k,n in [(OPENAI_API_KEY,"ChatGPT"),(ANTHROPIC_API_KEY,"Claude"),(GOOGLE_API_KEY,"Gemini")] if k]
-    if online and keys:
-        st.markdown(f'<div style="background:rgba(43,125,233,.1);border-left:4px solid {C_BLUE};padding:.5rem 1rem;border-radius:6px;font-size:.85rem;color:#7BB8F5;margin-bottom:.6rem">{ico(16)} <strong>{len(act)}</strong>: {" · ".join(act)}{"  · 🎨 DALL-E" if OPENAI_API_KEY else ""}{"  · 🎨 Imagen" if GOOGLE_API_KEY else ""}</div>',unsafe_allow_html=True)
+    if not conn:
+        keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
 
     # Tabs
     if online and keys:
