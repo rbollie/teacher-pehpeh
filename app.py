@@ -5,6 +5,9 @@ Built by Rodney L. Bollie, PhD
 """
 import streamlit as st
 import time, os, base64, json, random, zlib
+try:
+    import pandas as pd; PD=True
+except: PD=False
 
 # === API KEYS ===
 def _get_key(name):
@@ -335,10 +338,54 @@ def main():
             st.session_state.conn_info=check_conn(); st.session_state.conn_checked=True
     conn=st.session_state.conn_info; online=conn["online"] if conn else False
 
-    # CSS
+    # CSS with dark/light mode detection
     st.markdown(f"""<style>
     @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap');
-    .stApp {{font-family:'Source Sans Pro',sans-serif;background:{C_NAVY}}}
+    /* Dark mode (default) */
+    :root {{
+        --bg-main: {C_NAVY};
+        --bg-card: {C_NAVY_L};
+        --text-primary: #D0D8E8;
+        --text-secondary: #9CA3AF;
+        --text-muted: #667788;
+        --border-color: #2a3a5a;
+        --chat-user-bg: rgba(43,125,233,.08);
+        --chat-user-border: rgba(43,125,233,.3);
+        --chat-ai-bg: rgba(139,26,26,.1);
+        --chat-ai-border: rgba(178,34,52,.3);
+        --tip-color: #8899AA;
+    }}
+    /* Light mode detection */
+    @media (prefers-color-scheme: light) {{
+        :root {{
+            --bg-main: #F8F9FA;
+            --bg-card: #FFFFFF;
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a5568;
+            --text-muted: #6b7280;
+            --border-color: #d1d5db;
+            --chat-user-bg: rgba(43,125,233,.06);
+            --chat-user-border: rgba(43,125,233,.25);
+            --chat-ai-bg: rgba(139,26,26,.06);
+            --chat-ai-border: rgba(178,34,52,.2);
+            --tip-color: #555;
+        }}
+    }}
+    /* Also detect Streamlit's own light theme */
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] {{
+        --bg-main: #F8F9FA;
+        --bg-card: #FFFFFF;
+        --text-primary: #1a1a2e;
+        --text-secondary: #4a5568;
+        --text-muted: #6b7280;
+        --border-color: #d1d5db;
+        --chat-user-bg: rgba(43,125,233,.06);
+        --chat-user-border: rgba(43,125,233,.25);
+        --chat-ai-bg: rgba(139,26,26,.06);
+        --chat-ai-border: rgba(178,34,52,.2);
+        --tip-color: #555;
+    }}
+    .stApp {{font-family:'Source Sans Pro',sans-serif}}
     section[data-testid="stSidebar"] {{background:linear-gradient(180deg,#4A0E0E 0%,{C_RED} 40%,#7B2020 100%) !important}}
     section[data-testid="stSidebar"] .stMarkdown h2 {{color:{C_GOLD_L} !important;font-family:'Playfair Display',serif}}
     section[data-testid="stSidebar"] .stMarkdown p,section[data-testid="stSidebar"] .stMarkdown li {{color:#F0D5D5}}
@@ -352,16 +399,16 @@ def main():
     .stButton > button[kind="primary"]:hover {{box-shadow:0 4px 16px rgba(43,125,233,.4) !important}}
     .rh {{background:linear-gradient(135deg,{C_RED},{C_RED_L});color:white;padding:1rem;border-radius:10px 10px 0 0;margin-top:1rem}}
     .rh h3 {{margin:0;color:white;font-family:'Playfair Display',serif;font-size:1.15rem}}
-    .rb {{border:1px solid #2a3a5a;border-top:none;border-radius:0 0 10px 10px;padding:1.2rem;background:{C_NAVY_L};color:#D0D8E8;line-height:1.7}}
-    .ct {{background:rgba(43,125,233,.08);border:1px solid rgba(43,125,233,.3);border-radius:12px;padding:12px 16px;margin:6px 0;color:#D0D8E8}}
-    .cp {{background:rgba(139,26,26,.1);border:1px solid rgba(178,34,52,.3);border-radius:12px;padding:12px 16px;margin:6px 0;color:#D0D8E8}}
-    .qbox {{background:{C_NAVY_L};border:2px solid {C_BLUE};border-radius:14px;padding:18px;margin:10px 0}}
-    .qok {{background:rgba(76,175,80,.12);border:2px solid #4CAF50;border-radius:12px;padding:14px;margin:8px 0;color:#A5D6A7}}
-    .qno {{background:rgba(239,83,80,.1);border:2px solid #EF5350;border-radius:12px;padding:14px;margin:8px 0;color:#EF9A9A}}
+    .rb {{border:1px solid var(--border-color);border-top:none;border-radius:0 0 10px 10px;padding:1.2rem;background:var(--bg-card);color:var(--text-primary);line-height:1.7}}
+    .ct {{background:var(--chat-user-bg);border:1px solid var(--chat-user-border);border-radius:12px;padding:12px 16px;margin:6px 0;color:var(--text-primary)}}
+    .cp {{background:var(--chat-ai-bg);border:1px solid var(--chat-ai-border);border-radius:12px;padding:12px 16px;margin:6px 0;color:var(--text-primary)}}
+    .qbox {{background:var(--bg-card);border:2px solid {C_BLUE};border-radius:14px;padding:18px;margin:10px 0;color:var(--text-primary)}}
+    .qok {{background:rgba(76,175,80,.12);border:2px solid #4CAF50;border-radius:12px;padding:14px;margin:8px 0;color:var(--text-primary)}}
+    .qno {{background:rgba(239,83,80,.1);border:2px solid #EF5350;border-radius:12px;padding:14px;margin:8px 0;color:var(--text-primary)}}
     .qsc {{background:rgba(212,168,67,.1);border:1px solid {C_GOLD};border-radius:10px;padding:10px 16px;display:inline-block;color:{C_GOLD}}}
-    .qtip {{background:rgba(43,125,233,.08);border-left:4px solid {C_BLUE};border-radius:0 8px 8px 0;padding:10px 14px;margin:8px 0;font-size:.88rem;color:#93BBEA}}
-    .sc {{background:{C_NAVY_L};border:1px solid #2a3a5a;border-radius:10px;padding:12px 16px;margin:6px 0}}
-    .ft {{text-align:center;color:#556677;font-size:.8rem;padding:1.5rem 0 1rem;border-top:1px solid #1a2a44;margin-top:2rem}}
+    .qtip {{background:rgba(43,125,233,.08);border-left:4px solid {C_BLUE};border-radius:0 8px 8px 0;padding:10px 14px;margin:8px 0;font-size:.88rem;color:var(--text-secondary)}}
+    .sc {{background:var(--bg-card);border:1px solid var(--border-color);border-radius:10px;padding:12px 16px;margin:6px 0;color:var(--text-primary)}}
+    .ft {{text-align:center;color:var(--text-muted);font-size:.8rem;padding:1.5rem 0 1rem;border-top:1px solid var(--border-color);margin-top:2rem}}
     .ft a {{color:{C_GOLD};text-decoration:none}}
     </style>""",unsafe_allow_html=True)
 
@@ -454,6 +501,64 @@ def main():
             nt=st.text_area("Notes",key="nt",height=50)
             if st.button("✅ Save",key="sv") and sn.strip():
                 st.session_state.students.append(dict(name=sn.strip(),sib=sib,mom=me,sm=sm,wk=wk,cp=cp,nt=nt.strip())); st.rerun()
+        # Excel bulk upload
+        with st.expander("📤 Bulk Upload from Excel/CSV"):
+            st.markdown(f"""<div style="font-size:.85rem;color:var(--text-secondary);margin-bottom:8px">
+            Upload a spreadsheet with these columns:<br>
+            <strong>Name</strong> (required), <strong>Siblings</strong> (0-4, 5-8, or 8+), <strong>Mom_Edu</strong> (HS Grad, No HS, or Unknown),
+            <strong>Single_Mom</strong> (Yes, No, or Unknown), <strong>Works</strong> (Yes, No, or Unknown),
+            <strong>Computer</strong> (Never, Rarely, Sometimes, or Often), <strong>Notes</strong> (optional)
+            </div>""",unsafe_allow_html=True)
+            dl_cols=["Name","Siblings","Mom_Edu","Single_Mom","Works","Computer","Notes"]
+            dl_example=[["Janjay Kollie","5-8","No HS","Yes","No","Never","Quiet, needs encouragement"],["Hawa Sirleaf","0-4","HS Grad","No","No","Sometimes",""]]
+            if PD:
+                template_df=pd.DataFrame(dl_example,columns=dl_cols)
+                csv_data=template_df.to_csv(index=False)
+                st.download_button("📥 Download Template",data=csv_data,file_name="student_template.csv",mime="text/csv",key="dl_tmpl")
+            uploaded=st.file_uploader("Choose file",type=["csv","xlsx","xls"],key="stu_upload",label_visibility="collapsed")
+            if uploaded and PD:
+                try:
+                    if uploaded.name.endswith(".csv"):
+                        df=pd.read_csv(uploaded)
+                    else:
+                        df=pd.read_excel(uploaded)
+                    # Normalize column names
+                    df.columns=[c.strip().replace(" ","_") for c in df.columns]
+                    # Map common variations
+                    col_map={"name":"Name","student":"Name","student_name":"Name","siblings":"Siblings","sib":"Siblings",
+                             "mom_edu":"Mom_Edu","mother_education":"Mom_Edu","mom":"Mom_Edu","mother":"Mom_Edu",
+                             "single_mom":"Single_Mom","single_mother":"Single_Mom","sm":"Single_Mom",
+                             "works":"Works","works_after_school":"Works","working":"Works",
+                             "computer":"Computer","computer_access":"Computer","comp":"Computer",
+                             "notes":"Notes","note":"Notes","comments":"Notes"}
+                    df.columns=[col_map.get(c.lower(),c) for c in df.columns]
+                    if "Name" not in df.columns:
+                        st.error("❌ Spreadsheet must have a 'Name' column.")
+                    else:
+                        st.dataframe(df,use_container_width=True,height=200)
+                        st.markdown(f'<div style="color:var(--text-secondary);font-size:.85rem">📊 Found <strong>{len(df)}</strong> students</div>',unsafe_allow_html=True)
+                        if st.button(f"✅ Import {len(df)} Students",type="primary",key="bulk_import"):
+                            imported=0
+                            for _,row in df.iterrows():
+                                name=str(row.get("Name","")).strip()
+                                if not name: continue
+                                sib_v=str(row.get("Siblings","0-4")).strip()
+                                if sib_v not in ["0-4","5-8","8+"]: sib_v="0-4"
+                                mom_v=str(row.get("Mom_Edu","Unknown")).strip()
+                                if mom_v not in ["HS Grad","No HS","Unknown"]: mom_v="Unknown"
+                                sm_v=str(row.get("Single_Mom","Unknown")).strip()
+                                if sm_v not in ["Yes","No","Unknown"]: sm_v="Unknown"
+                                wk_v=str(row.get("Works","Unknown")).strip()
+                                if wk_v not in ["Yes","No","Unknown"]: wk_v="Unknown"
+                                cp_v=str(row.get("Computer","Never")).strip()
+                                if cp_v not in ["Never","Rarely","Sometimes","Often"]: cp_v="Never"
+                                nt_v=str(row.get("Notes","")).strip()
+                                if nt_v=="nan": nt_v=""
+                                st.session_state.students.append(dict(name=name,sib=sib_v,mom=mom_v,sm=sm_v,wk=wk_v,cp=cp_v,nt=nt_v))
+                                imported+=1
+                            st.success(f"✅ Imported {imported} students!"); time.sleep(1); st.rerun()
+                except Exception as e:
+                    st.error(f"❌ Error reading file: {e}")
         for i,s in enumerate(st.session_state.students):
             rsk=[]
             if s["mom"]=="No HS": rsk.append("🔴 No HS Mom")
@@ -512,7 +617,12 @@ def main():
             with ec[i]:
                 if st.button(f"💡 {ex[:38]}...",key=f"ex{i}",use_container_width=True):
                     st.session_state.chat_messages.append({"role":"user","content":ex})
-                    r,m,allr=best_all(build_chat(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl]),ex,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[:-1]])
+                    with st.status("🌶️ Teacher Pehpeh is thinking...",expanded=True) as status:
+                        st.write("🟣 Asking Claude...")
+                        st.write("🟢 Asking ChatGPT...")
+                        st.write("🔵 Asking Gemini...")
+                        r,m,allr=best_all(build_chat(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl]),ex,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[:-1]])
+                        status.update(label="✅ Response ready!",state="complete",expanded=False)
                     st.session_state.chat_messages.append({"role":"assistant","content":r,"model":m,"all_responses":allr}); st.rerun()
         st.markdown("---")
         st.markdown(f'<div style="font-size:.8rem;color:#8899AA;margin-bottom:4px">💡 Tip: Start your message with "draw" or "illustrate" to generate a visual (e.g., "draw a plant cell diagram")</div>',unsafe_allow_html=True)
@@ -535,16 +645,19 @@ def main():
         uq=st.chat_input(f"Ask about {subject}... (start with 'draw' for images)")
         if uq:
             st.session_state.chat_messages.append({"role":"user","content":uq})
-            # Detect image requests
             img_keywords=["draw","illustrate","sketch","diagram","picture","image","visual","create an image","make an image","generate an image","show me"]
             want_chat_img=any(uq.lower().startswith(k) or k in uq.lower() for k in img_keywords)
-            r,m,allr=best_all(build_chat(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl]),uq,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]])
-            msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
-            if want_chat_img:
-                img_url,img_model=gen_image(f"{subject}: {uq} for {grade} in {country}")
-                if img_url:
-                    msg_data["image"]=img_url
-                    msg_data["image_src"]=img_model
+            with st.status("🌶️ Teacher Pehpeh is thinking...",expanded=True) as status:
+                st.write("🟣 Asking Claude... 🟢 Asking ChatGPT... 🔵 Asking Gemini...")
+                r,m,allr=best_all(build_chat(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl]),uq,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]])
+                msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
+                if want_chat_img:
+                    st.write("🎨 Creating illustration...")
+                    img_url,img_model=gen_image(f"{subject}: {uq} for {grade} in {country}")
+                    if img_url:
+                        msg_data["image"]=img_url
+                        msg_data["image_src"]=img_model
+                status.update(label="✅ Response ready!",state="complete",expanded=False)
             st.session_state.chat_messages.append(msg_data); st.rerun()
         if st.session_state.chat_messages and st.button("🗑️ Clear",key="cc"): st.session_state.chat_messages=[]; st.rerun()
 
