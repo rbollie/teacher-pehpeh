@@ -1,5 +1,5 @@
 """
-TEACHER PEHPEH - AI-Powered Support for Every Classroom
+TEACHER PEHPEH BY IBT - AI-Powered Support for Every Classroom
 Institute of Basic Technology (IBT)
 Built by Rodney L. Bollie, PhD
 """
@@ -7,9 +7,9 @@ import streamlit as st
 import time, os, base64, json, random, zlib
 
 # === API KEYS ===
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "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")
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "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")
-GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "gen-lang-client-0632330468")
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
 LOGO_FILENAME = "logo.png"
 
 try:
@@ -64,12 +64,34 @@ def check_conn():
 
 # === IMAGE GENERATION ===
 def gen_image(prompt):
-    if not OAI or not OPENAI_API_KEY: return None
-    try:
-        c=openai.OpenAI(api_key=OPENAI_API_KEY)
-        r=c.images.generate(model="dall-e-3",prompt=f"Educational illustration for African classroom: {prompt}. Clear, colorful, culturally relevant to West Africa/Liberia.",size="1024x1024",quality="standard",n=1)
-        return r.data[0].url
-    except: return None
+    """Try DALL-E first, then Google Imagen as fallback"""
+    # Try DALL-E
+    if OAI and OPENAI_API_KEY:
+        try:
+            c=openai.OpenAI(api_key=OPENAI_API_KEY)
+            r=c.images.generate(model="dall-e-3",prompt=f"Educational illustration for African classroom: {prompt}. Clear, colorful, culturally relevant to West Africa/Liberia.",size="1024x1024",quality="standard",n=1)
+            return r.data[0].url,"DALL-E"
+        except: pass
+    # Try Google Imagen
+    if GEM and GOOGLE_API_KEY:
+        try:
+            genai.configure(api_key=GOOGLE_API_KEY)
+            from google.generativeai import types as gtypes
+            img_model=genai.GenerativeModel("gemini-2.0-flash-exp")
+            r=img_model.generate_content(
+                f"Generate an educational illustration for an African classroom: {prompt}. Clear, colorful, culturally relevant to West Africa/Liberia. The image should be suitable as a teaching visual aid.",
+                generation_config=genai.types.GenerationConfig(response_mime_type="text/plain")
+            )
+            # Imagen 3 via generate_images
+            client=genai.ImageGenerationModel("imagen-3.0-generate-002")
+            response=client.generate_images(prompt=f"Educational illustration for African classroom: {prompt}. Clear, colorful, culturally relevant to West Africa.",number_of_images=1)
+            if response.images:
+                import base64
+                img_bytes=response.images[0]._image_bytes
+                b64=base64.b64encode(img_bytes).decode()
+                return f"data:image/png;base64,{b64}","Imagen"
+        except: pass
+    return None,None
 
 # === QUIZ BANK ===
 QUIZ = {
@@ -192,7 +214,7 @@ def show_logo(country=None):
     b=get_b64()
     flag=FLAGS.get(country,"") if country else ""
     if b: st.markdown(f'<div style="text-align:center;padding:.8rem 0 .2rem;display:flex;align-items:center;justify-content:center;gap:16px"><span style="font-size:3rem">{flag}</span><img src="data:image/png;base64,{b}" style="max-height:170px;filter:drop-shadow(0 4px 12px rgba(212,168,67,.3))"><span style="font-size:3rem">{flag}</span></div>',unsafe_allow_html=True)
-    else: st.markdown(f'<div style="text-align:center"><h1 style="color:{C_GOLD}">{flag} 🌶️ Teacher Pehpeh {flag}</h1></div>',unsafe_allow_html=True)
+    else: st.markdown(f'<div style="text-align:center"><h1 style="color:{C_GOLD}">{flag} 🌶️ Teacher Pehpeh by IBT {flag}</h1></div>',unsafe_allow_html=True)
 
 def ico(s=20):
     b=get_b64()
@@ -200,10 +222,24 @@ def ico(s=20):
 
 def pprog(stg,tot,msg):
     b=get_b64(); lit=min(stg,tot); pct=int(lit/tot*100)
-    if not b: return f'<div style="background:{C_NAVY_L};border:1px solid #333;border-radius:10px;padding:12px;margin:8px 0"><div style="background:#2d3748;border-radius:6px;height:8px;overflow:hidden"><div style="background:linear-gradient(90deg,{C_BLUE},{C_BLUE_D});height:100%;width:{pct}%;border-radius:6px"></div></div><p style="text-align:center;color:#9CA3AF;font-size:.85rem;margin:6px 0 0">{msg}</p></div>'
-    peps="".join(f'<img src="data:image/png;base64,{b}" style="height:26px;width:26px;margin:0 3px;opacity:{"1" if i<lit else ".12"};{"" if i<lit else "filter:grayscale(100%);"}border-radius:50%">' for i in range(tot))
-    corner="".join(f'<img src="data:image/png;base64,{b}" style="height:{14+i*3}px;width:{14+i*3}px;margin:0 1px;opacity:{"1" if i<lit else ".15"};{"" if i<lit else "filter:grayscale(100%);"}border-radius:50%">' for i in range(tot))
-    return f'<div style="position:fixed;top:12px;right:70px;z-index:9999;display:flex;align-items:flex-end;gap:2px;background:rgba(15,34,71,.95);padding:6px 10px;border-radius:20px;border:1px solid {C_BLUE}">{corner}</div><div style="background:{C_NAVY_L};border:1px solid #333;border-radius:10px;padding:12px 16px;margin:8px 0"><div style="display:flex;justify-content:center;margin-bottom:8px">{peps}</div><div style="background:#2d3748;border-radius:6px;height:8px;overflow:hidden"><div style="background:linear-gradient(90deg,{C_BLUE},{C_BLUE_D});height:100%;width:{pct}%;border-radius:6px;transition:width .5s"></div></div><p style="text-align:center;color:#9CA3AF;font-size:.85rem;margin:6px 0 0">{msg}</p></div>'
+    # Animated pepper icons filling up with pulsing "Generating" text
+    pepfill="".join(f'<img src="data:image/png;base64,{b}" style="height:40px;width:40px;margin:0 4px;opacity:{"1" if i<lit else ".15"};{"animation:peppop .4s ease;" if i==lit-1 else ""}{"filter:grayscale(100%);" if i>=lit else ""}border-radius:50%;transition:all .3s">' for i in range(tot)) if b else ""
+    pepfill_fallback="".join(f'<span style="font-size:28px;margin:0 3px;opacity:{"1" if i<lit else ".2"};{"animation:peppop .4s ease;" if i==lit-1 else ""}transition:all .3s">🌶️</span>' for i in range(tot))
+    icons=pepfill if b else pepfill_fallback
+    # Status messages with model icons
+    status_icon={"🌶️ Teacher Pehpeh is cooking...":"🌶️","Asking ChatGPT...":"🟢","Asking Claude...":"🟣","Asking Gemini...":"🔵","Combining the best...":"🔀","🎨 Creating illustration...":"🎨","✅ Done! Content is ready!":"✅"}.get(msg,"🌶️")
+    done_class="animation:none;color:#10B981" if "Done" in msg else "animation:genpulse 1.2s ease-in-out infinite"
+    return f'''<style>
+@keyframes genpulse {{ 0%,100%{{opacity:.7;transform:scale(1)}} 50%{{opacity:1;transform:scale(1.03)}} }}
+@keyframes peppop {{ 0%{{transform:scale(0.3);opacity:0}} 50%{{transform:scale(1.2)}} 100%{{transform:scale(1);opacity:1}} }}
+@keyframes barshine {{ 0%{{background-position:-200% 0}} 100%{{background-position:200% 0}} }}
+</style>
+<div style="background:{C_NAVY_L};border:2px solid {C_GOLD};border-radius:16px;padding:20px 24px;margin:12px 0;text-align:center">
+<div style="display:flex;justify-content:center;align-items:center;margin-bottom:14px;flex-wrap:wrap">{icons}</div>
+<div style="background:#1a2744;border-radius:10px;height:14px;overflow:hidden;margin-bottom:12px;border:1px solid #2d3748">
+<div style="background:linear-gradient(90deg,{C_RED},{C_GOLD},{C_RED});background-size:200% 100%;animation:barshine 2s linear infinite;height:100%;width:{pct}%;border-radius:10px;transition:width .5s ease"></div></div>
+<div style="{done_class};font-size:1.1rem;font-weight:700;color:{C_GOLD};letter-spacing:.5px">{status_icon} {msg}</div>
+</div>'''
 
 # === PROMPTS ===
 def _p():
@@ -252,6 +288,20 @@ def best(sp,q,h=None):
     if r and not str(r).startswith("⚠️"): return r,"Gemini"
     return "⚠️ No models responded.",None
 
+def best_all(sp,q,h=None):
+    """Query all models and return (best_response, best_model, all_responses_dict)"""
+    rs={}
+    for k,fn,nm in [(OPENAI_API_KEY,ask_gpt,"ChatGPT"),(ANTHROPIC_API_KEY,ask_cl,"Claude"),(GOOGLE_API_KEY,ask_gem,"Gemini")]:
+        if k:
+            r=fn(sp,q,h) if nm!="Gemini" else fn(sp,q)
+            if r and not str(r).startswith("⚠️"): rs[nm]=r
+    if not rs: return "⚠️ No models responded.",None,{}
+    # Pick best: prefer Claude, then ChatGPT, then Gemini
+    for pref in ["Claude","ChatGPT","Gemini"]:
+        if pref in rs: return rs[pref],pref,rs
+    first=list(rs.items())[0]
+    return first[1],first[0],rs
+
 def synth(sp,q,resps):
     v={k:v for k,v in resps.items() if v and not str(v).startswith("⚠️")}
     if not v: return "⚠️ No models responded."
@@ -264,7 +314,7 @@ def synth(sp,q,resps):
 
 # === MAIN ===
 def main():
-    st.set_page_config(page_title="Teacher Pehpeh",page_icon="🌶️",layout="wide")
+    st.set_page_config(page_title="Teacher Pehpeh by IBT",page_icon="🌶️",layout="wide")
     for k in ["chat_messages","students","conn_checked","conn_info"]:
         if k not in st.session_state: st.session_state[k]=[] if k in ("chat_messages","students") else (False if k=="conn_checked" else None)
     for sk in QUIZ: 
@@ -330,7 +380,7 @@ def main():
     keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
     act=[n for k,n in [(OPENAI_API_KEY,"ChatGPT"),(ANTHROPIC_API_KEY,"Claude"),(GOOGLE_API_KEY,"Gemini")] if k]
     if online and keys:
-        st.markdown(f'<div style="background:rgba(43,125,233,.1);border-left:4px solid {C_BLUE};padding:.5rem 1rem;border-radius:6px;font-size:.85rem;color:#7BB8F5;margin-bottom:.6rem">{ico(16)} <strong>{len(act)}</strong>: {" · ".join(act)}{"  · 🎨 DALL-E" if OPENAI_API_KEY else ""}</div>',unsafe_allow_html=True)
+        st.markdown(f'<div style="background:rgba(43,125,233,.1);border-left:4px solid {C_BLUE};padding:.5rem 1rem;border-radius:6px;font-size:.85rem;color:#7BB8F5;margin-bottom:.6rem">{ico(16)} <strong>{len(act)}</strong>: {" · ".join(act)}{"  · 🎨 DALL-E" if OPENAI_API_KEY else ""}{"  · 🎨 Imagen" if GOOGLE_API_KEY else ""}</div>',unsafe_allow_html=True)
 
     # Tabs
     if online and keys:
@@ -346,24 +396,42 @@ def main():
         topic=st.selectbox("Topic",TOPICS.get(subject,DEF_TOPICS))
         with st.expander("Options"):
             exs=[o for i,o in enumerate(EXTRAS) if st.checkbox(o,key=f"x{i}")]
+            add_img=st.checkbox("🎨 Include AI illustration",key="add_img",help="Generates a visual aid using DALL-E or Google Imagen")
         if st.button("🌶️ Generate",type="primary",use_container_width=True,key="gen"):
             sp=build_sys(REGIONS[region],country,grade,subject,task,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],tm,topic)
             q=f"Create {TASKS[task]}.\nSubject:{subject}\nGrade:{grade}\nTopic:{topic}\nIMMEDIATELY USABLE."
             if exs: q+="\n"+"; ".join(exs)
-            rs={}; ph=st.empty(); s=0; tot=keys+1
-            ph.markdown(pprog(0,tot,"Preparing..."),unsafe_allow_html=True)
+            want_img=add_img or "image" in task.lower() or "AI visual" in str(exs)
+            rs={}; ph=st.empty(); s=0; tot=keys+(2 if want_img else 1)
+            ph.markdown(pprog(0,tot,"🌶️ Teacher Pehpeh is cooking..."),unsafe_allow_html=True)
             for k,fn,nm in [(OPENAI_API_KEY,ask_gpt,"ChatGPT"),(ANTHROPIC_API_KEY,ask_cl,"Claude"),(GOOGLE_API_KEY,ask_gem,"Gemini")]:
                 if k:
-                    s+=1; ph.markdown(pprog(s,tot,f"{nm}..."),unsafe_allow_html=True)
+                    s+=1; ph.markdown(pprog(s,tot,f"Asking {nm}..."),unsafe_allow_html=True)
                     rs[nm]=fn(sp,q) if nm!="Gemini" else fn(sp,q)
-            s+=1; ph.markdown(pprog(s,tot,"Combining..."),unsafe_allow_html=True)
-            result=synth(sp,q,rs); ph.markdown(pprog(tot,tot,"✅ Done!"),unsafe_allow_html=True); time.sleep(.3); ph.empty()
-            img=None
-            if "image" in task.lower() or "AI visual" in str(exs):
-                with st.spinner("🎨 Generating visual..."): img=gen_image(f"{subject}: {topic} for {grade} in {country}")
+            s+=1; ph.markdown(pprog(s,tot,"Combining the best..."),unsafe_allow_html=True)
+            result=synth(sp,q,rs)
+            img=None; img_src=None
+            if want_img:
+                s+=1; ph.markdown(pprog(s,tot,"🎨 Creating illustration..."),unsafe_allow_html=True)
+                img,img_src=gen_image(f"{subject}: {topic} for {grade} in {country}")
+            ph.markdown(pprog(tot,tot,"✅ Done! Content is ready!"),unsafe_allow_html=True); time.sleep(.5); ph.empty()
             st.markdown(f'<div class="rh"><h3>{ico(20)} {task} — {topic}</h3></div>',unsafe_allow_html=True)
-            if img: st.image(img,caption=topic,use_container_width=True)
+            if img: st.image(img,caption=f"{topic} — Generated by {img_src}",use_container_width=True)
+            # Show synthesized response
+            valid_rs={k:v for k,v in rs.items() if v and not str(v).startswith("⚠️")}
+            if len(valid_rs)>1:
+                st.markdown(f'<div style="background:rgba(212,168,67,.1);border-left:4px solid {C_GOLD};padding:6px 12px;border-radius:6px;font-size:.82rem;color:{C_GOLD};margin-bottom:8px">🔀 <strong>Synthesized Response</strong> — Combined from {" + ".join(valid_rs.keys())}</div>',unsafe_allow_html=True)
             st.markdown(f'<div class="rb">',unsafe_allow_html=True); st.markdown(result); st.markdown('</div>',unsafe_allow_html=True)
+            # Show individual model responses
+            if len(valid_rs)>1:
+                st.markdown(f'<div style="font-size:.85rem;color:{C_GOLD};margin:12px 0 6px">📋 <strong>Individual Model Responses</strong></div>',unsafe_allow_html=True)
+                for mname,mresp in valid_rs.items():
+                    clr={"Claude":"#D97706","ChatGPT":"#10B981","Gemini":"#6366F1"}.get(mname,"#888")
+                    with st.expander(f"{'🟣' if mname=='Claude' else '🟢' if mname=='ChatGPT' else '🔵'} {mname}'s Response"):
+                        st.markdown(mresp)
+            elif len(valid_rs)==1:
+                nm=list(valid_rs.keys())[0]
+                st.markdown(f'<div style="font-size:.75rem;color:#667;margin-top:4px">Response by {nm} (only model available)</div>',unsafe_allow_html=True)
             st.download_button("📥 Download",data=result,file_name=f"{task}_{topic}.txt".replace(" ","_")[:60])
 
     # TAB 2: STUDENTS
@@ -390,13 +458,23 @@ def main():
             with b1:
                 if st.button("📝 Assignment",key=f"a{i}"):
                     with st.spinner("Creating..."):
-                        r,m=best(build_stu(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],info),f"Tailored {subject} assignment. Max 3 problems.")
+                        r,m,allr=best_all(build_stu(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],info),f"Tailored {subject} assignment. Max 3 problems.")
                     st.markdown(f'<div class="rb">{r}<div style="font-size:.65rem;color:#556;margin-top:4px">by {m}</div></div>',unsafe_allow_html=True)
+                    if len(allr)>1:
+                        with st.expander(f"📋 See all {len(allr)} model responses"):
+                            for mn,mr in allr.items():
+                                mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mn,"⚪")
+                                st.markdown(f"**{mico} {mn}{'  ✅' if mn==m else ''}**"); st.markdown(mr); st.markdown("---")
             with b2:
                 if st.button("📊 Risk",key=f"r{i}"):
                     with st.spinner("Analyzing..."):
-                        r,m=best(build_stu(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],info),"Risk analysis using IBT data. Compare to 183-student dataset.")
+                        r,m,allr=best_all(build_stu(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],info),"Risk analysis using IBT data. Compare to 183-student dataset.")
                     st.markdown(f'<div class="rb">{r}<div style="font-size:.65rem;color:#556;margin-top:4px">by {m}</div></div>',unsafe_allow_html=True)
+                    if len(allr)>1:
+                        with st.expander(f"📋 See all {len(allr)} model responses"):
+                            for mn,mr in allr.items():
+                                mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mn,"⚪")
+                                st.markdown(f"**{mico} {mn}{'  ✅' if mn==m else ''}**"); st.markdown(mr); st.markdown("---")
             with b3:
                 if st.button("🗑️",key=f"d{i}"): st.session_state.students.pop(i); st.rerun()
         if st.session_state.students:
@@ -408,8 +486,13 @@ def main():
                 if sel:
                     info=f'{sel["name"]},{sel["sib"]}sib,Mom:{sel["mom"]},SM:{sel["sm"]},Works:{sel["wk"]},Comp:{sel["cp"]},{sel["nt"]}'
                     with st.spinner("Grading..."):
-                        r,m=best(build_stu(REGIONS[region],country,grade,gsub,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],info),f"Grade:\nSTUDENT:{info}\n{gsub} {gt}\n\nWORK:\n{gw}\n\nGive: grade, praise, corrections, tips, next step.")
+                        r,m,allr=best_all(build_stu(REGIONS[region],country,grade,gsub,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],info),f"Grade:\nSTUDENT:{info}\n{gsub} {gt}\n\nWORK:\n{gw}\n\nGive: grade, praise, corrections, tips, next step.")
                     st.markdown(f'<div class="rh"><h3>{ico(16)} Feedback: {gs}</h3></div><div class="rb">{r}</div>',unsafe_allow_html=True)
+                    if len(allr)>1:
+                        with st.expander(f"📋 See all {len(allr)} model responses"):
+                            for mn,mr in allr.items():
+                                mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mn,"⚪")
+                                st.markdown(f"**{mico} {mn}{'  ✅' if mn==m else ''}**"); st.markdown(mr); st.markdown("---")
 
     # TAB 3: CHAT
     if t3:
@@ -420,26 +503,40 @@ def main():
             with ec[i]:
                 if st.button(f"💡 {ex[:38]}...",key=f"ex{i}",use_container_width=True):
                     st.session_state.chat_messages.append({"role":"user","content":ex})
-                    r,m=best(build_chat(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl]),ex,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[:-1]])
-                    st.session_state.chat_messages.append({"role":"assistant","content":r,"model":m}); st.rerun()
+                    r,m,allr=best_all(build_chat(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl]),ex,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[:-1]])
+                    st.session_state.chat_messages.append({"role":"assistant","content":r,"model":m,"all_responses":allr}); st.rerun()
         st.markdown("---")
-        ic1,ic2=st.columns([3,1])
-        with ic1: ip=st.text_input("🎨 Generate visual:",key="ip",placeholder=f"e.g., {subject} diagram for {grade}")
-        with ic2:
-            st.markdown("<br>",unsafe_allow_html=True)
-            if st.button("🎨 Image",key="ib") and ip:
-                with st.spinner("Creating..."): url=gen_image(ip)
-                if url: st.image(url,caption=ip,use_container_width=True)
-                else: st.warning("Unavailable. Check OpenAI key.")
+        st.markdown(f'<div style="font-size:.8rem;color:#8899AA;margin-bottom:4px">💡 Tip: Start your message with "draw" or "illustrate" to generate a visual (e.g., "draw a plant cell diagram")</div>',unsafe_allow_html=True)
         st.markdown("---")
-        for msg in st.session_state.chat_messages:
+        for mi,msg in enumerate(st.session_state.chat_messages):
             if msg["role"]=="user": st.markdown(f'<div class="ct"><div style="font-size:.75rem;font-weight:700;color:{C_BLUE};margin-bottom:4px">🧑‍🏫 You</div>{msg["content"]}</div>',unsafe_allow_html=True)
-            else: st.markdown(f'<div class="cp"><div style="font-size:.75rem;font-weight:700;color:{C_GOLD};margin-bottom:4px">{ico(16)} Teacher Pehpeh</div>{msg["content"]}<div style="font-size:.65rem;color:#556;margin-top:4px">by {msg.get("model","AI")}</div></div>',unsafe_allow_html=True)
-        uq=st.chat_input(f"Ask about {subject}...")
+            else:
+                allr=msg.get("all_responses",{})
+                st.markdown(f'<div class="cp"><div style="font-size:.75rem;font-weight:700;color:{C_GOLD};margin-bottom:4px">{ico(16)} Teacher Pehpeh</div>{msg["content"]}<div style="font-size:.65rem;color:#556;margin-top:4px">by {msg.get("model","AI")}</div></div>',unsafe_allow_html=True)
+                if msg.get("image"):
+                    st.image(msg["image"],caption=f"🎨 Generated by {msg.get('image_src','AI')}",use_container_width=True)
+                if len(allr)>1:
+                    with st.expander(f"📋 See all {len(allr)} model responses",expanded=False):
+                        for mname,mresp in allr.items():
+                            mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mname,"⚪")
+                            is_primary=" ✅ (selected)" if mname==msg.get("model") else ""
+                            st.markdown(f"**{mico} {mname}{is_primary}**")
+                            st.markdown(mresp)
+                            st.markdown("---")
+        uq=st.chat_input(f"Ask about {subject}... (start with 'draw' for images)")
         if uq:
             st.session_state.chat_messages.append({"role":"user","content":uq})
-            r,m=best(build_chat(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl]),uq,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]])
-            st.session_state.chat_messages.append({"role":"assistant","content":r,"model":m}); st.rerun()
+            # Detect image requests
+            img_keywords=["draw","illustrate","sketch","diagram","picture","image","visual","create an image","make an image","generate an image","show me"]
+            want_chat_img=any(uq.lower().startswith(k) or k in uq.lower() for k in img_keywords)
+            r,m,allr=best_all(build_chat(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl]),uq,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]])
+            msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
+            if want_chat_img:
+                img_url,img_model=gen_image(f"{subject}: {uq} for {grade} in {country}")
+                if img_url:
+                    msg_data["image"]=img_url
+                    msg_data["image_src"]=img_model
+            st.session_state.chat_messages.append(msg_data); st.rerun()
         if st.session_state.chat_messages and st.button("🗑️ Clear",key="cc"): st.session_state.chat_messages=[]; st.rerun()
 
     # TAB 4: QUIZ (works offline)
@@ -486,6 +583,6 @@ def main():
         with r2:
             if st.button("📝 WASSCE Tips",key="wt"): st.markdown(f'<div style="background:{C_NAVY_L};border:1px solid {C_GOLD};border-radius:12px;padding:16px;color:#D0D8E8;white-space:pre-wrap;line-height:1.7">{WASSCE_TIPS}</div>',unsafe_allow_html=True)
 
-    st.markdown(f'<div class="ft">{ico(16)} Built by <strong>Rodney L. Bollie, PhD</strong> · <a href="https://www.institutebasictechnology.org">Institute of Basic Technology</a><br><a href="https://www.institutebasictechnology.org/index.php" style="color:{C_BLUE}">Visit our website →</a></div>',unsafe_allow_html=True)
+    st.markdown(f'<div class="ft">{ico(16)} <strong>Teacher Pehpeh by IBT</strong><br>Built by <strong>Rodney L. Bollie, PhD</strong> · <a href="https://www.institutebasictechnology.org">Institute of Basic Technology</a><br><a href="https://www.institutebasictechnology.org/index.php" style="color:{C_BLUE}">Visit our website →</a></div>',unsafe_allow_html=True)
 
 if __name__=="__main__": main()
