@@ -187,34 +187,45 @@ def gen_image(prompt):
 
 # === TEXT TO SPEECH ===
 
-def speak_elevenlabs(text, voice_id="woq6F0K3YYEpoS7T2Rx4", model_id="eleven_turbo_v2_5"):
-    """Generate speech using ElevenLabs API. Returns base64 audio or None."""
+def speak_elevenlabs(text, voice_id="woq6F0K3YYEpoS7T2Rx4", model_id="eleven_flash_v2_5"):
+    """Generate speech using ElevenLabs streaming API. Returns base64 audio or None."""
     if not ELEVENLABS_API_KEY: return None, "No ElevenLabs API key"
     try:
         import re, urllib.request, json as jlib
         clean = re.sub(r'<[^>]+>', '', text)
         clean = re.sub(r'[#*_`~\[\](){}|]', '', clean)
-        clean = re.sub(r'-{3,}', '', clean)
-        clean = re.sub(r'\n{2,}', '\n', clean)
+        clean = re.sub(r'-{3,}', ' ', clean)
+        clean = re.sub(r'\n{2,}', '. ', clean)
+        clean = re.sub(r'\n', '. ', clean)
         clean = re.sub(r' {2,}', ' ', clean)
-        # Keep it short enough for fast response
-        if len(clean) > 2500: clean = clean[:2500] + ". That's the summary. See the full written version for complete details."
-        url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
+        clean = re.sub(r'\.{2,}', '.', clean)
+        # Cap at 1200 chars for fast generation
+        if len(clean) > 1200: clean = clean[:1200] + ". See the full written version for complete details."
+        # Use streaming endpoint for faster first-byte
+        url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}/stream"
         payload = jlib.dumps({
             "text": clean,
             "model_id": model_id,
+            "output_format": "mp3_22050_32",
         }).encode("utf-8")
         req = urllib.request.Request(url, data=payload, headers={
             "xi-api-key": ELEVENLABS_API_KEY,
             "Content-Type": "application/json",
             "Accept": "audio/mpeg",
         })
-        with urllib.request.urlopen(req, timeout=90) as resp:
-            audio_bytes = resp.read()
+        # Stream response in chunks
+        chunks = []
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            while True:
+                chunk = resp.read(4096)
+                if not chunk: break
+                chunks.append(chunk)
+        audio_bytes = b"".join(chunks)
+        if len(audio_bytes) < 100: return None, "Empty audio response"
         b64 = base64.b64encode(audio_bytes).decode()
         return b64, "Teacher Pehpeh Voice"
     except Exception as e:
-        return None, f"ElevenLabs Error: {e}"
+        return None, f"Voice error: {e}"
 
 def tts_player(text, key_suffix):
     """Simple 'Hear Results' button — one click, plays audio."""
