@@ -368,7 +368,7 @@ DEF_TOPICS=["Core Concepts","Key Terms","Applications","Review","Exam Practice"]
 TASKS={"Lesson Plan":"detailed lesson plan","Quiz (10 Q)":"10-question quiz with answer key","Quiz (20 Q)":"20-question quiz","WASSCE MCQ (50)":"50 WASSCE-style MCQs","WASSCE Theory":"WASSCE theory questions","BECE Exam":"BECE-style exam","Homework":"homework with minimal resources","Group Activity":"group activity","Reading Comprehension":"reading passage with questions","No-Lab Practical":"hands-on zero-cost activity","Rubric":"grading rubric","Strategy Guide":"teaching strategies","Parent Letter":"parent communication","Weekly Scheme":"5-day scheme of work","Term Scheme":"term plan","Remedial Material":"catch-up material","Study Notes":"revision guide","Educational Game":"zero-cost teaching game","Illustrated Lesson (AI image)":"lesson with AI-generated visual"}
 SIZES={"Small (<25)":"<25 students","Medium (25-40)":"25-40","Large (40-60)":"40-60","Very Large (60+)":"60+"}
 RESOURCES={"Chalkboard only":"chalkboard/chalk only","+ shared textbooks":"chalkboard + shared textbooks","+ handouts":"+ printable handouts","Computer/projector":"occasional tech","Phones/tablets":"student devices","Well-equipped":"regular tech"}
-LANGS={"English only":"English","English + local":"English + local language","French only":"French","French + local":"French + local"}
+LANGS={"English":"English","Français":"French","Kiswahili":"Swahili"}
 # UI Translations
 UI_TEXT={
  "en":{
@@ -432,12 +432,45 @@ UI_TEXT={
   "pass_short":"Passage + Questions courtes","pass_fill":"Passage + Texte à trous",
   "pass_essay":"Passage + Sujet de rédaction","pass_mcq":"Passage + QCM",
   "pass_vocab":"Passage + Exercice de vocabulaire","full_comp":"Compréhension complète (Tous types)",
+ },
+ "sw":{
+  "generate":"📋 Tengeneza","chat":"💬 Mazungumzo","quiz":"🌶️ Maswali","students":"🧑‍🎓 Wanafunzi",
+  "task":"Kazi","time":"Muda","topic":"Mada","options":"Chaguzi","subject":"Somo","grade":"Darasa",
+  "country":"Nchi","setting":"Mazingira","class_size":"Ukubwa wa darasa","resources":"Rasilimali",
+  "language":"Lugha","student_level":"Kiwango cha wanafunzi","school_name":"🏫 Jina la shule",
+  "school_placeholder":"k.m., Bahn, St. Martin's","my_classroom":"Darasa Langu","my_students":"Wanafunzi Wangu",
+  "gen_btn":"🌶️ Tengeneza","clear":"🗑️ Futa","hear":"🔊 Sikiliza","grade_work":"Sahihisha Kazi",
+  "grade_btn":"🌶️ Sahihisha","students_work":"Kazi ya mwanafunzi:","offline_title":"📴 Nje ya mtandao — Maswali ya mazoezi",
+  "offline_msg":"Hakuna mtandao? Maswali haya yanafanya kazi nje ya mtandao!","practice_quiz":"Maswali ya Mazoezi",
+  "adaptive":"Yanabadilika. Yanafanya kazi nje ya mtandao pia!","score":"Alama","level":"Kiwango","next":"➡️ Ifuatayo",
+  "reset":"🔄 Weka upya","wassce_tips":"📝 Vidokezo vya WASSCE","add_student":"Ongeza mwanafunzi","name":"Jina",
+  "upload_excel":"📤 Pakia Excel","lit_library":"📚 Maktaba ya Vitabu",
+  "lit_desc":"Chagua riwaya kwa mazoezi ya ufahamu wa kusoma","select_book":"📖 Chagua Kitabu",
+  "comp_type":"Aina ya ufahamu","include_img":"🎨 Jumuisha mchoro wa AI",
+  "img_help":"Inatengeneza msaada wa kuona kwa DALL-E au Google Imagen",
+  "ask_about":"Uliza kuhusu","draw_hint":"(anza na 'chora' kwa picha)",
+  "mic_hint":"🎤 Bonyeza maikrofoni kusema badala ya kuandika","heard":"🎤 Imesikika",
+  "email_result":"📧 Tuma / Pakua matokeo haya","recheck":"🔄 Angalia tena",
+  "voice_ready":"🔊 Sauti tayari","no_models":"🤖 Hakuna modeli","offline":"NJE YA MTANDAO",
+  "generating":"🔊 Inatengeneza sauti...","transcribing":"🎤 Inabadilisha sauti kuwa maandishi...",
+  "audio_failed":"Sauti imeshindwa","try_again":"Jaribu tena",
+  "assignments":"Kazi za kibinafsi","risk_flags":"Ishara za hatari na msaada",
+  "no_students":"Hakuna wanafunzi walioongezwa","single_period":"Kipindi kimoja (dak 30-40)",
+  "double":"Mara mbili (dak 60-80)","half_day":"Nusu siku","full_day":"Siku nzima","weekly":"Kila wiki","na":"H/T",
+  "differentiation":"Utofautishaji","formative":"Tathmini ya mchakato","takehome":"Kazi ya nyumbani",
+  "wassce_align":"Ulinganifu wa WASSCE","local_ex":"Mifano ya mahali","literacy":"Ujumuishaji wa kusoma",
+  "large_class":"Mikakati ya darasa kubwa","cross_curr":"Mtambuka","ai_visual":"Msaada wa kuona wa AI",
+  "pass_short":"Kifungu + Maswali mafupi","pass_fill":"Kifungu + Jaza nafasi",
+  "pass_essay":"Kifungu + Swali la insha","pass_mcq":"Kifungu + Maswali ya kuchagua",
+  "pass_vocab":"Kifungu + Zoezi la msamiati","full_comp":"Ufahamu kamili (Aina zote)",
  }
 }
 def _lang_key():
     """Get current UI language key from session state."""
-    lk=st.session_state.get("lang_sel","English only")
-    return "fr" if "French" in lk else "en"
+    lk=st.session_state.get("lang_sel","English")
+    if "Français" in lk or "French" in lk: return "fr"
+    if "Kiswahili" in lk or "Swahili" in lk: return "sw"
+    return "en"
 def T(key):
     """Get translated UI string."""
     lk=_lang_key()
@@ -445,6 +478,42 @@ def T(key):
 ABILITY={"Mixed":"mixed-ability","Struggling":"below grade level","On level":"at expected level","Advanced":"needs challenge","Inclusive":"includes learning differences"}
 TIMES=["Single period (30-40 min)","Double (60-80 min)","Half day","Full day","Weekly","N/A"]
 EXTRAS=["Differentiation","Formative assessment","Take-home activity","WASSCE alignment","Local examples","Literacy integration","Large-class strategies","Cross-curricular","AI visual aid"]
+
+# French dropdown translations (display→English value for AI)
+FR_TASKS={"Plan de cours":"detailed lesson plan","Quiz (10 Q)":"10-question quiz with answer key","Quiz (20 Q)":"20-question quiz","QCM WASSCE (50)":"50 WASSCE-style MCQs","Théorie WASSCE":"WASSCE theory questions","Examen BECE":"BECE-style exam","Devoirs":"homework with minimal resources","Activité de groupe":"group activity","Compréhension écrite":"reading passage with questions","Pratique sans labo":"hands-on zero-cost activity","Grille d'évaluation":"grading rubric","Guide stratégique":"teaching strategies","Lettre aux parents":"parent communication","Plan hebdomadaire":"5-day scheme of work","Plan trimestriel":"term plan","Rattrapage":"catch-up material","Notes de révision":"revision guide","Jeu éducatif":"zero-cost teaching game","Leçon illustrée (image IA)":"lesson with AI-generated visual"}
+FR_GRADES=["9e année","10e année","11e année","12e année (WASSCE)"]
+FR_SUBJECTS=["Mathématiques","Langue anglaise","Sciences intégrées","Études sociales","Physique","Chimie","Biologie","Économie","Gouvernement / Éducation civique","Littérature anglaise","Histoire","Géographie","Agriculture","Français","Études religieuses","Gestion des affaires","Comptabilité","Informatique / TIC","Dessin technique","Économie domestique","Éducation physique","Art / Arts créatifs","Musique"]
+FR_SIZES={"Petit (<25)":"<25 students","Moyen (25-40)":"25-40","Grand (40-60)":"40-60","Très grand (60+)":"60+"}
+FR_RESOURCES={"Tableau noir seul":"chalkboard/chalk only","+ manuels partagés":"chalkboard + shared textbooks","+ polycopiés":"+ printable handouts","Ordinateur/projecteur":"occasional tech","Téléphones/tablettes":"student devices","Bien équipé":"regular tech"}
+FR_ABILITY={"Mixte":"mixed-ability","En difficulté":"below grade level","Au niveau":"at expected level","Avancé":"needs challenge","Inclusif":"includes learning differences"}
+FR_TIMES=["Période simple (30-40 min)","Double (60-80 min)","Demi-journée","Journée complète","Hebdomadaire","N/A"]
+FR_EXTRAS=["Différenciation","Évaluation formative","Activité à emporter","Alignement WASSCE","Exemples locaux","Intégration lecture","Stratégies grande classe","Interdisciplinaire","Aide visuelle IA"]
+FR_REGIONS={"Urbain":"urban","Péri-urbain":"peri-urban","Rural":"rural","Éloigné / Île":"remote"}
+# Swahili dropdown translations
+SW_TASKS={"Mpango wa Somo":"detailed lesson plan","Maswali (10)":"10-question quiz with answer key","Maswali (20)":"20-question quiz","QCM WASSCE (50)":"50 WASSCE-style MCQs","Nadharia WASSCE":"WASSCE theory questions","Mtihani BECE":"BECE-style exam","Kazi ya Nyumbani":"homework with minimal resources","Shughuli ya Kikundi":"group activity","Ufahamu wa Kusoma":"reading passage with questions","Mazoezi bila Maabara":"hands-on zero-cost activity","Rubriiki":"grading rubric","Mwongozo wa Mkakati":"teaching strategies","Barua kwa Mzazi":"parent communication","Mpango wa Wiki":"5-day scheme of work","Mpango wa Muhula":"term plan","Nyenzo za Kufidia":"catch-up material","Muhtasari wa Masomo":"revision guide","Mchezo wa Kielimu":"zero-cost teaching game","Somo Lenye Mchoro (picha AI)":"lesson with AI-generated visual"}
+SW_GRADES=["Darasa la 9","Darasa la 10","Darasa la 11","Darasa la 12 (WASSCE)"]
+SW_SUBJECTS=["Hisabati","Lugha ya Kiingereza","Sayansi Jumuishi","Maarifa ya Jamii","Fizikia","Kemia","Biolojia","Uchumi","Serikali / Uraia","Fasihi ya Kiingereza","Historia","Jiografia","Kilimo","Kifaransa","Masomo ya Dini","Usimamizi wa Biashara","Uhasibu","Kompyuta / TEHAMA","Uchora Ufundi","Uchumi wa Nyumbani","Elimu ya Mwili","Sanaa / Sanaa Bunifu","Muziki"]
+SW_SIZES={"Ndogo (<25)":"<25 students","Wastani (25-40)":"25-40","Kubwa (40-60)":"40-60","Kubwa sana (60+)":"60+"}
+SW_RESOURCES={"Ubao tu":"chalkboard/chalk only","+ vitabu vya kushiriki":"chalkboard + shared textbooks","+ nakala":"+ printable handouts","Kompyuta/projekta":"occasional tech","Simu/tableti":"student devices","Vifaa kamili":"regular tech"}
+SW_ABILITY={"Mchanganyiko":"mixed-ability","Wanaoshindwa":"below grade level","Kiwango sahihi":"at expected level","Wenye uwezo":"needs challenge","Jumuishi":"includes learning differences"}
+SW_TIMES=["Kipindi kimoja (dak 30-40)","Mara mbili (dak 60-80)","Nusu siku","Siku nzima","Kila wiki","H/T"]
+SW_EXTRAS=["Utofautishaji","Tathmini ya mchakato","Kazi ya nyumbani","Ulinganifu WASSCE","Mifano ya mahali","Ujumuishaji kusoma","Mikakati darasa kubwa","Mtambuka","Msaada wa kuona AI"]
+SW_REGIONS={"Mjini":"urban","Pembezoni mwa mji":"peri-urban","Vijijini":"rural","Mbali / Kisiwa":"remote"}
+# Grade/Subject mappings (French display→English value)
+_GRADE_MAP={**dict(zip(FR_GRADES,GRADES)),**dict(zip(SW_GRADES,GRADES))}
+_SUBJ_MAP={**dict(zip(FR_SUBJECTS,SUBJECTS)),**dict(zip(SW_SUBJECTS,SUBJECTS))}
+_TIME_MAP={**dict(zip(FR_TIMES,TIMES)),**dict(zip(SW_TIMES,TIMES))}
+def _tasks(): lk=_lang_key(); return FR_TASKS if lk=="fr" else SW_TASKS if lk=="sw" else TASKS
+def _grades(): lk=_lang_key(); return FR_GRADES if lk=="fr" else SW_GRADES if lk=="sw" else GRADES
+def _subjects(): lk=_lang_key(); return FR_SUBJECTS if lk=="fr" else SW_SUBJECTS if lk=="sw" else SUBJECTS
+def _sizes(): lk=_lang_key(); return FR_SIZES if lk=="fr" else SW_SIZES if lk=="sw" else SIZES
+def _resources(): lk=_lang_key(); return FR_RESOURCES if lk=="fr" else SW_RESOURCES if lk=="sw" else RESOURCES
+def _ability(): lk=_lang_key(); return FR_ABILITY if lk=="fr" else SW_ABILITY if lk=="sw" else ABILITY
+def _times(): lk=_lang_key(); return FR_TIMES if lk=="fr" else SW_TIMES if lk=="sw" else TIMES
+def _extras(): lk=_lang_key(); return FR_EXTRAS if lk=="fr" else SW_EXTRAS if lk=="sw" else EXTRAS
+def _regions(): lk=_lang_key(); return FR_REGIONS if lk=="fr" else SW_REGIONS if lk=="sw" else REGIONS
+def _to_en_grade(g): return _GRADE_MAP.get(g,g)
+def _to_en_subj(s): return _SUBJ_MAP.get(s,s)
 
 # Literature library for Reading Comprehension
 LITERATURE={
@@ -671,20 +740,28 @@ def main():
 
     # Sidebar (defined first so country is available for logo flag)
     with st.sidebar:
-        lang=st.selectbox("🌍 Language / Langue",list(LANGS.keys()),key="lang_sel")
+        lang=st.selectbox("🌍 Language / Langue / Lugha",list(LANGS.keys()),key="lang_sel")
         st.markdown("---")
         school_name=st.text_input(T("school_name"),value="",placeholder=T("school_placeholder"),key="school_name")
-        classroom_label=f"{school_name} {'Classe' if 'French' in lang else 'Classroom'}" if school_name.strip() else T("my_classroom")
-        st.markdown(f"## 🌶️ {classroom_label}"); st.caption({"en":"Set once — shapes every response","fr":"Configurer une fois — façonne chaque réponse"}.get(_lang_key(),"Set once — shapes every response")); st.markdown("---")
-        country=st.selectbox(T("country"),COUNTRIES); region=st.selectbox(T("setting"),list(REGIONS.keys()))
-        grade=st.selectbox(T("grade"),GRADES,index=1); subject=st.selectbox(T("subject"),SUBJECTS)
-        clsz=st.selectbox(T("class_size"),list(SIZES.keys()),index=2); res=st.selectbox(T("resources"),list(RESOURCES.keys()),index=1)
-        abl=st.selectbox(T("student_level"),list(ABILITY.keys()))
+        _cls_word={"en":"Classroom","fr":"Classe","sw":"Darasa"}.get(_lang_key(),"Classroom")
+        classroom_label=f"{school_name} {_cls_word}" if school_name.strip() else T("my_classroom")
+        st.markdown(f"## 🌶️ {classroom_label}"); st.caption({"en":"Set once — shapes every response","fr":"Configurer une fois — façonne chaque réponse","sw":"Weka mara moja — huunda kila jibu"}.get(_lang_key(),"Set once — shapes every response")); st.markdown("---")
+        country=st.selectbox(T("country"),COUNTRIES); region=st.selectbox(T("setting"),list(_regions().keys()))
+        grade=st.selectbox(T("grade"),_grades(),index=1); subject=st.selectbox(T("subject"),_subjects())
+        clsz=st.selectbox(T("class_size"),list(_sizes().keys()),index=2); res=st.selectbox(T("resources"),list(_resources().keys()),index=1)
+        abl=st.selectbox(T("student_level"),list(_ability().keys()))
+        # Map French display values back to English for AI
+        _region_val=_regions()[region]
+        _grade_en=_to_en_grade(grade)
+        _subj_en=_to_en_subj(subject)
+        _size_val=_sizes()[clsz]
+        _res_val=_resources()[res]
+        _abl_val=_ability()[abl]
         st.markdown("---"); st.caption("© 2026 Institute of Basic Technology")
         st.markdown("[🌐 Visit our website](https://www.institutebasictechnology.org/index.php)")
 
     show_logo(country)
-    _subtitle={"en":"Curating Personalized Content to Support Underresourced Teachers","fr":"Création de contenu personnalisé pour soutenir les enseignants sous-dotés"}.get(_lang_key(),"Curating Personalized Content to Support Underresourced Teachers")
+    _subtitle={"en":"Curating Personalized Content to Support Underresourced Teachers","fr":"Création de contenu personnalisé pour soutenir les enseignants sous-dotés","sw":"Kuunda Maudhui ya Kibinafsi Kusaidia Walimu Wasio na Rasilimali za Kutosha"}.get(_lang_key(),"Curating Personalized Content to Support Underresourced Teachers")
     st.markdown(f'<p style="text-align:center;color:#8899BB;font-size:.95rem;margin-bottom:.6rem">{_subtitle}<br>ChatGPT &bull; Claude &bull; Gemini</p>',unsafe_allow_html=True)
 
     # Unified status bar
@@ -733,12 +810,13 @@ def main():
     if t1:
      with t1:
         c1,c2=st.columns(2)
-        with c1: task=st.selectbox(T("task"),list(TASKS.keys()))
-        with c2: tm=st.selectbox(T("time"),TIMES)
-        topic=st.selectbox(T("topic"),TOPICS.get(subject,DEF_TOPICS))
+        with c1: task=st.selectbox(T("task"),list(_tasks().keys()))
+        with c2: tm=st.selectbox(T("time"),_times())
+        _task_val=_tasks()[task]  # English value for AI
+        topic=st.selectbox(T("topic"),TOPICS.get(_subj_en,DEF_TOPICS))
         # Reading Comprehension: show literature selector
         lit_book=None; lit_info=None; rc_mode=None
-        if task=="Reading Comprehension":
+        if _task_val=="reading passage with questions":
             st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:10px;padding:12px 16px;margin:8px 0"><strong style="color:{C_GOLD}">{T("lit_library")}</strong><br><span style="font-size:.85rem;color:var(--text-secondary)">{T("lit_desc")}</span></div>',unsafe_allow_html=True)
             lit_book=st.selectbox(T("select_book"),list(LITERATURE.keys()),key="lit_book")
             lit_info=LITERATURE.get(lit_book,{})
@@ -758,7 +836,7 @@ def main():
                 st.session_state.gen_result=None; st.rerun()
         if gen_btn:
             # Build prompt
-            if task=="Reading Comprehension" and lit_book and lit_book!="Teacher's Own Selection":
+            if _task_val=="reading passage with questions" and lit_book and lit_book!="Teacher's Own Selection":
                 rc_prompt=f"""Create a READING COMPREHENSION exercise using the novel "{lit_book}" by {lit_info.get('author','')}.
 
 INSTRUCTIONS:
@@ -775,15 +853,15 @@ For "Full Comprehension (All Types)": Include fill-in-the-blanks, 5 short answer
 3. Provide a COMPLETE ANSWER KEY at the end.
 4. Add TEACHER'S GUIDE with: key themes to discuss, discussion starters, and how this connects to WASSCE Literature requirements.
 
-Subject:{subject}
-Grade:{grade}
+Subject:{_subj_en}
+Grade:{_grade_en}
 Topic:{topic}
 Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Themes: {lit_info.get('themes','')}. {lit_info.get('wassce','')}."""
-                sp=build_sys(REGIONS[region],country,grade,subject,task,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],tm,topic,school_name)
+                sp=build_sys(_region_val,country,_grade_en,_subj_en,_task_val,_size_val,_res_val,LANGS[lang],_abl_val,tm,topic,school_name)
                 q=rc_prompt
             else:
-                sp=build_sys(REGIONS[region],country,grade,subject,task,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],tm,topic,school_name)
-                q=f"Create {TASKS[task]}.\nSubject:{subject}\nGrade:{grade}\nTopic:{topic}\nIMMEDIATELY USABLE."
+                sp=build_sys(_region_val,country,_grade_en,_subj_en,_task_val,_size_val,_res_val,LANGS[lang],_abl_val,tm,topic,school_name)
+                q=f"Create {_task_val}.\nSubject:{_subj_en}\nGrade:{_grade_en}\nTopic:{topic}\nIMMEDIATELY USABLE."
             if exs: q+="\n"+"; ".join(exs)
             want_img=add_img or "image" in task.lower() or "AI visual" in str(exs)
             rs={}; ph=st.empty(); s=0; tot=keys+(2 if want_img else 1)
@@ -797,7 +875,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             img=None; img_src=None
             if want_img:
                 s+=1; ph.markdown(pprog(s,tot,"🎨 Creating illustration..."),unsafe_allow_html=True)
-                img,img_src=gen_image(f"{subject}: {topic} for {grade} in {country}")
+                img,img_src=gen_image(f"{_subj_en}: {topic} for {_grade_en} in {country}")
             ph.markdown(pprog(tot,tot,"✅ Done! Content is ready!"),unsafe_allow_html=True); time.sleep(.5); ph.empty()
             # Store in session state
             st.session_state.gen_result={"result":result,"task":task,"topic":topic,"img":img,"img_src":img_src,"rs":rs,"grade":grade,"subject":subject,"lit_book":lit_book}
@@ -830,14 +908,15 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
     # TAB 2: STUDENTS
     if t2:
      with t2:
-        stu_label=f"{school_name} {'Élèves' if 'French' in lang else 'Students'}" if school_name.strip() else T("my_students")
+        _stu_word={"en":"Students","fr":"Élèves","sw":"Wanafunzi"}.get(_lang_key(),"Students")
+        stu_label=f"{school_name} {_stu_word}" if school_name.strip() else T("my_students")
         st.markdown(f'<div style="background:var(--bg-card);border:1px solid {C_BLUE};border-radius:12px;padding:14px 18px;margin-bottom:10px">{ico(20)} <strong style="color:{C_BLUE}">{stu_label}</strong></div>',unsafe_allow_html=True)
-        with st.expander({"en":"➕ Add Profile","fr":"➕ Ajouter un profil"}.get(_lang_key(),"➕ Add Profile"),expanded=not st.session_state.students):
+        with st.expander({"en":"➕ Add Profile","fr":"➕ Ajouter un profil","sw":"➕ Ongeza Wasifu"}.get(_lang_key(),"➕ Add Profile"),expanded=not st.session_state.students):
             c1,c2=st.columns(2)
-            with c1: sn=st.text_input(T("name"),key="sn"); sib=st.selectbox({"en":"Siblings","fr":"Frères et sœurs"}.get(_lang_key(),"Siblings"),["0-4","5-8","8+"],key="sb"); me=st.selectbox({"en":"Mom Edu","fr":"Éducation mère"}.get(_lang_key(),"Mom Edu"),["HS Grad","No HS","Unknown"],key="me")
-            with c2: sm=st.selectbox({"en":"Single Mom?","fr":"Mère seule ?"}.get(_lang_key(),"Single Mom?"),["No","Yes","Unknown"],key="sm"); wk=st.selectbox({"en":"Works?","fr":"Travaille ?"}.get(_lang_key(),"Works?"),["No","Yes","Unknown"],key="wk"); cp=st.selectbox({"en":"Computer?","fr":"Ordinateur ?"}.get(_lang_key(),"Computer?"),["Never","Rarely","Sometimes","Often"],key="cp")
+            with c1: sn=st.text_input(T("name"),key="sn"); sib=st.selectbox({"en":"Siblings","fr":"Frères et sœurs","sw":"Ndugu"}.get(_lang_key(),"Siblings"),["0-4","5-8","8+"],key="sb"); me=st.selectbox({"en":"Mom Edu","fr":"Éducation mère","sw":"Elimu ya mama"}.get(_lang_key(),"Mom Edu"),["HS Grad","No HS","Unknown"],key="me")
+            with c2: sm=st.selectbox({"en":"Single Mom?","fr":"Mère seule ?","sw":"Mama peke yake?"}.get(_lang_key(),"Single Mom?"),["No","Yes","Unknown"],key="sm"); wk=st.selectbox({"en":"Works?","fr":"Travaille ?","sw":"Anafanya kazi?"}.get(_lang_key(),"Works?"),["No","Yes","Unknown"],key="wk"); cp=st.selectbox({"en":"Computer?","fr":"Ordinateur ?","sw":"Kompyuta?"}.get(_lang_key(),"Computer?"),["Never","Rarely","Sometimes","Often"],key="cp")
             nt=st.text_area("Notes",key="nt",height=50)
-            if st.button({"en":"✅ Save","fr":"✅ Enregistrer"}.get(_lang_key(),"✅ Save"),key="sv") and sn.strip():
+            if st.button({"en":"✅ Save","fr":"✅ Enregistrer","sw":"✅ Hifadhi"}.get(_lang_key(),"✅ Save"),key="sv") and sn.strip():
                 st.session_state.students.append(dict(name=sn.strip(),sib=sib,mom=me,sm=sm,wk=wk,cp=cp,nt=nt.strip())); st.rerun()
         # Excel bulk upload
         with st.expander(T("upload_excel")):
@@ -910,7 +989,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             with b1:
                 if st.button("📝 Assignment",key=f"a{i}"):
                     with st.spinner("Creating..."):
-                        r,m,allr=best_all(build_stu(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],info,school_name),f"Tailored {subject} assignment. Max 3 problems.")
+                        r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),f"Tailored {_subj_en} assignment. Max 3 problems.")
                     st.markdown(f'<div class="rb">{r}<div style="font-size:.65rem;color:#556;margin-top:4px">by {m}</div></div>',unsafe_allow_html=True)
                     if len(allr)>1:
                         with st.expander(f"📋 See all {len(allr)} model responses"):
@@ -922,7 +1001,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             with b2:
                 if st.button("📊 Risk",key=f"r{i}"):
                     with st.spinner("Analyzing..."):
-                        r,m,allr=best_all(build_stu(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],info,school_name),"Risk analysis using IBT data. Compare to 183-student dataset.")
+                        r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),"Risk analysis using IBT data. Compare to 183-student dataset.")
                     st.markdown(f'<div class="rb">{r}<div style="font-size:.65rem;color:#556;margin-top:4px">by {m}</div></div>',unsafe_allow_html=True)
                     if len(allr)>1:
                         with st.expander(f"📋 See all {len(allr)} model responses"):
@@ -947,13 +1026,14 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     grade_text=transcribe_audio(grade_audio.read())
                 if grade_text:
                     st.session_state["gw"]=grade_text; st.rerun()
-            gsub=st.selectbox(f"{T('subject')}:",SUBJECTS,key="gsub"); gt=st.text_input(f"{T('topic')}:",key="gt")
+            gsub=st.selectbox(f"{T('subject')}:",_subjects(),key="gsub"); gt=st.text_input(f"{T('topic')}:",key="gt")
+            _gsub_en=_to_en_subj(gsub)
             if st.button(T("grade_btn"),type="primary",key="gb") and gw.strip():
                 sel=next((s for s in st.session_state.students if s["name"]==gs),None)
                 if sel:
                     info=f'{sel["name"]},{sel["sib"]}sib,Mom:{sel["mom"]},SM:{sel["sm"]},Works:{sel["wk"]},Comp:{sel["cp"]},{sel["nt"]}'
                     with st.spinner("Grading..."):
-                        r,m,allr=best_all(build_stu(REGIONS[region],country,grade,gsub,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],info,school_name),f"Grade:\nSTUDENT:{info}\n{gsub} {gt}\n\nWORK:\n{gw}\n\nGive: grade, praise, corrections, tips, next step.")
+                        r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_gsub_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),f"Grade:\nSTUDENT:{info}\n{_gsub_en} {gt}\n\nWORK:\n{gw}\n\nGive: grade, praise, corrections, tips, next step.")
                     st.markdown(f'<div class="rh"><h3>{ico(16)} Feedback: {gs}</h3></div><div class="rb">{r}</div>',unsafe_allow_html=True)
                     if len(allr)>1:
                         with st.expander(f"📋 See all {len(allr)} model responses"):
@@ -976,7 +1056,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                         st.write("🟣 Asking Claude...")
                         st.write("🟢 Asking ChatGPT...")
                         st.write("🔵 Asking Gemini...")
-                        r,m,allr=best_all(build_chat(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],school_name),ex,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[:-1]])
+                        r,m,allr=best_all(build_chat(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,school_name),ex,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[:-1]])
                         status.update(label="✅ Response ready!",state="complete",expanded=False)
                     st.session_state.chat_messages.append({"role":"assistant","content":r,"model":m,"all_responses":allr}); st.rerun()
         st.markdown("---")
@@ -1023,11 +1103,11 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             want_chat_img=any(uq.lower().startswith(k) or k in uq.lower() for k in img_keywords)
             with st.status("🌶️ Teacher Pehpeh is thinking...",expanded=True) as status:
                 st.write("🟣 Asking Claude... 🟢 Asking ChatGPT... 🔵 Asking Gemini...")
-                r,m,allr=best_all(build_chat(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],school_name),uq,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]])
+                r,m,allr=best_all(build_chat(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,school_name),uq,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]])
                 msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
                 if want_chat_img:
                     st.write("🎨 Creating illustration...")
-                    img_url,img_model=gen_image(f"{subject}: {uq} for {grade} in {country}")
+                    img_url,img_model=gen_image(f"{_subj_en}: {uq} for {_grade_en} in {country}")
                     if img_url:
                         msg_data["image"]=img_url
                         msg_data["image_src"]=img_model
