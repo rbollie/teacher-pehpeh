@@ -186,144 +186,59 @@ def gen_image(prompt):
     return None,None
 
 # === TEXT TO SPEECH ===
-TTS_PROVIDERS = ["ElevenLabs (Custom Voice)", "OpenAI TTS", "Browser (Free)"]
 
-OPENAI_TTS_VOICES = {
-    "Nova — Bright, energetic": "nova",
-    "Alloy — Neutral, clear": "alloy",
-    "Coral — Cheerful, friendly": "coral",
-    "Echo — Smooth, warm": "echo",
-    "Fable — Expressive, storytelling": "fable",
-    "Onyx — Deep, authoritative": "onyx",
-    "Sage — Calm, thoughtful": "sage",
-    "Shimmer — Lively, dynamic": "shimmer",
-    "Marin — Natural (recommended)": "marin",
-    "Cedar — Grounded (recommended)": "cedar",
-}
-
-ELEVENLABS_MODELS = {
-    "Eleven v3 (Best quality)": "eleven_v3",
-    "Eleven Turbo v2.5 (Fast)": "eleven_turbo_v2_5",
-    "Eleven Multilingual v2": "eleven_multilingual_v2",
-    "Eleven Flash v2.5 (Fastest)": "eleven_flash_v2_5",
-}
-
-def speak_elevenlabs(text, voice_id, model_id="eleven_v3"):
+def speak_elevenlabs(text, voice_id="woq6F0K3YYEpoS7T2Rx4", model_id="eleven_turbo_v2_5"):
     """Generate speech using ElevenLabs API. Returns base64 audio or None."""
     if not ELEVENLABS_API_KEY: return None, "No ElevenLabs API key"
     try:
         import re, urllib.request, json as jlib
         clean = re.sub(r'<[^>]+>', '', text)
-        clean = re.sub(r'[#*_`~\[\]()]', '', clean)
-        clean = re.sub(r'\n{3,}', '\n\n', clean)
-        if len(clean) > 5000: clean = clean[:5000] + "... Content continues in the written version."
+        clean = re.sub(r'[#*_`~\[\](){}|]', '', clean)
+        clean = re.sub(r'-{3,}', '', clean)
+        clean = re.sub(r'\n{2,}', '\n', clean)
+        clean = re.sub(r' {2,}', ' ', clean)
+        # Keep it short enough for fast response
+        if len(clean) > 2500: clean = clean[:2500] + ". That's the summary. See the full written version for complete details."
         url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
         payload = jlib.dumps({
             "text": clean,
             "model_id": model_id,
-            "output_format": "mp3_44100_128",
         }).encode("utf-8")
         req = urllib.request.Request(url, data=payload, headers={
             "xi-api-key": ELEVENLABS_API_KEY,
             "Content-Type": "application/json",
             "Accept": "audio/mpeg",
         })
-        with urllib.request.urlopen(req, timeout=30) as resp:
+        with urllib.request.urlopen(req, timeout=90) as resp:
             audio_bytes = resp.read()
         b64 = base64.b64encode(audio_bytes).decode()
-        return b64, "ElevenLabs"
+        return b64, "Teacher Pehpeh Voice"
     except Exception as e:
         return None, f"ElevenLabs Error: {e}"
 
-def speak_openai(text, voice="nova", instructions=None):
-    """Generate speech using OpenAI TTS API. Returns base64 audio or None."""
-    if not OAI or not OPENAI_API_KEY: return None, "No OpenAI API key"
-    try:
-        import re
-        c = openai.OpenAI(api_key=OPENAI_API_KEY)
-        clean = re.sub(r'<[^>]+>', '', text)
-        clean = re.sub(r'[#*_`~\[\]()]', '', clean)
-        clean = re.sub(r'\n{3,}', '\n\n', clean)
-        if len(clean) > 4000: clean = clean[:4000] + "... Content continues in the written version."
-        params = {"model": "gpt-4o-mini-tts", "voice": voice, "input": clean, "response_format": "mp3"}
-        if instructions: params["instructions"] = instructions
-        response = c.audio.speech.create(**params)
-        b64 = base64.b64encode(response.content).decode()
-        return b64, "OpenAI TTS"
-    except Exception as e:
-        return None, f"OpenAI TTS Error: {e}"
-
-def speak_browser_js(text, elem_id="tts_player"):
-    """Generate JavaScript for browser-based TTS fallback"""
-    import re
-    clean = re.sub(r'<[^>]+>', '', text)
-    clean = re.sub(r'[#*_`~\[\]()]', '', clean)
-    clean = clean.replace("'", "\\'").replace("\n", " ").replace("\r", "")
-    if len(clean) > 3000: clean = clean[:3000] + "... Content continues in the written version."
-    return f"""
-    <div id="{elem_id}" style="display:flex;gap:8px;align-items:center;margin:6px 0">
-        <button onclick="
-            if(window.speechSynthesis.speaking){{window.speechSynthesis.cancel();this.textContent='🔊 Listen (Browser)';return;}}
-            var u=new SpeechSynthesisUtterance('{clean}');
-            u.rate=0.95; u.pitch=1.0;
-            var voices=window.speechSynthesis.getVoices();
-            var pref=voices.find(v=>v.lang.startsWith('en')&&v.name.includes('Female'))||voices.find(v=>v.lang.startsWith('en'))||voices[0];
-            if(pref) u.voice=pref;
-            u.onend=()=>{{this.textContent='🔊 Listen (Browser)'}};
-            this.textContent='⏹️ Stop';
-            window.speechSynthesis.speak(u);
-        " style="background:#8B1A1A;color:#D4A843;border:1px solid #D4A843;padding:6px 14px;border-radius:8px;cursor:pointer;font-weight:600;font-size:.85rem">🔊 Listen (Browser)</button>
-        <span style="font-size:.7rem;color:#889">Free · Offline · Uses device voice</span>
-    </div>"""
-
-def tts_player(text, key_suffix, provider="ElevenLabs (Custom Voice)", el_voice_id=None, el_model="eleven_v3", oai_voice="nova", oai_instructions=None):
-    """Render TTS controls with ElevenLabs primary, OpenAI fallback, browser backup"""
+def tts_player(text, key_suffix):
+    """Simple 'Hear Results' button — one click, plays audio."""
     audio_key = f"tts_audio_{key_suffix}"
-    with st.expander("🔊 Listen to this result", expanded=False):
-        # Determine provider info
-        if provider == "ElevenLabs (Custom Voice)" and ELEVENLABS_API_KEY and el_voice_id:
-            cost_note = "ElevenLabs · Your custom voice"
-            btn_label = "🎙️ Play with My Voice"
-        elif provider == "OpenAI TTS" and OPENAI_API_KEY:
-            cost_note = f"OpenAI · {oai_voice} · ~$0.01/read"
-            btn_label = "🔊 Generate Audio"
-        else:
-            cost_note = "Browser · Free · Offline"
-            btn_label = None
-        c1, c2 = st.columns(2)
-        with c1:
-            if btn_label:
-                if st.button(btn_label, key=f"tts_gen_{key_suffix}", type="primary", use_container_width=True):
-                    with st.spinner("🎙️ Generating speech..."):
-                        if provider == "ElevenLabs (Custom Voice)":
-                            b64, src = speak_elevenlabs(text, el_voice_id, el_model)
-                        else:
-                            b64, src = speak_openai(text, oai_voice, oai_instructions)
-                    if b64:
-                        st.session_state[audio_key] = {"b64": b64, "src": src}
-                        st.rerun()
-                    else:
-                        st.warning(f"Voice generation failed: {src}")
+    if not ELEVENLABS_API_KEY: return  # No voice configured, show nothing
+    # Show cached audio if already generated
+    if audio_key in st.session_state and st.session_state[audio_key]:
+        aud = st.session_state[audio_key]
+        st.markdown(f'<audio controls autoplay style="width:100%;margin:8px 0;border-radius:8px"><source src="data:audio/mp3;base64,{aud["b64"]}" type="audio/mp3"></audio>', unsafe_allow_html=True)
+        ac1, ac2 = st.columns([2,1])
+        with ac1:
+            st.download_button("📥 Download MP3", data=base64.b64decode(aud["b64"]), file_name=f"teacher_pehpeh_{key_suffix}.mp3", mime="audio/mp3", key=f"tts_dl_{key_suffix}")
+        with ac2:
+            if st.button("🗑️ Clear", key=f"tts_clr_{key_suffix}"):
+                del st.session_state[audio_key]; st.rerun()
+    else:
+        if st.button("🔊 Hear Results", key=f"tts_gen_{key_suffix}", type="primary", use_container_width=True):
+            with st.spinner("🔊 Generating audio..."):
+                b64, src = speak_elevenlabs(text)
+            if b64:
+                st.session_state[audio_key] = {"b64": b64, "src": src}
+                st.rerun()
             else:
-                st.info("Using free browser voice. Add an ElevenLabs or OpenAI key for premium voices.")
-        with c2:
-            st.markdown(f'<div style="font-size:.78rem;color:var(--text-secondary);margin-top:8px">🎧 {cost_note}</div>', unsafe_allow_html=True)
-        # Display cached audio if available
-        if audio_key in st.session_state and st.session_state[audio_key]:
-            aud = st.session_state[audio_key]
-            st.markdown(f'<audio controls autoplay style="width:100%;margin:8px 0"><source src="data:audio/mp3;base64,{aud["b64"]}" type="audio/mp3"></audio>', unsafe_allow_html=True)
-            st.markdown(f'<div style="font-size:.7rem;color:#889">🎙️ Generated by {aud["src"]}</div>', unsafe_allow_html=True)
-            ac1, ac2 = st.columns(2)
-            with ac1:
-                st.download_button("📥 Download MP3", data=base64.b64decode(aud["b64"]), file_name=f"teacher_pehpeh_{key_suffix}.mp3", mime="audio/mp3", key=f"tts_dl_{key_suffix}")
-            with ac2:
-                if st.button("🗑️ Clear audio", key=f"tts_clr_{key_suffix}"):
-                    del st.session_state[audio_key]; st.rerun()
-        # Always show browser fallback
-        st.markdown("---")
-        st.markdown('<div style="font-size:.8rem;color:var(--text-muted)"><strong>Free alternative:</strong> Browser voice (no API needed)</div>', unsafe_allow_html=True)
-        import streamlit.components.v1 as components
-        components.html(speak_browser_js(text, f"browser_tts_{key_suffix}"), height=50)
+                st.error(f"Audio failed: {src}. Try again.")
 
 # === SPEECH TO TEXT ===
 def transcribe_audio(audio_bytes):
@@ -338,44 +253,6 @@ def transcribe_audio(audio_bytes):
         return r.text.strip() if r.text else None
     except Exception as e:
         return None
-
-def voice_input_widget(label, key, placeholder=""):
-    """Render a text input with a mic button for voice input. Returns the text."""
-    mic_key = f"mic_{key}"
-    txt_key = f"vtxt_{key}"
-    # Check if we have a transcription waiting
-    if mic_key in st.session_state and st.session_state[mic_key]:
-        default_val = st.session_state[mic_key]
-        st.session_state[mic_key] = None  # Clear after using
-    elif txt_key in st.session_state:
-        default_val = st.session_state[txt_key]
-    else:
-        default_val = ""
-    tc, mc = st.columns([5, 1])
-    with tc:
-        val = st.text_input(label, value=default_val, placeholder=placeholder, key=txt_key)
-    with mc:
-        st.markdown("<div style='height:28px'></div>", unsafe_allow_html=True)  # spacer to align with input
-        audio = st.audio_input("🎤", key=f"audio_{key}", label_visibility="collapsed")
-    if audio:
-        with st.spinner("🎤 Listening..."):
-            text = transcribe_audio(audio.read())
-        if text:
-            st.session_state[mic_key] = text
-            st.rerun()
-        else:
-            st.toast("Could not transcribe audio. Try again.", icon="⚠️")
-    return val
-
-def voice_chat_input(key="voice_chat"):
-    """Render a voice recorder for chat input. Returns transcribed text or None."""
-    audio = st.audio_input("🎤 Tap to speak", key=f"audio_{key}", label_visibility="visible")
-    if audio:
-        with st.spinner("🎤 Transcribing..."):
-            text = transcribe_audio(audio.read())
-        if text:
-            return text
-    return None
 
 # === QUIZ BANK ===
 QUIZ = {
@@ -717,27 +594,6 @@ def main():
         grade=st.selectbox("Grade",GRADES,index=1); subject=st.selectbox("Subject",SUBJECTS)
         clsz=st.selectbox("Class Size",list(SIZES.keys()),index=2); res=st.selectbox("Resources",list(RESOURCES.keys()),index=1)
         lang=st.selectbox("Language",list(LANGS.keys())); abl=st.selectbox("Student Level",list(ABILITY.keys()))
-        st.markdown("---")
-        with st.expander("🔊 Voice Settings"):
-            tts_provider=st.selectbox("Voice Provider",TTS_PROVIDERS,index=0 if ELEVENLABS_API_KEY else (1 if OPENAI_API_KEY else 2),key="tts_prov")
-            # ElevenLabs settings
-            el_voice_id=""; el_model="eleven_v3"
-            oai_voice="nova"; oai_instructions=""
-            if tts_provider=="ElevenLabs (Custom Voice)":
-                if not ELEVENLABS_API_KEY:
-                    st.warning("Add ELEVENLABS_API_KEY in Streamlit Secrets")
-                EL_VOICES={"🌶️ Teacher Pehpeh Voice 1":"woq6F0K3YYEpoS7T2Rx4","🌶️ Teacher Pehpeh Voice 2":"trc5lSEsYCOwKGQHMW0Q"}
-                el_voice_label=st.selectbox("🎙️ Voice",list(EL_VOICES.keys()),index=0,key="el_vid_sel")
-                el_voice_id=EL_VOICES[el_voice_label]
-                el_model_label=st.selectbox("Model",list(ELEVENLABS_MODELS.keys()),index=0,key="el_model")
-                el_model=ELEVENLABS_MODELS[el_model_label]
-                st.success(f"✅ {el_voice_label} ready")
-            elif tts_provider=="OpenAI TTS":
-                oai_voice_label=st.selectbox("Voice",list(OPENAI_TTS_VOICES.keys()),index=0,key="oai_voice")
-                oai_voice=OPENAI_TTS_VOICES[oai_voice_label]
-                oai_instructions=st.text_input("Voice style (optional):",placeholder="Speak warmly like a Liberian teacher",key="tts_instr",help="Tell the AI HOW to speak")
-            else:
-                st.info("🔊 Uses your device's built-in voice. Free and works offline!")
         st.markdown("---"); st.caption("© 2026 Institute of Basic Technology")
         st.markdown("[🌐 Visit our website](https://www.institutebasictechnology.org/index.php)")
 
@@ -773,14 +629,8 @@ def main():
         bar_parts=[net_html, models_html]
         if img_html: bar_parts.append(img_html)
         # Voice section
-        if ELEVENLABS_API_KEY or OPENAI_API_KEY:
-            if tts_provider=="ElevenLabs (Custom Voice)" and el_voice_id:
-                voice_label="🎙️ My Voice (ElevenLabs)"
-            elif tts_provider=="OpenAI TTS":
-                voice_label=f"🔊 {oai_voice.title()}"
-            else:
-                voice_label="🔊 Browser"
-            voice_html=f'<span style="color:#81D4A8">{voice_label}</span>'
+        if ELEVENLABS_API_KEY:
+            voice_html='<span style="color:#81D4A8">🔊 Voice Ready</span>'
             bar_parts.append(voice_html)
         st.markdown(f'<div class="status-bar">{div.join(bar_parts)}</div>',unsafe_allow_html=True)
     if st.sidebar.button("🔄 Re-check"): st.session_state.conn_checked=False; st.rerun()
@@ -886,7 +736,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             with em_col:
                 pass
             email_result(gr["result"], f"Teacher Pehpeh — {gr['task']}: {gr['topic']} ({gr['grade']}, {gr['subject']})", "gen")
-            tts_player(gr["result"], "gen", tts_provider, el_voice_id, el_model, oai_voice, oai_instructions)
+            tts_player(gr["result"], "gen")
 
     # TAB 2: STUDENTS
     if t2:
@@ -979,7 +829,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                                 mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mn,"⚪")
                                 st.markdown(f"**{mico} {mn}{'  ✅' if mn==m else ''}**"); st.markdown(mr); st.markdown("---")
                     email_result(r, f"Teacher Pehpeh — Assignment for {s['name']} ({subject}, {grade})", f"asn_{i}")
-                    tts_player(r, f"asn_{i}", tts_provider, el_voice_id, el_model, oai_voice, oai_instructions)
+                    tts_player(r, f"asn_{i}")
             with b2:
                 if st.button("📊 Risk",key=f"r{i}"):
                     with st.spinner("Analyzing..."):
@@ -991,7 +841,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                                 mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mn,"⚪")
                                 st.markdown(f"**{mico} {mn}{'  ✅' if mn==m else ''}**"); st.markdown(mr); st.markdown("---")
                     email_result(r, f"Teacher Pehpeh — Risk Analysis for {s['name']} ({subject}, {grade})", f"rsk_{i}")
-                    tts_player(r, f"rsk_{i}", tts_provider, el_voice_id, el_model, oai_voice, oai_instructions)
+                    tts_player(r, f"rsk_{i}")
             with b3:
                 if st.button("🗑️",key=f"d{i}"): st.session_state.students.pop(i); st.rerun()
         if st.session_state.students:
@@ -1022,7 +872,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                                 mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mn,"⚪")
                                 st.markdown(f"**{mico} {mn}{'  ✅' if mn==m else ''}**"); st.markdown(mr); st.markdown("---")
                     email_result(r, f"Teacher Pehpeh — Grade Feedback for {gs} ({gsub}, {grade})", "grade")
-                    tts_player(r, "grade", tts_provider, el_voice_id, el_model, oai_voice, oai_instructions)
+                    tts_player(r, "grade")
 
     # TAB 3: CHAT
     if t3:
@@ -1061,7 +911,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                 # Find the user question this responds to
                 user_q = st.session_state.chat_messages[mi-1]["content"] if mi>0 else "Chat"
                 email_result(msg["content"], f"Teacher Pehpeh — {user_q[:50]} ({grade}, {subject})", f"chat_{mi}")
-                tts_player(msg["content"], f"chat_{mi}", tts_provider, el_voice_id, el_model, oai_voice, oai_instructions)
+                tts_player(msg["content"], f"chat_{mi}")
         # Voice input for chat
         voice_col, label_col = st.columns([1, 4])
         with voice_col:
