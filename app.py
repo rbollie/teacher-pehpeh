@@ -465,6 +465,10 @@ UI_TEXT={
   "assignment":"📝 Assignment","risk":"⚠️ Risk Analysis","creating":"Creating...",
   "see_all":"📋 See all","model_responses":"model responses","streak":"streak",
   "generating_content":"🌶️ Teacher Pehpeh is cooking...","done":"✅ Done! Content is ready!",
+  "ask_tp":"Ask Teacher Pehpeh","thinking":"🌶️ Teacher Pehpeh is thinking...","response_ready":"✅ Response ready!",
+  "asking_claude":"🟣 Asking Claude...","asking_chatgpt":"🟢 Asking ChatGPT...","asking_gemini":"🔵 Asking Gemini...",
+  "chat_ex1":"How to teach fractions with no textbooks?","chat_ex2":"My students keep failing WASSCE.","chat_ex3":"Managing 60+ students?",
+  "combining":"🔀 Combining the best...","creating_img":"🎨 Creating illustration...",
  },
  "fr":{
   "generate":"📋 Générer","chat":"💬 Discussion","quiz":"🌶️ Quiz","students":"🧑‍🎓 Élèves",
@@ -499,6 +503,10 @@ UI_TEXT={
   "assignment":"📝 Devoir","risk":"⚠️ Analyse de risque","creating":"Création en cours...",
   "see_all":"📋 Voir tous les","model_responses":"réponses des modèles","streak":"série",
   "generating_content":"🌶️ Teacher Pehpeh prépare...","done":"✅ Terminé ! Le contenu est prêt !",
+  "ask_tp":"Demandez à Teacher Pehpeh","thinking":"🌶️ Teacher Pehpeh réfléchit...","response_ready":"✅ Réponse prête !",
+  "asking_claude":"🟣 Consultation de Claude...","asking_chatgpt":"🟢 Consultation de ChatGPT...","asking_gemini":"🔵 Consultation de Gemini...",
+  "chat_ex1":"Comment enseigner les fractions sans manuels ?","chat_ex2":"Mes élèves échouent au WASSCE.","chat_ex3":"Gérer plus de 60 élèves ?",
+  "combining":"🔀 Combinaison des meilleurs...","creating_img":"🎨 Création d'illustration...",
  },
  "sw":{
   "generate":"📋 Tengeneza","chat":"💬 Mazungumzo","quiz":"🌶️ Maswali","students":"🧑‍🎓 Wanafunzi",
@@ -533,6 +541,10 @@ UI_TEXT={
   "assignment":"📝 Kazi","risk":"⚠️ Uchambuzi wa hatari","creating":"Inatengeneza...",
   "see_all":"📋 Tazama zote","model_responses":"majibu ya modeli","streak":"mfululizo",
   "generating_content":"🌶️ Teacher Pehpeh anapika...","done":"✅ Imekamilika! Maudhui yako tayari!",
+  "ask_tp":"Muulize Teacher Pehpeh","thinking":"🌶️ Teacher Pehpeh anafikiria...","response_ready":"✅ Jibu liko tayari!",
+  "asking_claude":"🟣 Kuuliza Claude...","asking_chatgpt":"🟢 Kuuliza ChatGPT...","asking_gemini":"🔵 Kuuliza Gemini...",
+  "chat_ex1":"Jinsi ya kufundisha sehemu bila vitabu?","chat_ex2":"Wanafunzi wangu wanashindwa WASSCE.","chat_ex3":"Kusimamia wanafunzi 60+?",
+  "combining":"🔀 Kuchanganya bora zaidi...","creating_img":"🎨 Kuunda mchoro...",
  }
 }
 def _lang_key():
@@ -726,7 +738,8 @@ def main():
         if k not in st.session_state: st.session_state[k]={"lv":"easy","qi":0,"sc":0,"tot":0,"stk":0,"done":False,"sel":None,"hist":[]}
 
     if not st.session_state.conn_checked:
-        with st.spinner("🌶️ Checking connection..."):
+        _checking={"en":"🌶️ Checking connection...","fr":"🌶️ Vérification de la connexion...","sw":"🌶️ Kuangalia muunganisho..."}.get(_lang_key(),"🌶️ Checking connection...")
+        with st.spinner(_checking):
             st.session_state.conn_info=check_conn(); st.session_state.conn_checked=True
     conn=st.session_state.conn_info; online=conn["online"] if conn else False
 
@@ -824,7 +837,12 @@ def main():
         st.markdown("---")
         _cls_word={"en":"Classroom","fr":"Classe","sw":"Darasa"}.get(_lang_key(),"Classroom")
         classroom_label=f"{school_name} {_cls_word}" if school_name.strip() else T("my_classroom")
-        st.markdown(f"## 🌶️ {classroom_label}"); st.caption({"en":"Set once — shapes every response","fr":"Configurer une fois — façonne chaque réponse","sw":"Weka mara moja — huunda kila jibu"}.get(_lang_key(),"Set once — shapes every response")); st.markdown("---")
+        _logo_b64=get_b64()
+        if _logo_b64:
+            _logo_html=f'<img src="data:image/png;base64,{_logo_b64}" style="height:36px;width:36px;vertical-align:middle;border-radius:50%;margin-right:8px;filter:drop-shadow(0 2px 6px rgba(212,168,67,.4))">'
+        else:
+            _logo_html="🌶️ "
+        st.markdown(f'<div style="display:flex;align-items:center;margin:8px 0 4px">{_logo_html}<span style="font-family:Playfair Display,serif;font-size:1.3rem;font-weight:700;color:#F5D998">{classroom_label}</span></div>',unsafe_allow_html=True); st.caption({"en":"Set once — shapes every response","fr":"Configurer une fois — façonne chaque réponse","sw":"Weka mara moja — huunda kila jibu"}.get(_lang_key(),"Set once — shapes every response")); st.markdown("---")
         region=st.selectbox(T("setting"),list(_regions().keys()))
         grade=st.selectbox(T("grade"),_grades(),index=1); subject=st.selectbox(T("subject"),_subjects())
         clsz=st.selectbox(T("class_size"),list(_sizes().keys()),index=2); res=st.selectbox(T("resources"),list(_resources().keys()),index=1)
@@ -945,18 +963,18 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             if exs: q+="\n"+"; ".join(exs)
             want_img=add_img or "image" in task.lower() or "AI visual" in str(exs)
             rs={}; ph=st.empty(); s=0; tot=keys+(2 if want_img else 1)
-            ph.markdown(pprog(0,tot,"🌶️ Teacher Pehpeh is cooking..."),unsafe_allow_html=True)
+            ph.markdown(pprog(0,tot,T("generating_content")),unsafe_allow_html=True)
             for k,fn,nm in [(OPENAI_API_KEY,ask_gpt,"ChatGPT"),(ANTHROPIC_API_KEY,ask_cl,"Claude"),(GOOGLE_API_KEY,ask_gem,"Gemini")]:
                 if k:
                     s+=1; ph.markdown(pprog(s,tot,f"Asking {nm}..."),unsafe_allow_html=True)
                     rs[nm]=fn(sp,q) if nm!="Gemini" else fn(sp,q)
-            s+=1; ph.markdown(pprog(s,tot,"Combining the best..."),unsafe_allow_html=True)
+            s+=1; ph.markdown(pprog(s,tot,T("combining")),unsafe_allow_html=True)
             result=synth(sp,q,rs)
             img=None; img_src=None
             if want_img:
-                s+=1; ph.markdown(pprog(s,tot,"🎨 Creating illustration..."),unsafe_allow_html=True)
+                s+=1; ph.markdown(pprog(s,tot,T("creating_img")),unsafe_allow_html=True)
                 img,img_src=gen_image(f"{_subj_en}: {_topic_en} for {_grade_en} in {country}")
-            ph.markdown(pprog(tot,tot,"✅ Done! Content is ready!"),unsafe_allow_html=True); time.sleep(.5); ph.empty()
+            ph.markdown(pprog(tot,tot,T("done")),unsafe_allow_html=True); time.sleep(.5); ph.empty()
             # Store in session state
             st.session_state.gen_result={"result":result,"task":task,"topic":topic,"img":img,"img_src":img_src,"rs":rs,"grade":grade,"subject":subject,"lit_book":lit_book}
         # Display results from session state
@@ -967,10 +985,13 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             if gr.get("img"): st.image(gr["img"],caption=f"{gr['topic']} — Generated by {gr.get('img_src','')}",use_container_width=True)
             valid_rs={k:v for k,v in gr["rs"].items() if v and not str(v).startswith("⚠️")}
             if len(valid_rs)>1:
-                st.markdown(f'<div style="background:rgba(212,168,67,.1);border-left:4px solid {C_GOLD};padding:6px 12px;border-radius:6px;font-size:.82rem;color:{C_GOLD};margin-bottom:8px">🔀 <strong>Synthesized Response</strong> — Combined from {" + ".join(valid_rs.keys())}</div>',unsafe_allow_html=True)
+                _synth={"en":"Synthesized Response","fr":"Réponse synthétisée","sw":"Jibu lililochanganywa"}.get(_lang_key(),"Synthesized Response")
+                _from={"en":"Combined from","fr":"Combiné de","sw":"Imechanganywa kutoka"}.get(_lang_key(),"Combined from")
+                st.markdown(f'<div style="background:rgba(212,168,67,.1);border-left:4px solid {C_GOLD};padding:6px 12px;border-radius:6px;font-size:.82rem;color:{C_GOLD};margin-bottom:8px">🔀 <strong>{_synth}</strong> — {_from} {" + ".join(valid_rs.keys())}</div>',unsafe_allow_html=True)
             st.markdown(f'<div class="rb">{highlight_result(gr["result"])}</div>',unsafe_allow_html=True)
             if len(valid_rs)>1:
-                st.markdown(f'<div style="font-size:.85rem;color:{C_GOLD};margin:12px 0 6px">📋 <strong>Individual Model Responses</strong></div>',unsafe_allow_html=True)
+                _indiv={"en":"Individual Model Responses","fr":"Réponses individuelles des modèles","sw":"Majibu ya modeli binafsi"}.get(_lang_key(),"Individual Model Responses")
+                st.markdown(f'<div style="font-size:.85rem;color:{C_GOLD};margin:12px 0 6px">📋 <strong>{_indiv}</strong></div>',unsafe_allow_html=True)
                 for mname,mresp in valid_rs.items():
                     with st.expander(f"{'🟣' if mname=='Claude' else '🟢' if mname=='ChatGPT' else '🔵'} {mname}'s Response"):
                         st.markdown(mresp)
@@ -1070,7 +1091,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                 if st.button(T("assignment"),key=f"a{i}"):
                     with st.spinner(T("creating")):
                         r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),f"Tailored {_subj_en} assignment. Max 3 problems.")
-                    st.markdown(f'<div class="rb">{highlight_result(r)}<div style="font-size:.65rem;color:#556;margin-top:4px">by {m}</div></div>',unsafe_allow_html=True)
+                    _by={"en":"by","fr":"par","sw":"na"}.get(_lang_key(),"by"); st.markdown(f'<div class="rb">{highlight_result(r)}<div style="font-size:.65rem;color:#556;margin-top:4px">{_by} {m}</div></div>',unsafe_allow_html=True)
                     if len(allr)>1:
                         with st.expander(f"{T('see_all')} {len(allr)} {T('model_responses')}"):
                             for mn,mr in allr.items():
@@ -1082,7 +1103,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                 if st.button(T("risk"),key=f"r{i}"):
                     with st.spinner("Analyzing..."):
                         r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),"Risk analysis using IBT data. Compare to 183-student dataset.")
-                    st.markdown(f'<div class="rb">{highlight_result(r)}<div style="font-size:.65rem;color:#556;margin-top:4px">by {m}</div></div>',unsafe_allow_html=True)
+                    _by={"en":"by","fr":"par","sw":"na"}.get(_lang_key(),"by"); st.markdown(f'<div class="rb">{highlight_result(r)}<div style="font-size:.65rem;color:#556;margin-top:4px">{_by} {m}</div></div>',unsafe_allow_html=True)
                     if len(allr)>1:
                         with st.expander(f"{T('see_all')} {len(allr)} {T('model_responses')}"):
                             for mn,mr in allr.items():
@@ -1114,7 +1135,8 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     info=f'{sel["name"]},{sel["sib"]}sib,Mom:{sel["mom"]},SM:{sel["sm"]},Works:{sel["wk"]},Comp:{sel["cp"]},{sel["nt"]}'
                     with st.spinner("Grading..."):
                         r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_gsub_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),f"Grade:\nSTUDENT:{info}\n{_gsub_en} {gt}\n\nWORK:\n{gw}\n\nGive: grade, praise, corrections, tips, next step.")
-                    st.markdown(f'<div class="rh"><h3>{ico(16)} Feedback: {gs}</h3></div><div class="rb">{highlight_result(r)}</div>',unsafe_allow_html=True)
+                    _fb={"en":"Feedback","fr":"Commentaires","sw":"Maoni"}.get(_lang_key(),"Feedback")
+                    st.markdown(f'<div class="rh"><h3>{ico(16)} {_fb}: {gs}</h3></div><div class="rb">{highlight_result(r)}</div>',unsafe_allow_html=True)
                     if len(allr)>1:
                         with st.expander(f"{T('see_all')} {len(allr)} {T('model_responses')}"):
                             for mn,mr in allr.items():
@@ -1126,27 +1148,30 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
     # TAB 3: CHAT
     if t3:
      with t3:
-        st.markdown(f'<div style="background:rgba(139,26,26,.12);border:1px solid rgba(178,34,52,.3);border-radius:12px;padding:14px 18px;margin-bottom:10px">{ico(20)} <strong style="color:{C_GOLD}">Ask Teacher Pehpeh</strong> <span style="color:#C0A070;font-size:.85rem">— {grade} · {subject}</span></div>',unsafe_allow_html=True)
+        st.markdown(f'<div style="background:rgba(139,26,26,.12);border:1px solid rgba(178,34,52,.3);border-radius:12px;padding:14px 18px;margin-bottom:10px">{ico(20)} <strong style="color:{C_GOLD}">{T("ask_tp")}</strong> <span style="color:#C0A070;font-size:.85rem">— {grade} · {subject}</span></div>',unsafe_allow_html=True)
         ec=st.columns(3)
-        for i,ex in enumerate(["How to teach fractions with no textbooks?","My students keep failing WASSCE.","Managing 60+ students?"]):
+        _chat_examples=[T("chat_ex1"),T("chat_ex2"),T("chat_ex3")]
+        for i,ex in enumerate(_chat_examples):
             with ec[i]:
                 if st.button(f"💡 {ex[:38]}...",key=f"ex{i}",use_container_width=True):
                     st.session_state.chat_messages.append({"role":"user","content":ex})
-                    with st.status("🌶️ Teacher Pehpeh is thinking...",expanded=True) as status:
-                        st.write("🟣 Asking Claude...")
-                        st.write("🟢 Asking ChatGPT...")
-                        st.write("🔵 Asking Gemini...")
+                    with st.status(T("thinking"),expanded=True) as status:
+                        st.write(T("asking_claude"))
+                        st.write(T("asking_chatgpt"))
+                        st.write(T("asking_gemini"))
                         r,m,allr=best_all(build_chat(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,school_name),ex,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[:-1]])
-                        status.update(label="✅ Response ready!",state="complete",expanded=False)
+                        status.update(label=T("response_ready"),state="complete",expanded=False)
                     st.session_state.chat_messages.append({"role":"assistant","content":r,"model":m,"all_responses":allr}); st.rerun()
         st.markdown("---")
         st.markdown(f'<div style="font-size:.8rem;color:#8899AA;margin-bottom:4px">💡 Tip: Start your message with "draw" or "illustrate" to generate a visual (e.g., "draw a plant cell diagram")</div>',unsafe_allow_html=True)
         st.markdown("---")
         for mi,msg in enumerate(st.session_state.chat_messages):
-            if msg["role"]=="user": st.markdown(f'<div class="ct"><div style="font-size:.75rem;font-weight:700;color:{C_BLUE};margin-bottom:4px">🧑‍🏫 You</div>{msg["content"]}</div>',unsafe_allow_html=True)
+            _you_label={"en":"🧑‍🏫 You","fr":"🧑‍🏫 Vous","sw":"🧑‍🏫 Wewe"}.get(_lang_key(),"🧑‍🏫 You")
+            _by_label={"en":"by","fr":"par","sw":"na"}.get(_lang_key(),"by")
+            if msg["role"]=="user": st.markdown(f'<div class="ct"><div style="font-size:.75rem;font-weight:700;color:{C_BLUE};margin-bottom:4px">{_you_label}</div>{msg["content"]}</div>',unsafe_allow_html=True)
             else:
                 allr=msg.get("all_responses",{})
-                st.markdown(f'<div class="cp"><div style="font-size:.75rem;font-weight:700;color:{C_GOLD};margin-bottom:4px">{ico(16)} Teacher Pehpeh</div>{highlight_result(msg["content"])}<div style="font-size:.65rem;color:#556;margin-top:4px">by {msg.get("model","AI")}</div></div>',unsafe_allow_html=True)
+                st.markdown(f'<div class="cp"><div style="font-size:.75rem;font-weight:700;color:{C_GOLD};margin-bottom:4px">{ico(16)} Teacher Pehpeh</div>{highlight_result(msg["content"])}<div style="font-size:.65rem;color:#556;margin-top:4px">{_by_label} {msg.get("model","AI")}</div></div>',unsafe_allow_html=True)
                 if msg.get("image"):
                     st.image(msg["image"],caption=f"🎨 Generated by {msg.get('image_src','AI')}",use_container_width=True)
                 if len(allr)>1:
@@ -1179,21 +1204,21 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             uq = voice_text
         if uq:
             st.session_state.chat_messages.append({"role":"user","content":uq})
-            img_keywords=["draw","illustrate","sketch","diagram","picture","image","visual","create an image","make an image","generate an image","show me"]
+            img_keywords=["draw","illustrate","sketch","diagram","picture","image","visual","create an image","make an image","generate an image","show me","dessiner","dessine","diagramme","illustrer","chora","picha","mchoro"]
             want_chat_img=any(uq.lower().startswith(k) or k in uq.lower() for k in img_keywords)
-            with st.status("🌶️ Teacher Pehpeh is thinking...",expanded=True) as status:
-                st.write("🟣 Asking Claude... 🟢 Asking ChatGPT... 🔵 Asking Gemini...")
+            with st.status(T("thinking"),expanded=True) as status:
+                st.write(f"{T('asking_claude')} {T('asking_chatgpt')} {T('asking_gemini')}")
                 r,m,allr=best_all(build_chat(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,school_name),uq,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]])
                 msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
                 if want_chat_img:
-                    st.write("🎨 Creating illustration...")
+                    st.write(T("creating_img"))
                     img_url,img_model=gen_image(f"{_subj_en}: {uq} for {_grade_en} in {country}")
                     if img_url:
                         msg_data["image"]=img_url
                         msg_data["image_src"]=img_model
-                status.update(label="✅ Response ready!",state="complete",expanded=False)
+                status.update(label=T("response_ready"),state="complete",expanded=False)
             st.session_state.chat_messages.append(msg_data); st.rerun()
-        if st.session_state.chat_messages and st.button("🗑️ Clear",key="cc"): st.session_state.chat_messages=[]; st.rerun()
+        if st.session_state.chat_messages and st.button(T("clear"),key="cc"): st.session_state.chat_messages=[]; st.rerun()
 
     # TAB 4: QUIZ (works offline)
     with t4:
