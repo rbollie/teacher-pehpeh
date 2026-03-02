@@ -62,7 +62,7 @@ def _kb():
 def email_result(content, subject, key_suffix, container=None):
     """Render email controls with IBT branded template"""
     ctx = container or st
-    with ctx.expander("📧 Email this result", expanded=False):
+    with ctx.expander(T("email_result"), expanded=False):
         to_addr = st.text_input("To:", placeholder="teacher@school.edu", key=f"email_to_{key_suffix}")
         cc_addr = st.text_input("CC (optional):", placeholder="principal@school.edu", key=f"email_cc_{key_suffix}")
         clean = content.replace("\n\n", "\n").strip()
@@ -242,14 +242,14 @@ def tts_player(text, key_suffix):
             if st.button("🗑️ Clear", key=f"tts_clr_{key_suffix}"):
                 del st.session_state[audio_key]; st.rerun()
     else:
-        if st.button("🔊 Hear Results", key=f"tts_gen_{key_suffix}", type="primary", use_container_width=True):
-            with st.spinner("🔊 Generating audio..."):
+        if st.button(T("hear"), key=f"tts_gen_{key_suffix}", type="primary", use_container_width=True):
+            with st.spinner(T("generating")):
                 b64, src = speak_elevenlabs(text)
             if b64:
                 st.session_state[audio_key] = {"b64": b64, "src": src}
                 st.rerun()
             else:
-                st.error(f"Audio failed: {src}. Try again.")
+                st.error(f"{T('audio_failed')}: {src}. {T('try_again')}")
 
 # === SPEECH TO TEXT ===
 def transcribe_audio(audio_bytes):
@@ -369,6 +369,79 @@ TASKS={"Lesson Plan":"detailed lesson plan","Quiz (10 Q)":"10-question quiz with
 SIZES={"Small (<25)":"<25 students","Medium (25-40)":"25-40","Large (40-60)":"40-60","Very Large (60+)":"60+"}
 RESOURCES={"Chalkboard only":"chalkboard/chalk only","+ shared textbooks":"chalkboard + shared textbooks","+ handouts":"+ printable handouts","Computer/projector":"occasional tech","Phones/tablets":"student devices","Well-equipped":"regular tech"}
 LANGS={"English only":"English","English + local":"English + local language","French only":"French","French + local":"French + local"}
+# UI Translations
+UI_TEXT={
+ "en":{
+  "generate":"📋 Generate","chat":"💬 Chat","quiz":"🌶️ Quiz","students":"🧑‍🎓 Students",
+  "task":"Task","time":"Time","topic":"Topic","options":"Options","subject":"Subject","grade":"Grade",
+  "country":"Country","setting":"Setting","class_size":"Class Size","resources":"Resources",
+  "language":"Language","student_level":"Student Level","school_name":"🏫 School Name",
+  "school_placeholder":"e.g., Bahn, St. Martin's","my_classroom":"My Classroom","my_students":"My Students",
+  "gen_btn":"🌶️ Generate","clear":"🗑️ Clear","hear":"🔊 Hear Results","grade_work":"Grade Work",
+  "grade_btn":"🌶️ Grade","students_work":"Student's work:","offline_title":"📴 Offline — Practice Quiz",
+  "offline_msg":"No internet? These quizzes work offline!","practice_quiz":"Practice Quiz",
+  "adaptive":"Adaptive. Works offline too!","score":"Score","level":"Level","next":"➡️ Next",
+  "reset":"🔄 Reset","wassce_tips":"📝 WASSCE Tips","add_student":"Add Student","name":"Name",
+  "upload_excel":"📤 Upload Excel","lit_library":"📚 Literature Library",
+  "lit_desc":"Select a novel for passage-based comprehension exercises","select_book":"📖 Select Book",
+  "comp_type":"Comprehension Type","include_img":"🎨 Include AI illustration",
+  "img_help":"Generates a visual aid using DALL-E or Google Imagen",
+  "ask_about":"Ask about","draw_hint":"(start with 'draw' for images)",
+  "mic_hint":"🎤 Tap mic to speak instead of typing","heard":"🎤 Heard",
+  "email_result":"📧 Email / Download this result","recheck":"🔄 Re-check",
+  "voice_ready":"🔊 Voice Ready","no_models":"🤖 No models","offline":"OFFLINE",
+  "generating":"🔊 Generating audio...","transcribing":"🎤 Transcribing your voice...",
+  "audio_failed":"Audio failed","try_again":"Try again",
+  "assignments":"Personalized Assignments","risk_flags":"Risk & Support Flags",
+  "no_students":"No students added yet","single_period":"Single period (30-40 min)",
+  "double":"Double (60-80 min)","half_day":"Half day","full_day":"Full day","weekly":"Weekly","na":"N/A",
+  "differentiation":"Differentiation","formative":"Formative assessment","takehome":"Take-home activity",
+  "wassce_align":"WASSCE alignment","local_ex":"Local examples","literacy":"Literacy integration",
+  "large_class":"Large-class strategies","cross_curr":"Cross-curricular","ai_visual":"AI visual aid",
+  "pass_short":"Passage + Short Answer Questions","pass_fill":"Passage + Fill in the Blanks",
+  "pass_essay":"Passage + Essay Prompt","pass_mcq":"Passage + MCQ",
+  "pass_vocab":"Passage + Vocabulary Exercise","full_comp":"Full Comprehension (All Types)",
+ },
+ "fr":{
+  "generate":"📋 Générer","chat":"💬 Discussion","quiz":"🌶️ Quiz","students":"🧑‍🎓 Élèves",
+  "task":"Tâche","time":"Durée","topic":"Sujet","options":"Options","subject":"Matière","grade":"Classe",
+  "country":"Pays","setting":"Contexte","class_size":"Taille de classe","resources":"Ressources",
+  "language":"Langue","student_level":"Niveau des élèves","school_name":"🏫 Nom de l'école",
+  "school_placeholder":"ex: Bahn, St. Martin's","my_classroom":"Ma Classe","my_students":"Mes Élèves",
+  "gen_btn":"🌶️ Générer","clear":"🗑️ Effacer","hear":"🔊 Écouter","grade_work":"Noter le travail",
+  "grade_btn":"🌶️ Noter","students_work":"Travail de l'élève :","offline_title":"📴 Hors ligne — Quiz pratique",
+  "offline_msg":"Pas d'internet ? Ces quiz fonctionnent hors ligne !","practice_quiz":"Quiz pratique",
+  "adaptive":"Adaptatif. Fonctionne hors ligne aussi !","score":"Score","level":"Niveau","next":"➡️ Suivant",
+  "reset":"🔄 Réinitialiser","wassce_tips":"📝 Conseils WASSCE","add_student":"Ajouter un élève","name":"Nom",
+  "upload_excel":"📤 Télécharger Excel","lit_library":"📚 Bibliothèque littéraire",
+  "lit_desc":"Sélectionnez un roman pour des exercices de compréhension","select_book":"📖 Choisir un livre",
+  "comp_type":"Type de compréhension","include_img":"🎨 Inclure une illustration IA",
+  "img_help":"Génère une aide visuelle avec DALL-E ou Google Imagen",
+  "ask_about":"Posez une question sur","draw_hint":"(commencez par 'dessiner' pour images)",
+  "mic_hint":"🎤 Appuyez sur le micro pour parler","heard":"🎤 Entendu",
+  "email_result":"📧 Envoyer / Télécharger ce résultat","recheck":"🔄 Vérifier",
+  "voice_ready":"🔊 Voix prête","no_models":"🤖 Aucun modèle","offline":"HORS LIGNE",
+  "generating":"🔊 Génération audio...","transcribing":"🎤 Transcription en cours...",
+  "audio_failed":"Échec audio","try_again":"Réessayer",
+  "assignments":"Devoirs personnalisés","risk_flags":"Signaux de risque et soutien",
+  "no_students":"Aucun élève ajouté","single_period":"Période simple (30-40 min)",
+  "double":"Double (60-80 min)","half_day":"Demi-journée","full_day":"Journée complète","weekly":"Hebdomadaire","na":"N/A",
+  "differentiation":"Différenciation","formative":"Évaluation formative","takehome":"Activité à emporter",
+  "wassce_align":"Alignement WASSCE","local_ex":"Exemples locaux","literacy":"Intégration de la lecture",
+  "large_class":"Stratégies grande classe","cross_curr":"Interdisciplinaire","ai_visual":"Aide visuelle IA",
+  "pass_short":"Passage + Questions courtes","pass_fill":"Passage + Texte à trous",
+  "pass_essay":"Passage + Sujet de rédaction","pass_mcq":"Passage + QCM",
+  "pass_vocab":"Passage + Exercice de vocabulaire","full_comp":"Compréhension complète (Tous types)",
+ }
+}
+def _lang_key():
+    """Get current UI language key from session state."""
+    lk=st.session_state.get("lang_sel","English only")
+    return "fr" if "French" in lk else "en"
+def T(key):
+    """Get translated UI string."""
+    lk=_lang_key()
+    return UI_TEXT.get(lk,UI_TEXT["en"]).get(key,UI_TEXT["en"].get(key,key))
 ABILITY={"Mixed":"mixed-ability","Struggling":"below grade level","On level":"at expected level","Advanced":"needs challenge","Inclusive":"includes learning differences"}
 TIMES=["Single period (30-40 min)","Double (60-80 min)","Half day","Full day","Weekly","N/A"]
 EXTRAS=["Differentiation","Formative assessment","Take-home activity","WASSCE alignment","Local examples","Literacy integration","Large-class strategies","Cross-curricular","AI visual aid"]
@@ -598,18 +671,21 @@ def main():
 
     # Sidebar (defined first so country is available for logo flag)
     with st.sidebar:
-        school_name=st.text_input("🏫 School Name",value="",placeholder="e.g., Bahn, St. Martin's",key="school_name")
-        classroom_label=f"{school_name} Classroom" if school_name.strip() else "My Classroom"
-        st.markdown(f"## 🌶️ {classroom_label}"); st.caption("Set once — shapes every response"); st.markdown("---")
-        country=st.selectbox("Country",COUNTRIES); region=st.selectbox("Setting",list(REGIONS.keys()))
-        grade=st.selectbox("Grade",GRADES,index=1); subject=st.selectbox("Subject",SUBJECTS)
-        clsz=st.selectbox("Class Size",list(SIZES.keys()),index=2); res=st.selectbox("Resources",list(RESOURCES.keys()),index=1)
-        lang=st.selectbox("Language",list(LANGS.keys())); abl=st.selectbox("Student Level",list(ABILITY.keys()))
+        lang=st.selectbox("🌍 Language / Langue",list(LANGS.keys()),key="lang_sel")
+        st.markdown("---")
+        school_name=st.text_input(T("school_name"),value="",placeholder=T("school_placeholder"),key="school_name")
+        classroom_label=f"{school_name} {'Classe' if 'French' in lang else 'Classroom'}" if school_name.strip() else T("my_classroom")
+        st.markdown(f"## 🌶️ {classroom_label}"); st.caption({"en":"Set once — shapes every response","fr":"Configurer une fois — façonne chaque réponse"}.get(_lang_key(),"Set once — shapes every response")); st.markdown("---")
+        country=st.selectbox(T("country"),COUNTRIES); region=st.selectbox(T("setting"),list(REGIONS.keys()))
+        grade=st.selectbox(T("grade"),GRADES,index=1); subject=st.selectbox(T("subject"),SUBJECTS)
+        clsz=st.selectbox(T("class_size"),list(SIZES.keys()),index=2); res=st.selectbox(T("resources"),list(RESOURCES.keys()),index=1)
+        abl=st.selectbox(T("student_level"),list(ABILITY.keys()))
         st.markdown("---"); st.caption("© 2026 Institute of Basic Technology")
         st.markdown("[🌐 Visit our website](https://www.institutebasictechnology.org/index.php)")
 
     show_logo(country)
-    st.markdown('<p style="text-align:center;color:#8899BB;font-size:.95rem;margin-bottom:.6rem">Curating Personalized Content to Support Underresourced Teachers<br>ChatGPT &bull; Claude &bull; Gemini</p>',unsafe_allow_html=True)
+    _subtitle={"en":"Curating Personalized Content to Support Underresourced Teachers","fr":"Création de contenu personnalisé pour soutenir les enseignants sous-dotés"}.get(_lang_key(),"Curating Personalized Content to Support Underresourced Teachers")
+    st.markdown(f'<p style="text-align:center;color:#8899BB;font-size:.95rem;margin-bottom:.6rem">{_subtitle}<br>ChatGPT &bull; Claude &bull; Gemini</p>',unsafe_allow_html=True)
 
     # Unified status bar
     if conn:
@@ -620,7 +696,7 @@ def main():
         if GOOGLE_API_KEY: img_models.append("Imagen")
         # Network section
         if conn["quality"]=="none":
-            net_html=f'<span style="color:#EF5350">🔴 <strong>OFFLINE</strong></span>'
+            net_html=f'<span style="color:#EF5350">🔴 <strong>{T("offline")}</strong></span>'
         elif conn["quality"] in ("high","medium"):
             net_html=f'<span style="color:#81C784">{conn["emoji"]} <strong>{conn["label"]}</strong> ({conn["latency_ms"]}ms)</span>'
         else:
@@ -629,7 +705,7 @@ def main():
         if act:
             models_html=f'<span style="color:#7BB8F5">🤖 <strong>{len(act)}</strong>: {" · ".join(act)}</span>'
         else:
-            models_html='<span style="color:#EF9A9A">🤖 No models</span>'
+            models_html=f'<span style="color:#EF9A9A">{T("no_models")}</span>'
         # Image models section
         if img_models:
             img_html=f'<span style="color:#C9A0DC">🎨 {" · ".join(img_models)}</span>'
@@ -641,42 +717,44 @@ def main():
         if img_html: bar_parts.append(img_html)
         # Voice section
         if ELEVENLABS_API_KEY:
-            voice_html='<span style="color:#81D4A8">🔊 Voice Ready</span>'
+            voice_html=f'<span style="color:#81D4A8">{T("voice_ready")}</span>'
             bar_parts.append(voice_html)
         st.markdown(f'<div class="status-bar">{div.join(bar_parts)}</div>',unsafe_allow_html=True)
-    if st.sidebar.button("🔄 Re-check"): st.session_state.conn_checked=False; st.rerun()
+    if st.sidebar.button(T("recheck")): st.session_state.conn_checked=False; st.rerun()
     if not conn:
         keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
 
     # Tabs
     if online and keys:
-        t1,t3,t4,t2=st.tabs(["📋 Generate","💬 Chat","🌶️ Quiz","🧑‍🎓 Students"])
+        t1,t3,t4,t2=st.tabs([T("generate"),T("chat"),T("quiz"),T("students")])
     else: t1=t2=t3=None; t4=st.container()
 
     # TAB 1: GENERATE
     if t1:
      with t1:
         c1,c2=st.columns(2)
-        with c1: task=st.selectbox("Task",list(TASKS.keys()))
-        with c2: tm=st.selectbox("Time",TIMES)
-        topic=st.selectbox("Topic",TOPICS.get(subject,DEF_TOPICS))
+        with c1: task=st.selectbox(T("task"),list(TASKS.keys()))
+        with c2: tm=st.selectbox(T("time"),TIMES)
+        topic=st.selectbox(T("topic"),TOPICS.get(subject,DEF_TOPICS))
         # Reading Comprehension: show literature selector
         lit_book=None; lit_info=None; rc_mode=None
         if task=="Reading Comprehension":
-            st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:10px;padding:12px 16px;margin:8px 0"><strong style="color:{C_GOLD}">📚 Literature Library</strong><br><span style="font-size:.85rem;color:var(--text-secondary)">Select a novel for passage-based comprehension exercises</span></div>',unsafe_allow_html=True)
-            lit_book=st.selectbox("📖 Select Book",list(LITERATURE.keys()),key="lit_book")
+            st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:10px;padding:12px 16px;margin:8px 0"><strong style="color:{C_GOLD}">{T("lit_library")}</strong><br><span style="font-size:.85rem;color:var(--text-secondary)">{T("lit_desc")}</span></div>',unsafe_allow_html=True)
+            lit_book=st.selectbox(T("select_book"),list(LITERATURE.keys()),key="lit_book")
             lit_info=LITERATURE.get(lit_book,{})
             if lit_book and lit_book!="Teacher's Own Selection":
                 st.markdown(f'<div style="font-size:.85rem;color:var(--text-secondary);margin:4px 0">✍️ <strong>{lit_info.get("author","")}</strong> ({lit_info.get("origin","")}) · {lit_info.get("genre","")} · {lit_info.get("wassce","")}<br>Themes: {lit_info.get("themes","")}</div>',unsafe_allow_html=True)
-            rc_mode=st.selectbox("Comprehension Type",["Passage + Short Answer Questions","Passage + Fill in the Blanks","Passage + Essay Prompt","Passage + MCQ","Passage + Vocabulary Exercise","Full Comprehension (All Types)"],key="rc_mode")
-        with st.expander("Options"):
-            exs=[o for i,o in enumerate(EXTRAS) if st.checkbox(o,key=f"x{i}")]
-            add_img=st.checkbox("🎨 Include AI illustration",key="add_img",help="Generates a visual aid using DALL-E or Google Imagen")
+            rc_mode=st.selectbox(T("comp_type"),[T("pass_short"),T("pass_fill"),T("pass_essay"),T("pass_mcq"),T("pass_vocab"),T("full_comp")],key="rc_mode")
+        with st.expander(T("options")):
+            _extras_keys=["differentiation","formative","takehome","wassce_align","local_ex","literacy","large_class","cross_curr","ai_visual"]
+            _extras_labels=[T(k) for k in _extras_keys]
+            exs=[EXTRAS[i] for i,lbl in enumerate(_extras_labels) if st.checkbox(lbl,key=f"x{i}")]
+            add_img=st.checkbox(T("include_img"),key="add_img",help=T("img_help"))
         gen_col, clr_col = st.columns([3,1])
         with gen_col:
-            gen_btn=st.button("🌶️ Generate",type="primary",use_container_width=True,key="gen")
+            gen_btn=st.button(T("gen_btn"),type="primary",use_container_width=True,key="gen")
         with clr_col:
-            if st.button("🗑️ Clear",use_container_width=True,key="gen_clr"):
+            if st.button(T("clear"),use_container_width=True,key="gen_clr"):
                 st.session_state.gen_result=None; st.rerun()
         if gen_btn:
             # Build prompt
@@ -752,17 +830,17 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
     # TAB 2: STUDENTS
     if t2:
      with t2:
-        stu_label=f"{school_name} Students" if school_name.strip() else "My Students"
+        stu_label=f"{school_name} {'Élèves' if 'French' in lang else 'Students'}" if school_name.strip() else T("my_students")
         st.markdown(f'<div style="background:var(--bg-card);border:1px solid {C_BLUE};border-radius:12px;padding:14px 18px;margin-bottom:10px">{ico(20)} <strong style="color:{C_BLUE}">{stu_label}</strong></div>',unsafe_allow_html=True)
-        with st.expander("➕ Add Profile",expanded=not st.session_state.students):
+        with st.expander({"en":"➕ Add Profile","fr":"➕ Ajouter un profil"}.get(_lang_key(),"➕ Add Profile"),expanded=not st.session_state.students):
             c1,c2=st.columns(2)
-            with c1: sn=st.text_input("Name",key="sn"); sib=st.selectbox("Siblings",["0-4","5-8","8+"],key="sb"); me=st.selectbox("Mom Edu",["HS Grad","No HS","Unknown"],key="me")
-            with c2: sm=st.selectbox("Single Mom?",["No","Yes","Unknown"],key="sm"); wk=st.selectbox("Works?",["No","Yes","Unknown"],key="wk"); cp=st.selectbox("Computer?",["Never","Rarely","Sometimes","Often"],key="cp")
+            with c1: sn=st.text_input(T("name"),key="sn"); sib=st.selectbox({"en":"Siblings","fr":"Frères et sœurs"}.get(_lang_key(),"Siblings"),["0-4","5-8","8+"],key="sb"); me=st.selectbox({"en":"Mom Edu","fr":"Éducation mère"}.get(_lang_key(),"Mom Edu"),["HS Grad","No HS","Unknown"],key="me")
+            with c2: sm=st.selectbox({"en":"Single Mom?","fr":"Mère seule ?"}.get(_lang_key(),"Single Mom?"),["No","Yes","Unknown"],key="sm"); wk=st.selectbox({"en":"Works?","fr":"Travaille ?"}.get(_lang_key(),"Works?"),["No","Yes","Unknown"],key="wk"); cp=st.selectbox({"en":"Computer?","fr":"Ordinateur ?"}.get(_lang_key(),"Computer?"),["Never","Rarely","Sometimes","Often"],key="cp")
             nt=st.text_area("Notes",key="nt",height=50)
-            if st.button("✅ Save",key="sv") and sn.strip():
+            if st.button({"en":"✅ Save","fr":"✅ Enregistrer"}.get(_lang_key(),"✅ Save"),key="sv") and sn.strip():
                 st.session_state.students.append(dict(name=sn.strip(),sib=sib,mom=me,sm=sm,wk=wk,cp=cp,nt=nt.strip())); st.rerun()
         # Excel bulk upload
-        with st.expander("📤 Bulk Upload from Excel/CSV"):
+        with st.expander(T("upload_excel")):
             st.markdown(f"""<div style="font-size:.85rem;color:var(--text-secondary);margin-bottom:8px">
             Upload a spreadsheet with these columns:<br>
             <strong>Name</strong> (required), <strong>Siblings</strong> (0-4, 5-8, or 8+), <strong>Mom_Edu</strong> (HS Grad, No HS, or Unknown),
@@ -856,21 +934,21 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             with b3:
                 if st.button("🗑️",key=f"d{i}"): st.session_state.students.pop(i); st.rerun()
         if st.session_state.students:
-            st.markdown("---"); st.markdown(f"#### {ico(16)} Grade Work")
+            st.markdown("---"); st.markdown(f"#### {ico(16)} {T('grade_work')}")
             gs=st.selectbox("Student:",[s["name"] for s in st.session_state.students],key="gs")
             gw_col, gw_mic = st.columns([5,1])
             with gw_col:
-                gw=st.text_area("Student's work:",height=100,key="gw")
+                gw=st.text_area(T("students_work"),height=100,key="gw")
             with gw_mic:
                 st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
                 grade_audio=st.audio_input("🎤",key="grade_mic",label_visibility="collapsed")
             if grade_audio:
-                with st.spinner("🎤 Transcribing..."):
+                with st.spinner(T("transcribing")):
                     grade_text=transcribe_audio(grade_audio.read())
                 if grade_text:
                     st.session_state["gw"]=grade_text; st.rerun()
-            gsub=st.selectbox("Subject:",SUBJECTS,key="gsub"); gt=st.text_input("Topic:",key="gt")
-            if st.button("🌶️ Grade",type="primary",key="gb") and gw.strip():
+            gsub=st.selectbox(f"{T('subject')}:",SUBJECTS,key="gsub"); gt=st.text_input(f"{T('topic')}:",key="gt")
+            if st.button(T("grade_btn"),type="primary",key="gb") and gw.strip():
                 sel=next((s for s in st.session_state.students if s["name"]==gs),None)
                 if sel:
                     info=f'{sel["name"]},{sel["sib"]}sib,Mom:{sel["mom"]},SM:{sel["sm"]},Works:{sel["wk"]},Comp:{sel["cp"]},{sel["nt"]}'
@@ -928,14 +1006,14 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
         with voice_col:
             chat_audio = st.audio_input("🎤", key="chat_mic", label_visibility="collapsed")
         with label_col:
-            st.markdown('<div style="font-size:.8rem;color:var(--text-muted);margin-top:8px">🎤 Tap mic to speak instead of typing</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="font-size:.8rem;color:var(--text-muted);margin-top:8px">{T("mic_hint")}</div>', unsafe_allow_html=True)
         voice_text = None
         if chat_audio:
-            with st.spinner("🎤 Transcribing your voice..."):
+            with st.spinner(T("transcribing")):
                 voice_text = transcribe_audio(chat_audio.read())
             if voice_text:
-                st.success(f'🎤 Heard: "{voice_text[:80]}..."' if len(voice_text) > 80 else f'🎤 Heard: "{voice_text}"')
-        uq = st.chat_input(f"Ask about {subject}... (start with 'draw' for images)")
+                st.success(f'{T("heard")}: "{voice_text[:80]}..."' if len(voice_text) > 80 else f'{T("heard")}: "{voice_text}"')
+        uq = st.chat_input(f"{T('ask_about')} {subject}... {T('draw_hint')}")
         # Voice input takes priority
         if voice_text:
             uq = voice_text
@@ -960,16 +1038,16 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
     # TAB 4: QUIZ (works offline)
     with t4:
         if not online or not keys:
-            st.markdown(f'<div style="background:rgba(239,83,80,.12);border:2px solid {C_RED_L};border-radius:12px;padding:16px;margin-bottom:12px"><h3 style="color:#EF9A9A;margin:0 0 6px">📴 Offline — Practice Quiz</h3><p style="color:#FFCDD2;font-size:.9rem;margin:0">No internet? These quizzes work offline!</p></div>',unsafe_allow_html=True)
+            st.markdown(f'<div style="background:rgba(239,83,80,.12);border:2px solid {C_RED_L};border-radius:12px;padding:16px;margin-bottom:12px"><h3 style="color:#EF9A9A;margin:0 0 6px">{T("offline_title")}</h3><p style="color:#FFCDD2;font-size:.9rem;margin:0">{T("offline_msg")}</p></div>',unsafe_allow_html=True)
         else:
-            st.markdown(f'<div style="background:rgba(43,125,233,.08);border:1px solid {C_BLUE};border-radius:12px;padding:12px 18px;margin-bottom:10px">{ico(16)} <strong style="color:{C_BLUE}">Practice Quiz</strong> <span style="color:#7BB8F5;font-size:.85rem">— Adaptive. Works offline too!</span></div>',unsafe_allow_html=True)
+            st.markdown(f'<div style="background:rgba(43,125,233,.08);border:1px solid {C_BLUE};border-radius:12px;padding:12px 18px;margin-bottom:10px">{ico(16)} <strong style="color:{C_BLUE}">{T("practice_quiz")}</strong> <span style="color:#7BB8F5;font-size:.85rem">— {T("adaptive")}</span></div>',unsafe_allow_html=True)
 
-        qsub=st.selectbox("Subject:",list(QUIZ.keys()),key="qs")
+        qsub=st.selectbox(f"{T('subject')}:",list(QUIZ.keys()),key="qs")
         qs=st.session_state[f"qz_{qsub}"]
         bank=QUIZ[qsub]; lv=qs["lv"]; questions=bank.get(lv,bank["easy"]); qi=qs["qi"]%len(questions); cur=questions[qi]
         pct=f"{round(qs['sc']/qs['tot']*100)}%" if qs["tot"] else "—"
         stk=f"🔥 {qs['stk']} streak!" if qs["stk"]>=3 else ""
-        st.markdown(f'<div class="qsc">{ico(16)} Score: <strong>{qs["sc"]}/{qs["tot"]}</strong> ({pct}) · Level: <strong>{lv.upper()}</strong> {stk}</div>',unsafe_allow_html=True)
+        st.markdown(f'<div class="qsc">{ico(16)} {T("score")}: <strong>{qs["sc"]}/{qs["tot"]}</strong> ({pct}) · {T("level")}: <strong>{lv.upper()}</strong> {stk}</div>',unsafe_allow_html=True)
         st.markdown(f'<div class="qbox"><strong style="color:white">Q{qs["tot"]+1}:</strong><br><span style="color:#D0D8E8;line-height:1.6">{cur["q"]}</span></div>',unsafe_allow_html=True)
 
         if not qs["done"]:
@@ -988,7 +1066,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:10px;padding:12px 16px;margin:8px 0"><strong style="color:{C_GOLD}">📖 Explanation:</strong><br><span style="color:#D0D8E8">{cur["e"]}</span></div>',unsafe_allow_html=True)
             st.markdown(f'<div class="qtip"><strong>🧑‍🏫 Teacher Tip:</strong> {cur["t"]}</div>',unsafe_allow_html=True)
             recent=[h for h in qs["hist"][-5:]]; rc=sum(1 for h in recent if h["c"])
-            if st.button("➡️ Next",type="primary",key=f"nx_{qsub}_{qs['tot']}",use_container_width=True):
+            if st.button(T("next"),type="primary",key=f"nx_{qsub}_{qs['tot']}",use_container_width=True):
                 if len(recent)>=3:
                     if rc>=4 and lv!="hard": qs["lv"]="medium" if lv=="easy" else "hard"; st.toast(f"🌶️ Level UP → {qs['lv'].upper()}")
                     elif rc<=1 and lv!="easy": qs["lv"]="easy" if lv=="medium" else "medium"; st.toast(f"Adjusting → {qs['lv'].upper()}")
@@ -997,9 +1075,9 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
         st.markdown("---")
         r1,r2=st.columns(2)
         with r1:
-            if st.button("🔄 Reset",key=f"rst_{qsub}"): st.session_state[f"qz_{qsub}"]={"lv":"easy","qi":0,"sc":0,"tot":0,"stk":0,"done":False,"sel":None,"hist":[]}; st.rerun()
+            if st.button(T("reset"),key=f"rst_{qsub}"): st.session_state[f"qz_{qsub}"]={"lv":"easy","qi":0,"sc":0,"tot":0,"stk":0,"done":False,"sel":None,"hist":[]}; st.rerun()
         with r2:
-            if st.button("📝 WASSCE Tips",key="wt"): st.markdown(f'<div style="background:{C_NAVY_L};border:1px solid {C_GOLD};border-radius:12px;padding:16px;color:#D0D8E8;white-space:pre-wrap;line-height:1.7">{WASSCE_TIPS}</div>',unsafe_allow_html=True)
+            if st.button(T("wassce_tips"),key="wt"): st.markdown(f'<div style="background:{C_NAVY_L};border:1px solid {C_GOLD};border-radius:12px;padding:16px;color:#D0D8E8;white-space:pre-wrap;line-height:1.7">{WASSCE_TIPS}</div>',unsafe_allow_html=True)
 
     st.markdown(f'<div class="ft">{ico(16)} <strong>Teacher Pehpeh by IBT</strong><br>Built by <strong>Rodney L. Bollie, PhD</strong> · <a href="https://www.institutebasictechnology.org">Institute of Basic Technology</a><br><a href="https://www.institutebasictechnology.org/index.php" style="color:{C_BLUE}">Visit our website →</a></div>',unsafe_allow_html=True)
 
