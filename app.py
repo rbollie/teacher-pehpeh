@@ -157,11 +157,12 @@ def check_conn():
 # === IMAGE GENERATION ===
 def gen_image(prompt):
     """Try DALL-E first, then Google Imagen as fallback"""
+    img_style = "Clean, professional educational infographic style. Bright colors on white background. NO chalkboard, NO hand-drawn sketches, NO chalk-style text. Use clear labels, simple diagrams, and modern flat design. Culturally relevant to West Africa/Liberia."
     # Try DALL-E
     if OAI and OPENAI_API_KEY:
         try:
             c=openai.OpenAI(api_key=OPENAI_API_KEY)
-            r=c.images.generate(model="dall-e-3",prompt=f"Educational illustration for African classroom: {prompt}. Clear, colorful, culturally relevant to West Africa/Liberia.",size="1024x1024",quality="standard",n=1)
+            r=c.images.generate(model="dall-e-3",prompt=f"Educational visual aid: {prompt}. {img_style}",size="1024x1024",quality="standard",n=1)
             return r.data[0].url,"DALL-E"
         except: pass
     # Try Google Imagen
@@ -171,12 +172,11 @@ def gen_image(prompt):
             from google.generativeai import types as gtypes
             img_model=genai.GenerativeModel("gemini-2.5-flash")
             r=img_model.generate_content(
-                f"Generate an educational illustration for an African classroom: {prompt}. Clear, colorful, culturally relevant to West Africa/Liberia. The image should be suitable as a teaching visual aid.",
+                f"Generate an educational visual aid: {prompt}. {img_style}",
                 generation_config=genai.types.GenerationConfig(response_mime_type="text/plain")
             )
-            # Imagen 3 via generate_images
             client=genai.ImageGenerationModel("imagen-3.0-generate-002")
-            response=client.generate_images(prompt=f"Educational illustration for African classroom: {prompt}. Clear, colorful, culturally relevant to West Africa.",number_of_images=1)
+            response=client.generate_images(prompt=f"Educational visual aid: {prompt}. {img_style}",number_of_images=1)
             if response.images:
                 import base64
                 img_bytes=response.images[0]._image_bytes
@@ -485,7 +485,7 @@ def _p():
 def _g():
     return "Groups: 1(0-4 siblings,most time), 2(5-8,limited), 3(8+,very little). Consider socioeconomic, computer access, parents' ed."
 def _r():
-    return "Rules: stated resources only, max 3 problems/group, self-contained tips, WAEC format for exams, African context, Socratic method, print/chalkboard-ready."
+    return "Rules: stated resources only, max 3 problems/group, self-contained tips, WAEC format for exams, African context, Socratic method, print-ready."
 
 def build_sys(reg,cty,grd,subj,task,cls,res,lng,abl,tm,top,sch=""):
     s_tag=f",School:{sch}" if sch else ""
@@ -659,12 +659,12 @@ def main():
             if tts_provider=="ElevenLabs (Custom Voice)":
                 if not ELEVENLABS_API_KEY:
                     st.warning("Add ELEVENLABS_API_KEY in Streamlit Secrets")
-                el_voice_id=st.text_input("🎙️ Your Voice ID:",placeholder="JBFqnCBsd6RMkjVDRZzb",key="el_vid",help="Find this in ElevenLabs → Voices → Your voice → Voice ID")
+                EL_VOICES={"🌶️ Teacher Pehpeh Voice 1":"woq6F0K3YYEpoS7T2Rx4","🌶️ Teacher Pehpeh Voice 2":"trc5lSEsYCOwKGQHMW0Q"}
+                el_voice_label=st.selectbox("🎙️ Voice",list(EL_VOICES.keys()),index=0,key="el_vid_sel")
+                el_voice_id=EL_VOICES[el_voice_label]
                 el_model_label=st.selectbox("Model",list(ELEVENLABS_MODELS.keys()),index=0,key="el_model")
                 el_model=ELEVENLABS_MODELS[el_model_label]
-                if el_voice_id:
-                    st.success(f"✅ Your custom voice is ready")
-                st.markdown('<div style="font-size:.75rem;color:var(--text-muted)">Find your Voice ID:<br>1. Go to <a href="https://elevenlabs.io/voice-library" style="color:#D4A843">elevenlabs.io</a> → Voices<br>2. Click your custom voice<br>3. Copy the Voice ID<br>4. Paste it above</div>',unsafe_allow_html=True)
+                st.success(f"✅ {el_voice_label} ready")
             elif tts_provider=="OpenAI TTS":
                 oai_voice_label=st.selectbox("Voice",list(OPENAI_TTS_VOICES.keys()),index=0,key="oai_voice")
                 oai_voice=OPENAI_TTS_VOICES[oai_voice_label]
