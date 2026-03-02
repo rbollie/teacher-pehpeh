@@ -1,0 +1,642 @@
+{
+  "subject": "Physics",
+  "country": "Liberia",
+  "authority": "Ministry of Education - Republic of Liberia",
+  "description": "The Physics syllabus provides learners with sound knowledge of fundamental concepts in Physics, using a conceptual approach that focuses on scientific phenomena, facts, concepts, theories, laws and principles.",
+  "general_objectives": [
+    "Demonstrate comprehension of the basic principles and applications of Physics",
+    "Exhibit scientific skills, competencies and attitudes necessary for the advancement of Physics",
+    "Recognize the usefulness as well as limitations of the scientific method"
+  ],
+  "expected_competencies": [
+    "Effective Communication Skills",
+    "Research and Problem Solving",
+    "Digital Skills",
+    "Analytical Skills",
+    "Creativity and Innovation Skills"
+  ],
+  "assessment_strategies": [
+    "Presentations",
+    "Writing Assignments",
+    "Quizzes",
+    "Lab Reports",
+    "Class Participation",
+    "Tests"
+  ],
+  "primary_texts": [
+    "Brian Arnold, Steve Wolley & Penny Johnson, Edexcel IGCSE Physics (Pearson, 2009)",
+    "John Motey Addo & Barry Jackson, Senior High Physics (Longman, 2009)",
+    "Peter Asiedu, Physics for Senior High Schools in West Africa - Aki-Ola Series (Millennium Edition 4-2011)",
+    "M. Melkon, Principles of Physics (8th Edition)",
+    "Paul Attakorah, Atta Kay Physics (Vol. 1 & 2, 2012 Edition)",
+    "M. W. Anyakoha, New School Physics for Senior Secondary Schools (2016 Edition)",
+    "Bob McDuell, Senior High Integrated Science (Pearson, 2009)"
+  ],
+  "grades": {
+    "10": {
+      "grade_label": "Grade 10 (SHS 1)",
+      "semesters": {
+        "1": {
+          "periods": [
+            {
+              "period": "I",
+              "topic": "Introduction to Physics and Properties of Matter",
+              "specific_objectives": [
+                "Discuss the importance of Physics",
+                "Identify scalar and vector quantities",
+                "Identify basic mathematical concepts (scientific notation, significant figures)",
+                "Distinguish between fundamental and derived physical quantities and their units",
+                "Analyze dimensional analysis in terms of the relationship between fundamental and derived quantities",
+                "Measure with various measuring instruments",
+                "Distinguish between density and relative density"
+              ],
+              "content_outline": [
+                "Development of Physics: branches, basic mathematical concepts",
+                "Measurement: systems of measurement, fundamental quantities and units, derived quantities and units, metric prefixes and conversion, significant figures, accuracy and precision, errors in measurement",
+                "Pressure in solids, liquids, and gases",
+                "Dimensional analysis and its use in physics",
+                "Measuring instruments: meter rule, vernier caliper, micrometer screw gauge, beam balance, spring balance, stop watches, electronic balance, thermometer",
+                "Scalar and vector quantities: definitions, classification of quantities as scalars and vectors"
+              ],
+              "suggested_activities": [
+                "Calculation and deriving of units",
+                "Group discussion on the importance of studying Physics",
+                "Discuss branches of Physics",
+                "Discuss basic mathematical concepts (scientific notation, significant figures, unit conversion)",
+                "Discuss fundamental and derived quantities with their SI units",
+                "Use dimensional analysis to derive relationships between quantities",
+                "Distinguish scalar and vector quantities"
+              ],
+              "lab_materials": [
+                "Meter rule", "Beam balance", "Spring balance", "Stop watch",
+                "Thermometer", "Hydrometer", "Density bottle", "Beakers", "Graduated cylinders"
+              ],
+              "local_contextualization_notes": "Use locally available measuring tools. Relate density to everyday items like palm oil, water, and rubber. Connect pressure concepts to traditional palm wine tapping, carrying loads on the head (pressure on surfaces), and tire inflation."
+            },
+            {
+              "period": "II",
+              "topic": "Velocity and Acceleration",
+              "specific_objectives": [
+                "Analyze motion (uniformly accelerated)",
+                "Apply the basic equations of motion and interpret motion graphs",
+                "Use Newton's laws of motion and analyze the effect of gravity on falling bodies",
+                "Discuss the force of gravitation between objects"
+              ],
+              "content_outline": [
+                "Nature and types of motion: distance and displacement, speed, velocity and acceleration",
+                "Uniformly accelerated motion: uniform acceleration, equations of uniform linear motion",
+                "Graphical analysis of uniform motion: position-time graphs, displacement-time graphs, velocity-time graphs",
+                "Freely falling bodies and gravity",
+                "Newton's Laws of Motion",
+                "Newton's Law of Universal Gravitation"
+              ],
+              "suggested_activities": [
+                "Discuss using examples to distinguish distance, displacement, speed, velocity, acceleration, uniform velocity, instantaneous velocity and average velocity",
+                "Calculate displacement and acceleration of a moving object with respect to time",
+                "Derive equations of uniformly accelerated motion to solve problems",
+                "Draw and interpret graphs illustrating uniformly accelerated motion",
+                "Demonstrate motion of freely falling bodies due to gravity",
+                "Demonstrate Newton's Laws of Motion",
+                "Hammering nails to demonstrate Newton's Third Law of Motion"
+              ],
+              "lab_materials": [
+                "Simple pendulum", "Meter stick", "Stop watch/clock",
+                "Graph papers", "Rubber band", "Balloon", "Cart",
+                "Rubber or glass tube", "Cork"
+              ],
+              "local_contextualization_notes": "Use local examples: a car traveling from Monrovia to Buchanan (distance vs displacement), a football kicked on a field (projectile), dropping a coconut from a palm tree (free fall), pushing a wheelbarrow (Newton's laws). Relate gravity to why ripe mangoes fall from trees."
+            },
+            {
+              "period": "III",
+              "topic": "Work, Energy and Power",
+              "specific_objectives": [
+                "Identify the characteristics of work, energy and power and their SI units",
+                "Solve simple problems involving work, energy (potential and kinetic) and power",
+                "Distinguish the types of simple machines",
+                "Distinguish between work input and work output",
+                "Compute potential and kinetic energies problems",
+                "Demonstrate the law of conservation of mechanical energy and its application"
+              ],
+              "content_outline": [
+                "Work, Energy and Power: kinds of energy (potential and kinetic), conservation of energy (transformation)",
+                "Machines: kinds of simple machines, mechanical advantage, velocity ratios and efficiency of machines"
+              ],
+              "suggested_activities": [
+                "Examine characteristics of work, energy, and power",
+                "Analyze the system of pulleys and inclined plane",
+                "Discover simple machines at home and in school",
+                "Display Hooke's law in relationship to Young's modulus",
+                "Analyze potential and kinetic energies",
+                "Discuss the Law of Conservation of mechanical energy and relate it to energy changes"
+              ],
+              "lab_materials": [
+                "Standard graph sheets", "Strings/springs", "Set of simple machines",
+                "Meter rule", "Stop clock", "Coil spring", "Assorted masses"
+              ],
+              "local_contextualization_notes": "Connect to local life: women carrying water on their heads (work against gravity), using a lever to move heavy logs, the inclined planes used in construction, bicycle mechanics (gears as simple machines), the energy in flowing rivers and potential for hydroelectric power like the Mt. Coffee plant."
+            }
+          ]
+        },
+        "2": {
+          "periods": [
+            {
+              "period": "IV",
+              "topic": "Thermal Physics",
+              "specific_objectives": [
+                "Distinguish between temperature and heat",
+                "Outline the steps and principles involved in the measurement of temperature",
+                "Describe the features and use of different types of thermometers",
+                "Identify fundamental intervals of thermometers",
+                "Solve simple thermometry problems",
+                "Demonstrate Charles's, Boyle's, Combined gas laws"
+              ],
+              "content_outline": [
+                "Temperature and heat: difference between temperature and heat",
+                "Temperature scales: Fahrenheit, Celsius, and Kelvin conversions",
+                "Thermometry: types of thermometers and their properties, calibration of thermometers",
+                "Expansion: linear, area, and volume",
+                "Gas Laws: Charles's Law, Boyle's Law, Combined Gas Law, Pressure Law"
+              ],
+              "suggested_activities": [
+                "Bring out the concept of heat and temperature",
+                "Distinguish between heat and temperature",
+                "Discuss the Celsius, Fahrenheit, and Kelvin scales and their relationships",
+                "Solve problems associated with Charles's, Boyle's, Combined gas, and Pressure Laws",
+                "Use syringes to demonstrate pressure laws"
+              ],
+              "lab_materials": [
+                "Thermometers (liquid-in-glass)", "Linear expansion apparatus",
+                "Metal rods", "Weight meter stick", "Heat engine apparatus",
+                "Rubber tubing", "Thermos flask", "Source of heat"
+              ],
+              "local_contextualization_notes": "Relate heat to cooking over coal pots and three-stone fires. Explain thermal expansion using the expansion of zinc roofing sheets in the hot sun. Use the local climate (tropical heat) to discuss temperature measurement. Boyle's law can be demonstrated with locally available syringes from health clinics."
+            },
+            {
+              "period": "V",
+              "topic": "Electrostatics",
+              "specific_objectives": [
+                "Identify the two kinds of electric charges",
+                "Distinguish between conductors and insulators",
+                "State the basic and Coulomb's Laws of Electrostatics",
+                "Illustrate lines of force relative to electric charges",
+                "Explain/discuss the methods of charging a body",
+                "Solve problems on Coulomb's Law, electric field intensity and work done in an electric field",
+                "Identify/describe the types of capacitors and their uses",
+                "Discuss the relationship between potential difference and capacitance",
+                "Solve problems on networks of capacitors"
+              ],
+              "content_outline": [
+                "Concept of electric charge",
+                "Basic law of Electrostatics",
+                "Coulomb's Law of Electrostatics",
+                "Electric fields and potential difference",
+                "Electric field intensity (strength)",
+                "Capacitors and Capacitance",
+                "Network of capacitors: series, parallel, series-parallel"
+              ],
+              "suggested_activities": [
+                "Examine the two charges of electrostatic in an electric field",
+                "Examine electrification using silk and glass rod",
+                "Calculate applying the equation of Coulomb's Law",
+                "Experiments involving charge and discharge of capacitors",
+                "Calculations involving electric field intensity, potential difference and gradients",
+                "Design the structure of capacitors"
+              ],
+              "lab_materials": [
+                "Silk cloth", "Glass rod", "Ebonite rod", "Electroscope",
+                "Capacitors", "Connecting wires", "Power supply"
+              ],
+              "local_contextualization_notes": "Relate static electricity to the shock felt when touching a car door in dry season, or rubbing a balloon on hair. Discuss how lightning during rainy season is a massive electrostatic discharge. Connect capacitors to the energy storage in phone chargers and solar battery systems common in off-grid Liberian communities."
+            },
+            {
+              "period": "VI",
+              "topic": "Properties of Matter",
+              "specific_objectives": [
+                "Distinguish between atoms and molecules",
+                "Examine the kinetic theory of matter",
+                "Distinguish between cohesion and adhesion",
+                "Analyze Hooke's law and apply Young's modulus in solving problems"
+              ],
+              "content_outline": [
+                "The states of matter",
+                "The structure of matter",
+                "Kinetic theory",
+                "Forces between molecules",
+                "Elasticity and Hooke's Law (Young's/Elastic modulus) with graphical representation",
+                "Surface tension",
+                "Viscosity, diffusion, and elastic strings"
+              ],
+              "suggested_activities": [
+                "Distinguish between atoms and molecules",
+                "Discuss properties of matter",
+                "Discuss viscosity and diffusion in solid, liquid and gas",
+                "Work with springs and elastic strings",
+                "Discuss the phases of matter",
+                "Experiment using test tube hydrometer",
+                "Demonstrate cohesion and adhesion"
+              ],
+              "lab_materials": [
+                "U-tubes", "Liquids", "Hare's apparatus", "Gravity bottle",
+                "Hydrometer", "Test tubes", "Force siphons", "Life pump",
+                "Crystal samples", "Balloons"
+              ],
+              "local_contextualization_notes": "Use local materials: rubber bands and slingshots (elasticity/Hooke's law), palm oil and water for viscosity comparison, soap bubbles for surface tension, diffusion of perfume or cooking smells in the classroom. Relate states of matter to local observations: morning dew (condensation), boiling cassava (evaporation), ice from a freezer."
+            }
+          ]
+        }
+      }
+    },
+    "11": {
+      "grade_label": "Grade 11 (SHS 2)",
+      "semesters": {
+        "1": {
+          "periods": [
+            {
+              "period": "I",
+              "topic": "Motion in Two Dimensions",
+              "specific_objectives": [
+                "Add and resolve vectors",
+                "Solve problems on simple harmonic motion",
+                "Use the equations of motion in solving one and two dimensions problems",
+                "Distinguish the types of motion (projectile, rotational, circular, simple harmonic and oscillatory) and their applications"
+              ],
+              "content_outline": [
+                "Vectors: addition/composition, resolution",
+                "Projectile motion",
+                "Circular motion",
+                "Rotary/rotational motion",
+                "Simple harmonic/oscillatory motion"
+              ],
+              "suggested_activities": [
+                "Analyze vectors in one and two dimensions",
+                "Calculate the dimension of vectors in one and two dimensions",
+                "Examine the equations of motion to solve exercises",
+                "Demonstrate types of motion: projectile, rotational, circular, simple harmonic, oscillatory"
+              ],
+              "lab_materials": [
+                "U-tubes", "Liquids", "Hare's apparatus", "Gravity bottle",
+                "Hydrometer", "Test tubes", "Force siphons", "Balloons"
+              ],
+              "local_contextualization_notes": "Projectile motion: throwing a stone across a creek, a football kicked at an angle. Circular motion: the spinning of a traditional grinding stone, a car going around a roundabout in Monrovia. Simple harmonic motion: a child on a swing, the pendulum of a grandfather clock at the National Museum."
+            },
+            {
+              "period": "II",
+              "topic": "Composition and Resolution of Forces",
+              "specific_objectives": [
+                "Combine force vectors to produce resultant force",
+                "Use the cosine and sine laws in the resolution of force",
+                "Distinguish between resultant and equilibrant force",
+                "Demonstrate the two conditions for equilibrium",
+                "Distinguish the types of friction and calculate its coefficient",
+                "Distinguish between center of gravity and center of mass"
+              ],
+              "content_outline": [
+                "Composition and equilibrium of forces",
+                "Composition and resolution of forces",
+                "Parallel forces and moments (torque)",
+                "Center of gravity",
+                "Friction: types, coefficient, methods of reducing friction"
+              ],
+              "suggested_activities": [
+                "Construct vectors with magnitudes in the same and opposite directions to find the resultant",
+                "Construct a vector with a magnitude and direction in a plane and compute its components",
+                "Demonstrate gravity and equilibrium experiments using force table",
+                "Discuss coefficient of kinetic and static frictions on the inclined plane",
+                "Using pencils as rollers to overcome friction of a block of wood"
+              ],
+              "lab_materials": [
+                "Meter rule", "Assorted masses/weights", "Pulleys", "Force table",
+                "Air track and accessories", "Hard board", "Inclined plane", "Wooden blocks"
+              ],
+              "local_contextualization_notes": "Friction: why vehicles get stuck on muddy roads in rainy season vs. paved roads. Equilibrium: balancing loads on the head (center of gravity), how market women balance large trays of goods. Torque: opening a door, using a wrench to tighten a bolt on a generator."
+            },
+            {
+              "period": "III",
+              "topic": "Momentum and Its Conservation",
+              "specific_objectives": [
+                "Analyze the nature and the effect of momentum",
+                "Differentiate between impulse and momentum",
+                "Distinguish between elastic and inelastic collisions",
+                "Distinguish between the laws of conservation of linear and angular momentum and their applications"
+              ],
+              "content_outline": [
+                "Nature of linear momentum and impulse",
+                "Elastic and inelastic collisions",
+                "Conservation of momentum",
+                "Angular momentum and its conservation"
+              ],
+              "suggested_activities": [
+                "Discuss the nature and effect of momentum and impulse",
+                "Construct experiment verifying conservation of momentum using pendulum",
+                "Construct the steps (equations) involving calculations of elastic and inelastic collision",
+                "Design momentum carts to display conservation of momentum"
+              ],
+              "lab_materials": [
+                "Air track set", "Bump putty cars", "Pendulum", "Carts"
+              ],
+              "local_contextualization_notes": "Momentum: why a moving truck is harder to stop than a moving bicycle, the impact of a football header. Impulse: why you bend your knees when jumping from a height, why car bumpers crumple in accidents. Collisions: two marbles hitting each other (elastic), two lumps of clay sticking together (inelastic)."
+            }
+          ]
+        },
+        "2": {
+          "periods": [
+            {
+              "period": "IV",
+              "topic": "Heat",
+              "specific_objectives": [
+                "Elaborate the concept and characteristics of heat",
+                "Distinguish between specific heat and specific heat capacity",
+                "Distinguish between the methods of heat transfer and the laws of heat exchange",
+                "Discuss heat transfer in a vacuum flask"
+              ],
+              "content_outline": [
+                "Heat: concept and characteristics",
+                "Specific heat and specific heat capacity",
+                "Heat transfer and the laws of heat exchange",
+                "Latent heat of fusion and vaporization"
+              ],
+              "suggested_activities": [
+                "Discuss the characteristics of heat",
+                "Conduct calorimeter heat experiments",
+                "Estimate and calculate specific heat and specific heat capacity of an object",
+                "Examine the equation and calculate the latent heat of fusion and heat of vaporization",
+                "Demonstrate the principles of combustion engines"
+              ],
+              "lab_materials": [
+                "Calorimeter", "Thermometer", "Heat source", "Beakers",
+                "Assorted metals", "Water", "Ice"
+              ],
+              "local_contextualization_notes": "Heat transfer: why metal cooking pots get hot (conduction), how heat rises from a coal pot (convection), feeling the sun's warmth (radiation). Latent heat: why sweating cools you down, why clothes dry on a line. Vacuum flask: how a thermos keeps food warm for market women. Specific heat: why sand on the beach is hotter than the ocean water."
+            },
+            {
+              "period": "V",
+              "topic": "Waves",
+              "specific_objectives": [
+                "Analyze characteristics, concept and components of waves",
+                "Elaborate on the properties and the categories of waves",
+                "Design methods of production and transmission of sound wave and its application",
+                "Compute the speed of sound relative to its temperature",
+                "Analyze the Doppler Effect",
+                "Distinguish between loudness and intensity of sound, intensity and intensity level, music and noise, stringed and non-stringed instruments",
+                "Analyze vibrations in strings and tubes (pipes)"
+              ],
+              "content_outline": [
+                "Nature, characteristics and properties of waves",
+                "Types of waves",
+                "Sound waves: production, characteristics and transmission",
+                "Intensity and intensity level",
+                "Doppler Effect",
+                "Vibrations in strings and tubes",
+                "Beats"
+              ],
+              "suggested_activities": [
+                "Discuss the nature of waves and its components",
+                "Discuss wave characteristics: reflection, refraction, diffraction, interference, polarization",
+                "Examine the wave equation (v = λf)",
+                "Distinguish between transverse and longitudinal waves using string and coil spring",
+                "Demonstrate Doppler effect using tuning forks",
+                "Use percussion instruments (drum, bells, cymbal, horn, guitar, flute, sassa) to produce different sounds",
+                "Production and transmission of sound in tubes (closed and open)"
+              ],
+              "lab_materials": [
+                "Tuning forks", "Slinky spring", "String", "Drum", "Bells",
+                "Cymbal", "Horn", "Guitar", "Flute", "Sassa",
+                "Resonance tubes", "Meter rule"
+              ],
+              "local_contextualization_notes": "Waves: ripples in a pond or river, ocean waves on Liberian beaches. Sound: the sassa and drums used in traditional music, church bells, the call to prayer. Doppler effect: the changing pitch of a car horn as it passes on Tubman Boulevard. Resonance: blowing across the mouth of an empty bottle. Echo: shouting in a large concrete building."
+            },
+            {
+              "period": "VI",
+              "topic": "Light",
+              "specific_objectives": [
+                "Determine the sources and importance of radiant energy",
+                "Construct the linear propagation of light indicating shadows and eclipses",
+                "Analyze the major regions of the electromagnetic spectrum, the photoelectric effect and principle of a laser",
+                "Examine the effects of burning on the environment",
+                "Analyze and demonstrate image formation using a mirror"
+              ],
+              "content_outline": [
+                "Nature and sources of light",
+                "Properties of light",
+                "Propagation of light: shadows and eclipses, pin-hole camera",
+                "Reflection of light by plane and spherical mirrors",
+                "Electromagnetic spectrum"
+              ],
+              "suggested_activities": [
+                "Discuss the sources of light and its production",
+                "Distinguish between shadow and eclipse",
+                "Using torch light and copybook, and torch light and ball to demonstrate shadows and eclipses",
+                "Construct a ray box to indicate rectilinear propagation of light rays",
+                "Discuss the properties of luminous and non-luminous objects",
+                "Discuss the nature and types of mirrors",
+                "Construct ray diagrams displaying image formation by mirror",
+                "Apply mirror equation to calculate mirror problems"
+              ],
+              "lab_materials": [
+                "Ray box", "Pin-hole camera", "Plane and curved mirrors",
+                "Air track set", "Meter rule", "Posters", "Markers"
+              ],
+              "local_contextualization_notes": "Light: the sun as the primary light source, kerosene lamps and candles used in areas without electricity. Shadows: how shadows change throughout the day, shadow puppets. Mirrors: side mirrors on vehicles, reflecting sunlight with a mirror to signal. Electromagnetic spectrum: radio waves (ELBC, Radio Liberia), UV rays and sunburn, X-rays at JFK hospital."
+            }
+          ]
+        }
+      }
+    },
+    "12": {
+      "grade_label": "Grade 12 (SHS 3 / WASSCE Level)",
+      "semesters": {
+        "1": {
+          "periods": [
+            {
+              "period": "I",
+              "topic": "Refraction and Dispersion of Light",
+              "specific_objectives": [
+                "Analyze and justify the laws of refraction",
+                "Calculate the refractive index of various materials",
+                "Apply Snell's law equation to compute the index of refraction",
+                "Distinguish between primary colors and primary pigments",
+                "Distinguish between total internal reflection and critical angle"
+              ],
+              "content_outline": [
+                "Refraction at plane interface: laws of refraction",
+                "Refractive index: Snell's Law, speed of light, real depth and apparent depth, critical angle and total internal reflection",
+                "Critical angle and total internal reflection",
+                "Lenses and eye defects",
+                "Dispersion"
+              ],
+              "suggested_activities": [
+                "Discuss the law of refraction",
+                "Discuss optical instruments (lens, magnifying glass, prism glass, torch light on water in plastic)",
+                "Use glass block and prism to create the refractive index of material",
+                "Discuss how light ray leaves water to create critical angle",
+                "Discuss eye defects and correction, the camera, projection, simple and compound microscopes, and telescopes",
+                "Use bending pencil in the glass of water to practice refraction"
+              ],
+              "lab_materials": [
+                "Ray box", "Glass block", "Prism", "Lenses", "Pin-hole camera",
+                "Plane and curved mirrors", "Meter rule", "Posters", "Markers"
+              ],
+              "local_contextualization_notes": "Refraction: why a stick looks bent in water (washing in a basin), why the pool appears shallower than it is. Dispersion: rainbow after rain. Lenses: eyeglasses, magnifying glasses, the camera on a phone. Total internal reflection: fiber optic cables (relate to modern telecommunications coming to Liberia), the sparkle of a diamond."
+            },
+            {
+              "period": "II",
+              "topic": "Direct Current Electricity",
+              "specific_objectives": [
+                "Identify sources of direct current",
+                "Distinguish and analyze series and parallel circuits",
+                "Analyze Ohm's Law and its uses in circuit analysis",
+                "Formulate Kirchhoff's laws of electric energy and its application in circuits",
+                "Calculate internal resistance of cells/battery"
+              ],
+              "content_outline": [
+                "Sources of direct current: primary and secondary cells, fuel and solar cells",
+                "Resistance and Resistivity: Ohm's Law, factors affecting the resistance of the conductor",
+                "DC Circuits: series, parallel, series-parallel",
+                "Electromotive force (EMF) and internal resistance",
+                "Electrical energy and power: cost of electrical energy",
+                "Heating effects and electrolysis",
+                "Kirchhoff's Laws"
+              ],
+              "suggested_activities": [
+                "Discuss the process in which direct currents are produced",
+                "Construct and analyze series, parallel, and combination circuits using lamps and dry cells",
+                "Verification of Ohm's Law through lab experiment",
+                "Construct practical circuit diagram to apply Ohm's law",
+                "Discuss the importance of ammeter, voltmeter, and ohmmeter in circuit analysis",
+                "Demonstrate heating effect in circuits using cells and light bulb"
+              ],
+              "lab_materials": [
+                "Sources of EMF (cells)", "Electric meters", "Wheatstone bridge",
+                "Constantan wire (28 gauge)", "Conduction wire", "Tungsten wires",
+                "Photocell", "Resistance box", "Lamps (6 or 12 volt)"
+              ],
+              "local_contextualization_notes": "DC electricity: dry cell batteries used in torches and radios, solar panels on homes and schools, car batteries. Series vs parallel: why Christmas lights all go out when one burns out (series) vs house wiring (parallel). Cost of electrical energy: understanding LEC electricity bills, why generators are expensive to run. Relate to solar energy systems increasingly used across Liberia."
+            },
+            {
+              "period": "III",
+              "topic": "Magnetism and Electromagnetism",
+              "specific_objectives": [
+                "Analyze the origin of magnets",
+                "Compare the relationship between electricity and magnetism",
+                "Distinguish motor from generator",
+                "Elaborate the principle of transformer and its function",
+                "Distinguish between AC and DC motors"
+              ],
+              "content_outline": [
+                "Magnets: types and properties, magnetic materials, concept of magnetic fields, methods of magnetizing and demagnetizing magnets",
+                "Magnetic Fields: types, magnetic flux and magnetic flux density, force in a magnetic field, moving coil galvanometer",
+                "Electromagnetic Induction: laws of electromagnetic induction, induced current and EMF, inductors, generators, motors and transformers"
+              ],
+              "suggested_activities": [
+                "Discuss the origin of magnets and their importance",
+                "Distinguish the various types of magnets and their applications",
+                "Discuss the relationship between electricity and magnetism",
+                "Construct a diagram showing the conversion process between AC to DC motor",
+                "Construct and analyze diagrams of motor and generator",
+                "Verify the transformer equation (Vp/Vs = Np/Ns) to calculate input or output"
+              ],
+              "lab_materials": [
+                "Magnets (bar, U-shape, horseshoe)", "Iron filings", "Magnetometer",
+                "Mapping compass", "Nails", "Galvanometer", "Transformer",
+                "Demonstration motor", "Ammeter", "Voltmeter"
+              ],
+              "local_contextualization_notes": "Magnets: compass needles pointing north, fridge magnets, magnetic catches on doors. Electromagnetic induction: how generators (common in Liberia due to power outages) produce electricity, how transformers step voltage up and down for power distribution. Motors: electric fans, water pumps. Relate to the national power grid and the importance of transformers in bringing electricity to communities."
+            }
+          ]
+        },
+        "2": {
+          "periods": [
+            {
+              "period": "IV",
+              "topic": "Alternating Current and Electronics",
+              "specific_objectives": [
+                "Identify electrical measuring instruments and state their uses",
+                "Demonstrate the functions of alternating current",
+                "Distinguish between resistance and impedance",
+                "Analyze the R, C, L circuits and the phase diagram of RCL circuits",
+                "Analyze the principle of the cathode ray tube and applications of transistors and diodes"
+              ],
+              "content_outline": [
+                "AC: measurements, function, AC circuits (RCL)",
+                "Resonance",
+                "Basic Electronics: semi-conductors (doping, intrinsic and extrinsic, P-type and N-type, band theory)",
+                "Semiconductor devices: transistors, thermistors, diodes"
+              ],
+              "suggested_activities": [
+                "Discuss electrical measuring instruments for verification",
+                "Discuss vacuum tubes",
+                "Perform experiments in circuits involving inductor, capacitor, resistor",
+                "Demonstrate the uses of transistors and diodes in a circuit"
+              ],
+              "lab_materials": [
+                "Vacuum tubes", "Voltmeter", "Ammeter", "Ohmmeter",
+                "Resistors", "Capacitors", "Inductors", "Diodes",
+                "Transistors", "Conduction wires", "Power source"
+              ],
+              "local_contextualization_notes": "AC electricity: the power supplied by LEC to homes and businesses, why voltage stabilizers are needed. Electronics: how mobile phones, radios, and televisions work. Diodes: LED lights increasingly used in solar-powered lanterns. Transistors: the building blocks of all electronic devices. Relate semiconductor technology to the growing tech ecosystem in Monrovia."
+            },
+            {
+              "period": "V",
+              "topic": "Atomic and Nuclear Physics",
+              "specific_objectives": [
+                "Examine the properties of an electron",
+                "Analyze the effect of radioactive substances on the human body",
+                "Draw and analyze the typical atom and the applications of nuclear energy",
+                "Distinguish between fission and fusion"
+              ],
+              "content_outline": [
+                "The nucleus and the electron",
+                "Types of nuclear reactions and the uses of nuclear energy",
+                "Radioactivity: types, radioactive substances and their effects, radioactive decay and half-life",
+                "Nuclear fission and fusion",
+                "Thermionic and photoelectric emissions: cathode rays, X-rays"
+              ],
+              "suggested_activities": [
+                "Discuss the existence and strength of radioactive detectors and radioactive substances",
+                "Discuss fission and fusion reactions (e.g., U-238 disintegration)",
+                "List applications of nuclear energy",
+                "Draw and display a simple atom performing tracer experiment",
+                "State and discuss effects of radioactive substances on lives",
+                "Explain cathode rays and X-rays: their nature, properties and characteristics"
+              ],
+              "lab_materials": [
+                "Vacuum tubes", "Voltmeter", "Ammeter", "Ohmmeter",
+                "Resistors", "Capacitors", "Inductors", "Diodes",
+                "Transistors", "Conduction wires", "Power source"
+              ],
+              "local_contextualization_notes": "Nuclear physics: X-rays at JFK Medical Center and other hospitals, the global debate about nuclear energy. Radioactivity: why radiation can be dangerous (link to health education), carbon dating and archaeology. Applications: nuclear medicine, smoke detectors. Discuss the responsible use of nuclear technology and its relevance to Africa's energy future."
+            },
+            {
+              "period": "VI",
+              "topic": "High Energy Physics",
+              "specific_objectives": [
+                "Examine the uncertainty principle",
+                "Analyze the principle quantum numbers and describe the motion of an electron",
+                "Discuss various types of particle accelerators",
+                "Identify and discuss the four basic interactions between particles of matter",
+                "Analyze the conservation laws of particle physics"
+              ],
+              "content_outline": [
+                "Quantum mechanics",
+                "Particle accelerators",
+                "Detecting instruments",
+                "Subatomic reactions",
+                "Einstein's photoelectric equation"
+              ],
+              "suggested_activities": [
+                "Half-life experiment using Geiger counters",
+                "Electron configuration of some light elements",
+                "Drawing and labeling diagrams of various particle accelerators",
+                "Preparing a chart of subatomic particles"
+              ],
+              "lab_materials": [
+                "Geiger-Muller counter", "Charts", "Periodic table", "Markers"
+              ],
+              "local_contextualization_notes": "Quantum mechanics: the fundamental science behind modern technology (phones, solar panels, computers). Photoelectric effect: how solar panels convert sunlight to electricity (directly relevant to Liberia's growing solar infrastructure). Particle accelerators: the cutting-edge research happening globally. Encourage students to see themselves as future scientists who could contribute to these fields."
+            }
+          ]
+        }
+      }
+    }
+  }
+}
