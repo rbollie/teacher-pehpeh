@@ -325,6 +325,58 @@ def tts_player(text, key_suffix, provider="ElevenLabs (Custom Voice)", el_voice_
         import streamlit.components.v1 as components
         components.html(speak_browser_js(text, f"browser_tts_{key_suffix}"), height=50)
 
+# === SPEECH TO TEXT ===
+def transcribe_audio(audio_bytes):
+    """Transcribe audio using OpenAI Whisper. Returns text or None."""
+    if not OAI or not OPENAI_API_KEY: return None
+    try:
+        import io
+        c = openai.OpenAI(api_key=OPENAI_API_KEY)
+        audio_file = io.BytesIO(audio_bytes)
+        audio_file.name = "recording.wav"
+        r = c.audio.transcriptions.create(model="whisper-1", file=audio_file)
+        return r.text.strip() if r.text else None
+    except Exception as e:
+        return None
+
+def voice_input_widget(label, key, placeholder=""):
+    """Render a text input with a mic button for voice input. Returns the text."""
+    mic_key = f"mic_{key}"
+    txt_key = f"vtxt_{key}"
+    # Check if we have a transcription waiting
+    if mic_key in st.session_state and st.session_state[mic_key]:
+        default_val = st.session_state[mic_key]
+        st.session_state[mic_key] = None  # Clear after using
+    elif txt_key in st.session_state:
+        default_val = st.session_state[txt_key]
+    else:
+        default_val = ""
+    tc, mc = st.columns([5, 1])
+    with tc:
+        val = st.text_input(label, value=default_val, placeholder=placeholder, key=txt_key)
+    with mc:
+        st.markdown("<div style='height:28px'></div>", unsafe_allow_html=True)  # spacer to align with input
+        audio = st.audio_input("🎤", key=f"audio_{key}", label_visibility="collapsed")
+    if audio:
+        with st.spinner("🎤 Listening..."):
+            text = transcribe_audio(audio.read())
+        if text:
+            st.session_state[mic_key] = text
+            st.rerun()
+        else:
+            st.toast("Could not transcribe audio. Try again.", icon="⚠️")
+    return val
+
+def voice_chat_input(key="voice_chat"):
+    """Render a voice recorder for chat input. Returns transcribed text or None."""
+    audio = st.audio_input("🎤 Tap to speak", key=f"audio_{key}", label_visibility="visible")
+    if audio:
+        with st.spinner("🎤 Transcribing..."):
+            text = transcribe_audio(audio.read())
+        if text:
+            return text
+    return None
+
 # === QUIZ BANK ===
 QUIZ = {
  "Mathematics":{"easy":[
@@ -635,8 +687,12 @@ def main():
     .stStatusWidget {{display:none !important}}
     .stTabs [data-baseweb="tab-list"] {{background:{C_NAVY_L};border-radius:8px;padding:4px}}
     .stTabs [aria-selected="true"] {{color:white !important;background:{C_BLUE} !important;border-radius:6px}}
-    .stButton > button[kind="primary"] {{background:linear-gradient(135deg,{C_BLUE_D},{C_BLUE}) !important;color:white !important;font-weight:700 !important;border:none !important;border-radius:8px !important}}
-    .stButton > button[kind="primary"]:hover {{box-shadow:0 4px 16px rgba(43,125,233,.4) !important}}
+    .stButton > button[kind="primary"] {{background:linear-gradient(135deg,{C_BLUE_D},{C_BLUE}) !important;color:white !important;font-weight:700 !important;border:none !important;border-radius:8px !important;box-shadow:0 3px 10px rgba(43,125,233,.35) !important;padding:8px 20px !important;transition:all .2s !important}}
+    .stButton > button[kind="primary"]:hover {{box-shadow:0 5px 20px rgba(43,125,233,.5) !important;transform:translateY(-1px) !important}}
+    .stButton > button[kind="secondary"], .stButton > button:not([kind="primary"]) {{background:var(--bg-card) !important;color:var(--text-primary) !important;font-weight:600 !important;border:2px solid var(--border-color) !important;border-radius:8px !important;box-shadow:0 2px 6px rgba(0,0,0,.12) !important;transition:all .2s !important}}
+    .stButton > button[kind="secondary"]:hover, .stButton > button:not([kind="primary"]):hover {{border-color:{C_BLUE} !important;box-shadow:0 3px 12px rgba(43,125,233,.2) !important;transform:translateY(-1px) !important}}
+    /* Status bar: clearly non-interactive */
+    .status-bar {{background:transparent !important;border:1px dashed var(--border-color) !important;border-radius:20px;padding:5px 14px;font-size:.78rem;display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:.8rem;opacity:.75;pointer-events:none;user-select:none}}
     .rh {{background:linear-gradient(135deg,{C_RED},{C_RED_L});color:white;padding:1rem;border-radius:10px 10px 0 0;margin-top:1rem}}
     .rh h3 {{margin:0;color:white;font-family:'Playfair Display',serif;font-size:1.15rem}}
     .rb {{border:1px solid var(--border-color);border-top:none;border-radius:0 0 10px 10px;padding:1.2rem;background:var(--bg-card);color:var(--text-primary);line-height:1.7}}
@@ -726,7 +782,7 @@ def main():
                 voice_label="🔊 Browser"
             voice_html=f'<span style="color:#81D4A8">{voice_label}</span>'
             bar_parts.append(voice_html)
-        st.markdown(f'<div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:10px;padding:8px 16px;font-size:.85rem;display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:.8rem">{div.join(bar_parts)}</div>',unsafe_allow_html=True)
+        st.markdown(f'<div class="status-bar">{div.join(bar_parts)}</div>',unsafe_allow_html=True)
     if st.sidebar.button("🔄 Re-check"): st.session_state.conn_checked=False; st.rerun()
     if not conn:
         keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
@@ -941,7 +997,18 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
         if st.session_state.students:
             st.markdown("---"); st.markdown(f"#### {ico(16)} Grade Work")
             gs=st.selectbox("Student:",[s["name"] for s in st.session_state.students],key="gs")
-            gw=st.text_area("Student's work:",height=100,key="gw"); gsub=st.selectbox("Subject:",SUBJECTS,key="gsub"); gt=st.text_input("Topic:",key="gt")
+            gw_col, gw_mic = st.columns([5,1])
+            with gw_col:
+                gw=st.text_area("Student's work:",height=100,key="gw")
+            with gw_mic:
+                st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
+                grade_audio=st.audio_input("🎤",key="grade_mic",label_visibility="collapsed")
+            if grade_audio:
+                with st.spinner("🎤 Transcribing..."):
+                    grade_text=transcribe_audio(grade_audio.read())
+                if grade_text:
+                    st.session_state["gw"]=grade_text; st.rerun()
+            gsub=st.selectbox("Subject:",SUBJECTS,key="gsub"); gt=st.text_input("Topic:",key="gt")
             if st.button("🌶️ Grade",type="primary",key="gb") and gw.strip():
                 sel=next((s for s in st.session_state.students if s["name"]==gs),None)
                 if sel:
@@ -995,7 +1062,22 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                 user_q = st.session_state.chat_messages[mi-1]["content"] if mi>0 else "Chat"
                 email_result(msg["content"], f"Teacher Pehpeh — {user_q[:50]} ({grade}, {subject})", f"chat_{mi}")
                 tts_player(msg["content"], f"chat_{mi}", tts_provider, el_voice_id, el_model, oai_voice, oai_instructions)
-        uq=st.chat_input(f"Ask about {subject}... (start with 'draw' for images)")
+        # Voice input for chat
+        voice_col, label_col = st.columns([1, 4])
+        with voice_col:
+            chat_audio = st.audio_input("🎤", key="chat_mic", label_visibility="collapsed")
+        with label_col:
+            st.markdown('<div style="font-size:.8rem;color:var(--text-muted);margin-top:8px">🎤 Tap mic to speak instead of typing</div>', unsafe_allow_html=True)
+        voice_text = None
+        if chat_audio:
+            with st.spinner("🎤 Transcribing your voice..."):
+                voice_text = transcribe_audio(chat_audio.read())
+            if voice_text:
+                st.success(f'🎤 Heard: "{voice_text[:80]}..."' if len(voice_text) > 80 else f'🎤 Heard: "{voice_text}"')
+        uq = st.chat_input(f"Ask about {subject}... (start with 'draw' for images)")
+        # Voice input takes priority
+        if voice_text:
+            uq = voice_text
         if uq:
             st.session_state.chat_messages.append({"role":"user","content":uq})
             img_keywords=["draw","illustrate","sketch","diagram","picture","image","visual","create an image","make an image","generate an image","show me"]
