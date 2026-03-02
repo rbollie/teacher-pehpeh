@@ -1,820 +1,1270 @@
 """
-========================================================================
-TEACHER PEHPEH — AI-Powered Classroom Assistant for Liberian Teachers
-========================================================================
-Multi-model (Claude + ChatGPT + Gemini) educational support platform
-with Liberia Ministry of Education curriculum alignment.
-
-Built by the Institute of Basic Technology (IBT)
-Co-founded by Rodney Bollie & Dr. Sylvia Bollie
-
-Drop your logo file in this folder as "logo.png" to brand the app.
-Drop Ministry of Education curriculum JSON files into curriculum_data/
-to enable curriculum-aligned content generation.
-========================================================================
+TEACHER PEHPEH BY IBT - AI-Powered Support for Every Classroom
+Institute of Basic Technology (IBT)
+Built by Rodney L. Bollie, PhD
 """
-
 import streamlit as st
-import time
-import os
-import sys
-from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
+import time, os, base64, json, random, zlib
+from urllib.parse import quote as urlquote
+try:
+    import pandas as pd; PD=True
+except: PD=False
 
-# =====================================================================
-# API KEYS — Paste your keys here
-# =====================================================================
-OPENAI_API_KEY    = ""   # sk-...
-ANTHROPIC_API_KEY = ""   # sk-ant-...
-GOOGLE_API_KEY    = ""   # AIzaSy...
+# === API KEYS ===
+def _get_key(name):
+    """Get API key from environment or Streamlit secrets"""
+    v=os.environ.get(name,"")
+    if v: return v
+    try:
+        import streamlit as st
+        return st.secrets.get(name,"")
+    except: return ""
 
-# =====================================================================
-# LOGO — Put your logo file in the same folder as this script
-# =====================================================================
+OPENAI_API_KEY = _get_key("OPENAI_API_KEY")
+ANTHROPIC_API_KEY = _get_key("ANTHROPIC_API_KEY")
+GOOGLE_API_KEY = _get_key("GOOGLE_API_KEY")
+ELEVENLABS_API_KEY = _get_key("ELEVENLABS_API_KEY")
 LOGO_FILENAME = "logo.png"
 
-# =====================================================================
-# CURRICULUM — Load Ministry of Education data
-# =====================================================================
-# Add the app directory to path so curriculum module can be found
-APP_DIR = Path(__file__).parent
-if str(APP_DIR) not in sys.path:
-    sys.path.insert(0, str(APP_DIR))
-
 try:
-    from curriculum import (
-        load_all_curricula,
-        get_grade_topics,
-        get_topic_details,
-        build_curriculum_context,
-        get_curriculum_summary,
-        get_available_subjects,
-    )
-    CURRICULUM_AVAILABLE = True
-except ImportError:
-    CURRICULUM_AVAILABLE = False
-
-# Load curriculum data at startup
-CURRICULA = {}
-if CURRICULUM_AVAILABLE:
-    CURRICULA = load_all_curricula()
-
-# =====================================================================
-# IMPORTS — AI Libraries
-# =====================================================================
+    import openai; OAI = True
+except ImportError: OAI = False
 try:
-    import openai
-    OPENAI_AVAILABLE = True
-except ImportError:
-    OPENAI_AVAILABLE = False
-
+    import anthropic; ANT = True
+except ImportError: ANT = False
 try:
-    import anthropic
-    ANTHROPIC_AVAILABLE = True
-except ImportError:
-    ANTHROPIC_AVAILABLE = False
+    import google.generativeai as genai; GEM = True
+except ImportError: GEM = False
 
-try:
-    import google.generativeai as genai
-    GEMINI_AVAILABLE = True
-except ImportError:
-    GEMINI_AVAILABLE = False
+# === IBT COLORS (from website) ===
+C_NAVY = "#0F2247"
+C_NAVY_L = "#1A2744"
+C_BLUE = "#2B7DE9"
+C_BLUE_D = "#1D5CBF"
+C_RED = "#8B1A1A"
+C_RED_L = "#B22234"
+C_GOLD = "#D4A843"
+C_GOLD_L = "#F5D98E"
 
+# === KNOWLEDGE BASE (assembled at runtime only) ===
+@st.cache_data
+def _kb():
+    return ("IBT RESEARCH (183 students, 6 Liberian schools, 4 STEM subjects):\n"
+        "Overall avg 0.433(C-). Chem 0.494(C), Physics 0.399(C-), Math 0.391(C-), Bio 0.447(C). "
+        "Scale: 1.0=A,0.75=B+,0.625=B,0.50=B-,0.44=C,0.375=C-,0.25=D.\n"
+        "MOTHER'S EDUCATION: Mom HS Grad avg 0.449 vs No HS 0.418 (p=0.031). Physics gap: HS 0.438 vs NoHS 0.363 (p=0.0075). Significant across ALL subgroups.\n"
+        "SINGLE MOTHERS (22%): SM HS 0.457 vs SM NoHS 0.399 (14.7% gap). Physics: 0.461 vs 0.310=48.8% gap (p=0.006). SM+NoHS+4kids: Physics 0.283(D). 29% work after school.\n"
+        "DIGITAL: 58.5% never used computer. SM NoHS: 81% never. 100% of SM NoHS users study only. +0.041 boost.\n"
+        "SCHOOL: #1 predictor (F=8.60 p<0.001). Best 0.512(B-), worst 0.354(D+). 16x parent edu effect.\n"
+        "INTERVENTION: Gap widens +0.055/2yr without. Narrows to 0.024 with. Physics most sensitive +0.09/yr.")
 
-# =====================================================================
-# DROPDOWN OPTIONS
-# =====================================================================
+# === CONNECTIVITY ===
+def email_result(content, subject, key_suffix, container=None):
+    """Render email controls with IBT branded template"""
+    ctx = container or st
+    with ctx.expander(T("email_result"), expanded=False):
+        to_addr = st.text_input("To:", placeholder="teacher@school.edu", key=f"email_to_{key_suffix}")
+        cc_addr = st.text_input("CC (optional):", placeholder="principal@school.edu", key=f"email_cc_{key_suffix}")
+        clean = content.replace("\n\n", "\n").strip()
+        # IBT branded plain text template
+        branded_text = f"""═══════════════════════════════════════════
+   🌶️ TEACHER PEHPEH by IBT
+   Institute of Basic Technology
+═══════════════════════════════════════════
 
-REGIONS = {
-    "Urban": "urban area with relatively better access to resources and infrastructure",
-    "Peri-Urban": "peri-urban area with mixed access to resources",
-    "Rural": "rural area with limited access to resources and technology",
-    "Remote / Island": "remote or island community with very limited infrastructure",
-}
+{subject}
+───────────────────────────────────────────
 
-COUNTRIES = [
-    "Liberia", "Sierra Leone", "Ghana", "Nigeria", "Kenya",
-    "Uganda", "Tanzania", "Ethiopia", "Senegal", "Cameroon",
-    "Gambia", "Guinea", "Côte d'Ivoire", "Mali", "Burkina Faso",
-    "Rwanda", "Malawi", "Zambia", "Zimbabwe", "Mozambique",
-    "South Africa", "Botswana", "Namibia", "DRC", "Angola",
-    "Togo", "Benin", "Niger", "Chad", "Somalia",
-]
+{clean}
 
-GRADE_LEVELS = {
-    "Grade 7 (JHS 1)": 7,
-    "Grade 8 (JHS 2)": 8,
-    "Grade 9 (JHS 3 / BECE Level)": 9,
-    "Grade 10 (SHS 1)": 10,
-    "Grade 11 (SHS 2)": 11,
-    "Grade 12 (SHS 3 / WASSCE Level)": 12,
-}
+───────────────────────────────────────────
+📋 Generated by Teacher Pehpeh — AI-Powered
+   Teaching Assistant by IBT
 
-SUBJECTS = [
-    "Mathematics", "English Language", "Integrated Science",
-    "Social Studies", "Physics", "Chemistry", "Biology",
-    "Economics", "Government / Civics", "Literature in English",
-    "History", "Geography", "Agriculture", "French",
-    "Religious Studies", "Business Management", "Accounting",
-    "Computer Studies / ICT", "Technical Drawing",
-    "Home Economics", "Physical Education", "Art / Creative Arts", "Music",
-]
+🌐 App: https://teacher-pehpeh.streamlit.app
+🏫 IBT: www.institutebasictechnology.org
+📧 Contact: info@institutebasictechnology.org
 
-# Fallback topics when no curriculum data exists for a subject
-FALLBACK_TOPICS = {
-    "Physics": [
-        "Measurement and Units", "Scalars and Vectors",
-        "Motion (Kinematics)", "Newton's Laws of Motion",
-        "Work, Energy and Power", "Simple Machines",
-        "Thermal Physics", "Gas Laws",
-        "Electrostatics", "Current Electricity",
-        "Magnetism", "Electromagnetic Induction",
-        "Waves and Sound", "Light and Optics",
-        "Refraction and Lenses", "Nuclear Physics",
-        "Electronics", "Quantum Physics",
-    ],
-    "Mathematics": [
-        "Number and Numeration", "Fractions and Decimals", "Percentages",
-        "Ratio and Proportion", "Algebraic Expressions", "Linear Equations",
-        "Quadratic Equations", "Simultaneous Equations", "Inequalities",
-        "Sets and Venn Diagrams", "Functions and Relations",
-        "Sequences and Series", "Matrices", "Trigonometry",
-        "Mensuration", "Statistics and Probability",
-        "Geometry (Plane and Solid)", "Vectors", "Calculus (Introduction)",
-    ],
-    "English Language": [
-        "Comprehension and Summary", "Essay Writing (Narrative)",
-        "Essay Writing (Descriptive)", "Essay Writing (Argumentative)",
-        "Essay Writing (Expository)", "Letter Writing (Formal)",
-        "Letter Writing (Informal)", "Speech Writing", "Report Writing",
-        "Grammar (Parts of Speech)", "Grammar (Tenses)",
-        "Grammar (Sentence Structure)", "Vocabulary Development",
-        "Oral English and Phonetics", "Literature Appreciation",
-        "Reading Skills", "Listening and Note-Taking",
-    ],
-    "Chemistry": [
-        "Introduction to Chemistry", "States of Matter",
-        "Atomic Structure", "Periodic Table",
-        "Chemical Bonding", "Chemical Equations",
-        "Acids, Bases and Salts", "Redox Reactions",
-        "Electrochemistry", "Energy Changes",
-        "Rates of Reaction", "Chemical Equilibrium",
-        "Carbon and Its Compounds", "Metals and Their Compounds",
-        "Non-Metals", "Environmental Chemistry",
-    ],
-    "Biology": [
-        "Cell Biology", "Classification of Living Things",
-        "Nutrition", "Transport in Living Things",
-        "Respiration", "Excretion",
-        "Reproduction (Plants)", "Reproduction (Animals/Humans)",
-        "Growth and Development", "Genetics and Heredity",
-        "Evolution", "Ecology and Environment",
-        "Microorganisms and Disease", "Biotechnology",
-    ],
-    "Integrated Science": [
-        "Scientific Method", "Measurement", "Matter",
-        "Energy", "Force and Motion", "Electricity",
-        "Light and Sound", "Heat and Temperature",
-        "Living Things", "Ecology", "Health and Disease",
-        "Earth Science", "Space and the Solar System",
-    ],
-}
+   "Curating Personalized Content to Support
+    Underresourced Teachers"
 
-TASK_TYPES = {
-    "📝 Lesson Plan": "a complete, detailed lesson plan",
-    "📋 Scheme of Work (Weekly)": "a one-week scheme of work with daily breakdowns",
-    "📋 Scheme of Work (Termly)": "a full-term scheme of work with weekly topics and objectives",
-    "📊 Quiz (10 Questions)": "a 10-question quiz with answer key",
-    "📊 Quiz (20 Questions)": "a 20-question quiz with answer key",
-    "📝 WASSCE Paper 1 (Objectives)": "a WASSCE-style Paper 1 objective test with 50 multiple-choice questions and answer key",
-    "📝 WASSCE Paper 2 (Theory/Essay)": "a WASSCE-style Paper 2 theory/essay paper with structured and essay questions plus marking scheme",
-    "📝 BECE Exam Practice": "a BECE-style examination paper with objective and theory sections",
-    "📚 Homework Assignment": "a homework assignment appropriate for the level",
-    "👥 Group Activity": "a group activity or collaborative learning exercise",
-    "🎯 Rubric / Marking Guide": "a detailed rubric or marking guide",
-    "📬 Parent Communication Letter": "a professional letter to parents about student progress or classroom matters",
-    "🔁 Remedial / Catch-Up Material": "remedial or catch-up material for struggling students",
-    "🎮 Educational Game / Activity": "an educational game or interactive classroom activity",
-    "📖 Reading Comprehension Exercise": "a reading comprehension passage with questions",
-    "🧪 Lab / Practical Guide": "a laboratory or practical activity guide with procedure and questions",
-    "📑 Student Progress Report Template": "a student progress report template with relevant criteria",
-    "🧠 Differentiated Instruction Plan": "a differentiated instruction plan addressing multiple ability levels",
-    "🌍 Real-World Application Worksheet": "a worksheet connecting the topic to real-world Liberian/African contexts",
-    "📢 Class Presentation Guide": "a guide for student presentations on this topic",
-}
+   Powered by Claude · ChatGPT · Gemini
+═══════════════════════════════════════════"""
+        # IBT branded HTML template for file attachment
+        branded_html = f"""<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+body{{font-family:Arial,sans-serif;margin:0;padding:0;background:#f4f4f4}}
+.container{{max-width:700px;margin:20px auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.1)}}
+.header{{background:linear-gradient(135deg,#B22234,#8B1A1A);padding:24px 30px;text-align:center}}
+.header h1{{color:#D4A843;margin:0;font-size:22px;letter-spacing:1px}}
+.header p{{color:#F0D5D5;margin:6px 0 0;font-size:13px}}
+.subj{{background:#0F2247;color:#D4A843;padding:14px 30px;font-size:15px;font-weight:bold}}
+.body{{padding:24px 30px;color:#1a1a2e;line-height:1.8;font-size:14px;white-space:pre-wrap}}
+.footer{{background:#0F2247;padding:20px 30px;text-align:center;color:#8899BB;font-size:12px}}
+.footer a{{color:#D4A843;text-decoration:none}}
+.footer .brand{{color:#D4A843;font-weight:bold;font-size:14px;margin-bottom:8px;display:block}}
+</style></head><body>
+<div class="container">
+<div class="header">
+<h1>🌶️ TEACHER PEHPEH</h1>
+<p>Institute of Basic Technology (IBT)</p>
+</div>
+<div class="subj">{subject}</div>
+<div class="body">{clean}</div>
+<div class="footer">
+<span class="brand">Teacher Pehpeh by IBT</span>
+<a href="https://teacher-pehpeh.streamlit.app">🌶️ Open Teacher Pehpeh</a> &nbsp;·&nbsp;
+<a href="https://www.institutebasictechnology.org">🌐 IBT Website</a><br><br>
+<em>"Curating Personalized Content to Support Underresourced Teachers"</em><br>
+Powered by Claude · ChatGPT · Gemini
+</div>
+</div>
+</body></html>"""
+        # Mailto uses truncated plain text
+        max_body = 1800
+        mail_body = branded_text if len(branded_text) <= max_body else branded_text[:max_body] + "\n\n[Content truncated — see attached file for full version]"
+        encoded_subject = urlquote(f"🌶️ {subject}")
+        encoded_body = urlquote(mail_body)
+        cc_param = f"&cc={urlquote(cc_addr)}" if cc_addr.strip() else ""
+        mailto_url = f"mailto:{urlquote(to_addr)}?subject={encoded_subject}{cc_param}&body={encoded_body}"
+        c1,c2,c3 = st.columns(3)
+        with c1:
+            st.markdown(f'<a href="{mailto_url}" target="_blank" style="display:inline-block;background:#2B7DE9;color:white;padding:8px 16px;border-radius:8px;text-decoration:none;font-weight:600;font-size:.85rem;text-align:center;width:100%">📧 Email App</a>', unsafe_allow_html=True)
+        with c2:
+            st.download_button("📎 Text file", data=branded_text, file_name=f"{subject[:35].replace(' ','_')}.txt", key=f"email_dl_{key_suffix}")
+        with c3:
+            st.download_button("📎 HTML file", data=branded_html, file_name=f"{subject[:35].replace(' ','_')}.html", mime="text/html", key=f"email_html_{key_suffix}")
+        if len(branded_text) > max_body:
+            st.info("💡 Email body was truncated. Attach the downloaded file for the full version.")
 
-CLASS_SIZES = [
-    "Small (under 25)", "Medium (25-40)", "Large (40-60)",
-    "Very Large (60-100)", "Overcrowded (100+)",
-]
+def check_conn():
+    import urllib.request
+    r = {"online":False,"quality":"none","latency_ms":None,"label":"No Internet","emoji":"🔴"}
+    lats = []
+    for u in ["https://api.anthropic.com","https://api.openai.com","https://www.google.com"]:
+        try:
+            t=time.time(); req=urllib.request.Request(u,method="HEAD"); req.add_header("User-Agent","TP/1.0")
+            urllib.request.urlopen(req,timeout=5); lats.append((time.time()-t)*1000)
+        except: pass
+    if not lats: return r
+    a=sum(lats)/len(lats); r.update(online=True,latency_ms=round(a))
+    if a<300: r.update(quality="high",label="Strong (WiFi/5G)",emoji="🟢")
+    elif a<800: r.update(quality="medium",label="Moderate (4G/3G)",emoji="🟡")
+    elif a<2000: r.update(quality="low",label="Slow (2G/Edge)",emoji="🟠")
+    else: r.update(quality="very_low",label="Very Slow",emoji="🟠")
+    return r
 
-RESOURCES = [
-    "Textbooks only", "Textbooks + chalkboard",
-    "Basic supplies (paper, pens, ruler)",
-    "Some lab equipment", "Full lab access",
-    "Computer / tablet access", "Internet access",
-    "No materials (teacher knowledge only)",
-]
+# === IMAGE GENERATION ===
+def gen_image(prompt):
+    """Try DALL-E first, then Google Imagen as fallback"""
+    img_style = "Clean, professional educational infographic style. Bright colors on white background. NO chalkboard, NO hand-drawn sketches, NO chalk-style text. Use clear labels, simple diagrams, and modern flat design. Culturally relevant to West Africa/Liberia."
+    # Try DALL-E
+    if OAI and OPENAI_API_KEY:
+        try:
+            c=openai.OpenAI(api_key=OPENAI_API_KEY)
+            r=c.images.generate(model="dall-e-3",prompt=f"Educational visual aid: {prompt}. {img_style}",size="1024x1024",quality="standard",n=1)
+            return r.data[0].url,"DALL-E"
+        except: pass
+    # Try Google Imagen
+    if GEM and GOOGLE_API_KEY:
+        try:
+            genai.configure(api_key=GOOGLE_API_KEY)
+            from google.generativeai import types as gtypes
+            img_model=genai.GenerativeModel("gemini-2.5-flash")
+            r=img_model.generate_content(
+                f"Generate an educational visual aid: {prompt}. {img_style}",
+                generation_config=genai.types.GenerationConfig(response_mime_type="text/plain")
+            )
+            client=genai.ImageGenerationModel("imagen-3.0-generate-002")
+            response=client.generate_images(prompt=f"Educational visual aid: {prompt}. {img_style}",number_of_images=1)
+            if response.images:
+                import base64
+                img_bytes=response.images[0]._image_bytes
+                b64=base64.b64encode(img_bytes).decode()
+                return f"data:image/png;base64,{b64}","Imagen"
+        except: pass
+    return None,None
 
-LANGUAGES = [
-    "English only", "English + Liberian English (Koloqua)",
-    "English + local language support", "Bilingual instruction",
-]
+# === TEXT TO SPEECH ===
 
-ABILITY_LEVELS = [
-    "Mixed abilities", "Below grade level",
-    "At grade level", "Above grade level",
-    "Wide range (remedial to advanced)",
-]
-
-TIME_OPTIONS = [
-    "30 minutes", "45 minutes", "1 hour",
-    "1.5 hours", "2 hours", "Double period",
-]
-
-
-# =====================================================================
-# SYSTEM PROMPT — The heart of Teacher Pehpeh
-# =====================================================================
-
-def build_system_prompt(country, region_desc, grade, subject, class_size,
-                        resources, language, ability, time_avail,
-                        curriculum_context=""):
-    """Build the system prompt with optional curriculum injection."""
-
-    curriculum_block = ""
-    if curriculum_context:
-        curriculum_block = f"""
-
-CRITICAL — MINISTRY OF EDUCATION CURRICULUM DATA:
-The following is the OFFICIAL curriculum from Liberia's Ministry of Education
-for this exact topic. You MUST align your response with these objectives,
-content requirements, and suggested activities. This is not optional — 
-teachers are evaluated against these standards.
-
-{curriculum_context}
-
-When generating content, you MUST:
-1. Address ALL specific learning objectives listed above
-2. Follow the content outline structure
-3. Incorporate the suggested activities where appropriate
-4. Use the local contextualization examples to make content relevant
-5. Reference recommended textbooks when suggesting further reading
-6. Ensure assessment aligns with the approved assessment strategies
-7. Build toward the expected competencies listed
-"""
-
-    return f"""You are Teacher Pehpeh — a culturally contextualized AI teaching assistant 
-built by the Institute of Basic Technology (IBT) for teachers in Liberia and 
-across West Africa.
-
-You are named after the Liberian concept of "Pehpeh" (pepper) — the strict, 
-passionate, demanding teacher who believes deeply in their students' potential.
-
-CONTEXT FOR THIS REQUEST:
-- Country: {country}
-- Setting: {region_desc}
-- Grade Level: {grade}
-- Subject: {subject}
-- Class Size: {class_size}
-- Available Resources: {resources}
-- Language Context: {language}
-- Student Ability Level: {ability}
-- Time Available: {time_avail}
-{curriculum_block}
-
-YOUR CORE PRINCIPLES:
-1. LIBERIAN CONTEXT FIRST: Use examples, references, and scenarios from 
-   Liberian daily life. Reference local places (Monrovia, Buchanan, Nimba, 
-   Bong, Lofa, Grand Bassa), local foods (cassava, palm butter, pepper soup, 
-   dumboy), local currency (Liberian dollars), local transportation (kekeh, 
-   penpens, public buses), and local culture.
-
-2. RESOURCE-AWARE: Design everything to work with the stated available 
-   resources. If the teacher has no lab equipment, suggest locally available 
-   alternatives (bottles, sticks, rubber bands, stones, water, cooking pots).
-   Never assume access to technology unless stated.
-
-3. WASSCE/BECE ALIGNED: All academic content should prepare students for 
-   the West African Senior School Certificate Examination (WASSCE) or Basic 
-   Education Certificate Examination (BECE) as appropriate for the grade.
-
-4. CULTURALLY RESPECTFUL: Be aware of Liberian sociocultural norms. 
-   Use Liberian English (Koloqua) examples where appropriate to connect 
-   with students, while teaching standard English.
-
-5. PRACTICAL AND ACTIONABLE: Every output should be immediately usable 
-   by a teacher. No theoretical abstractions — give concrete steps, exact 
-   questions, specific examples, and clear instructions.
-
-6. INCLUSIVE EDUCATION: Design activities for mixed-gender groups, 
-   accommodate different learning styles, and be sensitive to students 
-   from different socioeconomic backgrounds.
-
-7. LARGE CLASS STRATEGIES: When class sizes are large, include specific 
-   strategies for managing and engaging all students (group work rotation, 
-   peer teaching, call-and-response, etc.).
-
-FORMAT: Use clear headings, numbered steps, and organized sections.
-Make everything copy-paste ready for the teacher to use immediately.
-"""
-
-
-# =====================================================================
-# AI MODEL CALLS
-# =====================================================================
-
-def call_chatgpt(prompt, system_prompt):
-    """Call OpenAI ChatGPT."""
-    if not OPENAI_AVAILABLE or not OPENAI_API_KEY:
-        return None
+def speak_elevenlabs(text, voice_id="woq6F0K3YYEpoS7T2Rx4", model_id="eleven_flash_v2_5"):
+    """Generate speech using ElevenLabs streaming API. Returns base64 audio or None."""
+    if not ELEVENLABS_API_KEY: return None, "No ElevenLabs API key"
     try:
-        client = openai.OpenAI(api_key=OPENAI_API_KEY)
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt},
-            ],
-            temperature=0.7,
-            max_tokens=4000,
-        )
-        return response.choices[0].message.content
+        import re, urllib.request, json as jlib
+        clean = re.sub(r'<[^>]+>', '', text)
+        clean = re.sub(r'[#*_`~\[\](){}|]', '', clean)
+        clean = re.sub(r'-{3,}', ' ', clean)
+        clean = re.sub(r'\n{2,}', '. ', clean)
+        clean = re.sub(r'\n', '. ', clean)
+        clean = re.sub(r' {2,}', ' ', clean)
+        clean = re.sub(r'\.{2,}', '.', clean)
+        # Cap at 1200 chars for fast generation
+        if len(clean) > 1200: clean = clean[:1200] + ". See the full written version for complete details."
+        # Use streaming endpoint for faster first-byte
+        url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}/stream"
+        payload = jlib.dumps({
+            "text": clean,
+            "model_id": model_id,
+            "output_format": "mp3_22050_32",
+        }).encode("utf-8")
+        req = urllib.request.Request(url, data=payload, headers={
+            "xi-api-key": ELEVENLABS_API_KEY,
+            "Content-Type": "application/json",
+            "Accept": "audio/mpeg",
+        })
+        # Stream response in chunks
+        chunks = []
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            while True:
+                chunk = resp.read(4096)
+                if not chunk: break
+                chunks.append(chunk)
+        audio_bytes = b"".join(chunks)
+        if len(audio_bytes) < 100: return None, "Empty audio response"
+        b64 = base64.b64encode(audio_bytes).decode()
+        return b64, "Teacher Pehpeh Voice"
     except Exception as e:
-        return f"⚠️ ChatGPT error: {str(e)}"
+        return None, f"Voice error: {e}"
 
+def highlight_result(text):
+    """Enhance AI result text with highlighted key points."""
+    import re
+    t=text
+    # Convert **bold** to highlighted spans
+    t=re.sub(r'\*\*(.+?)\*\*',r'<strong style="color:#D4A843;background:rgba(212,168,67,.1);padding:1px 4px;border-radius:3px">\1</strong>',t)
+    # Convert ### headers to styled headers
+    t=re.sub(r'^### (.+)$',r'<h4 style="color:#2B7DE9;margin:12px 0 6px;font-family:Playfair Display,serif">\1</h4>',t,flags=re.MULTILINE)
+    t=re.sub(r'^## (.+)$',r'<h3 style="color:#D4A843;margin:14px 0 8px;font-family:Playfair Display,serif">\1</h3>',t,flags=re.MULTILINE)
+    # Convert numbered lists with bold starters
+    t=re.sub(r'^(\d+)\.\s',r'<strong style="color:#2B7DE9">\1.</strong> ',t,flags=re.MULTILINE)
+    # Highlight key educational markers
+    for kw in ["WASSCE","BECE","Key Point","Note:","Tip:","Important:","Answer Key","Teacher's Guide","Objective","Assessment"]:
+        t=t.replace(kw,f'<span style="color:#D4A843;font-weight:600">{kw}</span>')
+    # Convert newlines to <br> for HTML display
+    t=t.replace('\n','<br>')
+    return t
 
-def call_claude(prompt, system_prompt):
-    """Call Anthropic Claude."""
-    if not ANTHROPIC_AVAILABLE or not ANTHROPIC_API_KEY:
-        return None
+def tts_player(text, key_suffix):
+    """Simple 'Hear Results' button — one click, plays audio."""
+    audio_key = f"tts_audio_{key_suffix}"
+    if not ELEVENLABS_API_KEY: return  # No voice configured, show nothing
+    # Show cached audio if already generated
+    if audio_key in st.session_state and st.session_state[audio_key]:
+        aud = st.session_state[audio_key]
+        st.markdown(f'<audio controls autoplay style="width:100%;margin:8px 0;border-radius:8px"><source src="data:audio/mp3;base64,{aud["b64"]}" type="audio/mp3"></audio>', unsafe_allow_html=True)
+        ac1, ac2 = st.columns([2,1])
+        with ac1:
+            st.download_button("📥 Download MP3", data=base64.b64decode(aud["b64"]), file_name=f"teacher_pehpeh_{key_suffix}.mp3", mime="audio/mp3", key=f"tts_dl_{key_suffix}")
+        with ac2:
+            if st.button("🗑️ Clear", key=f"tts_clr_{key_suffix}"):
+                del st.session_state[audio_key]; st.rerun()
+    else:
+        if st.button(T("hear"), key=f"tts_gen_{key_suffix}", type="primary", use_container_width=True):
+            with st.spinner(T("generating")):
+                b64, src = speak_elevenlabs(text)
+            if b64:
+                st.session_state[audio_key] = {"b64": b64, "src": src}
+                st.rerun()
+            else:
+                st.error(f"{T('audio_failed')}: {src}. {T('try_again')}")
+
+# === SPEECH TO TEXT ===
+def transcribe_audio(audio_bytes):
+    """Transcribe audio using OpenAI Whisper. Returns text or None."""
+    if not OAI or not OPENAI_API_KEY: return None
     try:
-        client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-        response = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=4000,
-            system=system_prompt,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return response.content[0].text
+        import io
+        c = openai.OpenAI(api_key=OPENAI_API_KEY)
+        audio_file = io.BytesIO(audio_bytes)
+        audio_file.name = "recording.wav"
+        r = c.audio.transcriptions.create(model="whisper-1", file=audio_file)
+        return r.text.strip() if r.text else None
     except Exception as e:
-        return f"⚠️ Claude error: {str(e)}"
-
-
-def call_gemini(prompt, system_prompt):
-    """Call Google Gemini."""
-    if not GEMINI_AVAILABLE or not GOOGLE_API_KEY:
         return None
+
+# === QUIZ BANK ===
+QUIZ = {
+ "Mathematics":{"easy":[
+  {"q":"Simplify: 3(2x - 4) + 5x","o":["11x - 12","11x - 4","6x - 12","x - 12"],"a":0,"e":"Expand: 6x - 12 + 5x = 11x - 12.","t":"WASSCE Paper 1 style. Teach: distribute first, then collect like terms. Write each step clearly."},
+  {"q":"If log₁₀ 2 = 0.301, find log₁₀ 8.","o":["0.903","2.408","0.602","0.301"],"a":0,"e":"8 = 2³, so log 8 = 3 × log 2 = 3 × 0.301 = 0.903.","t":"WASSCE loves log questions. Teach index form first: 8=2³. Then the log law: log(aⁿ) = n log a."},
+  {"q":"Solve: 2x² - 5x - 3 = 0","o":["x = 3 or -½","x = 3 or ½","x = -3 or ½","x = -3 or -½"],"a":0,"e":"Factor: (2x + 1)(x - 3) = 0. So x = -½ or x = 3.","t":"WASSCE always has quadratics. Teach factoring AND formula method. Students should check by substituting back."},
+  {"q":"Find the gradient of the line 3y = 6x - 9.","o":["2","-3","6","3"],"a":0,"e":"Rearrange to y = mx + c: y = 2x - 3. Gradient m = 2.","t":"Standard WASSCE. Always rearrange to y = mx + c form first. Gradient = coefficient of x."},
+  {"q":"The 5th term of an AP is 17, common difference is 3. Find the first term.","o":["5","8","2","14"],"a":0,"e":"aₙ = a + (n-1)d → 17 = a + 4(3) → a = 17 - 12 = 5.","t":"AP formula appears every year. Drill: a, a+d, a+2d... Students write out terms to verify."},
+ ],"medium":[
+  {"q":"If P = {1,2,3,4,5} and Q = {3,4,5,6,7}, find n(P ∪ Q).","o":["7","10","5","3"],"a":0,"e":"P ∪ Q = {1,2,3,4,5,6,7}. Count = 7.","t":"Venn diagram on board. Students place each element. WASSCE tests union, intersection, complement."},
+  {"q":"In triangle ABC, a=7, b=8, C=60°. Find c using cosine rule.","o":["√57","√113","7.55","8.06"],"a":0,"e":"c² = 7² + 8² - 2(7)(8)cos60° = 49 + 64 - 56 = 57. c = √57.","t":"Cosine rule is a WASSCE favourite. Students must memorize: c² = a² + b² - 2ab·cosC."},
+  {"q":"Differentiate y = 3x⁴ - 2x² + 5x - 1.","o":["12x³ - 4x + 5","12x³ - 4x + 5x","3x³ - 2x + 5","12x⁴ - 4x²"],"a":0,"e":"dy/dx = 12x³ - 4x + 5. Rule: bring power down, reduce by 1. Constants vanish.","t":"Differentiation appears in WASSCE Paper 2. Drill the power rule until it's automatic. Use mnemonic: 'Multiply by power, subtract one.'"},
+  {"q":"A fair die is thrown twice. P(sum = 7)?","o":["1/6","1/12","5/36","7/36"],"a":0,"e":"Outcomes summing to 7: (1,6)(2,5)(3,4)(4,3)(5,2)(6,1) = 6 out of 36. P = 6/36 = 1/6.","t":"Draw the 6×6 grid. Students count all sums. Probability questions need systematic listing."},
+  {"q":"Convert 101101₂ to base 10.","o":["45","37","53","29"],"a":0,"e":"1(32) + 0(16) + 1(8) + 1(4) + 0(2) + 1(1) = 32+8+4+1 = 45.","t":"Number bases: WASSCE staple. Write place values (32,16,8,4,2,1) above the digits. Multiply and add."},
+ ],"hard":[
+  {"q":"Evaluate ∫(3x² + 2x - 1)dx from 0 to 2.","o":["10","8","12","14"],"a":0,"e":"[x³ + x² - x] from 0 to 2 = (8+4-2) - 0 = 10.","t":"Integration: reverse of differentiation. Add 1 to power, divide by new power. Then substitute limits."},
+  {"q":"The 3rd and 6th terms of a GP are 18 and 486. Find the common ratio.","o":["3","9","6","2"],"a":0,"e":"ar² = 18, ar⁵ = 486. Divide: r³ = 27, r = 3.","t":"GP: divide consecutive term equations to eliminate 'a'. This technique appears in WASSCE Theory."},
+  {"q":"Two fair coins and a die are tossed. P(2 heads and even number)?","o":["1/4","1/8","1/12","1/6"],"a":0,"e":"P(2 heads) = ¼. P(even) = ½. Independent: ¼ × ½ = ⅛.","t":"Compound probability: independent events multiply. Tree diagrams help visual learners."},
+ ]},
+ "Physics":{"easy":[
+  {"q":"A car accelerates from 10 m/s to 30 m/s in 5s. Acceleration?","o":["4 m/s²","6 m/s²","8 m/s²","2 m/s²"],"a":0,"e":"a = (v-u)/t = (30-10)/5 = 20/5 = 4 m/s².","t":"WASSCE kinematics: always identify u, v, a, s, t first. Write them down before calculating."},
+  {"q":"A 2kg mass falls from 10m height. What is its PE at the top? (g=10)","o":["200 J","20 J","100 J","2000 J"],"a":0,"e":"PE = mgh = 2 × 10 × 10 = 200 J.","t":"Energy conservation is key WASSCE topic. PE at top converts to KE at bottom. Ask: where does energy go?"},
+  {"q":"Resistance of two 6Ω resistors in parallel?","o":["3 Ω","12 Ω","6 Ω","9 Ω"],"a":0,"e":"1/R = 1/6 + 1/6 = 2/6. R = 3 Ω.","t":"Parallel: 'product over sum' shortcut for two resistors: (6×6)/(6+6) = 36/12 = 3Ω."},
+  {"q":"A wave has frequency 50 Hz and wavelength 4m. Speed?","o":["200 m/s","12.5 m/s","54 m/s","46 m/s"],"a":0,"e":"v = fλ = 50 × 4 = 200 m/s.","t":"v = fλ is the wave equation. WASSCE applies it to sound, light, and water waves. Students must know it cold."},
+  {"q":"An object on a spring has period 0.5s. Frequency?","o":["2 Hz","0.5 Hz","5 Hz","0.2 Hz"],"a":0,"e":"f = 1/T = 1/0.5 = 2 Hz.","t":"Period and frequency are inverses. This is basic but students often confuse them on WASSCE."},
+ ],"medium":[
+  {"q":"A 5kg block is pushed with 30N on a frictionless surface. Acceleration?","o":["6 m/s²","150 m/s²","25 m/s²","35 m/s²"],"a":0,"e":"F = ma → a = F/m = 30/5 = 6 m/s².","t":"Newton's 2nd Law: WASSCE asks both calculation and conceptual understanding. What if friction = 10N?"},
+  {"q":"A ray enters glass (n=1.5) at 30° to the normal. Angle of refraction?","o":["19.5°","45°","20°","30°"],"a":0,"e":"Snell's law: sin30°/sinr = 1.5 → sinr = 0.5/1.5 = 0.333 → r ≈ 19.5°.","t":"Snell's law is examined every WASSCE. Students must use sine tables or know key sin values."},
+  {"q":"EMF of cell = 12V, internal resistance = 2Ω, external R = 4Ω. Current?","o":["2 A","3 A","6 A","4 A"],"a":0,"e":"I = EMF/(R+r) = 12/(4+2) = 2 A.","t":"Internal resistance: WASSCE Theory favourite. Draw the circuit. EMF = V + Ir. Students confuse EMF with terminal p.d."},
+  {"q":"Half-life of a substance is 4 days. After 12 days, what fraction remains?","o":["1/8","1/4","1/16","1/6"],"a":0,"e":"12 days = 3 half-lives. Fraction = (½)³ = 1/8.","t":"Half-life: count how many half-lives fit. Each one halves the amount. WASSCE asks both fraction and mass."},
+ ],"hard":[
+  {"q":"A projectile is launched at 30 m/s at 60° to horizontal. Max height? (g=10)","o":["33.75 m","45 m","22.5 m","15 m"],"a":0,"e":"Vy = 30sin60° = 25.98. H = Vy²/2g = 675/20 = 33.75 m.","t":"Projectile: resolve into components. Vertical determines height, horizontal determines range. WASSCE Paper 2 staple."},
+  {"q":"A transformer has 200 primary turns, 50 secondary turns, input 240V. Output voltage?","o":["60 V","960 V","48 V","12 V"],"a":0,"e":"Vs/Vp = Ns/Np → Vs = 240 × 50/200 = 60 V. Step-down transformer.","t":"Transformer equation: Vs/Vp = Ns/Np = Ip/Is. WASSCE tests both step-up and step-down."},
+  {"q":"A 0.5kg ball moving at 4 m/s hits a wall and bounces back at 3 m/s. Impulse?","o":["3.5 Ns","0.5 Ns","7 Ns","1.5 Ns"],"a":0,"e":"Impulse = m(v-u) = 0.5(3-(-4)) = 0.5 × 7 = 3.5 Ns. (Direction change: -4 becomes +3.)","t":"Impulse = change in momentum. KEY: when direction reverses, ADD the speeds. Common WASSCE trap."},
+ ]},
+ "Biology":{"easy":[
+  {"q":"Which organelle is the site of aerobic respiration?","o":["Mitochondria","Ribosome","Nucleus","Golgi body"],"a":0,"e":"Mitochondria: the 'powerhouse' where glucose + O₂ → CO₂ + H₂O + ATP.","t":"WASSCE cell biology: students must name organelle AND function. Use the 'factory analogy' — each organelle has a job."},
+  {"q":"In humans, the diploid number is 46. How many chromosomes in a gamete?","o":["23","46","92","12"],"a":0,"e":"Gametes are haploid (n). 46/2 = 23 chromosomes.","t":"Meiosis halves the chromosome number. WASSCE tests: diploid vs haploid, mitosis vs meiosis differences."},
+  {"q":"Which blood vessel carries oxygenated blood FROM the heart to the body?","o":["Aorta","Pulmonary artery","Vena cava","Pulmonary vein"],"a":0,"e":"The aorta carries oxygenated blood from the left ventricle to the body.","t":"Blood vessel quiz is WASSCE standard. Trick: pulmonary artery carries DE-oxygenated blood (only exception)."},
+  {"q":"Sickle cell trait (HbAS) provides resistance to which disease?","o":["Malaria","Typhoid","Cholera","HIV"],"a":0,"e":"HbAS heterozygotes have partial protection against Plasmodium falciparum malaria.","t":"Sickle cell and malaria: a key WASSCE genetics topic. Discuss why the gene persists in malaria-endemic West Africa."},
+  {"q":"Which hormone controls blood sugar level?","o":["Insulin","Adrenaline","Thyroxine","Oestrogen"],"a":0,"e":"Insulin (from pancreas) lowers blood glucose by promoting uptake into cells.","t":"Endocrine system: WASSCE asks hormone name, gland, and function. Make a table: gland → hormone → effect."},
+ ],"medium":[
+  {"q":"In a cross between Tt × Tt, what fraction of offspring are tall (T dominant)?","o":["3/4","1/4","1/2","1"],"a":0,"e":"TT:Tt:tt = 1:2:1. Tall (TT+Tt) = 3/4.","t":"Punnett square every time. WASSCE asks ratios AND probabilities. Practice with different crosses."},
+  {"q":"Which nitrogenous base is found in RNA but NOT DNA?","o":["Uracil","Thymine","Adenine","Cytosine"],"a":0,"e":"RNA has Uracil instead of Thymine. Both have A, G, C.","t":"DNA vs RNA: sugar, bases, structure. Mnemonic for RNA bases: 'GACU' sounds like 'gecko.'"},
+  {"q":"Oxygen debt occurs after vigorous exercise because:","o":["Lactic acid must be broken down","Glucose runs out","Lungs stop working","Blood pressure drops"],"a":0,"e":"During intense exercise, anaerobic respiration produces lactic acid. Extra O₂ is needed to oxidize it.","t":"Link to students' experience: why do you breathe hard AFTER stopping running? Oxygen debt!"},
+  {"q":"Which structure prevents food from entering the windpipe?","o":["Epiglottis","Larynx","Pharynx","Uvula"],"a":0,"e":"The epiglottis closes over the trachea during swallowing.","t":"Digestion system: WASSCE tests the pathway. Students act out swallowing — what moves, what closes?"},
+ ],"hard":[
+  {"q":"In ecological succession, the first organisms to colonize bare rock are:","o":["Lichens","Grasses","Trees","Ferns"],"a":0,"e":"Lichens are pioneer species — they break down rock into soil, enabling other plants to grow.","t":"Succession: pioneer → grass → shrub → tree. WASSCE Theory asks for full description of stages."},
+  {"q":"A man with blood group AB marries a woman with group O. Possible children?","o":["A and B only","AB only","O only","A, B, AB, and O"],"a":0,"e":"Father: IᴬIᴮ × Mother: ii → children are Iᴬi (A) or Iᴮi (B). No AB, no O.","t":"Blood group genetics: multiple alleles + codominance. WASSCE loves this. Always write the genotypes first."},
+  {"q":"Which process releases CO₂ back into the atmosphere in the carbon cycle?","o":["Respiration and combustion","Photosynthesis","Nitrogen fixation","Transpiration"],"a":0,"e":"Respiration (by all living things) and combustion (burning fuels) release CO₂.","t":"Carbon cycle: WASSCE asks arrows and processes. Draw the cycle on board with students labeling each arrow."},
+ ]},
+ "Chemistry":{"easy":[
+  {"q":"What is the oxidation state of Mn in KMnO₄?","o":["+7","+4","+2","+6"],"a":0,"e":"K(+1) + Mn(x) + 4O(-2) = 0 → 1 + x - 8 = 0 → x = +7.","t":"Oxidation states: WASSCE standard. Rules: O is -2, alkali metals +1. Solve for the unknown."},
+  {"q":"Which gas is collected over water in the lab?","o":["Oxygen","HCl","NH₃","SO₂"],"a":0,"e":"O₂ is insoluble in water, so it's collected by downward displacement of water.","t":"Gas collection methods depend on solubility and density. WASSCE tests all three methods."},
+  {"q":"The IUPAC name of CH₃CH₂OH is:","o":["Ethanol","Methanol","Propanol","Ethanal"],"a":0,"e":"2 carbons = eth-. -OH group = -anol. Ethanol.","t":"IUPAC naming: count carbons, identify functional group. WASSCE organic chemistry requires this."},
+  {"q":"How many moles are in 44g of CO₂? (C=12, O=16)","o":["1","2","0.5","44"],"a":0,"e":"Molar mass of CO₂ = 12 + 32 = 44 g/mol. Moles = 44/44 = 1.","t":"Mole calculations appear every WASSCE. Formula: n = mass/molar mass. Practice with different substances."},
+  {"q":"Which of these is an alkali?","o":["NaOH","HCl","NaCl","H₂SO₄"],"a":0,"e":"NaOH (sodium hydroxide) is a strong alkali/base. It produces OH⁻ in solution.","t":"Acids produce H⁺, alkalis produce OH⁻. WASSCE tests indicators, neutralization, and salt formation."},
+ ],"medium":[
+  {"q":"What volume of H₂ at STP is produced when 2 moles of Zn react with excess HCl?","o":["44.8 L","22.4 L","11.2 L","67.2 L"],"a":0,"e":"Zn + 2HCl → ZnCl₂ + H₂. 1 mol Zn gives 1 mol H₂. 2 mol Zn → 2 mol H₂ = 2 × 22.4 = 44.8 L.","t":"Stoichiometry + molar volume (22.4L at STP). Write balanced equation first. WASSCE Paper 2 calculation."},
+  {"q":"Which type of reaction is: CuO + H₂SO₄ → CuSO₄ + H₂O?","o":["Neutralization","Decomposition","Displacement","Combustion"],"a":0,"e":"Base (CuO) + Acid (H₂SO₄) → Salt + Water = Neutralization.","t":"Reaction types: WASSCE tests naming AND identifying from equations. Make a chart of types with examples."},
+  {"q":"In electrolysis of brine, what is produced at the cathode?","o":["Hydrogen","Chlorine","Sodium","Oxygen"],"a":0,"e":"At cathode (negative), H⁺ ions are reduced: 2H⁺ + 2e⁻ → H₂.","t":"Electrolysis: cathode = reduction (CATions go to CAThode). WASSCE tests products at each electrode."},
+  {"q":"An element has electronic configuration 2,8,7. Its likely ion is:","o":["X⁻","X⁷⁺","X⁺","X²⁻"],"a":0,"e":"7 outer electrons — needs 1 more for stable octet. Gains 1 electron → X⁻ (like chlorine).","t":"Electronic configuration → group → valency → ion charge. This chain of reasoning is WASSCE standard."},
+ ],"hard":[
+  {"q":"Calculate the enthalpy change: C + O₂ → CO₂, given C + ½O₂ → CO (ΔH=-110kJ) and CO + ½O₂ → CO₂ (ΔH=-283kJ).","o":["-393 kJ","-173 kJ","+393 kJ","-110 kJ"],"a":0,"e":"Hess's Law: add the two equations. ΔH = -110 + (-283) = -393 kJ.","t":"Hess's Law: WASSCE Theory. Energy is a state function — path doesn't matter. Add equations like algebra."},
+  {"q":"0.1M NaOH is titrated against 0.05M H₂SO₄. What volume of acid neutralizes 25ml of NaOH?","o":["25 ml","50 ml","12.5 ml","100 ml"],"a":0,"e":"2NaOH + H₂SO₄. Moles NaOH = 0.1×25 = 2.5mmol. Moles acid = 2.5/2 = 1.25mmol. Vol = 1.25/0.05 = 25ml.","t":"Titration: write balanced equation, find mole ratio, use C₁V₁/n₁ = C₂V₂/n₂. WASSCE practical and theory."},
+  {"q":"Which compound shows geometric (cis-trans) isomerism?","o":["But-2-ene","Ethene","Propane","Ethanol"],"a":0,"e":"But-2-ene: C=C with different groups on each carbon allows cis/trans forms.","t":"Isomerism: structural vs geometric vs optical. WASSCE asks students to draw both forms. C=C restricts rotation."},
+ ]},
+ "Reading Comprehension":{"easy":[
+  {"q":"'The government's education budget was slashed by 30%, leading to school closures across rural communities.' — What caused the school closures?","o":["Budget cuts","Natural disaster","Teacher strike","Student protests"],"a":0,"e":"The passage states the budget was 'slashed by 30%' which led to closures.","t":"WASSCE comprehension: identify cause and effect. Teach students to look for linking words: 'leading to', 'because', 'therefore'."},
+  {"q":"'Despite the drought, the farmers of Bong County managed to harvest enough rice to sustain their families through the dry season.' — What is the tone?","o":["Resilient / hopeful","Angry","Sad","Humorous"],"a":0,"e":"'Despite' shows challenge overcome. 'Managed to' shows resilience. Tone is hopeful.","t":"Tone questions: look at word choice. 'Despite' + 'managed' = overcoming. WASSCE tests tone, mood, attitude."},
+  {"q":"'Deforestation in the tropics has accelerated at an alarming rate.' — What does 'accelerated' mean here?","o":["Increased in speed","Slowed down","Stopped completely","Remained constant"],"a":0,"e":"'Accelerated' means sped up / increased. 'Alarming rate' confirms it's getting worse.","t":"Vocabulary in context: WASSCE gives unfamiliar words. Teach: look at surrounding words for clues. 'Alarming' = bad = getting worse."},
+ ],"medium":[
+  {"q":"'The author argues that technology alone cannot solve Africa's education crisis; rather, it must be coupled with trained teachers and culturally relevant curricula.' — What is the author's main argument?","o":["Technology needs teachers and relevant curricula to work","Technology is useless","Africa doesn't need technology","Curricula are already good"],"a":0,"e":"Key phrase: 'cannot solve alone... must be coupled with.' Author wants technology PLUS human/cultural elements.","t":"Argumentative comprehension: find the claim AND the qualifier. WASSCE asks 'What is the writer's view?' Look for 'rather', 'however', 'must'."},
+  {"q":"'She was the proverbial candle burning at both ends — teaching by day, farming by evening, and studying by lamplight.' — What figure of speech?","o":["Metaphor","Simile","Personification","Hyperbole"],"a":0,"e":"'Was the candle' (not 'like a candle') = metaphor. Describes exhausting double life.","t":"Simile uses 'like/as'. Metaphor says IS. WASSCE English Paper 1 tests these. Students collect examples from their own speech."},
+ ],"hard":[
+  {"q":"Read: 'The policy, while well-intentioned, failed to account for the socioeconomic realities of the communities it aimed to serve.' — The author's attitude is:","o":["Critically sympathetic","Fully supportive","Hostile","Indifferent"],"a":0,"e":"'Well-intentioned' = sympathetic. 'Failed to account' = critical. Both together = critically sympathetic.","t":"Advanced comprehension: authors can hold MIXED views. WASSCE rewards nuanced answers over simple ones."},
+  {"q":"'The minister's assertion that unemployment had decreased was contradicted by data showing a 15% rise in joblessness among youth.' — This is an example of:","o":["Irony","Metaphor","Alliteration","Flashback"],"a":0,"e":"The minister's claim is the OPPOSITE of reality — this is verbal/situational irony.","t":"WASSCE literary devices: irony = opposite of what's expected/stated. Teach with local examples: 'The fire station burned down.'"},
+ ]},
+}
+
+PRAISE = ["🌶️ Excellent! Teacher Pehpeh is proud!","🌶️ You're on FIRE!","🌶️ That's the pepper spirit!","🌶️ Outstanding! Getting stronger!","🌶️ Sharp like pepper!","🌶️ Brilliant! Hard work pays off!","🌶️ You nailed it!","🌶️ The village would be proud!"]
+ENCOURAGE = ["🌶️ Not quite — every mistake teaches!","🌶️ Close! Read explanation, try next one!","🌶️ Even the tallest palm started as seed. Keep growing!","🌶️ No worry! Let's learn together."]
+
+WASSCE_TIPS = """📝 WASSCE EXAM STRATEGY:\n\n1. ANSWER SHEET: HB pencil only. Shade completely. Erase cleanly. Check numbers match.\n2. ELIMINATION: Read ALL options. Cross out wrong ones. 'Always'/'never' usually wrong.\n3. TIME: Paper 1: ~1 min/question. Paper 2: start easiest. Leave 10 min to check.\n4. NIGHT BEFORE: Review only. Eat well, sleep early. Rested brain > tired cramming."""
+
+# === DROPDOWNS ===
+REGIONS={"Urban":"urban","Peri-Urban":"peri-urban","Rural":"rural","Remote / Island":"remote"}
+# Sub-Saharan African countries only
+COUNTRIES=["Liberia","Sierra Leone","Ghana","Nigeria","Kenya","Uganda","Tanzania","Ethiopia","Senegal","Cameroon","Gambia","Guinea","Côte d'Ivoire","Mali","Burkina Faso","Rwanda","Malawi","Zambia","Zimbabwe","Mozambique","South Africa","Botswana","Namibia","DRC","Angola","Togo","Benin","Niger","Chad","Somalia","Eritrea","Djibouti","South Sudan","Sudan","Central African Republic","Republic of Congo","Gabon","Equatorial Guinea","São Tomé and Príncipe","Cape Verde","Comoros","Madagascar","Mauritius","Seychelles","Eswatini","Lesotho","Burundi","Guinea-Bissau"]
+FLAGS={"Liberia":"🇱🇷","Sierra Leone":"🇸🇱","Ghana":"🇬🇭","Nigeria":"🇳🇬","Kenya":"🇰🇪","Uganda":"🇺🇬","Tanzania":"🇹🇿","Ethiopia":"🇪🇹","Senegal":"🇸🇳","Cameroon":"🇨🇲","Gambia":"🇬🇲","Guinea":"🇬🇳","Côte d'Ivoire":"🇨🇮","Mali":"🇲🇱","Burkina Faso":"🇧🇫","Rwanda":"🇷🇼","Malawi":"🇲🇼","Zambia":"🇿🇲","Zimbabwe":"🇿🇼","Mozambique":"🇲🇿","South Africa":"🇿🇦","Botswana":"🇧🇼","Namibia":"🇳🇦","DRC":"🇨🇩","Angola":"🇦🇴","Togo":"🇹🇬","Benin":"🇧🇯","Niger":"🇳🇪","Chad":"🇹🇩","Somalia":"🇸🇴","Eritrea":"🇪🇷","Djibouti":"🇩🇯","South Sudan":"🇸🇸","Sudan":"🇸🇩","Central African Republic":"🇨🇫","Republic of Congo":"🇨🇬","Gabon":"🇬🇦","Equatorial Guinea":"🇬🇶","São Tomé and Príncipe":"🇸🇹","Cape Verde":"🇨🇻","Comoros":"🇰🇲","Madagascar":"🇲🇬","Mauritius":"🇲🇺","Seychelles":"🇸🇨","Eswatini":"🇸🇿","Lesotho":"🇱🇸","Burundi":"🇧🇮","Guinea-Bissau":"🇬🇼"}
+GRADES=["9th Grade","10th Grade","11th Grade","12th Grade (WASSCE)"]
+SUBJECTS=["Mathematics","English Language","Integrated Science","Social Studies","Physics","Chemistry","Biology","Economics","Government / Civics","Literature in English","History","Geography","Agriculture","French","Religious Studies","Business Management","Accounting","Computer Studies / ICT","Technical Drawing","Home Economics","Physical Education","Art / Creative Arts","Music"]
+TOPICS={"Mathematics":["Number and Numeration","Fractions and Decimals","Percentages","Ratio and Proportion","Algebraic Expressions","Linear Equations","Quadratic Equations","Simultaneous Equations","Sets and Venn Diagrams","Trigonometry","Mensuration","Geometry","Statistics","Probability","Vectors","Logarithms","Indices and Surds"],
+"English Language":["Comprehension","Summary Writing","Essay (Narrative)","Essay (Argumentative)","Letter Writing (Formal)","Parts of Speech","Tenses","Active/Passive Voice","Punctuation","Vocabulary","Idioms"],
+"Physics":["Measurement","Motion","Newton's Laws","Work Energy Power","Simple Machines","Pressure","Heat Transfer","Gas Laws","Waves","Sound","Light","Electricity","Ohm's Law"],
+"Chemistry":["States of Matter","Atomic Structure","Periodic Table","Chemical Bonding","Reactions","Acids Bases Salts","Electrolysis","Organic Chemistry","Mole Concept"],
+"Biology":["Cell Structure","Cell Division","Photosynthesis","Human Body Systems","Reproduction","Genetics","Evolution","Ecology","Diseases and Immunity"],
+"Integrated Science":["Scientific Method","Cells","Photosynthesis","Respiration","Human Body","Ecology","Matter","Energy","Electricity"],
+}
+DEF_TOPICS=["Core Concepts","Key Terms","Applications","Review","Exam Practice"]
+FR_DEF_TOPICS=["Concepts fondamentaux","Termes clés","Applications","Révision","Préparation examen"]
+SW_DEF_TOPICS=["Dhana za Msingi","Maneno Muhimu","Matumizi","Mapitio","Mazoezi ya Mtihani"]
+# Topic translations: {English subject: {English topic: {fr:..., sw:...}}}
+FR_TOPICS={"Mathematics":["Nombres et numération","Fractions et décimales","Pourcentages","Rapport et proportion","Expressions algébriques","Équations linéaires","Équations quadratiques","Équations simultanées","Ensembles et diagrammes de Venn","Trigonométrie","Mensuration","Géométrie","Statistiques","Probabilité","Vecteurs","Logarithmes","Indices et radicaux"],
+"English Language":["Compréhension","Résumé","Rédaction (narratif)","Rédaction (argumentatif)","Lettre formelle","Parties du discours","Temps verbaux","Voix active/passive","Ponctuation","Vocabulaire","Expressions idiomatiques"],
+"Physics":["Mesure","Mouvement","Lois de Newton","Travail Énergie Puissance","Machines simples","Pression","Transfert thermique","Lois des gaz","Ondes","Son","Lumière","Électricité","Loi d'Ohm"],
+"Chemistry":["États de la matière","Structure atomique","Tableau périodique","Liaisons chimiques","Réactions","Acides Bases Sels","Électrolyse","Chimie organique","Concept de mole"],
+"Biology":["Structure cellulaire","Division cellulaire","Photosynthèse","Systèmes du corps humain","Reproduction","Génétique","Évolution","Écologie","Maladies et immunité"],
+"Integrated Science":["Méthode scientifique","Cellules","Photosynthèse","Respiration","Corps humain","Écologie","Matière","Énergie","Électricité"]}
+SW_TOPICS={"Mathematics":["Nambari na Uhesabuji","Sehemu na Desimali","Asilimia","Uwiano","Misemo ya Aljebra","Mlingano wa Mstari","Mlingano wa Pili","Mlingano Sawia","Seti na Michoro ya Venn","Trigonometria","Vipimo","Jiometri","Takwimu","Uwezekano","Vekta","Logarithimu","Indeksi na Mizizi"],
+"English Language":["Ufahamu","Muhtasari","Insha (Masimulizi)","Insha (Hoja)","Uandishi Barua Rasmi","Sehemu za Hotuba","Nyakati","Sauti Tendaji/Tendewa","Alama za Uandishi","Msamiati","Nahau"],
+"Physics":["Vipimo","Mwendo","Sheria za Newton","Kazi Nishati Nguvu","Mashine Rahisi","Shinikizo","Uhamishaji Joto","Sheria za Gesi","Mawimbi","Sauti","Mwanga","Umeme","Sheria ya Ohm"],
+"Chemistry":["Hali za Maada","Muundo wa Atomu","Jedwali la Vipindi","Vifungo vya Kemikali","Athari","Asidi Besi Chumvi","Elektrolisisi","Kemia Hai","Dhana ya Moli"],
+"Biology":["Muundo wa Seli","Mgawanyiko wa Seli","Usanisinuru","Mifumo ya Mwili","Uzazi","Jenetiki","Mageuzi","Ikolojia","Magonjwa na Kinga"],
+"Integrated Science":["Njia ya Kisayansi","Seli","Usanisinuru","Upumuaji","Mwili wa Binadamu","Ikolojia","Maada","Nishati","Umeme"]}
+# Build topic display→English maps
+_TOPIC_TO_EN={}
+for subj_en,en_topics in TOPICS.items():
+    for fr_t,en_t in zip(FR_TOPICS.get(subj_en,[]),en_topics): _TOPIC_TO_EN[fr_t]=en_t
+    for sw_t,en_t in zip(SW_TOPICS.get(subj_en,[]),en_topics): _TOPIC_TO_EN[sw_t]=en_t
+for fr_t,en_t in zip(FR_DEF_TOPICS,DEF_TOPICS): _TOPIC_TO_EN[fr_t]=en_t
+for sw_t,en_t in zip(SW_DEF_TOPICS,DEF_TOPICS): _TOPIC_TO_EN[sw_t]=en_t
+def _get_topics(subj_en):
+    lk=_lang_key()
+    if lk=="fr": return FR_TOPICS.get(subj_en,FR_DEF_TOPICS)
+    if lk=="sw": return SW_TOPICS.get(subj_en,SW_DEF_TOPICS)
+    return TOPICS.get(subj_en,DEF_TOPICS)
+def _to_en_topic(t): return _TOPIC_TO_EN.get(t,t)
+# Quiz subject translations
+_QUIZ_SUBJ_FR={"Mathematics":"Mathématiques","Physics":"Physique","Biology":"Biologie","Chemistry":"Chimie","Reading Comprehension":"Compréhension écrite"}
+_QUIZ_SUBJ_SW={"Mathematics":"Hisabati","Physics":"Fizikia","Biology":"Biolojia","Chemistry":"Kemia","Reading Comprehension":"Ufahamu wa Kusoma"}
+_QUIZ_SUBJ_TO_EN={v:k for k,v in _QUIZ_SUBJ_FR.items()}
+_QUIZ_SUBJ_TO_EN.update({v:k for k,v in _QUIZ_SUBJ_SW.items()})
+def _quiz_subjects():
+    lk=_lang_key()
+    if lk=="fr": return [_QUIZ_SUBJ_FR.get(k,k) for k in QUIZ.keys()]
+    if lk=="sw": return [_QUIZ_SUBJ_SW.get(k,k) for k in QUIZ.keys()]
+    return list(QUIZ.keys())
+def _quiz_subj_en(s): return _QUIZ_SUBJ_TO_EN.get(s,s)
+# Francophone countries for auto-switch
+FRANCOPHONE={"Côte d'Ivoire","Senegal","Cameroon","Mali","Burkina Faso","Niger","Chad","Guinea","Togo","Benin","Central African Republic","Republic of Congo","Gabon","Equatorial Guinea","DRC","Djibouti","Comoros","Madagascar","Burundi","Guinea-Bissau","São Tomé and Príncipe"}
+# Swahili-speaking countries
+SWAHILI_COUNTRIES={"Kenya","Tanzania","Uganda","DRC","Rwanda","Burundi"}
+TASKS={"Lesson Plan":"detailed lesson plan","Quiz (10 Q)":"10-question quiz with answer key","Quiz (20 Q)":"20-question quiz","WASSCE MCQ (50)":"50 WASSCE-style MCQs","WASSCE Theory":"WASSCE theory questions","BECE Exam":"BECE-style exam","Homework":"homework with minimal resources","Group Activity":"group activity","Reading Comprehension":"reading passage with questions","No-Lab Practical":"hands-on zero-cost activity","Rubric":"grading rubric","Strategy Guide":"teaching strategies","Parent Letter":"parent communication","Weekly Scheme":"5-day scheme of work","Term Scheme":"term plan","Remedial Material":"catch-up material","Study Notes":"revision guide","Educational Game":"zero-cost teaching game","Illustrated Lesson (AI image)":"lesson with AI-generated visual"}
+SIZES={"Small (<25)":"<25 students","Medium (25-40)":"25-40","Large (40-60)":"40-60","Very Large (60+)":"60+"}
+RESOURCES={"Chalkboard only":"chalkboard/chalk only","+ shared textbooks":"chalkboard + shared textbooks","+ handouts":"+ printable handouts","Computer/projector":"occasional tech","Phones/tablets":"student devices","Well-equipped":"regular tech"}
+LANGS={"English":"English","Français":"French","Kiswahili":"Swahili"}
+# UI Translations
+UI_TEXT={
+ "en":{
+  "generate":"📋 Generate","chat":"💬 Chat","quiz":"🌶️ Quiz","students":"🧑‍🎓 Students",
+  "task":"Task","time":"Time","topic":"Topic","options":"Options","subject":"Subject","grade":"Grade",
+  "country":"Country","setting":"Setting","class_size":"Class Size","resources":"Resources",
+  "language":"Language","student_level":"Student Level","school_name":"🏫 School Name",
+  "school_placeholder":"e.g., Bahn, St. Martin's","my_classroom":"My Classroom","my_students":"My Students",
+  "gen_btn":"🌶️ Generate","clear":"🗑️ Clear","hear":"🔊 Hear Results","grade_work":"Grade Work",
+  "grade_btn":"🌶️ Grade","students_work":"Student's work:","offline_title":"📴 Offline — Practice Quiz",
+  "offline_msg":"No internet? These quizzes work offline!","practice_quiz":"Practice Quiz",
+  "adaptive":"Adaptive. Works offline too!","score":"Score","level":"Level","next":"➡️ Next",
+  "reset":"🔄 Reset","wassce_tips":"📝 WASSCE Tips","add_student":"Add Student","name":"Name",
+  "upload_excel":"📤 Upload Excel","lit_library":"📚 Literature Library",
+  "lit_desc":"Select a novel for passage-based comprehension exercises","select_book":"📖 Select Book",
+  "comp_type":"Comprehension Type","include_img":"🎨 Include AI illustration",
+  "img_help":"Generates a visual aid using DALL-E or Google Imagen",
+  "ask_about":"Ask about","draw_hint":"(start with 'draw' for images)",
+  "mic_hint":"🎤 Tap mic to speak instead of typing","heard":"🎤 Heard",
+  "email_result":"📧 Email / Download this result","recheck":"🔄 Re-check",
+  "voice_ready":"🔊 Voice Ready","no_models":"🤖 No models","offline":"OFFLINE",
+  "generating":"🔊 Generating audio...","transcribing":"🎤 Transcribing your voice...",
+  "audio_failed":"Audio failed","try_again":"Try again",
+  "assignments":"Personalized Assignments","risk_flags":"Risk & Support Flags",
+  "no_students":"No students added yet","single_period":"Single period (30-40 min)",
+  "double":"Double (60-80 min)","half_day":"Half day","full_day":"Full day","weekly":"Weekly","na":"N/A",
+  "differentiation":"Differentiation","formative":"Formative assessment","takehome":"Take-home activity",
+  "wassce_align":"WASSCE alignment","local_ex":"Local examples","literacy":"Literacy integration",
+  "large_class":"Large-class strategies","cross_curr":"Cross-curricular","ai_visual":"AI visual aid",
+  "pass_short":"Passage + Short Answer Questions","pass_fill":"Passage + Fill in the Blanks",
+  "pass_essay":"Passage + Essay Prompt","pass_mcq":"Passage + MCQ",
+  "pass_vocab":"Passage + Vocabulary Exercise","full_comp":"Full Comprehension (All Types)",
+  "assignment":"📝 Assignment","risk":"⚠️ Risk Analysis","creating":"Creating...",
+  "see_all":"📋 See all","model_responses":"model responses","streak":"streak",
+  "generating_content":"🌶️ Teacher Pehpeh is cooking...","done":"✅ Done! Content is ready!",
+  "ask_tp":"Ask Teacher Pehpeh","thinking":"🌶️ Teacher Pehpeh is thinking...","response_ready":"✅ Response ready!",
+  "asking_claude":"🟣 Asking Claude...","asking_chatgpt":"🟢 Asking ChatGPT...","asking_gemini":"🔵 Asking Gemini...",
+  "chat_ex1":"How to teach fractions with no textbooks?","chat_ex2":"My students keep failing WASSCE.","chat_ex3":"Managing 60+ students?",
+  "combining":"🔀 Combining the best...","creating_img":"🎨 Creating illustration...",
+ },
+ "fr":{
+  "generate":"📋 Générer","chat":"💬 Discussion","quiz":"🌶️ Quiz","students":"🧑‍🎓 Élèves",
+  "task":"Tâche","time":"Durée","topic":"Sujet","options":"Options","subject":"Matière","grade":"Classe",
+  "country":"Pays","setting":"Contexte","class_size":"Taille de classe","resources":"Ressources",
+  "language":"Langue","student_level":"Niveau des élèves","school_name":"🏫 Nom de l'école",
+  "school_placeholder":"ex: Bahn, St. Martin's","my_classroom":"Ma Classe","my_students":"Mes Élèves",
+  "gen_btn":"🌶️ Générer","clear":"🗑️ Effacer","hear":"🔊 Écouter","grade_work":"Noter le travail",
+  "grade_btn":"🌶️ Noter","students_work":"Travail de l'élève :","offline_title":"📴 Hors ligne — Quiz pratique",
+  "offline_msg":"Pas d'internet ? Ces quiz fonctionnent hors ligne !","practice_quiz":"Quiz pratique",
+  "adaptive":"Adaptatif. Fonctionne hors ligne aussi !","score":"Score","level":"Niveau","next":"➡️ Suivant",
+  "reset":"🔄 Réinitialiser","wassce_tips":"📝 Conseils WASSCE","add_student":"Ajouter un élève","name":"Nom",
+  "upload_excel":"📤 Télécharger Excel","lit_library":"📚 Bibliothèque littéraire",
+  "lit_desc":"Sélectionnez un roman pour des exercices de compréhension","select_book":"📖 Choisir un livre",
+  "comp_type":"Type de compréhension","include_img":"🎨 Inclure une illustration IA",
+  "img_help":"Génère une aide visuelle avec DALL-E ou Google Imagen",
+  "ask_about":"Posez une question sur","draw_hint":"(commencez par 'dessiner' pour images)",
+  "mic_hint":"🎤 Appuyez sur le micro pour parler","heard":"🎤 Entendu",
+  "email_result":"📧 Envoyer / Télécharger ce résultat","recheck":"🔄 Vérifier",
+  "voice_ready":"🔊 Voix prête","no_models":"🤖 Aucun modèle","offline":"HORS LIGNE",
+  "generating":"🔊 Génération audio...","transcribing":"🎤 Transcription en cours...",
+  "audio_failed":"Échec audio","try_again":"Réessayer",
+  "assignments":"Devoirs personnalisés","risk_flags":"Signaux de risque et soutien",
+  "no_students":"Aucun élève ajouté","single_period":"Période simple (30-40 min)",
+  "double":"Double (60-80 min)","half_day":"Demi-journée","full_day":"Journée complète","weekly":"Hebdomadaire","na":"N/A",
+  "differentiation":"Différenciation","formative":"Évaluation formative","takehome":"Activité à emporter",
+  "wassce_align":"Alignement WASSCE","local_ex":"Exemples locaux","literacy":"Intégration de la lecture",
+  "large_class":"Stratégies grande classe","cross_curr":"Interdisciplinaire","ai_visual":"Aide visuelle IA",
+  "pass_short":"Passage + Questions courtes","pass_fill":"Passage + Texte à trous",
+  "pass_essay":"Passage + Sujet de rédaction","pass_mcq":"Passage + QCM",
+  "pass_vocab":"Passage + Exercice de vocabulaire","full_comp":"Compréhension complète (Tous types)",
+  "assignment":"📝 Devoir","risk":"⚠️ Analyse de risque","creating":"Création en cours...",
+  "see_all":"📋 Voir tous les","model_responses":"réponses des modèles","streak":"série",
+  "generating_content":"🌶️ Teacher Pehpeh prépare...","done":"✅ Terminé ! Le contenu est prêt !",
+  "ask_tp":"Demandez à Teacher Pehpeh","thinking":"🌶️ Teacher Pehpeh réfléchit...","response_ready":"✅ Réponse prête !",
+  "asking_claude":"🟣 Consultation de Claude...","asking_chatgpt":"🟢 Consultation de ChatGPT...","asking_gemini":"🔵 Consultation de Gemini...",
+  "chat_ex1":"Comment enseigner les fractions sans manuels ?","chat_ex2":"Mes élèves échouent au WASSCE.","chat_ex3":"Gérer plus de 60 élèves ?",
+  "combining":"🔀 Combinaison des meilleurs...","creating_img":"🎨 Création d'illustration...",
+ },
+ "sw":{
+  "generate":"📋 Tengeneza","chat":"💬 Mazungumzo","quiz":"🌶️ Maswali","students":"🧑‍🎓 Wanafunzi",
+  "task":"Kazi","time":"Muda","topic":"Mada","options":"Chaguzi","subject":"Somo","grade":"Darasa",
+  "country":"Nchi","setting":"Mazingira","class_size":"Ukubwa wa darasa","resources":"Rasilimali",
+  "language":"Lugha","student_level":"Kiwango cha wanafunzi","school_name":"🏫 Jina la shule",
+  "school_placeholder":"k.m., Bahn, St. Martin's","my_classroom":"Darasa Langu","my_students":"Wanafunzi Wangu",
+  "gen_btn":"🌶️ Tengeneza","clear":"🗑️ Futa","hear":"🔊 Sikiliza","grade_work":"Sahihisha Kazi",
+  "grade_btn":"🌶️ Sahihisha","students_work":"Kazi ya mwanafunzi:","offline_title":"📴 Nje ya mtandao — Maswali ya mazoezi",
+  "offline_msg":"Hakuna mtandao? Maswali haya yanafanya kazi nje ya mtandao!","practice_quiz":"Maswali ya Mazoezi",
+  "adaptive":"Yanabadilika. Yanafanya kazi nje ya mtandao pia!","score":"Alama","level":"Kiwango","next":"➡️ Ifuatayo",
+  "reset":"🔄 Weka upya","wassce_tips":"📝 Vidokezo vya WASSCE","add_student":"Ongeza mwanafunzi","name":"Jina",
+  "upload_excel":"📤 Pakia Excel","lit_library":"📚 Maktaba ya Vitabu",
+  "lit_desc":"Chagua riwaya kwa mazoezi ya ufahamu wa kusoma","select_book":"📖 Chagua Kitabu",
+  "comp_type":"Aina ya ufahamu","include_img":"🎨 Jumuisha mchoro wa AI",
+  "img_help":"Inatengeneza msaada wa kuona kwa DALL-E au Google Imagen",
+  "ask_about":"Uliza kuhusu","draw_hint":"(anza na 'chora' kwa picha)",
+  "mic_hint":"🎤 Bonyeza maikrofoni kusema badala ya kuandika","heard":"🎤 Imesikika",
+  "email_result":"📧 Tuma / Pakua matokeo haya","recheck":"🔄 Angalia tena",
+  "voice_ready":"🔊 Sauti tayari","no_models":"🤖 Hakuna modeli","offline":"NJE YA MTANDAO",
+  "generating":"🔊 Inatengeneza sauti...","transcribing":"🎤 Inabadilisha sauti kuwa maandishi...",
+  "audio_failed":"Sauti imeshindwa","try_again":"Jaribu tena",
+  "assignments":"Kazi za kibinafsi","risk_flags":"Ishara za hatari na msaada",
+  "no_students":"Hakuna wanafunzi walioongezwa","single_period":"Kipindi kimoja (dak 30-40)",
+  "double":"Mara mbili (dak 60-80)","half_day":"Nusu siku","full_day":"Siku nzima","weekly":"Kila wiki","na":"H/T",
+  "differentiation":"Utofautishaji","formative":"Tathmini ya mchakato","takehome":"Kazi ya nyumbani",
+  "wassce_align":"Ulinganifu wa WASSCE","local_ex":"Mifano ya mahali","literacy":"Ujumuishaji wa kusoma",
+  "large_class":"Mikakati ya darasa kubwa","cross_curr":"Mtambuka","ai_visual":"Msaada wa kuona wa AI",
+  "pass_short":"Kifungu + Maswali mafupi","pass_fill":"Kifungu + Jaza nafasi",
+  "pass_essay":"Kifungu + Swali la insha","pass_mcq":"Kifungu + Maswali ya kuchagua",
+  "pass_vocab":"Kifungu + Zoezi la msamiati","full_comp":"Ufahamu kamili (Aina zote)",
+  "assignment":"📝 Kazi","risk":"⚠️ Uchambuzi wa hatari","creating":"Inatengeneza...",
+  "see_all":"📋 Tazama zote","model_responses":"majibu ya modeli","streak":"mfululizo",
+  "generating_content":"🌶️ Teacher Pehpeh anapika...","done":"✅ Imekamilika! Maudhui yako tayari!",
+  "ask_tp":"Muulize Teacher Pehpeh","thinking":"🌶️ Teacher Pehpeh anafikiria...","response_ready":"✅ Jibu liko tayari!",
+  "asking_claude":"🟣 Kuuliza Claude...","asking_chatgpt":"🟢 Kuuliza ChatGPT...","asking_gemini":"🔵 Kuuliza Gemini...",
+  "chat_ex1":"Jinsi ya kufundisha sehemu bila vitabu?","chat_ex2":"Wanafunzi wangu wanashindwa WASSCE.","chat_ex3":"Kusimamia wanafunzi 60+?",
+  "combining":"🔀 Kuchanganya bora zaidi...","creating_img":"🎨 Kuunda mchoro...",
+ }
+}
+def _lang_key():
+    """Get current UI language key from session state."""
+    lk=st.session_state.get("lang_sel","English")
+    if "Français" in lk or "French" in lk: return "fr"
+    if "Kiswahili" in lk or "Swahili" in lk: return "sw"
+    return "en"
+def T(key):
+    """Get translated UI string."""
+    lk=_lang_key()
+    return UI_TEXT.get(lk,UI_TEXT["en"]).get(key,UI_TEXT["en"].get(key,key))
+ABILITY={"Mixed":"mixed-ability","Struggling":"below grade level","On level":"at expected level","Advanced":"needs challenge","Inclusive":"includes learning differences"}
+TIMES=["Single period (30-40 min)","Double (60-80 min)","Half day","Full day","Weekly","N/A"]
+EXTRAS=["Differentiation","Formative assessment","Take-home activity","WASSCE alignment","Local examples","Literacy integration","Large-class strategies","Cross-curricular","AI visual aid"]
+
+# French dropdown translations (display→English value for AI)
+FR_TASKS={"Plan de cours":"detailed lesson plan","Quiz (10 Q)":"10-question quiz with answer key","Quiz (20 Q)":"20-question quiz","QCM WASSCE (50)":"50 WASSCE-style MCQs","Théorie WASSCE":"WASSCE theory questions","Examen BECE":"BECE-style exam","Devoirs":"homework with minimal resources","Activité de groupe":"group activity","Compréhension écrite":"reading passage with questions","Pratique sans labo":"hands-on zero-cost activity","Grille d'évaluation":"grading rubric","Guide stratégique":"teaching strategies","Lettre aux parents":"parent communication","Plan hebdomadaire":"5-day scheme of work","Plan trimestriel":"term plan","Rattrapage":"catch-up material","Notes de révision":"revision guide","Jeu éducatif":"zero-cost teaching game","Leçon illustrée (image IA)":"lesson with AI-generated visual"}
+FR_GRADES=["9e année","10e année","11e année","12e année (WASSCE)"]
+FR_SUBJECTS=["Mathématiques","Langue anglaise","Sciences intégrées","Études sociales","Physique","Chimie","Biologie","Économie","Gouvernement / Éducation civique","Littérature anglaise","Histoire","Géographie","Agriculture","Français","Études religieuses","Gestion des affaires","Comptabilité","Informatique / TIC","Dessin technique","Économie domestique","Éducation physique","Art / Arts créatifs","Musique"]
+FR_SIZES={"Petit (<25)":"<25 students","Moyen (25-40)":"25-40","Grand (40-60)":"40-60","Très grand (60+)":"60+"}
+FR_RESOURCES={"Tableau noir seul":"chalkboard/chalk only","+ manuels partagés":"chalkboard + shared textbooks","+ polycopiés":"+ printable handouts","Ordinateur/projecteur":"occasional tech","Téléphones/tablettes":"student devices","Bien équipé":"regular tech"}
+FR_ABILITY={"Mixte":"mixed-ability","En difficulté":"below grade level","Au niveau":"at expected level","Avancé":"needs challenge","Inclusif":"includes learning differences"}
+FR_TIMES=["Période simple (30-40 min)","Double (60-80 min)","Demi-journée","Journée complète","Hebdomadaire","N/A"]
+FR_EXTRAS=["Différenciation","Évaluation formative","Activité à emporter","Alignement WASSCE","Exemples locaux","Intégration lecture","Stratégies grande classe","Interdisciplinaire","Aide visuelle IA"]
+FR_REGIONS={"Urbain":"urban","Péri-urbain":"peri-urban","Rural":"rural","Éloigné / Île":"remote"}
+# Swahili dropdown translations
+SW_TASKS={"Mpango wa Somo":"detailed lesson plan","Maswali (10)":"10-question quiz with answer key","Maswali (20)":"20-question quiz","QCM WASSCE (50)":"50 WASSCE-style MCQs","Nadharia WASSCE":"WASSCE theory questions","Mtihani BECE":"BECE-style exam","Kazi ya Nyumbani":"homework with minimal resources","Shughuli ya Kikundi":"group activity","Ufahamu wa Kusoma":"reading passage with questions","Mazoezi bila Maabara":"hands-on zero-cost activity","Rubriiki":"grading rubric","Mwongozo wa Mkakati":"teaching strategies","Barua kwa Mzazi":"parent communication","Mpango wa Wiki":"5-day scheme of work","Mpango wa Muhula":"term plan","Nyenzo za Kufidia":"catch-up material","Muhtasari wa Masomo":"revision guide","Mchezo wa Kielimu":"zero-cost teaching game","Somo Lenye Mchoro (picha AI)":"lesson with AI-generated visual"}
+SW_GRADES=["Darasa la 9","Darasa la 10","Darasa la 11","Darasa la 12 (WASSCE)"]
+SW_SUBJECTS=["Hisabati","Lugha ya Kiingereza","Sayansi Jumuishi","Maarifa ya Jamii","Fizikia","Kemia","Biolojia","Uchumi","Serikali / Uraia","Fasihi ya Kiingereza","Historia","Jiografia","Kilimo","Kifaransa","Masomo ya Dini","Usimamizi wa Biashara","Uhasibu","Kompyuta / TEHAMA","Uchora Ufundi","Uchumi wa Nyumbani","Elimu ya Mwili","Sanaa / Sanaa Bunifu","Muziki"]
+SW_SIZES={"Ndogo (<25)":"<25 students","Wastani (25-40)":"25-40","Kubwa (40-60)":"40-60","Kubwa sana (60+)":"60+"}
+SW_RESOURCES={"Ubao tu":"chalkboard/chalk only","+ vitabu vya kushiriki":"chalkboard + shared textbooks","+ nakala":"+ printable handouts","Kompyuta/projekta":"occasional tech","Simu/tableti":"student devices","Vifaa kamili":"regular tech"}
+SW_ABILITY={"Mchanganyiko":"mixed-ability","Wanaoshindwa":"below grade level","Kiwango sahihi":"at expected level","Wenye uwezo":"needs challenge","Jumuishi":"includes learning differences"}
+SW_TIMES=["Kipindi kimoja (dak 30-40)","Mara mbili (dak 60-80)","Nusu siku","Siku nzima","Kila wiki","H/T"]
+SW_EXTRAS=["Utofautishaji","Tathmini ya mchakato","Kazi ya nyumbani","Ulinganifu WASSCE","Mifano ya mahali","Ujumuishaji kusoma","Mikakati darasa kubwa","Mtambuka","Msaada wa kuona AI"]
+SW_REGIONS={"Mjini":"urban","Pembezoni mwa mji":"peri-urban","Vijijini":"rural","Mbali / Kisiwa":"remote"}
+# Grade/Subject mappings (French display→English value)
+_GRADE_MAP={**dict(zip(FR_GRADES,GRADES)),**dict(zip(SW_GRADES,GRADES))}
+_SUBJ_MAP={**dict(zip(FR_SUBJECTS,SUBJECTS)),**dict(zip(SW_SUBJECTS,SUBJECTS))}
+_TIME_MAP={**dict(zip(FR_TIMES,TIMES)),**dict(zip(SW_TIMES,TIMES))}
+def _tasks(): lk=_lang_key(); return FR_TASKS if lk=="fr" else SW_TASKS if lk=="sw" else TASKS
+def _grades(): lk=_lang_key(); return FR_GRADES if lk=="fr" else SW_GRADES if lk=="sw" else GRADES
+def _subjects(): lk=_lang_key(); return FR_SUBJECTS if lk=="fr" else SW_SUBJECTS if lk=="sw" else SUBJECTS
+def _sizes(): lk=_lang_key(); return FR_SIZES if lk=="fr" else SW_SIZES if lk=="sw" else SIZES
+def _resources(): lk=_lang_key(); return FR_RESOURCES if lk=="fr" else SW_RESOURCES if lk=="sw" else RESOURCES
+def _ability(): lk=_lang_key(); return FR_ABILITY if lk=="fr" else SW_ABILITY if lk=="sw" else ABILITY
+def _times(): lk=_lang_key(); return FR_TIMES if lk=="fr" else SW_TIMES if lk=="sw" else TIMES
+def _extras(): lk=_lang_key(); return FR_EXTRAS if lk=="fr" else SW_EXTRAS if lk=="sw" else EXTRAS
+def _regions(): lk=_lang_key(); return FR_REGIONS if lk=="fr" else SW_REGIONS if lk=="sw" else REGIONS
+def _to_en_grade(g): return _GRADE_MAP.get(g,g)
+def _to_en_subj(s): return _SUBJ_MAP.get(s,s)
+
+# Literature library for Reading Comprehension
+LITERATURE={
+    "Julius Caesar — William Shakespeare":{"author":"William Shakespeare","origin":"England","genre":"Tragedy/Drama","themes":"Power, betrayal, ambition, loyalty, rhetoric","wassce":"WASSCE Literature set text"},
+    "Things Fall Apart — Chinua Achebe":{"author":"Chinua Achebe","origin":"Nigeria","genre":"Novel","themes":"Colonialism, tradition vs change, masculinity, cultural identity","wassce":"WASSCE Literature set text"},
+    "The African Child — Camara Laye":{"author":"Camara Laye","origin":"Guinea","genre":"Autobiography","themes":"Childhood, tradition, education, family, cultural heritage","wassce":"WASSCE Literature set text"},
+    "Weep Not, Child — Ngũgĩ wa Thiong'o":{"author":"Ngũgĩ wa Thiong'o","origin":"Kenya","genre":"Novel","themes":"Education, colonialism, Mau Mau uprising, family, hope","wassce":"WASSCE Literature set text"},
+    "Murder in the Cassava Patch — Bediako Asare":{"author":"Bediako Asare","origin":"Ghana","genre":"Novel","themes":"Justice, rural life, mystery, social commentary","wassce":"Common African set text"},
+    "Hamlet — William Shakespeare":{"author":"William Shakespeare","origin":"England","genre":"Tragedy","themes":"Revenge, mortality, madness, duty, corruption","wassce":"WASSCE Literature option"},
+    "The River Between — Ngũgĩ wa Thiong'o":{"author":"Ngũgĩ wa Thiong'o","origin":"Kenya","genre":"Novel","themes":"Cultural conflict, education, tradition vs modernity, love","wassce":"African literature"},
+    "Anthills of the Savannah — Chinua Achebe":{"author":"Chinua Achebe","origin":"Nigeria","genre":"Novel","themes":"Power, corruption, friendship, social justice","wassce":"African literature"},
+    "The Beautyful Ones Are Not Yet Born — Ayi Kwei Armah":{"author":"Ayi Kwei Armah","origin":"Ghana","genre":"Novel","themes":"Corruption, morality, post-independence disillusionment","wassce":"African literature"},
+    "So Long a Letter — Mariama Bâ":{"author":"Mariama Bâ","origin":"Senegal","genre":"Epistolary novel","themes":"Women's rights, polygamy, friendship, tradition, grief","wassce":"African literature"},
+    "Nervous Conditions — Tsitsi Dangarembga":{"author":"Tsitsi Dangarembga","origin":"Zimbabwe","genre":"Novel","themes":"Gender, colonialism, education, identity, poverty","wassce":"African literature"},
+    "Half of a Yellow Sun — Chimamanda Ngozi Adichie":{"author":"Chimamanda Ngozi Adichie","origin":"Nigeria","genre":"Novel","themes":"War, love, identity, class, Biafran conflict","wassce":"Modern African literature"},
+    "Teacher's Own Selection":{"author":"—","origin":"—","genre":"—","themes":"Teacher provides custom text or topic","wassce":"Custom"},
+}
+
+# === LOGO ===
+def get_b64():
+    d=os.path.dirname(os.path.abspath(__file__))
+    for n in [LOGO_FILENAME,"logo.png"]:
+        p=os.path.join(d,n)
+        if os.path.exists(p):
+            with open(p,"rb") as f: return base64.b64encode(f.read()).decode()
+    return None
+
+def show_logo(country=None):
+    b=get_b64()
+    flag=FLAGS.get(country,"") if country else ""
+    if b: st.markdown(f'<div style="text-align:center;padding:.8rem 0 .2rem;display:flex;align-items:center;justify-content:center;gap:16px"><span style="font-size:3rem">{flag}</span><img src="data:image/png;base64,{b}" style="max-height:170px;filter:drop-shadow(0 4px 12px rgba(212,168,67,.3))"><span style="font-size:3rem">{flag}</span></div>',unsafe_allow_html=True)
+    else: st.markdown(f'<div style="text-align:center"><h1 style="color:{C_GOLD}">{flag} 🌶️ Teacher Pehpeh by IBT {flag}</h1></div>',unsafe_allow_html=True)
+
+def ico(s=20):
+    b=get_b64()
+    return f'<img src="data:image/png;base64,{b}" style="height:{s}px;width:{s}px;vertical-align:middle;border-radius:50%">' if b else "🌶️"
+
+def pprog(stg,tot,msg):
+    b=get_b64(); lit=min(stg,tot); pct=int(lit/tot*100)
+    # Animated pepper icons filling up with pulsing "Generating" text
+    pepfill="".join(f'<img src="data:image/png;base64,{b}" style="height:40px;width:40px;margin:0 4px;opacity:{"1" if i<lit else ".15"};{"animation:peppop .4s ease;" if i==lit-1 else ""}{"filter:grayscale(100%);" if i>=lit else ""}border-radius:50%;transition:all .3s">' for i in range(tot)) if b else ""
+    pepfill_fallback="".join(f'<span style="font-size:28px;margin:0 3px;opacity:{"1" if i<lit else ".2"};{"animation:peppop .4s ease;" if i==lit-1 else ""}transition:all .3s">🌶️</span>' for i in range(tot))
+    icons=pepfill if b else pepfill_fallback
+    # Status messages with model icons
+    status_icon={"🌶️ Teacher Pehpeh is cooking...":"🌶️","Asking ChatGPT...":"🟢","Asking Claude...":"🟣","Asking Gemini...":"🔵","Combining the best...":"🔀","🎨 Creating illustration...":"🎨","✅ Done! Content is ready!":"✅"}.get(msg,"🌶️")
+    done_class="animation:none;color:#10B981" if "Done" in msg else "animation:genpulse 1.2s ease-in-out infinite"
+    return f'''<style>
+@keyframes genpulse {{ 0%,100%{{opacity:.7;transform:scale(1)}} 50%{{opacity:1;transform:scale(1.03)}} }}
+@keyframes peppop {{ 0%{{transform:scale(0.3);opacity:0}} 50%{{transform:scale(1.2)}} 100%{{transform:scale(1);opacity:1}} }}
+@keyframes barshine {{ 0%{{background-position:-200% 0}} 100%{{background-position:200% 0}} }}
+</style>
+<div style="background:{C_NAVY_L};border:2px solid {C_GOLD};border-radius:16px;padding:20px 24px;margin:12px 0;text-align:center">
+<div style="display:flex;justify-content:center;align-items:center;margin-bottom:14px;flex-wrap:wrap">{icons}</div>
+<div style="background:#1a2744;border-radius:10px;height:14px;overflow:hidden;margin-bottom:12px;border:1px solid #2d3748">
+<div style="background:linear-gradient(90deg,{C_RED},{C_GOLD},{C_RED});background-size:200% 100%;animation:barshine 2s linear infinite;height:100%;width:{pct}%;border-radius:10px;transition:width .5s ease"></div></div>
+<div style="{done_class};font-size:1.1rem;font-weight:700;color:{C_GOLD};letter-spacing:.5px">{status_icon} {msg}</div>
+</div>'''
+
+# === PROMPTS ===
+def _p():
+    return "You are Teacher Pehpeh — AI teaching assistant by IBT. Warm, wise, practical. Speak like a trusted teacher/village elder. African idioms, proverbs, analogies (fetching water, clearing farm, cassava). Liberian terms. Cheerful, encouraging."
+def _g():
+    return "Groups: 1(0-4 siblings,most time), 2(5-8,limited), 3(8+,very little). Consider socioeconomic, computer access, parents' ed."
+def _r():
+    return "Rules: stated resources only, max 3 problems/group, self-contained tips, WAEC format for exams, African context, Socratic method, print-ready. Use **bold** for key terms, objectives, important concepts, and answer highlights."
+
+def build_sys(reg,cty,grd,subj,task,cls,res,lng,abl,tm,top,sch=""):
+    s_tag=f",School:{sch}" if sch else ""
+    return f"{_p()}\nCLASS: {cty},{reg},{grd},{subj},{task},{cls},{res},{lng},{abl},Time:{tm},Topic:{top}{s_tag}\n{_g()}\n{_kb()}\nPhysics=extra scaffolding. Group 3=SHORT. 58% no computer=paper first.\n{_r()}"
+
+def build_chat(reg,cty,grd,subj,cls,res,lng,abl,sch=""):
+    s_tag=f",School:{sch}" if sch else ""
+    return f"{_p()}\nWhen greeted: 'Hello, how can Teacher Pehpeh help you today!'\nCLASS: {cty},{reg},{grd},{subj},{cls},{res},{lng},{abl}{s_tag}\n{_g()}\n{_kb()}\nIntervention WORKS. Teacher's work matters.\n{_r()}"
+
+def build_stu(reg,cty,grd,subj,cls,res,lng,abl,info,sch=""):
+    s_tag=f",School:{sch}" if sch else ""
+    return f"{_p()}\nCLASS: {cty},{reg},{grd},{subj},{cls},{res},{lng},{abl}{s_tag}\nSTUDENT: {info}\n{_kb()}\nTargeted advice. Compare to data. Risk factors. Interventions.\n{_r()}"
+
+# === AI ===
+def ask_gpt(sp,q,h=None):
+    if not OAI or not OPENAI_API_KEY: return None
+    try:
+        m=[{"role":"system","content":sp}]+(h or [])+[{"role":"user","content":q}]
+        return openai.OpenAI(api_key=OPENAI_API_KEY).chat.completions.create(model="gpt-4o-mini",messages=m,max_tokens=3000,temperature=.7).choices[0].message.content
+    except Exception as e: return f"⚠️ {e}"
+
+def ask_cl(sp,q,h=None):
+    if not ANT or not ANTHROPIC_API_KEY: return None
+    try:
+        m=list(h or [])+[{"role":"user","content":q}]
+        return anthropic.Anthropic(api_key=ANTHROPIC_API_KEY).messages.create(model="claude-haiku-4-5-20251001",max_tokens=3000,system=sp,messages=m).content[0].text
+    except Exception as e: return f"⚠️ {e}"
+
+def ask_gem(sp,q):
+    if not GEM or not GOOGLE_API_KEY: return None
     try:
         genai.configure(api_key=GOOGLE_API_KEY)
-        model = genai.GenerativeModel(
-            "gemini-1.5-flash",
-            system_instruction=system_prompt,
-        )
-        response = model.generate_content(prompt)
-        return response.text
-    except Exception as e:
-        return f"⚠️ Gemini error: {str(e)}"
+        return genai.GenerativeModel("gemini-2.5-flash",system_instruction=sp).generate_content(q).text
+    except Exception as e: return f"⚠️ Gemini: {e}"
 
+def best(sp,q,h=None):
+    for fn,nm in [(ask_cl,"Claude"),(ask_gpt,"ChatGPT")]:
+        r=fn(sp,q,h)
+        if r and not str(r).startswith("⚠️"): return r,nm
+    r=ask_gem(sp,q)
+    if r and not str(r).startswith("⚠️"): return r,"Gemini"
+    return "⚠️ No models responded.",None
 
-def query_all_models(prompt, system_prompt):
-    """Query all available models in parallel."""
-    responses = {}
-    tasks = {}
+def best_all(sp,q,h=None):
+    """Query all models and return (best_response, best_model, all_responses_dict)"""
+    rs={}
+    for k,fn,nm in [(OPENAI_API_KEY,ask_gpt,"ChatGPT"),(ANTHROPIC_API_KEY,ask_cl,"Claude"),(GOOGLE_API_KEY,ask_gem,"Gemini")]:
+        if k:
+            r=fn(sp,q,h) if nm!="Gemini" else fn(sp,q)
+            if r and not str(r).startswith("⚠️"): rs[nm]=r
+    if not rs: return "⚠️ No models responded.",None,{}
+    # Pick best: prefer Claude, then ChatGPT, then Gemini
+    for pref in ["Claude","ChatGPT","Gemini"]:
+        if pref in rs: return rs[pref],pref,rs
+    first=list(rs.items())[0]
+    return first[1],first[0],rs
 
-    with ThreadPoolExecutor(max_workers=3) as executor:
-        if OPENAI_AVAILABLE and OPENAI_API_KEY:
-            tasks["chatgpt"] = executor.submit(call_chatgpt, prompt, system_prompt)
-        if ANTHROPIC_AVAILABLE and ANTHROPIC_API_KEY:
-            tasks["claude"] = executor.submit(call_claude, prompt, system_prompt)
-        if GEMINI_AVAILABLE and GOOGLE_API_KEY:
-            tasks["gemini"] = executor.submit(call_gemini, prompt, system_prompt)
+def synth(sp,q,resps):
+    v={k:v for k,v in resps.items() if v and not str(v).startswith("⚠️")}
+    if not v: return "⚠️ No models responded."
+    if len(v)==1: return list(v.values())[0]
+    p=f"Combine into ONE print-ready document:\n{sp}\n{q}\n\n"+"".join(f"=== {k} ===\n{r}\n\n" for k,r in v.items())
+    for fn in [ask_cl,ask_gpt]:
+        r=fn("Expert editor.",p)
+        if r and not str(r).startswith("⚠️"): return r
+    return max(v.values(),key=len)
 
-        for name, future in tasks.items():
-            try:
-                responses[name] = future.result(timeout=60)
-            except Exception as e:
-                responses[name] = f"⚠️ {name} timed out: {str(e)}"
-
-    return responses
-
-
-def synthesize_responses(responses, task_label, topic, grade):
-    """Pick the best response or synthesize from multiple."""
-    valid = {k: v for k, v in responses.items()
-             if v and not str(v).startswith("⚠️")}
-
-    if not valid:
-        return "⚠️ No AI models returned a response. Please check your API keys."
-
-    if len(valid) == 1:
-        return list(valid.values())[0]
-
-    # Use the longest substantive response as primary
-    primary_name = max(valid, key=lambda k: len(str(valid[k])))
-    return valid[primary_name]
-
-
-# =====================================================================
-# HELPER: Get topics for current grade + subject
-# =====================================================================
-
-def get_topics_for_selection(subject, grade_number):
-    """
-    Return topics for the dropdown. If curriculum data exists for this
-    subject + grade, use it. Otherwise fall back to generic topics.
-    """
-    # Try curriculum data first
-    if CURRICULA and CURRICULUM_AVAILABLE:
-        subject_key = subject.strip().lower()
-        if subject_key in CURRICULA:
-            topics = get_grade_topics(CURRICULA, subject, grade_number)
-            if topics:
-                return topics, True  # True = curriculum-aligned
-
-    # Fall back to generic topics
-    fallback = FALLBACK_TOPICS.get(subject, [
-        "Introduction / Fundamentals",
-        "Core Concepts",
-        "Applications and Problem Solving",
-        "Review and Exam Preparation",
-    ])
-    return fallback, False
-
-
-# =====================================================================
-# BUILD THE TASK PROMPT
-# =====================================================================
-
-def build_task_prompt(task_label, task_desc, subject, topic, grade,
-                      class_size, time_avail, curriculum_details=None):
-    """Build the user prompt for the AI models."""
-
-    prompt = f"""Generate {task_desc} for the following:
-
-Subject: {subject}
-Topic: {topic}
-Grade: {grade}
-Class Size: {class_size}
-Time Available: {time_avail}
-"""
-
-    # If we have curriculum details, add specific guidance
-    if curriculum_details:
-        objectives = curriculum_details.get("specific_objectives", [])
-        if objectives:
-            prompt += "\nThis lesson must address these specific learning objectives:\n"
-            for i, obj in enumerate(objectives, 1):
-                prompt += f"  {i}. {obj}\n"
-
-        local_notes = curriculum_details.get("local_contextualization_notes", "")
-        if local_notes:
-            prompt += f"\nContextualization guidance: {local_notes}\n"
-
-        materials = curriculum_details.get("lab_materials", [])
-        if materials:
-            prompt += f"\nAvailable lab materials: {', '.join(materials)}\n"
-
-    prompt += """
-Make it immediately usable — a teacher should be able to take this output
-straight into their classroom. Include all necessary details, examples, 
-questions, and answers where applicable.
-
-Use Liberian context throughout: local examples, familiar scenarios, 
-culturally relevant references, and language appropriate for Liberian students.
-"""
-    return prompt
-
-
-# =====================================================================
-# STREAMLIT APP
-# =====================================================================
-
+# === MAIN ===
 def main():
-    st.set_page_config(
-        page_title="Teacher Pehpeh",
-        page_icon="🌶️",
-        layout="wide",
-    )
+    st.set_page_config(page_title="Teacher Pehpeh by IBT",page_icon="🌶️",layout="wide")
+    for k in ["chat_messages","students","conn_checked","conn_info","gen_result"]:
+        if k not in st.session_state: st.session_state[k]=[] if k in ("chat_messages","students") else (False if k=="conn_checked" else None)
+    for sk in QUIZ: 
+        k=f"qz_{sk}"
+        if k not in st.session_state: st.session_state[k]={"lv":"easy","qi":0,"sc":0,"tot":0,"stk":0,"done":False,"sel":None,"hist":[]}
 
-    # ── Styling ──────────────────────────────────────────────────────
-    st.markdown("""
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700&display=swap');
+    if not st.session_state.conn_checked:
+        _checking={"en":"🌶️ Checking connection...","fr":"🌶️ Vérification de la connexion...","sw":"🌶️ Kuangalia muunganisho..."}.get(_lang_key(),"🌶️ Checking connection...")
+        with st.spinner(_checking):
+            st.session_state.conn_info=check_conn(); st.session_state.conn_checked=True
+    conn=st.session_state.conn_info; online=conn["online"] if conn else False
 
-        .stApp { font-family: 'DM Sans', sans-serif; }
+    # CSS with dark/light mode detection
+    st.markdown(f"""<style>
+    @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap');
+    /* Dark mode (default) */
+    :root {{
+        --bg-main: {C_NAVY};
+        --bg-card: {C_NAVY_L};
+        --text-primary: #D0D8E8;
+        --text-secondary: #9CA3AF;
+        --text-muted: #667788;
+        --border-color: #2a3a5a;
+        --chat-user-bg: rgba(43,125,233,.08);
+        --chat-user-border: rgba(43,125,233,.3);
+        --chat-ai-bg: rgba(139,26,26,.1);
+        --chat-ai-border: rgba(178,34,52,.3);
+        --tip-color: #8899AA;
+    }}
+    /* Light mode detection */
+    @media (prefers-color-scheme: light) {{
+        :root {{
+            --bg-main: #F8F9FA;
+            --bg-card: #FFFFFF;
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a5568;
+            --text-muted: #6b7280;
+            --border-color: #d1d5db;
+            --chat-user-bg: rgba(43,125,233,.06);
+            --chat-user-border: rgba(43,125,233,.25);
+            --chat-ai-bg: rgba(139,26,26,.06);
+            --chat-ai-border: rgba(178,34,52,.2);
+            --tip-color: #555;
+        }}
+    }}
+    /* Also detect Streamlit's own light theme */
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] {{
+        --bg-main: #F8F9FA;
+        --bg-card: #FFFFFF;
+        --text-primary: #1a1a2e;
+        --text-secondary: #4a5568;
+        --text-muted: #6b7280;
+        --border-color: #d1d5db;
+        --chat-user-bg: rgba(43,125,233,.06);
+        --chat-user-border: rgba(43,125,233,.25);
+        --chat-ai-bg: rgba(139,26,26,.06);
+        --chat-ai-border: rgba(178,34,52,.2);
+        --tip-color: #555;
+    }}
+    .stApp {{font-family:'Source Sans Pro',sans-serif}}
+    section[data-testid="stSidebar"] {{background:linear-gradient(180deg,#4A0E0E 0%,{C_RED} 40%,#7B2020 100%) !important}}
+    section[data-testid="stSidebar"] .stMarkdown h2 {{color:{C_GOLD_L} !important;font-family:'Playfair Display',serif}}
+    section[data-testid="stSidebar"] .stMarkdown p,section[data-testid="stSidebar"] .stMarkdown li {{color:#F0D5D5}}
+    section[data-testid="stSidebar"] label {{color:#F0D5D5 !important}}
+    section[data-testid="stSidebar"] .stSelectbox > div > div {{background:#3D0C0C !important;color:#F0D5D5 !important;border-color:#8B3030 !important}}
+    section[data-testid="stSidebar"] hr {{border-color:#8B3030 !important}}
+    .stStatusWidget {{display:none !important}}
+    .stTabs [data-baseweb="tab-list"] {{background:{C_NAVY_L};border-radius:8px;padding:4px}}
+    .stTabs [aria-selected="true"] {{color:white !important;background:{C_BLUE} !important;border-radius:6px}}
+    .stButton > button[kind="primary"] {{background:linear-gradient(135deg,{C_BLUE_D},{C_BLUE}) !important;color:white !important;font-weight:700 !important;border:none !important;border-radius:8px !important;box-shadow:0 3px 10px rgba(43,125,233,.35) !important;padding:8px 20px !important;transition:all .2s !important}}
+    .stButton > button[kind="primary"]:hover {{box-shadow:0 5px 20px rgba(43,125,233,.5) !important;transform:translateY(-1px) !important}}
+    .stButton > button[kind="secondary"], .stButton > button:not([kind="primary"]) {{background:var(--bg-card) !important;color:var(--text-primary) !important;font-weight:600 !important;border:2px solid var(--border-color) !important;border-radius:8px !important;box-shadow:0 2px 6px rgba(0,0,0,.12) !important;transition:all .2s !important}}
+    .stButton > button[kind="secondary"]:hover, .stButton > button:not([kind="primary"]):hover {{border-color:{C_BLUE} !important;box-shadow:0 3px 12px rgba(43,125,233,.2) !important;transform:translateY(-1px) !important}}
+    /* Status bar: clearly non-interactive */
+    .status-bar {{background:transparent !important;border:1px dashed var(--border-color) !important;border-radius:20px;padding:5px 14px;font-size:.78rem;display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:.8rem;opacity:.75;pointer-events:none;user-select:none}}
+    .rh {{background:linear-gradient(135deg,{C_RED},{C_RED_L});color:white;padding:1rem;border-radius:10px 10px 0 0;margin-top:1rem}}
+    .rh h3 {{margin:0;color:white;font-family:'Playfair Display',serif;font-size:1.15rem}}
+    .rb {{border:1px solid var(--border-color);border-top:none;border-radius:0 0 10px 10px;padding:1.2rem;background:var(--bg-card);color:var(--text-primary);line-height:1.7}}
+    .ct {{background:var(--chat-user-bg);border:1px solid var(--chat-user-border);border-radius:12px;padding:12px 16px;margin:6px 0;color:var(--text-primary)}}
+    .cp {{background:var(--chat-ai-bg);border:1px solid var(--chat-ai-border);border-radius:12px;padding:12px 16px;margin:6px 0;color:var(--text-primary)}}
+    .qbox {{background:var(--bg-card);border:2px solid {C_BLUE};border-radius:14px;padding:18px;margin:10px 0;color:var(--text-primary)}}
+    .qok {{background:rgba(76,175,80,.12);border:2px solid #4CAF50;border-radius:12px;padding:14px;margin:8px 0;color:var(--text-primary)}}
+    .qno {{background:rgba(239,83,80,.1);border:2px solid #EF5350;border-radius:12px;padding:14px;margin:8px 0;color:var(--text-primary)}}
+    .qsc {{background:rgba(212,168,67,.1);border:1px solid {C_GOLD};border-radius:10px;padding:10px 16px;display:inline-block;color:{C_GOLD}}}
+    .qtip {{background:rgba(43,125,233,.08);border-left:4px solid {C_BLUE};border-radius:0 8px 8px 0;padding:10px 14px;margin:8px 0;font-size:.88rem;color:var(--text-secondary)}}
+    .sc {{background:var(--bg-card);border:1px solid var(--border-color);border-radius:10px;padding:12px 16px;margin:6px 0;color:var(--text-primary)}}
+    .ft {{text-align:center;color:var(--text-muted);font-size:.8rem;padding:1.5rem 0 1rem;border-top:1px solid var(--border-color);margin-top:2rem}}
+    .ft a {{color:{C_GOLD};text-decoration:none}}
+    </style>""",unsafe_allow_html=True)
 
-        .app-header {
-            text-align: center;
-            padding: 0.5rem 0 1rem 0;
-        }
-        .app-header h1 {
-            font-family: 'Fraunces', serif;
-            color: #1B5E20;
-            font-size: 2.2rem;
-            margin: 0;
-        }
-        .app-header p {
-            color: #555;
-            font-size: 1rem;
-            margin: 0.3rem 0 0 0;
-        }
-
-        .status-bar {
-            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
-            border-left: 4px solid #2E7D32;
-            padding: 0.7rem 1rem;
-            border-radius: 6px;
-            margin: 0.5rem 0 1rem 0;
-            font-size: 0.88rem;
-            color: #1B5E20;
-        }
-
-        .curriculum-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #1B5E20, #388E3C);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            margin: 4px 0;
-        }
-        .curriculum-badge-none {
-            display: inline-block;
-            background: #FF8F00;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            margin: 4px 0;
-        }
-
-        .result-header {
-            background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 50%, #388E3C 100%);
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 10px 10px 0 0;
-            margin-top: 1.5rem;
-        }
-        .result-header h3 { margin: 0; color: white; font-family: 'Fraunces', serif; }
-        .result-header p { margin: 0.3rem 0 0 0; opacity: 0.85; font-size: 0.85rem; }
-
-        .result-body {
-            border: 1px solid #C8E6C9;
-            border-top: none;
-            border-radius: 0 0 10px 10px;
-            padding: 1.5rem;
-            background: #FAFAFA;
-        }
-
-        .app-footer {
-            text-align: center;
-            padding: 2rem 0 1rem 0;
-            color: #888;
-            font-size: 0.85rem;
-            border-top: 1px solid #eee;
-            margin-top: 2rem;
-        }
-
-        /* Sidebar styling */
-        section[data-testid="stSidebar"] .stSelectbox label,
-        section[data-testid="stSidebar"] .stRadio label {
-            font-weight: 500;
-        }
-
-        .curriculum-info {
-            background: #F1F8E9;
-            border: 1px solid #C5E1A5;
-            border-radius: 8px;
-            padding: 0.8rem;
-            margin: 0.5rem 0;
-            font-size: 0.82rem;
-            color: #33691E;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-
-    # ── Logo / Header ────────────────────────────────────────────────
-    logo_path = APP_DIR / LOGO_FILENAME
-    if logo_path.exists():
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            st.image(str(logo_path), use_container_width=True)
-        st.markdown('<p style="text-align:center; color:#555; margin-top:-10px;">'
-                    'AI-Powered Teaching Assistant · Aligned to Liberia MOE Curriculum</p>',
-                    unsafe_allow_html=True)
-    else:
-        st.markdown("""
-        <div class="app-header">
-            <h1>🌶️ Teacher Pehpeh</h1>
-            <p>AI-Powered Teaching Assistant · Aligned to Liberia Ministry of Education Curriculum</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    # ── API key check ────────────────────────────────────────────────
-    active_models = []
-    if OPENAI_AVAILABLE and OPENAI_API_KEY:
-        active_models.append("ChatGPT")
-    if ANTHROPIC_AVAILABLE and ANTHROPIC_API_KEY:
-        active_models.append("Claude")
-    if GEMINI_AVAILABLE and GOOGLE_API_KEY:
-        active_models.append("Gemini")
-
-    if not active_models:
-        st.error("⚠️ **No API keys configured.** Open `app.py` and paste your API keys near the top.")
-        return
-
-    # ── Status bar ───────────────────────────────────────────────────
-    curriculum_subjects = get_available_subjects(CURRICULA) if CURRICULA else []
-    curriculum_note = ""
-    if curriculum_subjects:
-        curriculum_note = f" · 📘 Curriculum loaded: {', '.join(curriculum_subjects)}"
-
-    st.markdown(f"""
-    <div class="status-bar">
-        ✅ <strong>{len(active_models)} AI model(s) active:</strong> {', '.join(active_models)}
-        {curriculum_note}
-    </div>
-    """, unsafe_allow_html=True)
-
-    # ── Sidebar: Classroom Context ───────────────────────────────────
+    # Sidebar (defined first so country is available for logo flag)
     with st.sidebar:
-        st.markdown("## ⚙️ Classroom Context")
-        st.markdown("*Set once — these shape every response.*")
-
-        country = st.selectbox("🌍 Country", COUNTRIES, index=0)
-        region = st.selectbox("📍 Setting", list(REGIONS.keys()), index=0)
-        grade_label = st.selectbox("🎓 Grade Level", list(GRADE_LEVELS.keys()), index=3)
-        grade_number = GRADE_LEVELS[grade_label]
-
-        subject = st.selectbox("📚 Subject", SUBJECTS, index=4)  # Default: Physics
-        class_size = st.selectbox("👥 Class Size", CLASS_SIZES, index=2)
-        resources = st.selectbox("🔧 Available Resources", RESOURCES, index=1)
-        language = st.selectbox("🗣️ Language Context", LANGUAGES, index=1)
-        ability = st.selectbox("📊 Student Ability Level", ABILITY_LEVELS, index=0)
-        time_avail = st.selectbox("⏱️ Time Available", TIME_OPTIONS, index=2)
-
-        # Curriculum info in sidebar
-        if CURRICULA and CURRICULUM_AVAILABLE:
-            st.markdown("---")
-            st.markdown("### 📘 Loaded Curricula")
-            st.markdown(f'<div class="curriculum-info">{get_curriculum_summary(CURRICULA)}</div>',
-                        unsafe_allow_html=True)
-            st.markdown("*Drop more subject JSONs into `curriculum_data/` to expand.*")
-
-    # ── Main Area: Task Selection ────────────────────────────────────
-    col1, col2 = st.columns(2)
-
-    with col1:
-        task_key = st.selectbox("🎯 What do you need?", list(TASK_TYPES.keys()))
-        task_label = task_key.split(" ", 1)[1] if " " in task_key else task_key
-        task_desc = TASK_TYPES[task_key]
-
-    with col2:
-        # Dynamic topics based on grade + subject + curriculum
-        topics, is_curriculum_aligned = get_topics_for_selection(subject, grade_number)
-
-        if is_curriculum_aligned:
-            st.markdown('<span class="curriculum-badge">✅ MOE Curriculum-Aligned Topics</span>',
-                        unsafe_allow_html=True)
+        school_name=st.text_input(T("school_name"),value="",placeholder=T("school_placeholder"),key="school_name")
+        # Country first - drives auto language
+        country=st.selectbox(T("country"),COUNTRIES,key="country_sel")
+        # Auto-detect language from country (user can still override)
+        if "lang_auto_done" not in st.session_state: st.session_state.lang_auto_done=set()
+        if country not in st.session_state.lang_auto_done:
+            st.session_state.lang_auto_done.add(country)
+            if country in FRANCOPHONE: st.session_state.lang_sel="Français"
+            elif country in SWAHILI_COUNTRIES: st.session_state.lang_sel="Kiswahili"
+            else: st.session_state.lang_sel="English"
+        lang=st.selectbox("🌍 Language / Langue / Lugha",list(LANGS.keys()),key="lang_sel")
+        st.markdown("---")
+        _cls_word={"en":"Classroom","fr":"Classe","sw":"Darasa"}.get(_lang_key(),"Classroom")
+        classroom_label=f"{school_name} {_cls_word}" if school_name.strip() else T("my_classroom")
+        _logo_b64=get_b64()
+        if _logo_b64:
+            _logo_html=f'<img src="data:image/png;base64,{_logo_b64}" style="height:36px;width:36px;vertical-align:middle;border-radius:50%;margin-right:8px;filter:drop-shadow(0 2px 6px rgba(212,168,67,.4))">'
         else:
-            st.markdown('<span class="curriculum-badge-none">⚡ General Topics (No MOE data yet)</span>',
-                        unsafe_allow_html=True)
+            _logo_html="🌶️ "
+        st.markdown(f'<div style="display:flex;align-items:center;margin:8px 0 4px">{_logo_html}<span style="font-family:Playfair Display,serif;font-size:1.3rem;font-weight:700;color:#F5D998">{classroom_label}</span></div>',unsafe_allow_html=True); st.caption({"en":"Set once — shapes every response","fr":"Configurer une fois — façonne chaque réponse","sw":"Weka mara moja — huunda kila jibu"}.get(_lang_key(),"Set once — shapes every response")); st.markdown("---")
+        region=st.selectbox(T("setting"),list(_regions().keys()))
+        grade=st.selectbox(T("grade"),_grades(),index=1); subject=st.selectbox(T("subject"),_subjects())
+        clsz=st.selectbox(T("class_size"),list(_sizes().keys()),index=2); res=st.selectbox(T("resources"),list(_resources().keys()),index=1)
+        abl=st.selectbox(T("student_level"),list(_ability().keys()))
+        # Map French display values back to English for AI
+        _region_val=_regions()[region]
+        _grade_en=_to_en_grade(grade)
+        _subj_en=_to_en_subj(subject)
+        _size_val=_sizes()[clsz]
+        _res_val=_resources()[res]
+        _abl_val=_ability()[abl]
+        st.markdown("---"); st.caption("© 2026 Institute of Basic Technology")
+        st.markdown("[🌐 Visit our website](https://www.institutebasictechnology.org/index.php)")
 
-        topic = st.selectbox("📖 Topic", topics)
+    show_logo(country)
+    _subtitle={"en":"Curating Personalized Content to Support Underresourced Teachers","fr":"Création de contenu personnalisé pour soutenir les enseignants sous-dotés","sw":"Kuunda Maudhui ya Kibinafsi Kusaidia Walimu Wasio na Rasilimali za Kutosha"}.get(_lang_key(),"Curating Personalized Content to Support Underresourced Teachers")
+    st.markdown(f'<p style="text-align:center;color:#8899BB;font-size:.95rem;margin-bottom:.6rem">{_subtitle}<br>ChatGPT &bull; Claude &bull; Gemini</p>',unsafe_allow_html=True)
 
-    # ── Curriculum preview (expandable) ──────────────────────────────
-    curriculum_details = None
-    curriculum_context = ""
-    if is_curriculum_aligned and CURRICULA:
-        curriculum_details = get_topic_details(CURRICULA, subject, grade_number, topic)
-        curriculum_context = build_curriculum_context(CURRICULA, subject, grade_number, topic)
+    # Unified status bar
+    if conn:
+        keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
+        act=[n for k,n in [(OPENAI_API_KEY,"ChatGPT"),(ANTHROPIC_API_KEY,"Claude"),(GOOGLE_API_KEY,"Gemini")] if k]
+        img_models=[]
+        if OPENAI_API_KEY: img_models.append("DALL-E")
+        if GOOGLE_API_KEY: img_models.append("Imagen")
+        # Network section
+        if conn["quality"]=="none":
+            net_html=f'<span style="color:#EF5350">🔴 <strong>{T("offline")}</strong></span>'
+        elif conn["quality"] in ("high","medium"):
+            net_html=f'<span style="color:#81C784">{conn["emoji"]} <strong>{conn["label"]}</strong> ({conn["latency_ms"]}ms)</span>'
+        else:
+            net_html=f'<span style="color:#FFB74D">{conn["emoji"]} <strong>{conn["label"]}</strong> ({conn["latency_ms"]}ms)</span>'
+        # Models section
+        if act:
+            models_html=f'<span style="color:#7BB8F5">🤖 <strong>{len(act)}</strong>: {" · ".join(act)}</span>'
+        else:
+            models_html=f'<span style="color:#EF9A9A">{T("no_models")}</span>'
+        # Image models section
+        if img_models:
+            img_html=f'<span style="color:#C9A0DC">🎨 {" · ".join(img_models)}</span>'
+        else:
+            img_html=""
+        # Divider
+        div='<span style="color:#3a4a6a;margin:0 10px;font-size:1.1rem">│</span>'
+        bar_parts=[net_html, models_html]
+        if img_html: bar_parts.append(img_html)
+        # Voice section
+        if ELEVENLABS_API_KEY:
+            voice_html=f'<span style="color:#81D4A8">{T("voice_ready")}</span>'
+            bar_parts.append(voice_html)
+        st.markdown(f'<div class="status-bar">{div.join(bar_parts)}</div>',unsafe_allow_html=True)
+    if st.sidebar.button(T("recheck")): st.session_state.conn_checked=False; st.rerun()
+    if not conn:
+        keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
 
-        if curriculum_details:
-            with st.expander("📋 View Ministry of Education Requirements for This Topic"):
-                objectives = curriculum_details.get("specific_objectives", [])
-                if objectives:
-                    st.markdown("**Learning Objectives (students will be able to):**")
-                    for obj in objectives:
-                        st.markdown(f"- {obj}")
+    # Tabs
+    if online and keys:
+        t1,t3,t4,t2=st.tabs([T("generate"),T("chat"),T("quiz"),T("students")])
+    else: t1=t2=t3=None; t4=st.container()
 
-                content = curriculum_details.get("content_outline", [])
-                if content:
-                    st.markdown("**Content Outline:**")
-                    for item in content:
-                        st.markdown(f"- {item}")
+    # TAB 1: GENERATE
+    if t1:
+     with t1:
+        c1,c2=st.columns(2)
+        with c1: task=st.selectbox(T("task"),list(_tasks().keys()))
+        with c2: tm=st.selectbox(T("time"),_times())
+        _task_val=_tasks()[task]  # English value for AI
+        topic=st.selectbox(T("topic"),_get_topics(_subj_en))
+        _topic_en=_to_en_topic(topic)
+        # Reading Comprehension: show literature selector
+        lit_book=None; lit_info=None; rc_mode=None
+        if _task_val=="reading passage with questions":
+            st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:10px;padding:12px 16px;margin:8px 0"><strong style="color:{C_GOLD}">{T("lit_library")}</strong><br><span style="font-size:.85rem;color:var(--text-secondary)">{T("lit_desc")}</span></div>',unsafe_allow_html=True)
+            lit_book=st.selectbox(T("select_book"),list(LITERATURE.keys()),key="lit_book")
+            lit_info=LITERATURE.get(lit_book,{})
+            if lit_book and lit_book!="Teacher's Own Selection":
+                st.markdown(f'<div style="font-size:.85rem;color:var(--text-secondary);margin:4px 0">✍️ <strong>{lit_info.get("author","")}</strong> ({lit_info.get("origin","")}) · {lit_info.get("genre","")} · {lit_info.get("wassce","")}<br>Themes: {lit_info.get("themes","")}</div>',unsafe_allow_html=True)
+            rc_mode=st.selectbox(T("comp_type"),[T("pass_short"),T("pass_fill"),T("pass_essay"),T("pass_mcq"),T("pass_vocab"),T("full_comp")],key="rc_mode")
+        with st.expander(T("options")):
+            _extras_keys=["differentiation","formative","takehome","wassce_align","local_ex","literacy","large_class","cross_curr","ai_visual"]
+            _extras_labels=[T(k) for k in _extras_keys]
+            exs=[EXTRAS[i] for i,lbl in enumerate(_extras_labels) if st.checkbox(lbl,key=f"x{i}")]
+            add_img=st.checkbox(T("include_img"),key="add_img",help=T("img_help"))
+        gen_col, clr_col = st.columns([3,1])
+        with gen_col:
+            gen_btn=st.button(T("gen_btn"),type="primary",use_container_width=True,key="gen")
+        with clr_col:
+            if st.button(T("clear"),use_container_width=True,key="gen_clr"):
+                st.session_state.gen_result=None; st.rerun()
+        if gen_btn:
+            # Build prompt
+            if _task_val=="reading passage with questions" and lit_book and lit_book!="Teacher's Own Selection":
+                rc_prompt=f"""Create a READING COMPREHENSION exercise using the novel "{lit_book}" by {lit_info.get('author','')}.
 
-                activities = curriculum_details.get("suggested_activities", [])
-                if activities:
-                    st.markdown("**Suggested Activities:**")
-                    for act in activities:
-                        st.markdown(f"- {act}")
+INSTRUCTIONS:
+1. Write an ORIGINAL passage (250-400 words) that captures the style, themes, and characters of this novel. The passage should feel authentic to the book's setting and voice. Include dialogue where appropriate.
+2. After the passage, create comprehension exercises in this format: {rc_mode}
 
-                local_notes = curriculum_details.get("local_contextualization_notes", "")
-                if local_notes:
-                    st.markdown(f"**Liberian Contextualization:** {local_notes}")
+For "Fill in the Blanks": Remove 8-12 key words from the passage and list them as a word bank. Students must fill in the correct word.
+For "Short Answer Questions": Write 6-8 questions requiring 2-3 sentence answers about the passage's meaning, character motivation, literary devices, and themes.
+For "Essay Prompt": Give 2 essay questions (150-250 words each) requiring analysis of themes: {lit_info.get('themes','')}.
+For "MCQ": Write 10 multiple-choice questions with 4 options each.
+For "Vocabulary Exercise": Identify 10 challenging words from the passage with context clues exercises.
+For "Full Comprehension (All Types)": Include fill-in-the-blanks, 5 short answer questions, 1 essay prompt, and 5 MCQs.
 
-                materials = curriculum_details.get("lab_materials", [])
-                if materials:
-                    st.markdown(f"**Lab Materials:** {', '.join(materials)}")
+3. Provide a COMPLETE ANSWER KEY at the end.
+4. Add TEACHER'S GUIDE with: key themes to discuss, discussion starters, and how this connects to WASSCE Literature requirements.
 
-    # ── Advanced options ─────────────────────────────────────────────
-    with st.expander("⚙️ Advanced Options"):
-        col_a, col_b = st.columns(2)
-        with col_a:
-            include_diff = st.checkbox("Include differentiation strategies", value=True)
-            include_wassce = st.checkbox("Align to WASSCE standards", value=True)
-        with col_b:
-            include_local = st.checkbox("Maximize Liberian context", value=True)
-            include_assessment = st.checkbox("Include assessment criteria", value=True)
+Subject:{_subj_en}
+Grade:{_grade_en}
+Topic:{_topic_en}
+Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Themes: {lit_info.get('themes','')}. {lit_info.get('wassce','')}."""
+                sp=build_sys(_region_val,country,_grade_en,_subj_en,_task_val,_size_val,_res_val,LANGS[lang],_abl_val,tm,_topic_en,school_name)
+                q=rc_prompt
+            else:
+                sp=build_sys(_region_val,country,_grade_en,_subj_en,_task_val,_size_val,_res_val,LANGS[lang],_abl_val,tm,_topic_en,school_name)
+                q=f"Create {_task_val}.\nSubject:{_subj_en}\nGrade:{_grade_en}\nTopic:{_topic_en}\nIMMEDIATELY USABLE."
+            if exs: q+="\n"+"; ".join(exs)
+            want_img=add_img or "image" in task.lower() or "AI visual" in str(exs)
+            rs={}; ph=st.empty(); s=0; tot=keys+(2 if want_img else 1)
+            ph.markdown(pprog(0,tot,T("generating_content")),unsafe_allow_html=True)
+            for k,fn,nm in [(OPENAI_API_KEY,ask_gpt,"ChatGPT"),(ANTHROPIC_API_KEY,ask_cl,"Claude"),(GOOGLE_API_KEY,ask_gem,"Gemini")]:
+                if k:
+                    s+=1; ph.markdown(pprog(s,tot,f"Asking {nm}..."),unsafe_allow_html=True)
+                    rs[nm]=fn(sp,q) if nm!="Gemini" else fn(sp,q)
+            s+=1; ph.markdown(pprog(s,tot,T("combining")),unsafe_allow_html=True)
+            result=synth(sp,q,rs)
+            img=None; img_src=None
+            if want_img:
+                s+=1; ph.markdown(pprog(s,tot,T("creating_img")),unsafe_allow_html=True)
+                img,img_src=gen_image(f"{_subj_en}: {_topic_en} for {_grade_en} in {country}")
+            ph.markdown(pprog(tot,tot,T("done")),unsafe_allow_html=True); time.sleep(.5); ph.empty()
+            # Store in session state
+            st.session_state.gen_result={"result":result,"task":task,"topic":topic,"img":img,"img_src":img_src,"rs":rs,"grade":grade,"subject":subject,"lit_book":lit_book}
+        # Display results from session state
+        gr=st.session_state.gen_result
+        if gr:
+            lit_tag=f" — 📖 {gr.get('lit_book','')}" if gr.get('lit_book') and gr['lit_book']!="Teacher's Own Selection" else ""
+            st.markdown(f'<div class="rh"><h3>{ico(20)} {gr["task"]} — {gr["topic"]}{lit_tag}</h3></div>',unsafe_allow_html=True)
+            if gr.get("img"): st.image(gr["img"],caption=f"{gr['topic']} — Generated by {gr.get('img_src','')}",use_container_width=True)
+            valid_rs={k:v for k,v in gr["rs"].items() if v and not str(v).startswith("⚠️")}
+            if len(valid_rs)>1:
+                _synth={"en":"Synthesized Response","fr":"Réponse synthétisée","sw":"Jibu lililochanganywa"}.get(_lang_key(),"Synthesized Response")
+                _from={"en":"Combined from","fr":"Combiné de","sw":"Imechanganywa kutoka"}.get(_lang_key(),"Combined from")
+                st.markdown(f'<div style="background:rgba(212,168,67,.1);border-left:4px solid {C_GOLD};padding:6px 12px;border-radius:6px;font-size:.82rem;color:{C_GOLD};margin-bottom:8px">🔀 <strong>{_synth}</strong> — {_from} {" + ".join(valid_rs.keys())}</div>',unsafe_allow_html=True)
+            st.markdown(f'<div class="rb">{highlight_result(gr["result"])}</div>',unsafe_allow_html=True)
+            if len(valid_rs)>1:
+                _indiv={"en":"Individual Model Responses","fr":"Réponses individuelles des modèles","sw":"Majibu ya modeli binafsi"}.get(_lang_key(),"Individual Model Responses")
+                st.markdown(f'<div style="font-size:.85rem;color:{C_GOLD};margin:12px 0 6px">📋 <strong>{_indiv}</strong></div>',unsafe_allow_html=True)
+                for mname,mresp in valid_rs.items():
+                    with st.expander(f"{'🟣' if mname=='Claude' else '🟢' if mname=='ChatGPT' else '🔵'} {mname}'s Response"):
+                        st.markdown(mresp)
+            elif len(valid_rs)==1:
+                nm=list(valid_rs.keys())[0]
+                st.markdown(f'<div style="font-size:.75rem;color:#667;margin-top:4px">Response by {nm} (only model available)</div>',unsafe_allow_html=True)
+            dl_col, em_col = st.columns(2)
+            with dl_col:
+                st.download_button("📥 Download",data=gr["result"],file_name=f"{gr['task']}_{gr['topic']}.txt".replace(" ","_")[:60],key="gen_dl")
+            with em_col:
+                pass
+            email_result(gr["result"], f"Teacher Pehpeh — {gr['task']}: {gr['topic']} ({gr['grade']}, {gr['subject']})", "gen")
+            tts_player(gr["result"], "gen")
 
-    # ── Generate Button ──────────────────────────────────────────────
-    st.markdown("")
-    generate = st.button("🌶️ Generate with Teacher Pehpeh", use_container_width=True, type="primary")
+    # TAB 2: STUDENTS
+    if t2:
+     with t2:
+        _stu_word={"en":"Students","fr":"Élèves","sw":"Wanafunzi"}.get(_lang_key(),"Students")
+        stu_label=f"{school_name} {_stu_word}" if school_name.strip() else T("my_students")
+        st.markdown(f'<div style="background:var(--bg-card);border:1px solid {C_BLUE};border-radius:12px;padding:14px 18px;margin-bottom:10px">{ico(20)} <strong style="color:{C_BLUE}">{stu_label}</strong></div>',unsafe_allow_html=True)
+        with st.expander({"en":"➕ Add Profile","fr":"➕ Ajouter un profil","sw":"➕ Ongeza Wasifu"}.get(_lang_key(),"➕ Add Profile"),expanded=not st.session_state.students):
+            c1,c2=st.columns(2)
+            with c1: sn=st.text_input(T("name"),key="sn"); sib=st.selectbox({"en":"Siblings","fr":"Frères et sœurs","sw":"Ndugu"}.get(_lang_key(),"Siblings"),["0-4","5-8","8+"],key="sb"); me=st.selectbox({"en":"Mom Edu","fr":"Éducation mère","sw":"Elimu ya mama"}.get(_lang_key(),"Mom Edu"),["HS Grad","No HS","Unknown"],key="me")
+            with c2: sm=st.selectbox({"en":"Single Mom?","fr":"Mère seule ?","sw":"Mama peke yake?"}.get(_lang_key(),"Single Mom?"),["No","Yes","Unknown"],key="sm"); wk=st.selectbox({"en":"Works?","fr":"Travaille ?","sw":"Anafanya kazi?"}.get(_lang_key(),"Works?"),["No","Yes","Unknown"],key="wk"); cp=st.selectbox({"en":"Computer?","fr":"Ordinateur ?","sw":"Kompyuta?"}.get(_lang_key(),"Computer?"),["Never","Rarely","Sometimes","Often"],key="cp")
+            nt=st.text_area("Notes",key="nt",height=50)
+            if st.button({"en":"✅ Save","fr":"✅ Enregistrer","sw":"✅ Hifadhi"}.get(_lang_key(),"✅ Save"),key="sv") and sn.strip():
+                st.session_state.students.append(dict(name=sn.strip(),sib=sib,mom=me,sm=sm,wk=wk,cp=cp,nt=nt.strip())); st.rerun()
+        # Excel bulk upload
+        with st.expander(T("upload_excel")):
+            st.markdown(f"""<div style="font-size:.85rem;color:var(--text-secondary);margin-bottom:8px">
+            Upload a spreadsheet with these columns:<br>
+            <strong>Name</strong> (required), <strong>Siblings</strong> (0-4, 5-8, or 8+), <strong>Mom_Edu</strong> (HS Grad, No HS, or Unknown),
+            <strong>Single_Mom</strong> (Yes, No, or Unknown), <strong>Works</strong> (Yes, No, or Unknown),
+            <strong>Computer</strong> (Never, Rarely, Sometimes, or Often), <strong>Notes</strong> (optional)
+            </div>""",unsafe_allow_html=True)
+            dl_cols=["Name","Siblings","Mom_Edu","Single_Mom","Works","Computer","Notes"]
+            dl_example=[["Janjay Kollie","5-8","No HS","Yes","No","Never","Quiet, needs encouragement"],["Hawa Sirleaf","0-4","HS Grad","No","No","Sometimes",""]]
+            if PD:
+                template_df=pd.DataFrame(dl_example,columns=dl_cols)
+                csv_data=template_df.to_csv(index=False)
+                st.download_button("📥 Download Template",data=csv_data,file_name="student_template.csv",mime="text/csv",key="dl_tmpl")
+            uploaded=st.file_uploader("Choose file",type=["csv","xlsx","xls"],key="stu_upload",label_visibility="collapsed")
+            if uploaded and PD:
+                try:
+                    if uploaded.name.endswith(".csv"):
+                        df=pd.read_csv(uploaded)
+                    else:
+                        df=pd.read_excel(uploaded)
+                    # Normalize column names
+                    df.columns=[c.strip().replace(" ","_") for c in df.columns]
+                    # Map common variations
+                    col_map={"name":"Name","student":"Name","student_name":"Name","siblings":"Siblings","sib":"Siblings",
+                             "mom_edu":"Mom_Edu","mother_education":"Mom_Edu","mom":"Mom_Edu","mother":"Mom_Edu",
+                             "single_mom":"Single_Mom","single_mother":"Single_Mom","sm":"Single_Mom",
+                             "works":"Works","works_after_school":"Works","working":"Works",
+                             "computer":"Computer","computer_access":"Computer","comp":"Computer",
+                             "notes":"Notes","note":"Notes","comments":"Notes"}
+                    df.columns=[col_map.get(c.lower(),c) for c in df.columns]
+                    if "Name" not in df.columns:
+                        st.error("❌ Spreadsheet must have a 'Name' column.")
+                    else:
+                        st.dataframe(df,use_container_width=True,height=200)
+                        st.markdown(f'<div style="color:var(--text-secondary);font-size:.85rem">📊 Found <strong>{len(df)}</strong> students</div>',unsafe_allow_html=True)
+                        if st.button(f"✅ Import {len(df)} Students",type="primary",key="bulk_import"):
+                            imported=0
+                            for _,row in df.iterrows():
+                                name=str(row.get("Name","")).strip()
+                                if not name: continue
+                                sib_v=str(row.get("Siblings","0-4")).strip()
+                                if sib_v not in ["0-4","5-8","8+"]: sib_v="0-4"
+                                mom_v=str(row.get("Mom_Edu","Unknown")).strip()
+                                if mom_v not in ["HS Grad","No HS","Unknown"]: mom_v="Unknown"
+                                sm_v=str(row.get("Single_Mom","Unknown")).strip()
+                                if sm_v not in ["Yes","No","Unknown"]: sm_v="Unknown"
+                                wk_v=str(row.get("Works","Unknown")).strip()
+                                if wk_v not in ["Yes","No","Unknown"]: wk_v="Unknown"
+                                cp_v=str(row.get("Computer","Never")).strip()
+                                if cp_v not in ["Never","Rarely","Sometimes","Often"]: cp_v="Never"
+                                nt_v=str(row.get("Notes","")).strip()
+                                if nt_v=="nan": nt_v=""
+                                st.session_state.students.append(dict(name=name,sib=sib_v,mom=mom_v,sm=sm_v,wk=wk_v,cp=cp_v,nt=nt_v))
+                                imported+=1
+                            st.success(f"✅ Imported {imported} students!"); time.sleep(1); st.rerun()
+                except Exception as e:
+                    st.error(f"❌ Error reading file: {e}")
+        for i,s in enumerate(st.session_state.students):
+            rsk=[]
+            if s["mom"]=="No HS": rsk.append("🔴 No HS Mom")
+            if s["sm"]=="Yes": rsk.append("🔴 Single Mom")
+            if s["sib"]=="8+": rsk.append("🟠 8+ siblings")
+            if s["wk"]=="Yes": rsk.append("🟠 Works")
+            if s["cp"]=="Never": rsk.append("🟡 No computer")
+            st.markdown(f'<div class="sc"><strong style="color:{C_BLUE}">{s["name"]}</strong> — {s["sib"]} sib, Mom:{s["mom"]}<br><span style="font-size:.82rem">{" · ".join(rsk) or "🟢 Lower risk"}</span></div>',unsafe_allow_html=True)
+            info=f'{s["name"]},{s["sib"]}sib,Mom:{s["mom"]},SM:{s["sm"]},Works:{s["wk"]},Comp:{s["cp"]},{s["nt"]}'
+            b1,b2,b3=st.columns(3)
+            with b1:
+                if st.button(T("assignment"),key=f"a{i}"):
+                    with st.spinner(T("creating")):
+                        r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),f"Tailored {_subj_en} assignment. Max 3 problems.")
+                    _by={"en":"by","fr":"par","sw":"na"}.get(_lang_key(),"by"); st.markdown(f'<div class="rb">{highlight_result(r)}<div style="font-size:.65rem;color:#556;margin-top:4px">{_by} {m}</div></div>',unsafe_allow_html=True)
+                    if len(allr)>1:
+                        with st.expander(f"{T('see_all')} {len(allr)} {T('model_responses')}"):
+                            for mn,mr in allr.items():
+                                mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mn,"⚪")
+                                st.markdown(f"**{mico} {mn}{'  ✅' if mn==m else ''}**"); st.markdown(mr); st.markdown("---")
+                    email_result(r, f"Teacher Pehpeh — Assignment for {s['name']} ({subject}, {grade})", f"asn_{i}")
+                    tts_player(r, f"asn_{i}")
+            with b2:
+                if st.button(T("risk"),key=f"r{i}"):
+                    with st.spinner("Analyzing..."):
+                        r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),"Risk analysis using IBT data. Compare to 183-student dataset.")
+                    _by={"en":"by","fr":"par","sw":"na"}.get(_lang_key(),"by"); st.markdown(f'<div class="rb">{highlight_result(r)}<div style="font-size:.65rem;color:#556;margin-top:4px">{_by} {m}</div></div>',unsafe_allow_html=True)
+                    if len(allr)>1:
+                        with st.expander(f"{T('see_all')} {len(allr)} {T('model_responses')}"):
+                            for mn,mr in allr.items():
+                                mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mn,"⚪")
+                                st.markdown(f"**{mico} {mn}{'  ✅' if mn==m else ''}**"); st.markdown(mr); st.markdown("---")
+                    email_result(r, f"Teacher Pehpeh — Risk Analysis for {s['name']} ({subject}, {grade})", f"rsk_{i}")
+                    tts_player(r, f"rsk_{i}")
+            with b3:
+                if st.button("🗑️",key=f"d{i}"): st.session_state.students.pop(i); st.rerun()
+        if st.session_state.students:
+            st.markdown("---"); st.markdown(f"#### {ico(16)} {T('grade_work')}")
+            gs=st.selectbox("Student:",[s["name"] for s in st.session_state.students],key="gs")
+            gw_col, gw_mic = st.columns([5,1])
+            with gw_col:
+                gw=st.text_area(T("students_work"),height=100,key="gw")
+            with gw_mic:
+                st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
+                grade_audio=st.audio_input("🎤",key="grade_mic",label_visibility="collapsed")
+            if grade_audio:
+                with st.spinner(T("transcribing")):
+                    grade_text=transcribe_audio(grade_audio.read())
+                if grade_text:
+                    st.session_state["gw"]=grade_text; st.rerun()
+            gsub=st.selectbox(f"{T('subject')}:",_subjects(),key="gsub"); gt=st.text_input(f"{T('topic')}:",key="gt")
+            _gsub_en=_to_en_subj(gsub)
+            if st.button(T("grade_btn"),type="primary",key="gb") and gw.strip():
+                sel=next((s for s in st.session_state.students if s["name"]==gs),None)
+                if sel:
+                    info=f'{sel["name"]},{sel["sib"]}sib,Mom:{sel["mom"]},SM:{sel["sm"]},Works:{sel["wk"]},Comp:{sel["cp"]},{sel["nt"]}'
+                    with st.spinner("Grading..."):
+                        r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_gsub_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),f"Grade:\nSTUDENT:{info}\n{_gsub_en} {gt}\n\nWORK:\n{gw}\n\nGive: grade, praise, corrections, tips, next step.")
+                    _fb={"en":"Feedback","fr":"Commentaires","sw":"Maoni"}.get(_lang_key(),"Feedback")
+                    st.markdown(f'<div class="rh"><h3>{ico(16)} {_fb}: {gs}</h3></div><div class="rb">{highlight_result(r)}</div>',unsafe_allow_html=True)
+                    if len(allr)>1:
+                        with st.expander(f"{T('see_all')} {len(allr)} {T('model_responses')}"):
+                            for mn,mr in allr.items():
+                                mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mn,"⚪")
+                                st.markdown(f"**{mico} {mn}{'  ✅' if mn==m else ''}**"); st.markdown(mr); st.markdown("---")
+                    email_result(r, f"Teacher Pehpeh — Grade Feedback for {gs} ({gsub}, {grade})", "grade")
+                    tts_player(r, "grade")
 
-    if generate:
-        # Build prompts
-        region_desc = REGIONS[region]
-        system = build_system_prompt(
-            country, region_desc, grade_label, subject, class_size,
-            resources, language, ability, time_avail, curriculum_context
-        )
-        prompt = build_task_prompt(
-            task_label, task_desc, subject, topic, grade_label,
-            class_size, time_avail, curriculum_details
-        )
+    # TAB 3: CHAT
+    if t3:
+     with t3:
+        st.markdown(f'<div style="background:rgba(139,26,26,.12);border:1px solid rgba(178,34,52,.3);border-radius:12px;padding:14px 18px;margin-bottom:10px">{ico(20)} <strong style="color:{C_GOLD}">{T("ask_tp")}</strong> <span style="color:#C0A070;font-size:.85rem">— {grade} · {subject}</span></div>',unsafe_allow_html=True)
+        ec=st.columns(3)
+        _chat_examples=[T("chat_ex1"),T("chat_ex2"),T("chat_ex3")]
+        for i,ex in enumerate(_chat_examples):
+            with ec[i]:
+                if st.button(f"💡 {ex[:38]}...",key=f"ex{i}",use_container_width=True):
+                    st.session_state.chat_messages.append({"role":"user","content":ex})
+                    with st.status(T("thinking"),expanded=True) as status:
+                        st.write(T("asking_claude"))
+                        st.write(T("asking_chatgpt"))
+                        st.write(T("asking_gemini"))
+                        r,m,allr=best_all(build_chat(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,school_name),ex,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[:-1]])
+                        status.update(label=T("response_ready"),state="complete",expanded=False)
+                    st.session_state.chat_messages.append({"role":"assistant","content":r,"model":m,"all_responses":allr}); st.rerun()
+        st.markdown("---")
+        st.markdown(f'<div style="font-size:.8rem;color:#8899AA;margin-bottom:4px">💡 Tip: Start your message with "draw" or "illustrate" to generate a visual (e.g., "draw a plant cell diagram")</div>',unsafe_allow_html=True)
+        st.markdown("---")
+        for mi,msg in enumerate(st.session_state.chat_messages):
+            _you_label={"en":"🧑‍🏫 You","fr":"🧑‍🏫 Vous","sw":"🧑‍🏫 Wewe"}.get(_lang_key(),"🧑‍🏫 You")
+            _by_label={"en":"by","fr":"par","sw":"na"}.get(_lang_key(),"by")
+            if msg["role"]=="user": st.markdown(f'<div class="ct"><div style="font-size:.75rem;font-weight:700;color:{C_BLUE};margin-bottom:4px">{_you_label}</div>{msg["content"]}</div>',unsafe_allow_html=True)
+            else:
+                allr=msg.get("all_responses",{})
+                st.markdown(f'<div class="cp"><div style="font-size:.75rem;font-weight:700;color:{C_GOLD};margin-bottom:4px">{ico(16)} Teacher Pehpeh</div>{highlight_result(msg["content"])}<div style="font-size:.65rem;color:#556;margin-top:4px">{_by_label} {msg.get("model","AI")}</div></div>',unsafe_allow_html=True)
+                if msg.get("image"):
+                    st.image(msg["image"],caption=f"🎨 Generated by {msg.get('image_src','AI')}",use_container_width=True)
+                if len(allr)>1:
+                    with st.expander(f"{T('see_all')} {len(allr)} {T('model_responses')}",expanded=False):
+                        for mname,mresp in allr.items():
+                            mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mname,"⚪")
+                            is_primary=" ✅ (selected)" if mname==msg.get("model") else ""
+                            st.markdown(f"**{mico} {mname}{is_primary}**")
+                            st.markdown(mresp)
+                            st.markdown("---")
+                # Find the user question this responds to
+                user_q = st.session_state.chat_messages[mi-1]["content"] if mi>0 else "Chat"
+                email_result(msg["content"], f"Teacher Pehpeh — {user_q[:50]} ({grade}, {subject})", f"chat_{mi}")
+                tts_player(msg["content"], f"chat_{mi}")
+        # Voice input for chat
+        voice_col, label_col = st.columns([1, 4])
+        with voice_col:
+            chat_audio = st.audio_input("🎤", key="chat_mic", label_visibility="collapsed")
+        with label_col:
+            st.markdown(f'<div style="font-size:.8rem;color:var(--text-muted);margin-top:8px">{T("mic_hint")}</div>', unsafe_allow_html=True)
+        voice_text = None
+        if chat_audio:
+            with st.spinner(T("transcribing")):
+                voice_text = transcribe_audio(chat_audio.read())
+            if voice_text:
+                st.success(f'{T("heard")}: "{voice_text[:80]}..."' if len(voice_text) > 80 else f'{T("heard")}: "{voice_text}"')
+        uq = st.chat_input(f"{T('ask_about')} {subject}... {T('draw_hint')}")
+        # Voice input takes priority
+        if voice_text:
+            uq = voice_text
+        if uq:
+            st.session_state.chat_messages.append({"role":"user","content":uq})
+            img_keywords=["draw","illustrate","sketch","diagram","picture","image","visual","create an image","make an image","generate an image","show me","dessiner","dessine","diagramme","illustrer","chora","picha","mchoro"]
+            want_chat_img=any(uq.lower().startswith(k) or k in uq.lower() for k in img_keywords)
+            with st.status(T("thinking"),expanded=True) as status:
+                st.write(f"{T('asking_claude')} {T('asking_chatgpt')} {T('asking_gemini')}")
+                r,m,allr=best_all(build_chat(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,school_name),uq,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]])
+                msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
+                if want_chat_img:
+                    st.write(T("creating_img"))
+                    img_url,img_model=gen_image(f"{_subj_en}: {uq} for {_grade_en} in {country}")
+                    if img_url:
+                        msg_data["image"]=img_url
+                        msg_data["image_src"]=img_model
+                status.update(label=T("response_ready"),state="complete",expanded=False)
+            st.session_state.chat_messages.append(msg_data); st.rerun()
+        if st.session_state.chat_messages and st.button(T("clear"),key="cc"): st.session_state.chat_messages=[]; st.rerun()
 
-        # Add advanced options to prompt
-        extras = []
-        if include_diff:
-            extras.append("Include differentiation strategies for multiple ability levels.")
-        if include_wassce and grade_number >= 10:
-            extras.append("Ensure alignment with WASSCE examination standards and question formats.")
-        if include_local:
-            extras.append("Maximize use of Liberian/West African real-world examples and cultural context.")
-        if include_assessment:
-            extras.append("Include clear assessment criteria or a marking guide.")
-        if extras:
-            prompt += "\n\nAdditional requirements:\n" + "\n".join(f"- {e}" for e in extras)
+    # TAB 4: QUIZ (works offline)
+    with t4:
+        if not online or not keys:
+            st.markdown(f'<div style="background:rgba(239,83,80,.12);border:2px solid {C_RED_L};border-radius:12px;padding:16px;margin-bottom:12px"><h3 style="color:#EF9A9A;margin:0 0 6px">{T("offline_title")}</h3><p style="color:#FFCDD2;font-size:.9rem;margin:0">{T("offline_msg")}</p></div>',unsafe_allow_html=True)
+        else:
+            st.markdown(f'<div style="background:rgba(43,125,233,.08);border:1px solid {C_BLUE};border-radius:12px;padding:12px 18px;margin-bottom:10px">{ico(16)} <strong style="color:{C_BLUE}">{T("practice_quiz")}</strong> <span style="color:#7BB8F5;font-size:.85rem">— {T("adaptive")}</span></div>',unsafe_allow_html=True)
 
-        # Progress indicator
-        progress = st.empty()
-        with progress.container():
-            st.info(f"🌶️ Teacher Pehpeh is working... querying {len(active_models)} AI model(s)")
-            bar = st.progress(0)
-            for i in range(100):
-                time.sleep(0.02)
-                bar.progress(i + 1)
+        qsub_display=st.selectbox(f"{T('subject')}:",_quiz_subjects(),key="qs")
+        qsub=_quiz_subj_en(qsub_display)  # English key for QUIZ dict
+        qs=st.session_state[f"qz_{qsub}"]
+        bank=QUIZ[qsub]; lv=qs["lv"]; questions=bank.get(lv,bank["easy"]); qi=qs["qi"]%len(questions); cur=questions[qi]
+        pct=f"{round(qs['sc']/qs['tot']*100)}%" if qs["tot"] else "—"
+        stk=f"🔥 {qs['stk']} {T('streak')}!" if qs["stk"]>=3 else ""
+        st.markdown(f'<div class="qsc">{ico(16)} {T("score")}: <strong>{qs["sc"]}/{qs["tot"]}</strong> ({pct}) · {T("level")}: <strong>{lv.upper()}</strong> {stk}</div>',unsafe_allow_html=True)
+        st.markdown(f'<div class="qbox"><strong style="color:white">Q{qs["tot"]+1}:</strong><br><span style="color:#D0D8E8;line-height:1.6">{cur["q"]}</span></div>',unsafe_allow_html=True)
 
-        # Query models
-        responses = query_all_models(prompt, system)
-        result = synthesize_responses(responses, task_label, topic, grade_label)
-        progress.empty()
+        if not qs["done"]:
+            cols=st.columns(2)
+            for j,opt in enumerate(cur["o"]):
+                with cols[j%2]:
+                    if st.button(f"{'ABCD'[j]}) {opt}",key=f"qo_{qsub}_{qs['tot']}_{j}",use_container_width=True):
+                        qs["sel"]=j; qs["done"]=True; qs["tot"]+=1
+                        if j==cur["a"]: qs["sc"]+=1; qs["stk"]+=1
+                        else: qs["stk"]=0
+                        qs["hist"].append({"c":j==cur["a"],"lv":lv}); st.rerun()
+        else:
+            ok=qs["sel"]==cur["a"]
+            if ok: st.markdown(f'<div class="qok"><strong>{random.choice(PRAISE)}</strong><br>✅ {cur["o"][cur["a"]]} is correct!</div>',unsafe_allow_html=True)
+            else: st.markdown(f'<div class="qno"><strong>{random.choice(ENCOURAGE)}</strong><br>Answer: <strong>{cur["o"][cur["a"]]}</strong></div>',unsafe_allow_html=True)
+            st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:10px;padding:12px 16px;margin:8px 0"><strong style="color:{C_GOLD}">📖 Explanation:</strong><br><span style="color:#D0D8E8">{cur["e"]}</span></div>',unsafe_allow_html=True)
+            st.markdown(f'<div class="qtip"><strong>🧑‍🏫 Teacher Tip:</strong> {cur["t"]}</div>',unsafe_allow_html=True)
+            recent=[h for h in qs["hist"][-5:]]; rc=sum(1 for h in recent if h["c"])
+            if st.button(T("next"),type="primary",key=f"nx_{qsub}_{qs['tot']}",use_container_width=True):
+                if len(recent)>=3:
+                    if rc>=4 and lv!="hard": qs["lv"]="medium" if lv=="easy" else "hard"; st.toast(f"🌶️ Level UP → {qs['lv'].upper()}")
+                    elif rc<=1 and lv!="easy": qs["lv"]="easy" if lv=="medium" else "medium"; st.toast(f"Adjusting → {qs['lv'].upper()}")
+                qs["qi"]=(qi+1)%len(bank.get(qs["lv"],bank["easy"])); qs["done"]=False; qs["sel"]=None; st.rerun()
 
-        # ── Display Result ───────────────────────────────────────────
-        context_line = f"{grade_label} · {subject} · {topic} · {task_label}"
-        alignment_tag = " · ✅ MOE Aligned" if is_curriculum_aligned else ""
+        st.markdown("---")
+        r1,r2=st.columns(2)
+        with r1:
+            if st.button(T("reset"),key=f"rst_{qsub}"): st.session_state[f"qz_{qsub}"]={"lv":"easy","qi":0,"sc":0,"tot":0,"stk":0,"done":False,"sel":None,"hist":[]}; st.rerun()
+        with r2:
+            if st.button(T("wassce_tips"),key="wt"): st.markdown(f'<div style="background:{C_NAVY_L};border:1px solid {C_GOLD};border-radius:12px;padding:16px;color:#D0D8E8;white-space:pre-wrap;line-height:1.7">{WASSCE_TIPS}</div>',unsafe_allow_html=True)
 
-        st.markdown(f"""
-        <div class="result-header">
-            <h3>🌶️ {task_label} — {topic}</h3>
-            <p>{context_line}{alignment_tag} · {region} · {country}</p>
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown(f'<div class="ft">{ico(16)} <strong>Teacher Pehpeh by IBT</strong><br>Built by <strong>Rodney L. Bollie, PhD</strong> · <a href="https://www.institutebasictechnology.org">Institute of Basic Technology</a><br><a href="https://www.institutebasictechnology.org/index.php" style="color:{C_BLUE}">Visit our website →</a></div>',unsafe_allow_html=True)
 
-        st.markdown('<div class="result-body">', unsafe_allow_html=True)
-        st.markdown(result)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-        # Download
-        safe_name = f"{task_label}_{subject}_{topic}".replace(" ", "_").replace("/", "-")
-        safe_name = "".join(c for c in safe_name if c.isalnum() or c in "_-").lower()
-        st.download_button(
-            label="📥 Download as Text File",
-            data=result,
-            file_name=f"teacher_pehpeh_{safe_name}.txt",
-            mime="text/plain",
-        )
-
-        # Show individual model responses
-        valid = {k: v for k, v in responses.items() if v and not str(v).startswith("⚠️")}
-        if len(valid) > 1:
-            with st.expander("🔍 View individual AI model responses"):
-                for model_name, resp in valid.items():
-                    st.markdown(f"**{model_name.upper()}**")
-                    st.markdown(resp)
-                    st.markdown("---")
-
-    # ── Footer ───────────────────────────────────────────────────────
-    st.markdown("""
-    <div class="app-footer">
-        Built with 🌶️ by the <strong>Institute of Basic Technology (IBT)</strong><br>
-        Teacher Pehpeh — For the teacher who stays late. For the student who keeps showing up.
-    </div>
-    """, unsafe_allow_html=True)
-
-
-if __name__ == "__main__":
-    main()
+if __name__=="__main__": main()
