@@ -227,6 +227,24 @@ def speak_elevenlabs(text, voice_id="woq6F0K3YYEpoS7T2Rx4", model_id="eleven_fla
     except Exception as e:
         return None, f"Voice error: {e}"
 
+def highlight_result(text):
+    """Enhance AI result text with highlighted key points."""
+    import re
+    t=text
+    # Convert **bold** to highlighted spans
+    t=re.sub(r'\*\*(.+?)\*\*',r'<strong style="color:#D4A843;background:rgba(212,168,67,.1);padding:1px 4px;border-radius:3px">\1</strong>',t)
+    # Convert ### headers to styled headers
+    t=re.sub(r'^### (.+)$',r'<h4 style="color:#2B7DE9;margin:12px 0 6px;font-family:Playfair Display,serif">\1</h4>',t,flags=re.MULTILINE)
+    t=re.sub(r'^## (.+)$',r'<h3 style="color:#D4A843;margin:14px 0 8px;font-family:Playfair Display,serif">\1</h3>',t,flags=re.MULTILINE)
+    # Convert numbered lists with bold starters
+    t=re.sub(r'^(\d+)\.\s',r'<strong style="color:#2B7DE9">\1.</strong> ',t,flags=re.MULTILINE)
+    # Highlight key educational markers
+    for kw in ["WASSCE","BECE","Key Point","Note:","Tip:","Important:","Answer Key","Teacher's Guide","Objective","Assessment"]:
+        t=t.replace(kw,f'<span style="color:#D4A843;font-weight:600">{kw}</span>')
+    # Convert newlines to <br> for HTML display
+    t=t.replace('\n','<br>')
+    return t
+
 def tts_player(text, key_suffix):
     """Simple 'Hear Results' button — one click, plays audio."""
     audio_key = f"tts_audio_{key_suffix}"
@@ -365,6 +383,49 @@ TOPICS={"Mathematics":["Number and Numeration","Fractions and Decimals","Percent
 "Integrated Science":["Scientific Method","Cells","Photosynthesis","Respiration","Human Body","Ecology","Matter","Energy","Electricity"],
 }
 DEF_TOPICS=["Core Concepts","Key Terms","Applications","Review","Exam Practice"]
+FR_DEF_TOPICS=["Concepts fondamentaux","Termes clés","Applications","Révision","Préparation examen"]
+SW_DEF_TOPICS=["Dhana za Msingi","Maneno Muhimu","Matumizi","Mapitio","Mazoezi ya Mtihani"]
+# Topic translations: {English subject: {English topic: {fr:..., sw:...}}}
+FR_TOPICS={"Mathematics":["Nombres et numération","Fractions et décimales","Pourcentages","Rapport et proportion","Expressions algébriques","Équations linéaires","Équations quadratiques","Équations simultanées","Ensembles et diagrammes de Venn","Trigonométrie","Mensuration","Géométrie","Statistiques","Probabilité","Vecteurs","Logarithmes","Indices et radicaux"],
+"English Language":["Compréhension","Résumé","Rédaction (narratif)","Rédaction (argumentatif)","Lettre formelle","Parties du discours","Temps verbaux","Voix active/passive","Ponctuation","Vocabulaire","Expressions idiomatiques"],
+"Physics":["Mesure","Mouvement","Lois de Newton","Travail Énergie Puissance","Machines simples","Pression","Transfert thermique","Lois des gaz","Ondes","Son","Lumière","Électricité","Loi d'Ohm"],
+"Chemistry":["États de la matière","Structure atomique","Tableau périodique","Liaisons chimiques","Réactions","Acides Bases Sels","Électrolyse","Chimie organique","Concept de mole"],
+"Biology":["Structure cellulaire","Division cellulaire","Photosynthèse","Systèmes du corps humain","Reproduction","Génétique","Évolution","Écologie","Maladies et immunité"],
+"Integrated Science":["Méthode scientifique","Cellules","Photosynthèse","Respiration","Corps humain","Écologie","Matière","Énergie","Électricité"]}
+SW_TOPICS={"Mathematics":["Nambari na Uhesabuji","Sehemu na Desimali","Asilimia","Uwiano","Misemo ya Aljebra","Mlingano wa Mstari","Mlingano wa Pili","Mlingano Sawia","Seti na Michoro ya Venn","Trigonometria","Vipimo","Jiometri","Takwimu","Uwezekano","Vekta","Logarithimu","Indeksi na Mizizi"],
+"English Language":["Ufahamu","Muhtasari","Insha (Masimulizi)","Insha (Hoja)","Uandishi Barua Rasmi","Sehemu za Hotuba","Nyakati","Sauti Tendaji/Tendewa","Alama za Uandishi","Msamiati","Nahau"],
+"Physics":["Vipimo","Mwendo","Sheria za Newton","Kazi Nishati Nguvu","Mashine Rahisi","Shinikizo","Uhamishaji Joto","Sheria za Gesi","Mawimbi","Sauti","Mwanga","Umeme","Sheria ya Ohm"],
+"Chemistry":["Hali za Maada","Muundo wa Atomu","Jedwali la Vipindi","Vifungo vya Kemikali","Athari","Asidi Besi Chumvi","Elektrolisisi","Kemia Hai","Dhana ya Moli"],
+"Biology":["Muundo wa Seli","Mgawanyiko wa Seli","Usanisinuru","Mifumo ya Mwili","Uzazi","Jenetiki","Mageuzi","Ikolojia","Magonjwa na Kinga"],
+"Integrated Science":["Njia ya Kisayansi","Seli","Usanisinuru","Upumuaji","Mwili wa Binadamu","Ikolojia","Maada","Nishati","Umeme"]}
+# Build topic display→English maps
+_TOPIC_TO_EN={}
+for subj_en,en_topics in TOPICS.items():
+    for fr_t,en_t in zip(FR_TOPICS.get(subj_en,[]),en_topics): _TOPIC_TO_EN[fr_t]=en_t
+    for sw_t,en_t in zip(SW_TOPICS.get(subj_en,[]),en_topics): _TOPIC_TO_EN[sw_t]=en_t
+for fr_t,en_t in zip(FR_DEF_TOPICS,DEF_TOPICS): _TOPIC_TO_EN[fr_t]=en_t
+for sw_t,en_t in zip(SW_DEF_TOPICS,DEF_TOPICS): _TOPIC_TO_EN[sw_t]=en_t
+def _get_topics(subj_en):
+    lk=_lang_key()
+    if lk=="fr": return FR_TOPICS.get(subj_en,FR_DEF_TOPICS)
+    if lk=="sw": return SW_TOPICS.get(subj_en,SW_DEF_TOPICS)
+    return TOPICS.get(subj_en,DEF_TOPICS)
+def _to_en_topic(t): return _TOPIC_TO_EN.get(t,t)
+# Quiz subject translations
+_QUIZ_SUBJ_FR={"Mathematics":"Mathématiques","Physics":"Physique","Biology":"Biologie","Chemistry":"Chimie","Reading Comprehension":"Compréhension écrite"}
+_QUIZ_SUBJ_SW={"Mathematics":"Hisabati","Physics":"Fizikia","Biology":"Biolojia","Chemistry":"Kemia","Reading Comprehension":"Ufahamu wa Kusoma"}
+_QUIZ_SUBJ_TO_EN={v:k for k,v in _QUIZ_SUBJ_FR.items()}
+_QUIZ_SUBJ_TO_EN.update({v:k for k,v in _QUIZ_SUBJ_SW.items()})
+def _quiz_subjects():
+    lk=_lang_key()
+    if lk=="fr": return [_QUIZ_SUBJ_FR.get(k,k) for k in QUIZ.keys()]
+    if lk=="sw": return [_QUIZ_SUBJ_SW.get(k,k) for k in QUIZ.keys()]
+    return list(QUIZ.keys())
+def _quiz_subj_en(s): return _QUIZ_SUBJ_TO_EN.get(s,s)
+# Francophone countries for auto-switch
+FRANCOPHONE={"Côte d'Ivoire","Senegal","Cameroon","Mali","Burkina Faso","Niger","Chad","Guinea","Togo","Benin","Central African Republic","Republic of Congo","Gabon","Equatorial Guinea","DRC","Djibouti","Comoros","Madagascar","Burundi","Guinea-Bissau","São Tomé and Príncipe"}
+# Swahili-speaking countries
+SWAHILI_COUNTRIES={"Kenya","Tanzania","Uganda","DRC","Rwanda","Burundi"}
 TASKS={"Lesson Plan":"detailed lesson plan","Quiz (10 Q)":"10-question quiz with answer key","Quiz (20 Q)":"20-question quiz","WASSCE MCQ (50)":"50 WASSCE-style MCQs","WASSCE Theory":"WASSCE theory questions","BECE Exam":"BECE-style exam","Homework":"homework with minimal resources","Group Activity":"group activity","Reading Comprehension":"reading passage with questions","No-Lab Practical":"hands-on zero-cost activity","Rubric":"grading rubric","Strategy Guide":"teaching strategies","Parent Letter":"parent communication","Weekly Scheme":"5-day scheme of work","Term Scheme":"term plan","Remedial Material":"catch-up material","Study Notes":"revision guide","Educational Game":"zero-cost teaching game","Illustrated Lesson (AI image)":"lesson with AI-generated visual"}
 SIZES={"Small (<25)":"<25 students","Medium (25-40)":"25-40","Large (40-60)":"40-60","Very Large (60+)":"60+"}
 RESOURCES={"Chalkboard only":"chalkboard/chalk only","+ shared textbooks":"chalkboard + shared textbooks","+ handouts":"+ printable handouts","Computer/projector":"occasional tech","Phones/tablets":"student devices","Well-equipped":"regular tech"}
@@ -401,6 +462,9 @@ UI_TEXT={
   "pass_short":"Passage + Short Answer Questions","pass_fill":"Passage + Fill in the Blanks",
   "pass_essay":"Passage + Essay Prompt","pass_mcq":"Passage + MCQ",
   "pass_vocab":"Passage + Vocabulary Exercise","full_comp":"Full Comprehension (All Types)",
+  "assignment":"📝 Assignment","risk":"⚠️ Risk Analysis","creating":"Creating...",
+  "see_all":"📋 See all","model_responses":"model responses","streak":"streak",
+  "generating_content":"🌶️ Teacher Pehpeh is cooking...","done":"✅ Done! Content is ready!",
  },
  "fr":{
   "generate":"📋 Générer","chat":"💬 Discussion","quiz":"🌶️ Quiz","students":"🧑‍🎓 Élèves",
@@ -432,6 +496,9 @@ UI_TEXT={
   "pass_short":"Passage + Questions courtes","pass_fill":"Passage + Texte à trous",
   "pass_essay":"Passage + Sujet de rédaction","pass_mcq":"Passage + QCM",
   "pass_vocab":"Passage + Exercice de vocabulaire","full_comp":"Compréhension complète (Tous types)",
+  "assignment":"📝 Devoir","risk":"⚠️ Analyse de risque","creating":"Création en cours...",
+  "see_all":"📋 Voir tous les","model_responses":"réponses des modèles","streak":"série",
+  "generating_content":"🌶️ Teacher Pehpeh prépare...","done":"✅ Terminé ! Le contenu est prêt !",
  },
  "sw":{
   "generate":"📋 Tengeneza","chat":"💬 Mazungumzo","quiz":"🌶️ Maswali","students":"🧑‍🎓 Wanafunzi",
@@ -463,6 +530,9 @@ UI_TEXT={
   "pass_short":"Kifungu + Maswali mafupi","pass_fill":"Kifungu + Jaza nafasi",
   "pass_essay":"Kifungu + Swali la insha","pass_mcq":"Kifungu + Maswali ya kuchagua",
   "pass_vocab":"Kifungu + Zoezi la msamiati","full_comp":"Ufahamu kamili (Aina zote)",
+  "assignment":"📝 Kazi","risk":"⚠️ Uchambuzi wa hatari","creating":"Inatengeneza...",
+  "see_all":"📋 Tazama zote","model_responses":"majibu ya modeli","streak":"mfululizo",
+  "generating_content":"🌶️ Teacher Pehpeh anapika...","done":"✅ Imekamilika! Maudhui yako tayari!",
  }
 }
 def _lang_key():
@@ -578,7 +648,7 @@ def _p():
 def _g():
     return "Groups: 1(0-4 siblings,most time), 2(5-8,limited), 3(8+,very little). Consider socioeconomic, computer access, parents' ed."
 def _r():
-    return "Rules: stated resources only, max 3 problems/group, self-contained tips, WAEC format for exams, African context, Socratic method, print-ready."
+    return "Rules: stated resources only, max 3 problems/group, self-contained tips, WAEC format for exams, African context, Socratic method, print-ready. Use **bold** for key terms, objectives, important concepts, and answer highlights."
 
 def build_sys(reg,cty,grd,subj,task,cls,res,lng,abl,tm,top,sch=""):
     s_tag=f",School:{sch}" if sch else ""
@@ -740,13 +810,22 @@ def main():
 
     # Sidebar (defined first so country is available for logo flag)
     with st.sidebar:
+        school_name=st.text_input(T("school_name"),value="",placeholder=T("school_placeholder"),key="school_name")
+        # Country first - drives auto language
+        country=st.selectbox(T("country"),COUNTRIES,key="country_sel")
+        # Auto-detect language from country (user can still override)
+        if "lang_auto_done" not in st.session_state: st.session_state.lang_auto_done=set()
+        if country not in st.session_state.lang_auto_done:
+            st.session_state.lang_auto_done.add(country)
+            if country in FRANCOPHONE: st.session_state.lang_sel="Français"
+            elif country in SWAHILI_COUNTRIES: st.session_state.lang_sel="Kiswahili"
+            else: st.session_state.lang_sel="English"
         lang=st.selectbox("🌍 Language / Langue / Lugha",list(LANGS.keys()),key="lang_sel")
         st.markdown("---")
-        school_name=st.text_input(T("school_name"),value="",placeholder=T("school_placeholder"),key="school_name")
         _cls_word={"en":"Classroom","fr":"Classe","sw":"Darasa"}.get(_lang_key(),"Classroom")
         classroom_label=f"{school_name} {_cls_word}" if school_name.strip() else T("my_classroom")
         st.markdown(f"## 🌶️ {classroom_label}"); st.caption({"en":"Set once — shapes every response","fr":"Configurer une fois — façonne chaque réponse","sw":"Weka mara moja — huunda kila jibu"}.get(_lang_key(),"Set once — shapes every response")); st.markdown("---")
-        country=st.selectbox(T("country"),COUNTRIES); region=st.selectbox(T("setting"),list(_regions().keys()))
+        region=st.selectbox(T("setting"),list(_regions().keys()))
         grade=st.selectbox(T("grade"),_grades(),index=1); subject=st.selectbox(T("subject"),_subjects())
         clsz=st.selectbox(T("class_size"),list(_sizes().keys()),index=2); res=st.selectbox(T("resources"),list(_resources().keys()),index=1)
         abl=st.selectbox(T("student_level"),list(_ability().keys()))
@@ -813,7 +892,8 @@ def main():
         with c1: task=st.selectbox(T("task"),list(_tasks().keys()))
         with c2: tm=st.selectbox(T("time"),_times())
         _task_val=_tasks()[task]  # English value for AI
-        topic=st.selectbox(T("topic"),TOPICS.get(_subj_en,DEF_TOPICS))
+        topic=st.selectbox(T("topic"),_get_topics(_subj_en))
+        _topic_en=_to_en_topic(topic)
         # Reading Comprehension: show literature selector
         lit_book=None; lit_info=None; rc_mode=None
         if _task_val=="reading passage with questions":
@@ -855,13 +935,13 @@ For "Full Comprehension (All Types)": Include fill-in-the-blanks, 5 short answer
 
 Subject:{_subj_en}
 Grade:{_grade_en}
-Topic:{topic}
+Topic:{_topic_en}
 Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Themes: {lit_info.get('themes','')}. {lit_info.get('wassce','')}."""
-                sp=build_sys(_region_val,country,_grade_en,_subj_en,_task_val,_size_val,_res_val,LANGS[lang],_abl_val,tm,topic,school_name)
+                sp=build_sys(_region_val,country,_grade_en,_subj_en,_task_val,_size_val,_res_val,LANGS[lang],_abl_val,tm,_topic_en,school_name)
                 q=rc_prompt
             else:
-                sp=build_sys(_region_val,country,_grade_en,_subj_en,_task_val,_size_val,_res_val,LANGS[lang],_abl_val,tm,topic,school_name)
-                q=f"Create {_task_val}.\nSubject:{_subj_en}\nGrade:{_grade_en}\nTopic:{topic}\nIMMEDIATELY USABLE."
+                sp=build_sys(_region_val,country,_grade_en,_subj_en,_task_val,_size_val,_res_val,LANGS[lang],_abl_val,tm,_topic_en,school_name)
+                q=f"Create {_task_val}.\nSubject:{_subj_en}\nGrade:{_grade_en}\nTopic:{_topic_en}\nIMMEDIATELY USABLE."
             if exs: q+="\n"+"; ".join(exs)
             want_img=add_img or "image" in task.lower() or "AI visual" in str(exs)
             rs={}; ph=st.empty(); s=0; tot=keys+(2 if want_img else 1)
@@ -875,7 +955,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             img=None; img_src=None
             if want_img:
                 s+=1; ph.markdown(pprog(s,tot,"🎨 Creating illustration..."),unsafe_allow_html=True)
-                img,img_src=gen_image(f"{_subj_en}: {topic} for {_grade_en} in {country}")
+                img,img_src=gen_image(f"{_subj_en}: {_topic_en} for {_grade_en} in {country}")
             ph.markdown(pprog(tot,tot,"✅ Done! Content is ready!"),unsafe_allow_html=True); time.sleep(.5); ph.empty()
             # Store in session state
             st.session_state.gen_result={"result":result,"task":task,"topic":topic,"img":img,"img_src":img_src,"rs":rs,"grade":grade,"subject":subject,"lit_book":lit_book}
@@ -888,7 +968,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             valid_rs={k:v for k,v in gr["rs"].items() if v and not str(v).startswith("⚠️")}
             if len(valid_rs)>1:
                 st.markdown(f'<div style="background:rgba(212,168,67,.1);border-left:4px solid {C_GOLD};padding:6px 12px;border-radius:6px;font-size:.82rem;color:{C_GOLD};margin-bottom:8px">🔀 <strong>Synthesized Response</strong> — Combined from {" + ".join(valid_rs.keys())}</div>',unsafe_allow_html=True)
-            st.markdown(f'<div class="rb">',unsafe_allow_html=True); st.markdown(gr["result"]); st.markdown('</div>',unsafe_allow_html=True)
+            st.markdown(f'<div class="rb">{highlight_result(gr["result"])}</div>',unsafe_allow_html=True)
             if len(valid_rs)>1:
                 st.markdown(f'<div style="font-size:.85rem;color:{C_GOLD};margin:12px 0 6px">📋 <strong>Individual Model Responses</strong></div>',unsafe_allow_html=True)
                 for mname,mresp in valid_rs.items():
@@ -987,24 +1067,24 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             info=f'{s["name"]},{s["sib"]}sib,Mom:{s["mom"]},SM:{s["sm"]},Works:{s["wk"]},Comp:{s["cp"]},{s["nt"]}'
             b1,b2,b3=st.columns(3)
             with b1:
-                if st.button("📝 Assignment",key=f"a{i}"):
-                    with st.spinner("Creating..."):
+                if st.button(T("assignment"),key=f"a{i}"):
+                    with st.spinner(T("creating")):
                         r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),f"Tailored {_subj_en} assignment. Max 3 problems.")
-                    st.markdown(f'<div class="rb">{r}<div style="font-size:.65rem;color:#556;margin-top:4px">by {m}</div></div>',unsafe_allow_html=True)
+                    st.markdown(f'<div class="rb">{highlight_result(r)}<div style="font-size:.65rem;color:#556;margin-top:4px">by {m}</div></div>',unsafe_allow_html=True)
                     if len(allr)>1:
-                        with st.expander(f"📋 See all {len(allr)} model responses"):
+                        with st.expander(f"{T('see_all')} {len(allr)} {T('model_responses')}"):
                             for mn,mr in allr.items():
                                 mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mn,"⚪")
                                 st.markdown(f"**{mico} {mn}{'  ✅' if mn==m else ''}**"); st.markdown(mr); st.markdown("---")
                     email_result(r, f"Teacher Pehpeh — Assignment for {s['name']} ({subject}, {grade})", f"asn_{i}")
                     tts_player(r, f"asn_{i}")
             with b2:
-                if st.button("📊 Risk",key=f"r{i}"):
+                if st.button(T("risk"),key=f"r{i}"):
                     with st.spinner("Analyzing..."):
                         r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),"Risk analysis using IBT data. Compare to 183-student dataset.")
-                    st.markdown(f'<div class="rb">{r}<div style="font-size:.65rem;color:#556;margin-top:4px">by {m}</div></div>',unsafe_allow_html=True)
+                    st.markdown(f'<div class="rb">{highlight_result(r)}<div style="font-size:.65rem;color:#556;margin-top:4px">by {m}</div></div>',unsafe_allow_html=True)
                     if len(allr)>1:
-                        with st.expander(f"📋 See all {len(allr)} model responses"):
+                        with st.expander(f"{T('see_all')} {len(allr)} {T('model_responses')}"):
                             for mn,mr in allr.items():
                                 mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mn,"⚪")
                                 st.markdown(f"**{mico} {mn}{'  ✅' if mn==m else ''}**"); st.markdown(mr); st.markdown("---")
@@ -1034,9 +1114,9 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     info=f'{sel["name"]},{sel["sib"]}sib,Mom:{sel["mom"]},SM:{sel["sm"]},Works:{sel["wk"]},Comp:{sel["cp"]},{sel["nt"]}'
                     with st.spinner("Grading..."):
                         r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_gsub_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),f"Grade:\nSTUDENT:{info}\n{_gsub_en} {gt}\n\nWORK:\n{gw}\n\nGive: grade, praise, corrections, tips, next step.")
-                    st.markdown(f'<div class="rh"><h3>{ico(16)} Feedback: {gs}</h3></div><div class="rb">{r}</div>',unsafe_allow_html=True)
+                    st.markdown(f'<div class="rh"><h3>{ico(16)} Feedback: {gs}</h3></div><div class="rb">{highlight_result(r)}</div>',unsafe_allow_html=True)
                     if len(allr)>1:
-                        with st.expander(f"📋 See all {len(allr)} model responses"):
+                        with st.expander(f"{T('see_all')} {len(allr)} {T('model_responses')}"):
                             for mn,mr in allr.items():
                                 mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mn,"⚪")
                                 st.markdown(f"**{mico} {mn}{'  ✅' if mn==m else ''}**"); st.markdown(mr); st.markdown("---")
@@ -1066,11 +1146,11 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             if msg["role"]=="user": st.markdown(f'<div class="ct"><div style="font-size:.75rem;font-weight:700;color:{C_BLUE};margin-bottom:4px">🧑‍🏫 You</div>{msg["content"]}</div>',unsafe_allow_html=True)
             else:
                 allr=msg.get("all_responses",{})
-                st.markdown(f'<div class="cp"><div style="font-size:.75rem;font-weight:700;color:{C_GOLD};margin-bottom:4px">{ico(16)} Teacher Pehpeh</div>{msg["content"]}<div style="font-size:.65rem;color:#556;margin-top:4px">by {msg.get("model","AI")}</div></div>',unsafe_allow_html=True)
+                st.markdown(f'<div class="cp"><div style="font-size:.75rem;font-weight:700;color:{C_GOLD};margin-bottom:4px">{ico(16)} Teacher Pehpeh</div>{highlight_result(msg["content"])}<div style="font-size:.65rem;color:#556;margin-top:4px">by {msg.get("model","AI")}</div></div>',unsafe_allow_html=True)
                 if msg.get("image"):
                     st.image(msg["image"],caption=f"🎨 Generated by {msg.get('image_src','AI')}",use_container_width=True)
                 if len(allr)>1:
-                    with st.expander(f"📋 See all {len(allr)} model responses",expanded=False):
+                    with st.expander(f"{T('see_all')} {len(allr)} {T('model_responses')}",expanded=False):
                         for mname,mresp in allr.items():
                             mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mname,"⚪")
                             is_primary=" ✅ (selected)" if mname==msg.get("model") else ""
@@ -1122,11 +1202,12 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
         else:
             st.markdown(f'<div style="background:rgba(43,125,233,.08);border:1px solid {C_BLUE};border-radius:12px;padding:12px 18px;margin-bottom:10px">{ico(16)} <strong style="color:{C_BLUE}">{T("practice_quiz")}</strong> <span style="color:#7BB8F5;font-size:.85rem">— {T("adaptive")}</span></div>',unsafe_allow_html=True)
 
-        qsub=st.selectbox(f"{T('subject')}:",list(QUIZ.keys()),key="qs")
+        qsub_display=st.selectbox(f"{T('subject')}:",_quiz_subjects(),key="qs")
+        qsub=_quiz_subj_en(qsub_display)  # English key for QUIZ dict
         qs=st.session_state[f"qz_{qsub}"]
         bank=QUIZ[qsub]; lv=qs["lv"]; questions=bank.get(lv,bank["easy"]); qi=qs["qi"]%len(questions); cur=questions[qi]
         pct=f"{round(qs['sc']/qs['tot']*100)}%" if qs["tot"] else "—"
-        stk=f"🔥 {qs['stk']} streak!" if qs["stk"]>=3 else ""
+        stk=f"🔥 {qs['stk']} {T('streak')}!" if qs["stk"]>=3 else ""
         st.markdown(f'<div class="qsc">{ico(16)} {T("score")}: <strong>{qs["sc"]}/{qs["tot"]}</strong> ({pct}) · {T("level")}: <strong>{lv.upper()}</strong> {stk}</div>',unsafe_allow_html=True)
         st.markdown(f'<div class="qbox"><strong style="color:white">Q{qs["tot"]+1}:</strong><br><span style="color:#D0D8E8;line-height:1.6">{cur["q"]}</span></div>',unsafe_allow_html=True)
 
