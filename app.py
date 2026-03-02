@@ -291,14 +291,17 @@ def _g():
 def _r():
     return "Rules: stated resources only, max 3 problems/group, self-contained tips, WAEC format for exams, African context, Socratic method, print/chalkboard-ready."
 
-def build_sys(reg,cty,grd,subj,task,cls,res,lng,abl,tm,top):
-    return f"{_p()}\nCLASS: {cty},{reg},{grd},{subj},{task},{cls},{res},{lng},{abl},Time:{tm},Topic:{top}\n{_g()}\n{_kb()}\nPhysics=extra scaffolding. Group 3=SHORT. 58% no computer=paper first.\n{_r()}"
+def build_sys(reg,cty,grd,subj,task,cls,res,lng,abl,tm,top,sch=""):
+    s_tag=f",School:{sch}" if sch else ""
+    return f"{_p()}\nCLASS: {cty},{reg},{grd},{subj},{task},{cls},{res},{lng},{abl},Time:{tm},Topic:{top}{s_tag}\n{_g()}\n{_kb()}\nPhysics=extra scaffolding. Group 3=SHORT. 58% no computer=paper first.\n{_r()}"
 
-def build_chat(reg,cty,grd,subj,cls,res,lng,abl):
-    return f"{_p()}\nWhen greeted: 'Hello, how can Teacher Pehpeh help you today!'\nCLASS: {cty},{reg},{grd},{subj},{cls},{res},{lng},{abl}\n{_g()}\n{_kb()}\nIntervention WORKS. Teacher's work matters.\n{_r()}"
+def build_chat(reg,cty,grd,subj,cls,res,lng,abl,sch=""):
+    s_tag=f",School:{sch}" if sch else ""
+    return f"{_p()}\nWhen greeted: 'Hello, how can Teacher Pehpeh help you today!'\nCLASS: {cty},{reg},{grd},{subj},{cls},{res},{lng},{abl}{s_tag}\n{_g()}\n{_kb()}\nIntervention WORKS. Teacher's work matters.\n{_r()}"
 
-def build_stu(reg,cty,grd,subj,cls,res,lng,abl,info):
-    return f"{_p()}\nCLASS: {cty},{reg},{grd},{subj},{cls},{res},{lng},{abl}\nSTUDENT: {info}\n{_kb()}\nTargeted advice. Compare to data. Risk factors. Interventions.\n{_r()}"
+def build_stu(reg,cty,grd,subj,cls,res,lng,abl,info,sch=""):
+    s_tag=f",School:{sch}" if sch else ""
+    return f"{_p()}\nCLASS: {cty},{reg},{grd},{subj},{cls},{res},{lng},{abl}{s_tag}\nSTUDENT: {info}\n{_kb()}\nTargeted advice. Compare to data. Risk factors. Interventions.\n{_r()}"
 
 # === AI ===
 def ask_gpt(sp,q,h=None):
@@ -444,7 +447,9 @@ def main():
 
     # Sidebar (defined first so country is available for logo flag)
     with st.sidebar:
-        st.markdown("## 🌶️ My Classroom"); st.caption("Set once — shapes every response"); st.markdown("---")
+        school_name=st.text_input("🏫 School Name",value="",placeholder="e.g., Bahn, St. Martin's",key="school_name")
+        classroom_label=f"{school_name} Classroom" if school_name.strip() else "My Classroom"
+        st.markdown(f"## 🌶️ {classroom_label}"); st.caption("Set once — shapes every response"); st.markdown("---")
         country=st.selectbox("Country",COUNTRIES); region=st.selectbox("Setting",list(REGIONS.keys()))
         grade=st.selectbox("Grade",GRADES,index=1); subject=st.selectbox("Subject",SUBJECTS)
         clsz=st.selectbox("Class Size",list(SIZES.keys()),index=2); res=st.selectbox("Resources",list(RESOURCES.keys()),index=1)
@@ -490,7 +495,7 @@ def main():
 
     # Tabs
     if online and keys:
-        t1,t2,t3,t4=st.tabs(["📋 Generate","🧑‍🎓 Students","💬 Chat","🌶️ Quiz"])
+        t1,t3,t4,t2=st.tabs(["📋 Generate","💬 Chat","🌶️ Quiz","🧑‍🎓 Students"])
     else: t1=t2=t3=None; t4=st.container()
 
     # TAB 1: GENERATE
@@ -504,7 +509,7 @@ def main():
             exs=[o for i,o in enumerate(EXTRAS) if st.checkbox(o,key=f"x{i}")]
             add_img=st.checkbox("🎨 Include AI illustration",key="add_img",help="Generates a visual aid using DALL-E or Google Imagen")
         if st.button("🌶️ Generate",type="primary",use_container_width=True,key="gen"):
-            sp=build_sys(REGIONS[region],country,grade,subject,task,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],tm,topic)
+            sp=build_sys(REGIONS[region],country,grade,subject,task,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],tm,topic,school_name)
             q=f"Create {TASKS[task]}.\nSubject:{subject}\nGrade:{grade}\nTopic:{topic}\nIMMEDIATELY USABLE."
             if exs: q+="\n"+"; ".join(exs)
             want_img=add_img or "image" in task.lower() or "AI visual" in str(exs)
@@ -548,7 +553,8 @@ def main():
     # TAB 2: STUDENTS
     if t2:
      with t2:
-        st.markdown(f'<div style="background:{C_NAVY_L};border:1px solid {C_BLUE};border-radius:12px;padding:14px 18px;margin-bottom:10px">{ico(20)} <strong style="color:{C_BLUE}">My Students</strong></div>',unsafe_allow_html=True)
+        stu_label=f"{school_name} Students" if school_name.strip() else "My Students"
+        st.markdown(f'<div style="background:var(--bg-card);border:1px solid {C_BLUE};border-radius:12px;padding:14px 18px;margin-bottom:10px">{ico(20)} <strong style="color:{C_BLUE}">{stu_label}</strong></div>',unsafe_allow_html=True)
         with st.expander("➕ Add Profile",expanded=not st.session_state.students):
             c1,c2=st.columns(2)
             with c1: sn=st.text_input("Name",key="sn"); sib=st.selectbox("Siblings",["0-4","5-8","8+"],key="sb"); me=st.selectbox("Mom Edu",["HS Grad","No HS","Unknown"],key="me")
@@ -627,7 +633,7 @@ def main():
             with b1:
                 if st.button("📝 Assignment",key=f"a{i}"):
                     with st.spinner("Creating..."):
-                        r,m,allr=best_all(build_stu(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],info),f"Tailored {subject} assignment. Max 3 problems.")
+                        r,m,allr=best_all(build_stu(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],info,school_name),f"Tailored {subject} assignment. Max 3 problems.")
                     st.markdown(f'<div class="rb">{r}<div style="font-size:.65rem;color:#556;margin-top:4px">by {m}</div></div>',unsafe_allow_html=True)
                     if len(allr)>1:
                         with st.expander(f"📋 See all {len(allr)} model responses"):
@@ -638,7 +644,7 @@ def main():
             with b2:
                 if st.button("📊 Risk",key=f"r{i}"):
                     with st.spinner("Analyzing..."):
-                        r,m,allr=best_all(build_stu(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],info),"Risk analysis using IBT data. Compare to 183-student dataset.")
+                        r,m,allr=best_all(build_stu(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],info,school_name),"Risk analysis using IBT data. Compare to 183-student dataset.")
                     st.markdown(f'<div class="rb">{r}<div style="font-size:.65rem;color:#556;margin-top:4px">by {m}</div></div>',unsafe_allow_html=True)
                     if len(allr)>1:
                         with st.expander(f"📋 See all {len(allr)} model responses"):
@@ -657,7 +663,7 @@ def main():
                 if sel:
                     info=f'{sel["name"]},{sel["sib"]}sib,Mom:{sel["mom"]},SM:{sel["sm"]},Works:{sel["wk"]},Comp:{sel["cp"]},{sel["nt"]}'
                     with st.spinner("Grading..."):
-                        r,m,allr=best_all(build_stu(REGIONS[region],country,grade,gsub,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],info),f"Grade:\nSTUDENT:{info}\n{gsub} {gt}\n\nWORK:\n{gw}\n\nGive: grade, praise, corrections, tips, next step.")
+                        r,m,allr=best_all(build_stu(REGIONS[region],country,grade,gsub,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],info,school_name),f"Grade:\nSTUDENT:{info}\n{gsub} {gt}\n\nWORK:\n{gw}\n\nGive: grade, praise, corrections, tips, next step.")
                     st.markdown(f'<div class="rh"><h3>{ico(16)} Feedback: {gs}</h3></div><div class="rb">{r}</div>',unsafe_allow_html=True)
                     if len(allr)>1:
                         with st.expander(f"📋 See all {len(allr)} model responses"):
@@ -679,7 +685,7 @@ def main():
                         st.write("🟣 Asking Claude...")
                         st.write("🟢 Asking ChatGPT...")
                         st.write("🔵 Asking Gemini...")
-                        r,m,allr=best_all(build_chat(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl]),ex,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[:-1]])
+                        r,m,allr=best_all(build_chat(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],school_name),ex,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[:-1]])
                         status.update(label="✅ Response ready!",state="complete",expanded=False)
                     st.session_state.chat_messages.append({"role":"assistant","content":r,"model":m,"all_responses":allr}); st.rerun()
         st.markdown("---")
@@ -710,7 +716,7 @@ def main():
             want_chat_img=any(uq.lower().startswith(k) or k in uq.lower() for k in img_keywords)
             with st.status("🌶️ Teacher Pehpeh is thinking...",expanded=True) as status:
                 st.write("🟣 Asking Claude... 🟢 Asking ChatGPT... 🔵 Asking Gemini...")
-                r,m,allr=best_all(build_chat(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl]),uq,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]])
+                r,m,allr=best_all(build_chat(REGIONS[region],country,grade,subject,SIZES[clsz],RESOURCES[res],LANGS[lang],ABILITY[abl],school_name),uq,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]])
                 msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
                 if want_chat_img:
                     st.write("🎨 Creating illustration...")
