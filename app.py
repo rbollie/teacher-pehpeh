@@ -11,15 +11,15 @@ try:
 except: PD=False
 
 # === API KEYS ===
-def _get_key(name):
-    """Get API key from environment or Streamlit secrets"""
-    v=os.environ.get(name,"")
-    if v: return v
-    try:
-        import streamlit as st
-        return st.secrets.get(name,"")
-    except: return ""
+from dotenv import load_dotenv
+load_dotenv()  # loads .env file from project folder
 
+def _get_key(name):
+    """Get API key from environment or Streamlit secrets."""
+    v = os.environ.get(name, "")
+    if v: return v
+    try: return st.secrets.get(name, "")
+    except: return ""
 OPENAI_API_KEY = _get_key("OPENAI_API_KEY")
 ANTHROPIC_API_KEY = _get_key("ANTHROPIC_API_KEY")
 GOOGLE_API_KEY = _get_key("GOOGLE_API_KEY")
@@ -35,6 +35,34 @@ except ImportError: ANT = False
 try:
     import google.generativeai as genai; GEM = True
 except ImportError: GEM = False
+
+# === CURRICULUM — Load Ministry of Education data ===
+import sys
+from pathlib import Path
+APP_DIR = Path(__file__).parent
+if str(APP_DIR) not in sys.path:
+    sys.path.insert(0, str(APP_DIR))
+try:
+    from curriculum import (
+        load_all_curricula, get_grade_topics, get_topic_details,
+        build_curriculum_context, get_curriculum_summary, get_available_subjects,
+    )
+    CURRICULUM_AVAILABLE = True
+except ImportError:
+    CURRICULUM_AVAILABLE = False
+
+CURRICULA = {}
+if CURRICULUM_AVAILABLE:
+    CURRICULA = load_all_curricula()
+
+# === MANO LANGUAGE — Load Mano language library for bilingual lessons ===
+try:
+    from mano_context import (
+        build_mano_prompt_context, get_mano_preview, get_mano_stats,
+        match_vocabulary, MANO_AVAILABLE,
+    )
+except ImportError:
+    MANO_AVAILABLE = False
 
 # === IBT COLORS (from website) ===
 C_NAVY = "#0F2247"
@@ -228,22 +256,56 @@ def speak_elevenlabs(text, voice_id="woq6F0K3YYEpoS7T2Rx4", model_id="eleven_fla
         return None, f"Voice error: {e}"
 
 def highlight_result(text):
-    """Enhance AI result text with highlighted key points."""
     import re
-    t=text
-    # Convert **bold** to highlighted spans
-    t=re.sub(r'\*\*(.+?)\*\*',r'<strong style="color:#D4A843;background:rgba(212,168,67,.1);padding:1px 4px;border-radius:3px">\1</strong>',t)
-    # Convert ### headers to styled headers
-    t=re.sub(r'^### (.+)$',r'<h4 style="color:#2B7DE9;margin:12px 0 6px;font-family:Playfair Display,serif">\1</h4>',t,flags=re.MULTILINE)
-    t=re.sub(r'^## (.+)$',r'<h3 style="color:#D4A843;margin:14px 0 8px;font-family:Playfair Display,serif">\1</h3>',t,flags=re.MULTILINE)
-    # Convert numbered lists with bold starters
-    t=re.sub(r'^(\d+)\.\s',r'<strong style="color:#2B7DE9">\1.</strong> ',t,flags=re.MULTILINE)
-    # Highlight key educational markers
+    t = text
+    t = re.sub(r'\n{3,}', '\n\n', t)
+    t = re.sub(r'\*\*(.+?)\*\*', r'<strong style="color:#D4A843;background:rgba(212,168,67,.1);padding:1px 4px;border-radius:3px">\1</strong>', t)
+    t = re.sub(r'^### (.+)$', r'<h4 style="color:#2B7DE9;margin:12px 0 6px;font-family:Playfair Display,serif">\1</h4>', t, flags=re.MULTILINE)
+    t = re.sub(r'^## (.+)$', r'<h3 style="color:#D4A843;margin:14px 0 8px;font-family:Playfair Display,serif">\1</h3>', t, flags=re.MULTILINE)
+    t = re.sub(r'^(\d+)\.\s', r'<strong style="color:#2B7DE9">\1.</strong> ', t, flags=re.MULTILINE)
     for kw in ["WASSCE","BECE","Key Point","Note:","Tip:","Important:","Answer Key","Teacher's Guide","Objective","Assessment"]:
-        t=t.replace(kw,f'<span style="color:#D4A843;font-weight:600">{kw}</span>')
-    # Convert newlines to <br> for HTML display
-    t=t.replace('\n','<br>')
+        t = t.replace(kw, f'<span style="color:#D4A843;font-weight:600">{kw}</span>')
+    t = t.replace('\n', '<br>')
+    t = re.sub(r'(<br>\s*){3,}', '<br><br>', t)
     return t
+
+def clean_parent_output(text):
+    import re
+    raw_lines = text.split('\n')
+    clean = []
+    skip = False
+    for line in raw_lines:
+        lo = line.strip().lower()
+        if any(lo.startswith(p) for p in [
+            '# parent communication', '## key features', '### key features',
+            '## why this works', '### why this works', '## analysis', '### analysis',
+            '| element', '|---', '| **', '## message', '### message quality',
+            '[spoken duration', 'key elements included:', '## format', '### format',
+            '## tone', '# sms', '## sms', '# email format', '## delivery',
+            '**key features', '**why this works', '**analysis']):
+            skip = True
+            continue
+        if skip:
+            if lo == '' or lo == '---':
+                skip = False
+                continue
+            if any(lo.startswith(g) for g in ['dear ', 'good day', 'hello', 'hi ', 'greetings']):
+                skip = False
+            else:
+                continue
+        if any(x in lo for x in ['character count', 'characters /', 'this letter includes',
+            'this message was', 'why this works', 'respects parent capacity',
+            'achieves confirmation', 'no digital access', 'key features of',
+            'this works for', 'warm, not accusatory', 'math focus',
+            'practical home support', 'addresses low stem']):
+            continue
+        if lo.startswith('|') and '|' in lo[1:]:
+            continue
+        clean.append(line)
+    result = '\n'.join(clean).strip()
+    result = re.sub(r'\n{3,}', '\n\n', result)
+    result = re.sub(r'^(\s*---\s*\n?)+', '', result).strip()
+    return result
 
 def tts_player(text, key_suffix):
     """Simple 'Hear Results' button — one click, plays audio."""
@@ -369,11 +431,11 @@ ENCOURAGE = ["🌶️ Not quite — every mistake teaches!","🌶️ Close! Read
 WASSCE_TIPS = """📝 WASSCE EXAM STRATEGY:\n\n1. ANSWER SHEET: HB pencil only. Shade completely. Erase cleanly. Check numbers match.\n2. ELIMINATION: Read ALL options. Cross out wrong ones. 'Always'/'never' usually wrong.\n3. TIME: Paper 1: ~1 min/question. Paper 2: start easiest. Leave 10 min to check.\n4. NIGHT BEFORE: Review only. Eat well, sleep early. Rested brain > tired cramming."""
 
 # === DROPDOWNS ===
-REGIONS={"Urban":"urban","Peri-Urban":"peri-urban","Rural":"rural","Remote / Island":"remote"}
+REGIONS={"Urban":"urban","Suburban":"suburban","Rural":"rural"}
 # Sub-Saharan African countries only
 COUNTRIES=["Liberia","Sierra Leone","Ghana","Nigeria","Kenya","Uganda","Tanzania","Ethiopia","Senegal","Cameroon","Gambia","Guinea","Côte d'Ivoire","Mali","Burkina Faso","Rwanda","Malawi","Zambia","Zimbabwe","Mozambique","South Africa","Botswana","Namibia","DRC","Angola","Togo","Benin","Niger","Chad","Somalia","Eritrea","Djibouti","South Sudan","Sudan","Central African Republic","Republic of Congo","Gabon","Equatorial Guinea","São Tomé and Príncipe","Cape Verde","Comoros","Madagascar","Mauritius","Seychelles","Eswatini","Lesotho","Burundi","Guinea-Bissau"]
 FLAGS={"Liberia":"🇱🇷","Sierra Leone":"🇸🇱","Ghana":"🇬🇭","Nigeria":"🇳🇬","Kenya":"🇰🇪","Uganda":"🇺🇬","Tanzania":"🇹🇿","Ethiopia":"🇪🇹","Senegal":"🇸🇳","Cameroon":"🇨🇲","Gambia":"🇬🇲","Guinea":"🇬🇳","Côte d'Ivoire":"🇨🇮","Mali":"🇲🇱","Burkina Faso":"🇧🇫","Rwanda":"🇷🇼","Malawi":"🇲🇼","Zambia":"🇿🇲","Zimbabwe":"🇿🇼","Mozambique":"🇲🇿","South Africa":"🇿🇦","Botswana":"🇧🇼","Namibia":"🇳🇦","DRC":"🇨🇩","Angola":"🇦🇴","Togo":"🇹🇬","Benin":"🇧🇯","Niger":"🇳🇪","Chad":"🇹🇩","Somalia":"🇸🇴","Eritrea":"🇪🇷","Djibouti":"🇩🇯","South Sudan":"🇸🇸","Sudan":"🇸🇩","Central African Republic":"🇨🇫","Republic of Congo":"🇨🇬","Gabon":"🇬🇦","Equatorial Guinea":"🇬🇶","São Tomé and Príncipe":"🇸🇹","Cape Verde":"🇨🇻","Comoros":"🇰🇲","Madagascar":"🇲🇬","Mauritius":"🇲🇺","Seychelles":"🇸🇨","Eswatini":"🇸🇿","Lesotho":"🇱🇸","Burundi":"🇧🇮","Guinea-Bissau":"🇬🇼"}
-GRADES=["9th Grade","10th Grade","11th Grade","12th Grade (WASSCE)"]
+GRADES=["9th Grade","10th Grade","11th Grade","12th Grade","12th Grade (WASSCE Prep)"]
 SUBJECTS=["Mathematics","English Language","Integrated Science","Social Studies","Physics","Chemistry","Biology","Economics","Government / Civics","Literature in English","History","Geography","Agriculture","French","Religious Studies","Business Management","Accounting","Computer Studies / ICT","Technical Drawing","Home Economics","Physical Education","Art / Creative Arts","Music"]
 TOPICS={"Mathematics":["Number and Numeration","Fractions and Decimals","Percentages","Ratio and Proportion","Algebraic Expressions","Linear Equations","Quadratic Equations","Simultaneous Equations","Sets and Venn Diagrams","Trigonometry","Mensuration","Geometry","Statistics","Probability","Vectors","Logarithms","Indices and Surds"],
 "English Language":["Comprehension","Summary Writing","Essay (Narrative)","Essay (Argumentative)","Letter Writing (Formal)","Parts of Speech","Tenses","Active/Passive Voice","Punctuation","Vocabulary","Idioms"],
@@ -563,24 +625,24 @@ EXTRAS=["Differentiation","Formative assessment","Take-home activity","WASSCE al
 
 # French dropdown translations (display→English value for AI)
 FR_TASKS={"Plan de cours":"detailed lesson plan","Quiz (10 Q)":"10-question quiz with answer key","Quiz (20 Q)":"20-question quiz","QCM WASSCE (50)":"50 WASSCE-style MCQs","Théorie WASSCE":"WASSCE theory questions","Examen BECE":"BECE-style exam","Devoirs":"homework with minimal resources","Activité de groupe":"group activity","Compréhension écrite":"reading passage with questions","Pratique sans labo":"hands-on zero-cost activity","Grille d'évaluation":"grading rubric","Guide stratégique":"teaching strategies","Lettre aux parents":"parent communication","Plan hebdomadaire":"5-day scheme of work","Plan trimestriel":"term plan","Rattrapage":"catch-up material","Notes de révision":"revision guide","Jeu éducatif":"zero-cost teaching game","Leçon illustrée (image IA)":"lesson with AI-generated visual"}
-FR_GRADES=["9e année","10e année","11e année","12e année (WASSCE)"]
+FR_GRADES=["9e année","10e année","11e année","12e année","12e année (WASSCE Prép)"]
 FR_SUBJECTS=["Mathématiques","Langue anglaise","Sciences intégrées","Études sociales","Physique","Chimie","Biologie","Économie","Gouvernement / Éducation civique","Littérature anglaise","Histoire","Géographie","Agriculture","Français","Études religieuses","Gestion des affaires","Comptabilité","Informatique / TIC","Dessin technique","Économie domestique","Éducation physique","Art / Arts créatifs","Musique"]
 FR_SIZES={"Petit (<25)":"<25 students","Moyen (25-40)":"25-40","Grand (40-60)":"40-60","Très grand (60+)":"60+"}
 FR_RESOURCES={"Tableau noir seul":"chalkboard/chalk only","+ manuels partagés":"chalkboard + shared textbooks","+ polycopiés":"+ printable handouts","Ordinateur/projecteur":"occasional tech","Téléphones/tablettes":"student devices","Bien équipé":"regular tech"}
 FR_ABILITY={"Mixte":"mixed-ability","En difficulté":"below grade level","Au niveau":"at expected level","Avancé":"needs challenge","Inclusif":"includes learning differences"}
 FR_TIMES=["Période simple (30-40 min)","Double (60-80 min)","Demi-journée","Journée complète","Hebdomadaire","N/A"]
 FR_EXTRAS=["Différenciation","Évaluation formative","Activité à emporter","Alignement WASSCE","Exemples locaux","Intégration lecture","Stratégies grande classe","Interdisciplinaire","Aide visuelle IA"]
-FR_REGIONS={"Urbain":"urban","Péri-urbain":"peri-urban","Rural":"rural","Éloigné / Île":"remote"}
+FR_REGIONS={"Urbain":"urban","Banlieue":"suburban","Rural":"rural"}
 # Swahili dropdown translations
 SW_TASKS={"Mpango wa Somo":"detailed lesson plan","Maswali (10)":"10-question quiz with answer key","Maswali (20)":"20-question quiz","QCM WASSCE (50)":"50 WASSCE-style MCQs","Nadharia WASSCE":"WASSCE theory questions","Mtihani BECE":"BECE-style exam","Kazi ya Nyumbani":"homework with minimal resources","Shughuli ya Kikundi":"group activity","Ufahamu wa Kusoma":"reading passage with questions","Mazoezi bila Maabara":"hands-on zero-cost activity","Rubriiki":"grading rubric","Mwongozo wa Mkakati":"teaching strategies","Barua kwa Mzazi":"parent communication","Mpango wa Wiki":"5-day scheme of work","Mpango wa Muhula":"term plan","Nyenzo za Kufidia":"catch-up material","Muhtasari wa Masomo":"revision guide","Mchezo wa Kielimu":"zero-cost teaching game","Somo Lenye Mchoro (picha AI)":"lesson with AI-generated visual"}
-SW_GRADES=["Darasa la 9","Darasa la 10","Darasa la 11","Darasa la 12 (WASSCE)"]
+SW_GRADES=["Darasa la 9","Darasa la 10","Darasa la 11","Darasa la 12","Darasa la 12 (WASSCE)"]
 SW_SUBJECTS=["Hisabati","Lugha ya Kiingereza","Sayansi Jumuishi","Maarifa ya Jamii","Fizikia","Kemia","Biolojia","Uchumi","Serikali / Uraia","Fasihi ya Kiingereza","Historia","Jiografia","Kilimo","Kifaransa","Masomo ya Dini","Usimamizi wa Biashara","Uhasibu","Kompyuta / TEHAMA","Uchora Ufundi","Uchumi wa Nyumbani","Elimu ya Mwili","Sanaa / Sanaa Bunifu","Muziki"]
 SW_SIZES={"Ndogo (<25)":"<25 students","Wastani (25-40)":"25-40","Kubwa (40-60)":"40-60","Kubwa sana (60+)":"60+"}
 SW_RESOURCES={"Ubao tu":"chalkboard/chalk only","+ vitabu vya kushiriki":"chalkboard + shared textbooks","+ nakala":"+ printable handouts","Kompyuta/projekta":"occasional tech","Simu/tableti":"student devices","Vifaa kamili":"regular tech"}
 SW_ABILITY={"Mchanganyiko":"mixed-ability","Wanaoshindwa":"below grade level","Kiwango sahihi":"at expected level","Wenye uwezo":"needs challenge","Jumuishi":"includes learning differences"}
 SW_TIMES=["Kipindi kimoja (dak 30-40)","Mara mbili (dak 60-80)","Nusu siku","Siku nzima","Kila wiki","H/T"]
 SW_EXTRAS=["Utofautishaji","Tathmini ya mchakato","Kazi ya nyumbani","Ulinganifu WASSCE","Mifano ya mahali","Ujumuishaji kusoma","Mikakati darasa kubwa","Mtambuka","Msaada wa kuona AI"]
-SW_REGIONS={"Mjini":"urban","Pembezoni mwa mji":"peri-urban","Vijijini":"rural","Mbali / Kisiwa":"remote"}
+SW_REGIONS={"Mjini":"urban","Pembezoni":"suburban","Vijijini":"rural"}
 # Grade/Subject mappings (French display→English value)
 _GRADE_MAP={**dict(zip(FR_GRADES,GRADES)),**dict(zip(SW_GRADES,GRADES))}
 _SUBJ_MAP={**dict(zip(FR_SUBJECTS,SUBJECTS)),**dict(zip(SW_SUBJECTS,SUBJECTS))}
@@ -662,13 +724,16 @@ def _g():
 def _r():
     return "Rules: stated resources only, max 3 problems/group, self-contained tips, WAEC format for exams, African context, Socratic method, print-ready. Use **bold** for key terms, objectives, important concepts, and answer highlights."
 
-def build_sys(reg,cty,grd,subj,task,cls,res,lng,abl,tm,top,sch=""):
+def build_sys(reg,cty,grd,subj,task,cls,res,lng,abl,tm,top,sch="",mano_ctx=""):
     s_tag=f",School:{sch}" if sch else ""
-    return f"{_p()}\nCLASS: {cty},{reg},{grd},{subj},{task},{cls},{res},{lng},{abl},Time:{tm},Topic:{top}{s_tag}\n{_g()}\n{_kb()}\nPhysics=extra scaffolding. Group 3=SHORT. 58% no computer=paper first.\n{_r()}"
+    mano_block=f"\n\n{mano_ctx}" if mano_ctx else ""
+    return f"{_p()}\nCLASS: {cty},{reg},{grd},{subj},{task},{cls},{res},{lng},{abl},Time:{tm},Topic:{top}{s_tag}\n{_g()}\n{_kb()}\nPhysics=extra scaffolding. Group 3=SHORT. 58% no computer=paper first.{mano_block}\n{_r()}"
 
-def build_chat(reg,cty,grd,subj,cls,res,lng,abl,sch=""):
+def build_chat(reg,cty,grd,subj,cls,res,lng,abl,sch="",curr_ctx="",mano_ctx=""):
     s_tag=f",School:{sch}" if sch else ""
-    return f"{_p()}\nWhen greeted: 'Hello, how can Teacher Pehpeh help you today!'\nCLASS: {cty},{reg},{grd},{subj},{cls},{res},{lng},{abl}{s_tag}\n{_g()}\n{_kb()}\nIntervention WORKS. Teacher's work matters.\n{_r()}"
+    curr_block=f"\nMOE CURRICULUM CONTEXT:\n{curr_ctx}\nUse this when answering questions about curriculum, topics, or lesson planning." if curr_ctx else ""
+    mano_block=f"\n\n{mano_ctx}" if mano_ctx else ""
+    return f"{_p()}\nWhen greeted: 'Hello, how can Teacher Pehpeh help you today!'\nCLASS: {cty},{reg},{grd},{subj},{cls},{res},{lng},{abl}{s_tag}\n{_g()}\n{_kb()}\nIntervention WORKS. Teacher's work matters.{curr_block}{mano_block}\n{_r()}"
 
 def build_stu(reg,cty,grd,subj,cls,res,lng,abl,info,sch=""):
     s_tag=f",School:{sch}" if sch else ""
@@ -697,12 +762,50 @@ def ask_gem(sp,q):
     except Exception as e: return f"⚠️ Gemini: {e}"
 
 def best(sp,q,h=None):
+    """Try text models"""
     for fn,nm in [(ask_cl,"Claude"),(ask_gpt,"ChatGPT")]:
         r=fn(sp,q,h)
         if r and not str(r).startswith("⚠️"): return r,nm
     r=ask_gem(sp,q)
     if r and not str(r).startswith("⚠️"): return r,"Gemini"
     return "⚠️ No models responded.",None
+
+# === VISION AI — Grade photos of student work ===
+def ask_gpt_vision(sp, prompt, img_b64, mime="image/jpeg"):
+    if not OAI or not OPENAI_API_KEY: return None
+    try:
+        m=[{"role":"system","content":sp},{"role":"user","content":[
+            {"type":"image_url","image_url":{"url":f"data:{mime};base64,{img_b64}"}},
+            {"type":"text","text":prompt}]}]
+        return openai.OpenAI(api_key=OPENAI_API_KEY).chat.completions.create(model="gpt-4o",messages=m,max_tokens=3000,temperature=.4).choices[0].message.content
+    except Exception as e: return f"⚠️ GPT Vision: {e}"
+
+def ask_cl_vision(sp, prompt, img_b64, mime="image/jpeg"):
+    if not ANT or not ANTHROPIC_API_KEY: return None
+    try:
+        m=[{"role":"user","content":[
+            {"type":"image","source":{"type":"base64","media_type":mime,"data":img_b64}},
+            {"type":"text","text":prompt}]}]
+        return anthropic.Anthropic(api_key=ANTHROPIC_API_KEY).messages.create(model="claude-haiku-4-5-20251001",max_tokens=3000,system=sp,messages=m).content[0].text
+    except Exception as e: return f"⚠️ Claude Vision: {e}"
+
+def ask_gem_vision(sp, prompt, img_b64, mime="image/jpeg"):
+    if not GEM or not GOOGLE_API_KEY: return None
+    try:
+        genai.configure(api_key=GOOGLE_API_KEY)
+        import io; img_data=base64.b64decode(img_b64)
+        try:
+            from PIL import Image; img=Image.open(io.BytesIO(img_data))
+            return genai.GenerativeModel("gemini-2.5-flash",system_instruction=sp).generate_content([prompt,img]).text
+        except ImportError:
+            return genai.GenerativeModel("gemini-2.5-flash",system_instruction=sp).generate_content([prompt,{"mime_type":mime,"data":img_b64}]).text
+    except Exception as e: return f"⚠️ Gemini Vision: {e}"
+
+def best_vision(sp, prompt, img_b64, mime="image/jpeg"):
+    for fn,nm in [(ask_cl_vision,"Claude"),(ask_gpt_vision,"ChatGPT"),(ask_gem_vision,"Gemini")]:
+        r=fn(sp,prompt,img_b64,mime)
+        if r and not str(r).startswith("⚠️"): return r,nm
+    return "⚠️ No vision models responded.",None
 
 def best_all(sp,q,h=None):
     """Query all models and return (best_response, best_model, all_responses_dict)"""
@@ -730,9 +833,15 @@ def synth(sp,q,resps):
 
 # === MAIN ===
 def main():
-    st.set_page_config(page_title="Teacher Pehpeh by IBT",page_icon="🌶️",layout="wide")
-    for k in ["chat_messages","students","conn_checked","conn_info","gen_result"]:
-        if k not in st.session_state: st.session_state[k]=[] if k in ("chat_messages","students") else (False if k=="conn_checked" else None)
+    st.set_page_config(page_title="Teacher Pehpeh by IBT",page_icon="🌶️",layout="wide",initial_sidebar_state="collapsed")
+    for k in ["chat_messages","students","conn_checked","conn_info","gen_result","grade_history"]:
+        if k not in st.session_state: st.session_state[k]=[] if k in ("chat_messages","students","grade_history") else (False if k=="conn_checked" else None)
+    # === PENDING PROFILE LOAD — must run BEFORE any widgets render ===
+    if st.session_state.get("_pending_load"):
+        _lp=st.session_state.pop("_pending_load")
+        for _k,_v in [("school_name",_lp.get("school","")),("teacher_name",_lp.get("teacher","")),("teacher_phone",_lp.get("phone","")),("country_sel",_lp.get("country","Liberia")),("lang_sel",_lp.get("lang","English"))]:
+            st.session_state[_k]=_v
+        st.session_state.profile_set=True
     for sk in QUIZ: 
         k=f"qz_{sk}"
         if k not in st.session_state: st.session_state[k]={"lv":"easy","qi":0,"sc":0,"tot":0,"stk":0,"done":False,"sel":None,"hist":[]}
@@ -819,11 +928,46 @@ def main():
     .sc {{background:var(--bg-card);border:1px solid var(--border-color);border-radius:10px;padding:12px 16px;margin:6px 0;color:var(--text-primary)}}
     .ft {{text-align:center;color:var(--text-muted);font-size:.8rem;padding:1.5rem 0 1rem;border-top:1px solid var(--border-color);margin-top:2rem}}
     .ft a {{color:{C_GOLD};text-decoration:none}}
+
+    /* Solid blue Configure expander */
+    [data-testid="stSidebar"] .stExpander {{ background:linear-gradient(135deg,#1a3a6b,#2B7DE9);border-radius:10px;border:none !important }}
+    [data-testid="stSidebar"] .stExpander summary {{ color:white !important;font-weight:700 }}
+    [data-testid="stSidebar"] .stExpander [data-testid="stExpanderDetails"] {{ background:rgba(0,0,0,.15);border-radius:0 0 10px 10px }}
+    @keyframes throb {{ 0%,100% {{ opacity:.3;transform:scale(1) }} 50% {{ opacity:1;transform:scale(1.2) }} }}
+    [data-testid="collapsedControl"] {{ animation:throb 2s ease-in-out infinite }}
+    [data-testid="collapsedControl"]:hover {{ animation:none;opacity:1 !important;transform:scale(1.1) }}
+    /* Red pepper cursor on main content (non-red background) */
+    .stSelectbox,.stCheckbox,.stButton>button,.stTextInput,.stExpander,[role="tab"],
+    .stSelectbox > div,.stSelectbox [data-baseweb="select"],.stSelectbox [data-baseweb="select"] *,
+    .stSelectbox svg,.stCheckbox label,.stCheckbox input,.stCheckbox span,
+    .stButton>button *,.stExpander summary,.stExpander summary * {{
+        cursor: pointer !important;
+    }}
+    /* Blue pepper cursor on red sidebar */
+    [data-testid="stSidebar"] *,
+    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"],
+    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] *,
+    [data-testid="stSidebar"] .stSelectbox svg,
+    [data-testid="stSidebar"] .stCheckbox label,
+    [data-testid="stSidebar"] .stButton>button,
+    [data-testid="stSidebar"] .stExpander summary {{
+        cursor: pointer !important;
+    }}
+    /* Reduce sidebar gaps */
+    section[data-testid="stSidebar"] [data-testid="stVerticalBlockBorderWrapper"] {{ padding: 0 !important; margin: 0 !important }}
+    section[data-testid="stSidebar"] hr {{ margin: 4px 0 !important }}
+    section[data-testid="stSidebar"] .stSelectbox {{ margin-bottom: -6px !important }}
+    section[data-testid="stSidebar"] .stCheckbox {{ margin-bottom: -8px !important }}
+    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] > p {{ margin-bottom: 0 !important }}
+    section[data-testid="stSidebar"] .stExpander {{ margin-bottom: 2px !important }}
+
+    [data-testid="stSidebar"] .stExpander {{ background:linear-gradient(135deg,#2B7DE9,#1D5CBF) !important;border-radius:10px !important;border:none !important }}
+    [data-testid="stSidebar"] .stExpander summary {{ color:white !important;font-weight:700 !important }}
+    [data-testid="stSidebar"] .stExpander [data-testid="stExpanderDetails"] {{ background:rgba(0,0,0,.15) !important;border-radius:0 0 10px 10px !important }}
     </style>""",unsafe_allow_html=True)
 
     # Sidebar (defined first so country is available for logo flag)
     with st.sidebar:
-        school_name=st.text_input(T("school_name"),value="",placeholder=T("school_placeholder"),key="school_name")
         # Country first - drives auto language
         country=st.selectbox(T("country"),COUNTRIES,key="country_sel")
         # Auto-detect language from country (user can still override)
@@ -836,17 +980,39 @@ def main():
         lang=st.selectbox("🌍 Language / Langue / Lugha",list(LANGS.keys()),key="lang_sel")
         st.markdown("---")
         _cls_word={"en":"Classroom","fr":"Classe","sw":"Darasa"}.get(_lang_key(),"Classroom")
-        classroom_label=f"{school_name} {_cls_word}" if school_name.strip() else T("my_classroom")
+        _sn = st.session_state.get("school_name","")
+        classroom_label=f"{_sn} {_cls_word}" if _sn.strip() else T("my_classroom")
         _logo_b64=get_b64()
         if _logo_b64:
             _logo_html=f'<img src="data:image/png;base64,{_logo_b64}" style="height:36px;width:36px;vertical-align:middle;border-radius:50%;margin-right:8px;filter:drop-shadow(0 2px 6px rgba(212,168,67,.4))">'
         else:
             _logo_html="🌶️ "
-        st.markdown(f'<div style="display:flex;align-items:center;margin:8px 0 4px">{_logo_html}<span style="font-family:Playfair Display,serif;font-size:1.3rem;font-weight:700;color:#F5D998">{classroom_label}</span></div>',unsafe_allow_html=True); st.caption({"en":"Set once — shapes every response","fr":"Configurer une fois — façonne chaque réponse","sw":"Weka mara moja — huunda kila jibu"}.get(_lang_key(),"Set once — shapes every response")); st.markdown("---")
-        region=st.selectbox(T("setting"),list(_regions().keys()))
-        grade=st.selectbox(T("grade"),_grades(),index=1); subject=st.selectbox(T("subject"),_subjects())
-        clsz=st.selectbox(T("class_size"),list(_sizes().keys()),index=2); res=st.selectbox(T("resources"),list(_resources().keys()),index=1)
-        abl=st.selectbox(T("student_level"),list(_ability().keys()))
+        st.markdown(f'<div style="display:flex;align-items:center;margin:8px 0 4px">{_logo_html}<span style="font-family:Playfair Display,serif;font-size:1.3rem;font-weight:700;color:#F5D998">{classroom_label}</span></div>',unsafe_allow_html=True)
+        school_name=st.text_input(T("school_name"),value="",placeholder=T("school_placeholder"),key="school_name",label_visibility="collapsed")
+        _tn_col,_tp_col=st.columns([3,2])
+        with _tn_col:
+            teacher_name=st.text_input("Teacher Name",value="",placeholder="e.g., Mr. Kollie",key="teacher_name",label_visibility="collapsed")
+        with _tp_col:
+            teacher_phone=st.text_input("Phone",value="",placeholder="e.g., 0886-XXX-XXX",key="teacher_phone",label_visibility="collapsed")
+        if not school_name.strip() and not teacher_name.strip():
+            st.caption("✏️ Enter school & teacher name to personalize")
+        elif not teacher_name.strip():
+            st.caption("✏️ Add your name — parents will see it on letters")
+        else:
+            _tinfo=teacher_name
+            if teacher_phone.strip(): _tinfo+=f" • {teacher_phone.strip()}"
+            st.caption(f"👤 {_tinfo}")
+        if "profile_set" not in st.session_state: st.session_state.profile_set=False
+        # All classroom settings inside collapsible Configure block
+        with st.expander("🌶️ Configure Your Classroom", expanded=False):
+            if not st.session_state.profile_set:
+                st.markdown('<div style="font-size:.85rem;color:#F0D5D5;margin-bottom:8px">Select your school setting, grade, subject, and preferences below. Save your profile to reuse later!</div>',unsafe_allow_html=True)
+            region=st.selectbox(T("setting"),list(_regions().keys()),label_visibility="collapsed",format_func=lambda x: f"📍 Setting: {x}")
+            grade=st.selectbox(T("grade"),_grades(),index=1,label_visibility="collapsed",format_func=lambda x: f"🎓 Grade: {x}")
+            subject=st.selectbox(T("subject"),_subjects(),label_visibility="collapsed",format_func=lambda x: f"📚 Subject: {x}")
+            clsz=st.selectbox(T("class_size"),list(_sizes().keys()),index=2,label_visibility="collapsed",format_func=lambda x: f"👥 Class Size: {x}")
+            res=st.selectbox(T("resources"),list(_resources().keys()),index=1,label_visibility="collapsed",format_func=lambda x: f"🧰 Resources: {x}")
+            abl=st.selectbox(T("student_level"),list(_ability().keys()),label_visibility="collapsed",format_func=lambda x: f"📊 Student Level: {x}")
         # Map French display values back to English for AI
         _region_val=_regions()[region]
         _grade_en=_to_en_grade(grade)
@@ -854,7 +1020,64 @@ def main():
         _size_val=_sizes()[clsz]
         _res_val=_resources()[res]
         _abl_val=_ability()[abl]
-        st.markdown("---"); st.caption("© 2026 Institute of Basic Technology")
+        st.markdown("---"); 
+        # MOE Curriculum Toggle — Liberia only
+        if CURRICULA and CURRICULUM_AVAILABLE and country == "Liberia":
+            moe_on = st.checkbox("🇱🇷 Align to MOE Curriculum", value=False, key="moe_toggle",
+                                 help="When ON, topics and prompts align to Liberia Ministry of Education standards")
+            curr_subjects = get_available_subjects(CURRICULA)
+            if moe_on:
+                st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:8px;'
+                            f'padding:8px 12px;margin:4px 0;font-size:.8rem;color:#F0D5D5">'
+                            f'📘 <strong>Aligned:</strong> {", ".join(curr_subjects)}<br>'
+                            f'<span style="font-size:.72rem;opacity:.8">Lessons will match MOE learning objectives, content outlines, and assessment strategies</span></div>',
+                            unsafe_allow_html=True)
+        else:
+            moe_on = False
+        # Mano Language Toggle — Rural Liberia only
+        if MANO_AVAILABLE and country == "Liberia" and _regions()[region] == "rural":
+            mano_on = st.checkbox("🗣️ Mano Language (Bilingual)", value=False, key="mano_toggle",
+                                  help="When ON, lessons include Mano vocabulary, grammar, and cultural context for Nimba County")
+            _mano_stats = get_mano_stats()
+            if _mano_stats and mano_on:
+                st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:8px;'
+                            f'padding:8px 12px;margin:4px 0;font-size:.8rem;color:#F0D5D5">'
+                            f'🗣️ <strong>Mano Library:</strong> {_mano_stats["total"]}+ words<br>'
+                            f'<span style="font-size:.72rem;opacity:.8">{", ".join(_mano_stats["categories"][:5])}...</span></div>',
+                            unsafe_allow_html=True)
+        else:
+            mano_on = False
+        st.markdown("---")
+        # Save / Load Classroom Profile
+        _pf1,_pf2=st.columns(2)
+        with _pf1:
+            if st.button("💾 Save Configuration",use_container_width=True,key="sv_prof"):
+                st.session_state.saved_profile={"school":school_name,"teacher":teacher_name,"phone":teacher_phone,"country":country,"lang":lang,"region":region,"grade":grade,"subject":subject,"class_size":clsz,"resources":res,"ability":abl,"moe_on":moe_on,"mano_on":mano_on}
+                st.session_state.profile_set=True
+                st.success("Saved!")
+        with _pf2:
+            if st.button("📂 Load Configuration",use_container_width=True,key="ld_prof"):
+                st.session_state["_show_load_opts"]=not st.session_state.get("_show_load_opts",False)
+                st.rerun()
+        if st.session_state.get("_show_load_opts"):
+            if "saved_profile" in st.session_state:
+                if st.button("Restore last saved profile",use_container_width=True,key="ld_restore"):
+                    st.session_state["_pending_load"]=st.session_state.saved_profile
+                    st.session_state["_show_load_opts"]=False
+                    st.rerun()
+                _pj=json.dumps(st.session_state.saved_profile,indent=2)
+                st.download_button("Download Profile to Desktop",data=_pj,file_name="teacher_pehpeh_profile.json",mime="application/json",key="dl_prof",use_container_width=True)
+            _up_prof=st.file_uploader("Load from file:",type=["json"],key="up_prof",label_visibility="visible")
+            if _up_prof:
+                try:
+                    _loaded=json.loads(_up_prof.read().decode("utf-8"))
+                    st.session_state.saved_profile=_loaded
+                    st.session_state["_pending_load"]=_loaded
+                    st.session_state["_show_load_opts"]=False
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Invalid file: {e}")
+        st.caption("© 2026 Institute of Basic Technology")
         st.markdown("[🌐 Visit our website](https://www.institutebasictechnology.org/index.php)")
 
     show_logo(country)
@@ -893,8 +1116,33 @@ def main():
         if ELEVENLABS_API_KEY:
             voice_html=f'<span style="color:#81D4A8">{T("voice_ready")}</span>'
             bar_parts.append(voice_html)
+        # MOE Curriculum section
+        if moe_on and CURRICULA:
+            curr_subjects = get_available_subjects(CURRICULA)
+            moe_html=f'<span style="color:#81C784">📘 MOE: {", ".join(curr_subjects)}</span>'
+            bar_parts.append(moe_html)
+        # Mano language status
+        if mano_on and MANO_AVAILABLE:
+            _ms = get_mano_stats()
+            mano_html=f'<span style="color:#FFB74D">🗣️ Mano: {_ms["total"]}+ words</span>' if _ms else ""
+            if mano_html: bar_parts.append(mano_html)
         st.markdown(f'<div class="status-bar">{div.join(bar_parts)}</div>',unsafe_allow_html=True)
     if st.sidebar.button(T("recheck")): st.session_state.conn_checked=False; st.rerun()
+
+    # Compute general MOE curriculum context for chat (available across tabs)
+    _chat_curr_ctx = ""
+    if moe_on and CURRICULA:
+        _grade_num_chat = int(''.join(c for c in _grade_en if c.isdigit()) or "10")
+        _chat_curr_ctx = get_curriculum_summary(CURRICULA) if CURRICULUM_AVAILABLE else ""
+        # Also get all topics for this subject/grade to include in chat context
+        _chat_topics = get_grade_topics(CURRICULA, _subj_en, _grade_num_chat) if CURRICULUM_AVAILABLE else []
+        if _chat_topics:
+            _chat_curr_ctx += f"\n\nAvailable MOE topics for {_subj_en} Grade {_grade_num_chat}: {', '.join(_chat_topics)}"
+    # Compute Mano language context for chat
+    _chat_mano_ctx = ""
+    if mano_on and MANO_AVAILABLE:
+        _chat_mano_ctx = build_mano_prompt_context(_subj_en, _subj_en)
+
     if not conn:
         keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
 
@@ -907,25 +1155,223 @@ def main():
     if t1:
      with t1:
         c1,c2=st.columns(2)
-        with c1: task=st.selectbox(T("task"),list(_tasks().keys()))
-        with c2: tm=st.selectbox(T("time"),_times())
-        _task_val=_tasks()[task]  # English value for AI
-        topic=st.selectbox(T("topic"),_get_topics(_subj_en))
-        _topic_en=_to_en_topic(topic)
+        with c1: task=st.selectbox(T("task"),list(_tasks().keys()),label_visibility="collapsed",format_func=lambda x: f"\U0001f4dd Task: {x}")
+        _task_val=_tasks()[task]
+        _IS_PARENT_LETTER=(_task_val=="parent communication")
+        _NEEDS_TIME={"detailed lesson plan","homework with minimal resources","group activity","reading passage with questions","hands-on zero-cost activity","zero-cost teaching game","5-day scheme of work","lesson with AI-generated visual","catch-up material"}
+        _NEEDS_OPTIONS={"detailed lesson plan","homework with minimal resources","group activity","hands-on zero-cost activity","5-day scheme of work","term plan","catch-up material","zero-cost teaching game","lesson with AI-generated visual","reading passage with questions","revision guide"}
+        _NEEDS_MOE={"detailed lesson plan","homework with minimal resources","group activity","hands-on zero-cost activity","5-day scheme of work","term plan","catch-up material","zero-cost teaching game","lesson with AI-generated visual","reading passage with questions","revision guide","10-question quiz with answer key","20-question quiz","50 WASSCE-style MCQs","WASSCE theory questions","BECE-style exam"}
+        _NEEDS_IMG={"detailed lesson plan","homework with minimal resources","group activity","hands-on zero-cost activity","lesson with AI-generated visual","reading passage with questions"}
+        _show_time=_task_val in _NEEDS_TIME
+        _show_options=_task_val in _NEEDS_OPTIONS
+        _show_moe=_task_val in _NEEDS_MOE
+        _show_img=_task_val in _NEEDS_IMG
+        with c2:
+            if _show_time:
+                tm=st.selectbox(T("time"),_times(),label_visibility="collapsed",format_func=lambda x: f"\u23f1\ufe0f Time: {x}")
+            else:
+                tm="N/A"
+                st.markdown(f'<div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:10px 14px;color:var(--text-muted);font-size:.85rem;opacity:.5">\u23f1\ufe0f Time: not needed for this task</div>',unsafe_allow_html=True)
+        _parent_letter_override=None
+        _pl_delivery=None
+        _pl_mom_edu=None
+        if _IS_PARENT_LETTER:
+            st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:10px;padding:12px 16px;margin:8px 0"><strong style="color:{C_GOLD}">\u2709\ufe0f Parent Letter</strong><br><span style="font-size:.85rem;color:var(--text-secondary)">Adapts to each parent \u2014 audio for those who find reading difficult, text or email for others</span></div>',unsafe_allow_html=True)
+            _pl1,_pl2=st.columns(2)
+            with _pl1:
+                if st.session_state.students:
+                    _pl_student=st.selectbox("Student:",["--Select--"]+[s["name"] for s in st.session_state.students],key="pl_stu")
+                else:
+                    _pl_student=st.text_input("Student Name:",key="pl_stu_txt",placeholder="e.g., Janjay Kollie")
+            with _pl2:
+                _pl_concern=st.selectbox("Concern:",["Struggling academically","Frequent absences","Behavior issues","Needs extra support","Outstanding progress","Parent meeting request"],key="pl_concern")
+            _pl_details=st.text_area("Specific details (optional):",key="pl_details",height=60,placeholder="e.g., Failing math quizzes...")
+            topic=_pl_concern; _topic_en=_pl_concern
+            _pl_name=_pl_student if (st.session_state.students and _pl_student!="--Select--") else (st.session_state.get("pl_stu_txt","") or "the student")
+            _pl_info=""
+            _pl_mom_edu="Unknown"
+            if st.session_state.students and _pl_student!="--Select--":
+                _sel=next((s for s in st.session_state.students if s["name"]==_pl_student),None)
+                if _sel:
+                    _pl_info=f'Profile: {_sel["sib"]}sib, Mom:{_sel["mom"]}, SM:{_sel["sm"]}, Works:{_sel["wk"]}'
+                    _pl_mom_edu=_sel.get("mom","Unknown")
+            _auto_idx=0 if _pl_mom_edu=="No HS" else 1
+            # Build sensitivity context from student profile
+            _sensitivity=""
+            if st.session_state.students and _pl_student!="--Select--":
+                _sel=next((s for s in st.session_state.students if s["name"]==_pl_student),None)
+                if _sel:
+                    _sib=_sel.get("sib","0-4")
+                    _sm=_sel.get("sm","No")
+                    _wk=_sel.get("wk","No")
+                    _mom=_sel.get("mom","Unknown")
+                    _factors=[]
+                    if _sib in ["5-8","8+"]:
+                        _factors.append(f"This child has {_sib} siblings — they likely help care for younger ones, cook, fetch water, or do household chores.")
+                    if _sm=="Yes":
+                        _factors.append("This is a single-mother household. The mother is carrying the full burden alone. Be extra respectful of her effort.")
+                    if _wk=="Yes":
+                        _factors.append("This child works after school (possibly selling on the street, helping at market, or doing farm work). They may have very little free time to study.")
+                    if _mom=="No HS":
+                        _factors.append("The mother has no high school education. She may feel embarrassed or powerless about academics. Never make her feel blamed.")
+                    if _factors:
+                        _sensitivity=("CRITICAL SENSITIVITY CONTEXT — READ BEFORE WRITING:\n"
+                            + "\n".join(f"• {f}" for f in _factors)
+                            + "\n\nBecause of this home situation:\n"
+                            "- Do NOT assume the child is lazy or not trying. They may be exhausted from responsibilities.\n"
+                            "- Do NOT say 'make sure they study every night' as if it's simple. Acknowledge the parent's hard work first.\n"
+                            "- DO frame it as: 'I know things are not easy at home. Even small-small time for books — 15 or 20 minutes — can help.'\n"
+                            "- DO suggest REALISTIC actions: 'If the child can sit with their book even while minding the smaller ones, that helps.'\n"
+                            "- DO position the teacher as an ALLY, not an authority: 'Let us work together. I am here to help, not to add to your load.'\n"
+                            "- DO NOT put the child in trouble. The goal is partnership, not punishment.\n")
+            _delivery_opts=["\U0001f50a Voice Message (audio for phone)","\U0001f4f1 Text Message (short SMS)","\U0001f4e7 Email (detailed letter)"]
+            _pl_delivery=st.radio("How to reach this parent:",_delivery_opts,index=_auto_idx,key="pl_delivery",horizontal=True)
+            if _pl_mom_edu=="No HS" and "\U0001f50a" in _pl_delivery:
+                st.markdown(f'<div style="background:rgba(46,125,50,.1);border-left:4px solid #4CAF50;padding:8px 12px;border-radius:6px;font-size:.82rem;margin:4px 0">\U0001f4a1 <strong>Voice message recommended</strong> \u2014 this parent may find reading difficult. A warm audio message they can play on their phone is more accessible.</div>',unsafe_allow_html=True)
+            _close_loop=("CRITICAL: End with a specific, simple way for the parent to confirm they received this. "
+                         "E.g. 'Please send [child] back with this note signed' or 'Please call the school' or "
+                         "'Tell [student] to let me know you heard this.' One simple action.")
+            _t_name=teacher_name.strip() if teacher_name.strip() else "the teacher"
+            _t_phone=teacher_phone.strip() if teacher_phone.strip() else ""
+            _t_sig=_t_name
+            if _t_phone: _t_sig+=f" ({_t_phone})"
+            _t_phone_line=f"Include teacher phone number {_t_phone} so the parent can call." if _t_phone else "Invite parent to come to the school."
+            if "\U0001f50a" in _pl_delivery:
+                _parent_letter_override=(f"Create a SHORT VOICE MESSAGE (under 45 seconds spoken) from {_t_name} (teacher) to parent of {_pl_name}.\n"
+                    f"CONCERN: {_pl_concern}\nDETAILS: {_pl_details or 'General concern'}\nSTUDENT: {_pl_info or 'N/A'}\n{_sensitivity}"
+                    f"SCHOOL: {school_name or 'Our school'} | {_subj_en} | {_grade_en}\n"
+                    "RULES:\n"
+                    "1. Write ONLY the spoken message. NO meta-commentary, NO key elements list, NO analysis, NO duration notes. Just the words to speak.\n"
+                    "2. Natural, warm, conversational. Max 6-8 sentences.\n"
+                    f"3. Introduce yourself as {_t_name} from {school_name or 'the school'}. Say something POSITIVE about the child first.\n"
+                    "4. State concern simply. No education jargon. Use Liberian English expressions.\n"
+                    "5. NEVER use the word 'spirit'. Say 'sharp', 'bright', 'hardworking' instead of 'bright spirit' or 'good spirit'.\n"
+                    "6. This parent may NOT be able to help with schoolwork directly. Do NOT ask them to teach or tutor.\n"
+                    "7. Focus on PARENTAL ACCOUNTABILITY: make sure child sits down to do homework each evening, goes to school on time, takes studies seriously.\n"
+                    "8. If classmates or older children live nearby, encourage the parent to let the child study with them.\n"
+                    f"9. {_t_phone_line}\n"
+                    f"10. {_close_loop}\n"
+                    "11. NO letter formatting. NO section headers. Just natural speech.\n"
+                    "OUTPUT: Only the spoken message text. Nothing else.")
+            elif "\U0001f4f1" in _pl_delivery:
+                _parent_letter_override=(f"Create a SHORT TEXT MESSAGE (SMS, max 300 chars) from {_t_name} to parent of {_pl_name}.\n"
+                    f"CONCERN: {_pl_concern}\nDETAILS: {_pl_details or 'General concern'}\nSTUDENT: {_pl_info or 'N/A'}\n{_sensitivity}"
+                    f"SCHOOL: {school_name or 'Our school'} | {_subj_en} | {_grade_en}\n"
+                    "RULES:\n"
+                    "1. OUTPUT ONLY the text message itself. NO headers, NO titles, NO meta-commentary, NO format notes, NO character counts.\n"
+                    "2. Max 300 characters total. Friendly but brief.\n"
+                    "3. Greet, state concern in one sentence, one action parent can take, invite to call/visit.\n"
+                    "4. NEVER use the word 'spirit'. Use Liberian English: 'your child doing fine-o', 'sharp', 'bright'.\n"
+                    f"5. {_close_loop}\n"
+                    f"6. Sign as {_t_sig}, {school_name or 'the school'}. Simple words only.\n"
+                    "OUTPUT: Only the SMS text. Nothing else.")
+            else:
+                _parent_letter_override=(f"Write a letter from {_t_name} (teacher) to parent/guardian of {_pl_name}.\n"
+                    f"CONCERN: {_pl_concern}\nDETAILS: {_pl_details or 'General concern'}\nSTUDENT: {_pl_info or 'N/A'}\n{_sensitivity}"
+                    f"SCHOOL: {school_name or 'Our school'} | {_subj_en} | {_grade_en}\n"
+                    "RULES:\n"
+                    "1. OUTPUT ONLY the letter itself. NO analysis, NO key features table, NO 'why this works' section, NO commentary about the letter.\n"
+                    "2. Simple reading level. Short sentences. No jargon. Warm and respectful. Use Liberian English expressions.\n"
+                    "3. NEVER use the word 'spirit'. Say 'sharp', 'bright', 'hardworking', 'doing well' instead.\n"
+                    "4. Include: concern, what teacher is doing, what parent can do at home, invitation to meet.\n"
+                    f"5. ONE page max. Proper letter format with date, greeting, body, closing. Sign as {_t_sig}, {school_name or 'the school'}.\n"
+                    f"6. {'Include phone number '+_t_phone+' in the closing so the parent can call. ' if _t_phone else ''}{_close_loop}\n"
+                    "OUTPUT: Only the letter. Nothing before it, nothing after it.")
+
+        else:
+            topic=st.selectbox(T("topic"),_get_topics(_subj_en),label_visibility="collapsed",format_func=lambda x: f"\U0001f4d6 Topic: {x}")
+            _topic_en=_to_en_topic(topic)
+
+        # === MOE Curriculum: override topics + show badge when aligned ===
+        is_curriculum_aligned = False
+        curriculum_details = None
+        curriculum_context = ""
+        if not _IS_PARENT_LETTER and _show_moe and moe_on and CURRICULA:
+            _grade_num = int(''.join(c for c in _grade_en if c.isdigit()) or "10")
+            curr_topics = get_grade_topics(CURRICULA, _subj_en, _grade_num)
+            if curr_topics:
+                is_curriculum_aligned = True
+                topic = st.selectbox(f"📘 {T('topic')} (MOE Curriculum)", curr_topics, key="moe_topic")
+                _topic_en = topic  # Curriculum topics are already in English
+                st.markdown(f'<div style="display:inline-block;background:linear-gradient(135deg,#1B5E20,#388E3C);'
+                            f'color:white;padding:3px 10px;border-radius:16px;font-size:.72rem;font-weight:600;margin:2px 0">'
+                            f'✅ MOE Curriculum-Aligned</div>', unsafe_allow_html=True)
+                # Get details for this topic
+                curriculum_details = get_topic_details(CURRICULA, _subj_en, _grade_num, topic)
+                curriculum_context = build_curriculum_context(CURRICULA, _subj_en, _grade_num, topic)
+        # === MOE Curriculum Preview (expandable) ===
+        if is_curriculum_aligned and curriculum_details:
+            with st.expander("📋 View Ministry of Education Requirements for This Topic"):
+                objectives = curriculum_details.get("specific_objectives", [])
+                if objectives:
+                    st.markdown(f"**Learning Objectives:**")
+                    for obj in objectives:
+                        st.markdown(f"- {obj}")
+                content = curriculum_details.get("content_outline", [])
+                if content:
+                    st.markdown(f"**Content Outline:**")
+                    for item in content:
+                        st.markdown(f"- {item}")
+                activities = curriculum_details.get("suggested_activities", [])
+                if activities:
+                    st.markdown(f"**Suggested Activities:**")
+                    for act in activities:
+                        st.markdown(f"- {act}")
+                local_notes = curriculum_details.get("local_contextualization_notes", "")
+                if local_notes:
+                    st.markdown(f"**Liberian Contextualization:** {local_notes}")
+                materials = curriculum_details.get("lab_materials", [])
+                if materials:
+                    st.markdown(f"**Lab Materials:** {', '.join(materials)}")
+
+        # === Mano Language: vocabulary preview for selected topic ===
+        _mano_prompt_ctx = ""
+        if not _IS_PARENT_LETTER and _show_moe and mano_on and MANO_AVAILABLE:
+            _mano_prompt_ctx = build_mano_prompt_context(_topic_en, _subj_en)
+            _mano_preview = get_mano_preview(_topic_en, _subj_en)
+            if _mano_preview:
+                st.markdown(f'<div style="display:inline-block;background:linear-gradient(135deg,#E65100,#F57C00);'
+                            f'color:white;padding:3px 10px;border-radius:16px;font-size:.72rem;font-weight:600;margin:2px 0">'
+                            f'🗣️ Mano Vocabulary Matched</div>', unsafe_allow_html=True)
+                with st.expander(f"🗣️ Mano Vocabulary for This Topic ({len(_mano_preview)} words)"):
+                    _mv_cols = st.columns(2)
+                    for idx, (eng, mano) in enumerate(_mano_preview):
+                        with _mv_cols[idx % 2]:
+                            st.markdown(f"**{eng}** → {mano}")
+                    st.markdown(f'<div style="font-size:.75rem;color:var(--text-muted);margin-top:8px">'
+                                f'💡 These Mano words will be woven into the generated lesson for bilingual teaching.</div>',
+                                unsafe_allow_html=True)
+
         # Reading Comprehension: show literature selector
         lit_book=None; lit_info=None; rc_mode=None
-        if _task_val=="reading passage with questions":
+        if not _IS_PARENT_LETTER and _task_val=="reading passage with questions":
             st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:10px;padding:12px 16px;margin:8px 0"><strong style="color:{C_GOLD}">{T("lit_library")}</strong><br><span style="font-size:.85rem;color:var(--text-secondary)">{T("lit_desc")}</span></div>',unsafe_allow_html=True)
             lit_book=st.selectbox(T("select_book"),list(LITERATURE.keys()),key="lit_book")
             lit_info=LITERATURE.get(lit_book,{})
             if lit_book and lit_book!="Teacher's Own Selection":
                 st.markdown(f'<div style="font-size:.85rem;color:var(--text-secondary);margin:4px 0">✍️ <strong>{lit_info.get("author","")}</strong> ({lit_info.get("origin","")}) · {lit_info.get("genre","")} · {lit_info.get("wassce","")}<br>Themes: {lit_info.get("themes","")}</div>',unsafe_allow_html=True)
             rc_mode=st.selectbox(T("comp_type"),[T("pass_short"),T("pass_fill"),T("pass_essay"),T("pass_mcq"),T("pass_vocab"),T("full_comp")],key="rc_mode")
-        with st.expander(T("options")):
+        exs=[]; add_img=False
+        if _show_options and not _IS_PARENT_LETTER:
+          with st.expander(T("options")):
             _extras_keys=["differentiation","formative","takehome","wassce_align","local_ex","literacy","large_class","cross_curr","ai_visual"]
             _extras_labels=[T(k) for k in _extras_keys]
             exs=[EXTRAS[i] for i,lbl in enumerate(_extras_labels) if st.checkbox(lbl,key=f"x{i}")]
-            add_img=st.checkbox(T("include_img"),key="add_img",help=T("img_help"))
+            if _show_img:
+                add_img=st.checkbox(T("include_img"),key="add_img",help=T("img_help"))
+        # === AI Agent Selection ===
+        _avail_agents=[]
+        if OPENAI_API_KEY: _avail_agents.append("ChatGPT")
+        if ANTHROPIC_API_KEY: _avail_agents.append("Claude")
+        if GOOGLE_API_KEY: _avail_agents.append("Gemini")
+        if _avail_agents:
+            _agent_opts=[f"🌶️ All {len(_avail_agents)} Agents"]+[f"🌶️ {a}" for a in _avail_agents]
+            _agent_sel=st.selectbox("Select AI Agent:",_agent_opts,key="agent_pick",label_visibility="collapsed",format_func=lambda x:x)
+            if _agent_sel.startswith("🌶️ All"):
+                _agent_pick=_avail_agents
+            else:
+                _agent_pick=[_agent_sel.replace("🌶️ ","")]
+        else: _agent_pick=[]
         gen_col, clr_col = st.columns([3,1])
         with gen_col:
             gen_btn=st.button(T("gen_btn"),type="primary",use_container_width=True,key="gen")
@@ -934,7 +1380,28 @@ def main():
                 st.session_state.gen_result=None; st.rerun()
         if gen_btn:
             # Build prompt
-            if _task_val=="reading passage with questions" and lit_book and lit_book!="Teacher's Own Selection":
+            if _IS_PARENT_LETTER and _parent_letter_override:
+                _tn=teacher_name.strip() if teacher_name.strip() else "the teacher"
+                _is_rural=_region_val=="rural"
+                _locale_guide=("Use Liberian English expressions the parent will recognize: "
+                    "'your child doing fine-o', 'small-small', 'I beg you', 'let us put our heads together', 'the child can be somebody'. "
+                    "Avoid the word 'spirit' entirely — do not say 'bright spirit', 'good spirit', 'has spirit', etc. "
+                    "Say instead: 'your child is sharp', 'bright', 'hardworking', 'doing well', 'trying hard'. ")
+                if _is_rural:
+                    _locale_guide+=("This is a rural family — farm analogies are appropriate: "
+                        "'education is like planting rice — you must tend it every day', "
+                        "'the child who studies is like the farmer who clears the bush early'. "
+                        "Reference walking to school, community support, studying by lamplight.")
+                else:
+                    _locale_guide+=("This is an urban family — use town-appropriate references: "
+                        "school transport, study space at home, after-school time management, "
+                        "neighborhood study groups. Avoid farm analogies.")
+                sp=(f"You are {_tn}, a teacher at {school_name or 'a school'} in {country}. "
+                    f"You are writing to a parent. Be warm, respectful, and use simple language. "
+                    f"Do NOT refer to yourself as Teacher Pehpeh or any AI. You are a real teacher communicating with a real parent. "
+                    f"{_locale_guide}")
+                q=_parent_letter_override
+            elif _task_val=="reading passage with questions" and lit_book and lit_book!="Teacher's Own Selection":
                 rc_prompt=f"""Create a READING COMPREHENSION exercise using the novel "{lit_book}" by {lit_info.get('author','')}.
 
 INSTRUCTIONS:
@@ -955,33 +1422,53 @@ Subject:{_subj_en}
 Grade:{_grade_en}
 Topic:{_topic_en}
 Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Themes: {lit_info.get('themes','')}. {lit_info.get('wassce','')}."""
-                sp=build_sys(_region_val,country,_grade_en,_subj_en,_task_val,_size_val,_res_val,LANGS[lang],_abl_val,tm,_topic_en,school_name)
+                sp=build_sys(_region_val,country,_grade_en,_subj_en,_task_val,_size_val,_res_val,LANGS[lang],_abl_val,tm,_topic_en,school_name,_mano_prompt_ctx)
                 q=rc_prompt
             else:
-                sp=build_sys(_region_val,country,_grade_en,_subj_en,_task_val,_size_val,_res_val,LANGS[lang],_abl_val,tm,_topic_en,school_name)
+                sp=build_sys(_region_val,country,_grade_en,_subj_en,_task_val,_size_val,_res_val,LANGS[lang],_abl_val,tm,_topic_en,school_name,_mano_prompt_ctx)
                 q=f"Create {_task_val}.\nSubject:{_subj_en}\nGrade:{_grade_en}\nTopic:{_topic_en}\nIMMEDIATELY USABLE."
             if exs: q+="\n"+"; ".join(exs)
+            # === MOE Curriculum: inject context into prompts ===
+            if is_curriculum_aligned and curriculum_context:
+                sp += f"\n\nCRITICAL — MINISTRY OF EDUCATION CURRICULUM DATA:\n{curriculum_context}\nYou MUST align content with these objectives, content outline, and activities."
+                if curriculum_details:
+                    objectives = curriculum_details.get("specific_objectives", [])
+                    if objectives:
+                        q += "\n\nMOE Learning Objectives (address ALL of these):\n" + "\n".join(f"  {i+1}. {o}" for i, o in enumerate(objectives))
+                    local_notes = curriculum_details.get("local_contextualization_notes", "")
+                    if local_notes:
+                        q += f"\nContextualization: {local_notes}"
             want_img=add_img or "image" in task.lower() or "AI visual" in str(exs)
+            keys=len(_agent_pick)
             rs={}; ph=st.empty(); s=0; tot=keys+(2 if want_img else 1)
             ph.markdown(pprog(0,tot,T("generating_content")),unsafe_allow_html=True)
             for k,fn,nm in [(OPENAI_API_KEY,ask_gpt,"ChatGPT"),(ANTHROPIC_API_KEY,ask_cl,"Claude"),(GOOGLE_API_KEY,ask_gem,"Gemini")]:
-                if k:
+                if k and nm in _agent_pick:
                     s+=1; ph.markdown(pprog(s,tot,f"Asking {nm}..."),unsafe_allow_html=True)
                     rs[nm]=fn(sp,q) if nm!="Gemini" else fn(sp,q)
             s+=1; ph.markdown(pprog(s,tot,T("combining")),unsafe_allow_html=True)
             result=synth(sp,q,rs)
+            if _IS_PARENT_LETTER: result=clean_parent_output(result)
+            # Also clean individual model responses for parent letters
+            if _IS_PARENT_LETTER:
+                rs={k:clean_parent_output(v) if v and not str(v).startswith("⚠️") else v for k,v in rs.items()}
             img=None; img_src=None
             if want_img:
                 s+=1; ph.markdown(pprog(s,tot,T("creating_img")),unsafe_allow_html=True)
                 img,img_src=gen_image(f"{_subj_en}: {_topic_en} for {_grade_en} in {country}")
             ph.markdown(pprog(tot,tot,T("done")),unsafe_allow_html=True); time.sleep(.5); ph.empty()
             # Store in session state
-            st.session_state.gen_result={"result":result,"task":task,"topic":topic,"img":img,"img_src":img_src,"rs":rs,"grade":grade,"subject":subject,"lit_book":lit_book}
+            # Clear cached voice audio from previous generation
+            for _vck in ["tts_audio_pl_voice","tts_audio_gen_pl_voice","tts_audio_gen_pl_sms","tts_audio_gen_pl_email","tts_audio_gen"]:
+                st.session_state.pop(_vck,None)
+            st.session_state.gen_result={"result":result,"task":task,"topic":topic,"img":img,"img_src":img_src,"rs":rs,"grade":grade,"subject":subject,"lit_book":lit_book,"moe_aligned":is_curriculum_aligned and not _IS_PARENT_LETTER,"mano_aligned":mano_on and MANO_AVAILABLE and not _IS_PARENT_LETTER,"pl_delivery":_pl_delivery if _IS_PARENT_LETTER else None,"is_parent_letter":_IS_PARENT_LETTER}
         # Display results from session state
         gr=st.session_state.gen_result
         if gr:
             lit_tag=f" — 📖 {gr.get('lit_book','')}" if gr.get('lit_book') and gr['lit_book']!="Teacher's Own Selection" else ""
-            st.markdown(f'<div class="rh"><h3>{ico(20)} {gr["task"]} — {gr["topic"]}{lit_tag}</h3></div>',unsafe_allow_html=True)
+            moe_tag=" · ✅ MOE Aligned" if gr.get('moe_aligned') else ""
+            mano_tag=" · 🗣️ Mano" if gr.get('mano_aligned') else ""
+            st.markdown(f'<div class="rh"><h3>{ico(20)} {gr["task"]} — {gr["topic"]}{lit_tag}{moe_tag}{mano_tag}</h3></div>',unsafe_allow_html=True)
             if gr.get("img"): st.image(gr["img"],caption=f"{gr['topic']} — Generated by {gr.get('img_src','')}",use_container_width=True)
             valid_rs={k:v for k,v in gr["rs"].items() if v and not str(v).startswith("⚠️")}
             if len(valid_rs)>1:
@@ -998,13 +1485,55 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             elif len(valid_rs)==1:
                 nm=list(valid_rs.keys())[0]
                 st.markdown(f'<div style="font-size:.75rem;color:#667;margin-top:4px">Response by {nm} (only model available)</div>',unsafe_allow_html=True)
-            dl_col, em_col = st.columns(2)
-            with dl_col:
+            # === DELIVERY HANDLING ===
+            if gr.get("is_parent_letter") and gr.get("pl_delivery"):
+                # Let teacher pick which response to send
+                _send_opts={"Combined (Best)":gr["result"]}
+                for _mn,_mr in valid_rs.items():
+                    if _mr: _send_opts[_mn]=_mr
+                if len(_send_opts)>1:
+                    _send_pick=st.selectbox("Which version to send:",list(_send_opts.keys()),key="pl_pick_model")
+                else:
+                    _send_pick=list(_send_opts.keys())[0]
+                _send_text=_send_opts[_send_pick]
+                _pdl=gr["pl_delivery"]
+                if "Voice" in _pdl:
+                    _vk="tts_audio_pl_voice"
+                    if _vk in st.session_state and st.session_state[_vk]:
+                        _aud=st.session_state[_vk]
+                        st.markdown(f'<div style="background:linear-gradient(135deg,#2E7D32,#1B5E20);border-radius:10px;padding:12px 16px;margin:6px 0;color:white"><strong>Voice Message</strong> &mdash; Send this audio to the parent via WhatsApp or play on their phone</div>',unsafe_allow_html=True)
+                        st.markdown(f'<audio controls autoplay style="width:100%;margin:4px 0;border-radius:8px"><source src="data:audio/mp3;base64,{_aud["b64"]}" type="audio/mp3"></audio>',unsafe_allow_html=True)
+                        st.download_button("Download MP3 to Send",data=base64.b64decode(_aud["b64"]),file_name="voice_message_for_parent.mp3",mime="audio/mp3",key="gen_pl_dl_mp3",use_container_width=True)
+                    else:
+                        st.markdown('<div style="background:linear-gradient(135deg,#2E7D32,#1B5E20);border-radius:10px;padding:12px 16px;margin:6px 0;color:white"><strong>Voice Message</strong> &mdash; Generate audio to send to the parent</div>',unsafe_allow_html=True)
+                        if st.button("Generate Voice Message",type="primary",use_container_width=True,key="gen_pl_voice_btn"):
+                            with st.spinner("Creating voice message..."):
+                                b64,src=speak_elevenlabs(_send_text)
+                            if b64:
+                                st.session_state[_vk]={"b64":b64,"src":src}
+                                st.rerun()
+                            else:
+                                st.error(f"Audio failed: {src}")
+                elif "Text" in _pdl:
+                    _sms_text=_send_text.strip()
+                    st.markdown('<div style="background:linear-gradient(135deg,#1565C0,#0D47A1);border-radius:10px;padding:12px 16px;margin:8px 0;color:white"><strong>Text Message Ready</strong> &mdash; Copy and send via SMS or WhatsApp</div>',unsafe_allow_html=True)
+                    st.code(_sms_text, language=None)
+                    
+                    email_result(_send_text, f"Parent Message: {gr['topic']} ({gr['grade']})", "gen_pl_sms")
+                else:
+                    st.markdown('<div style="background:linear-gradient(135deg,#4A148C,#6A1B9A);border-radius:10px;padding:12px 16px;margin:8px 0;color:white"><strong>Parent Letter Ready</strong> &mdash; Download, print, or email</div>',unsafe_allow_html=True)
+                    st.download_button("Download Letter",data=_send_text,file_name="parent_letter.txt",key="gen_dl_pl")
+                    email_result(_send_text, f"Parent Letter: {gr['topic']} ({gr['grade']}, {gr['subject']})", "gen_pl_em")
+                    tts_player(_send_text, "gen_pl_email")
+                st.markdown('<div style="background:rgba(255,152,0,.1);border:1px solid #FF9800;border-radius:8px;padding:10px 14px;margin:8px 0;font-size:.85rem"><strong>Close the Loop</strong> &mdash; Follow up in 3-5 days to confirm parent received your message. If no response, try a different delivery method or send message home with the student.</div>',unsafe_allow_html=True)
+            else:
+              dl_col, em_col = st.columns(2)
+              with dl_col:
                 st.download_button("📥 Download",data=gr["result"],file_name=f"{gr['task']}_{gr['topic']}.txt".replace(" ","_")[:60],key="gen_dl")
-            with em_col:
-                pass
-            email_result(gr["result"], f"Teacher Pehpeh — {gr['task']}: {gr['topic']} ({gr['grade']}, {gr['subject']})", "gen")
-            tts_player(gr["result"], "gen")
+              with em_col:
+                  pass
+              email_result(gr["result"], f"Teacher Pehpeh — {gr['task']}: {gr['topic']} ({gr['grade']}, {gr['subject']})", "gen")
+              tts_player(gr["result"], "gen")
 
     # TAB 2: STUDENTS
     if t2:
@@ -1145,6 +1674,184 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     email_result(r, f"Teacher Pehpeh — Grade Feedback for {gs} ({gsub}, {grade})", "grade")
                     tts_player(r, "grade")
 
+        # === PHOTO GRADING — Batch scan student work ===
+        if st.session_state.students:
+            st.markdown("---")
+            st.markdown(f'<div style="background:linear-gradient(135deg,#1565C0,#0D47A1);border-radius:12px;padding:14px 18px;margin-bottom:10px;color:white"><strong>📸 Photo Grading</strong> — Snap or upload photos of handwritten student work</div>',unsafe_allow_html=True)
+            _max_batch = min(10, len(st.session_state.students))
+            pg_cols = st.columns([2,2,2])
+            with pg_cols[0]:
+                pg_count = st.number_input("Students to grade", min_value=1, max_value=_max_batch, value=min(3, _max_batch), key="pg_count")
+            with pg_cols[1]:
+                pg_subj = st.selectbox("Subject:", _subjects(), key="pg_subj")
+            with pg_cols[2]:
+                pg_topic = st.text_input("Topic/Assignment:", key="pg_topic", placeholder="e.g., Algebra Quiz #3")
+            _pg_subj_en = _to_en_subj(pg_subj)
+
+            # Create upload slots
+            pg_uploads = []
+            pg_students = []
+            for slot in range(int(pg_count)):
+                sc1, sc2 = st.columns([1, 2])
+                with sc1:
+                    stu_name = st.selectbox(f"Student {slot+1}:", [s["name"] for s in st.session_state.students], key=f"pg_stu_{slot}")
+                    pg_students.append(stu_name)
+                with sc2:
+                    photo = st.file_uploader(f"Upload work", type=["jpg","jpeg","png","heic","pdf"], key=f"pg_img_{slot}", label_visibility="collapsed")
+                    if not photo:
+                        photo = st.camera_input(f"📷 Or take photo", key=f"pg_cam_{slot}", label_visibility="collapsed")
+                    pg_uploads.append(photo)
+
+            _has_any = any(pg_uploads)
+            if st.button("🌶️ Grade All Photos", type="primary", use_container_width=True, key="pg_go", disabled=not _has_any):
+                _graded = 0
+                for slot in range(int(pg_count)):
+                    photo = pg_uploads[slot]
+                    sname = pg_students[slot]
+                    if not photo:
+                        continue
+                    sel = next((s for s in st.session_state.students if s["name"] == sname), None)
+                    if not sel:
+                        continue
+                    info = f'{sel["name"]},{sel["sib"]}sib,Mom:{sel["mom"]},SM:{sel["sm"]},Works:{sel["wk"]},Comp:{sel["cp"]},{sel["nt"]}'
+                    img_bytes = photo.read()
+                    img_b64 = base64.b64encode(img_bytes).decode()
+                    mime = photo.type if hasattr(photo, 'type') and photo.type else "image/jpeg"
+                    if "pdf" in mime:
+                        st.warning(f"⚠️ PDF not supported for {sname} — use JPG/PNG photo instead.")
+                        continue
+
+                    sys_prompt = f"""You are Teacher Pehpeh, an expert Liberian education AI grading handwritten student work.
+STUDENT PROFILE: {info}
+SCHOOL: {school_name or 'Not specified'} | COUNTRY: {country} | GRADE: {_grade_en} | SUBJECT: {_pg_subj_en}
+TOPIC: {pg_topic or 'General'}
+
+INSTRUCTIONS:
+1. Read the handwritten work carefully. Transcribe what you see.
+2. Grade on a scale of 0-100.
+3. Note specific errors with corrections.
+4. TAILOR feedback to this student's profile (risk factors, background).
+5. Give 2-3 specific next steps personalized for this student.
+6. Be encouraging — celebrate what they got right FIRST.
+7. Format: SCORE | TRANSCRIPTION | STRENGTHS | ERRORS | PERSONALIZED FEEDBACK | NEXT STEPS
+
+IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100"""
+
+                    with st.spinner(f"📸 Grading {sname}'s work..."):
+                        r, m = best_vision(sys_prompt, f"Grade this student's handwritten {_pg_subj_en} work on {pg_topic}. Student: {sname}.", img_b64, mime)
+
+                    if r and not str(r).startswith("⚠️"):
+                        _graded += 1
+                        # Extract score for history
+                        import re as _re
+                        _score_match = _re.search(r'SCORE:\s*(\d+)', r, _re.IGNORECASE)
+                        _score = int(_score_match.group(1)) if _score_match else None
+                        if not _score:
+                            _score_match = _re.search(r'(\d+)\s*/\s*100', r)
+                            _score = int(_score_match.group(1)) if _score_match else None
+
+                        # Save to grade history
+                        if _score is not None:
+                            import datetime
+                            st.session_state.grade_history.append({
+                                "student": sname, "subject": _pg_subj_en,
+                                "topic": pg_topic or "General", "score": _score,
+                                "date": datetime.datetime.now().isoformat(),
+                                "grade_level": _grade_en, "model": m
+                            })
+
+                        _fb_label = {"en":"Feedback","fr":"Commentaires","sw":"Maoni"}.get(_lang_key(),"Feedback")
+                        _score_display = f" — {_score}/100" if _score else ""
+                        st.markdown(f'<div class="rh"><h3>📸 {_fb_label}: {sname}{_score_display}</h3></div><div class="rb">{highlight_result(r)}<div style="font-size:.65rem;color:#556;margin-top:4px">by {m}</div></div>',unsafe_allow_html=True)
+                        email_result(r, f"Teacher Pehpeh — Photo Grade for {sname} ({pg_subj}, {grade})", f"pg_{slot}")
+                    else:
+                        st.error(f"⚠️ Could not grade {sname}'s work: {r}")
+
+                if _graded:
+                    st.success(f"✅ Graded {_graded} student{'s' if _graded>1 else ''}'s work!")
+
+        # === TREND ANALYTICS — Performance over time ===
+        if st.session_state.grade_history:
+            st.markdown("---")
+            st.markdown(f'<div style="background:linear-gradient(135deg,#2E7D32,#1B5E20);border-radius:12px;padding:14px 18px;margin-bottom:10px;color:white"><strong>📈 Performance Trends</strong> — Track student progress over time</div>',unsafe_allow_html=True)
+
+            import datetime
+            _gh = st.session_state.grade_history
+
+            # Filter controls
+            _tc1, _tc2 = st.columns(2)
+            with _tc1:
+                _all_stu = sorted(set(g["student"] for g in _gh))
+                _sel_stu = st.multiselect("Filter by student:", _all_stu, default=_all_stu, key="trend_stu")
+            with _tc2:
+                _all_subj = sorted(set(g["subject"] for g in _gh))
+                _sel_subj = st.multiselect("Filter by subject:", _all_subj, default=_all_subj, key="trend_subj")
+
+            _filtered = [g for g in _gh if g["student"] in _sel_stu and g["subject"] in _sel_subj]
+
+            if _filtered and PD:
+                _df = pd.DataFrame(_filtered)
+                _df["date"] = pd.to_datetime(_df["date"])
+                _df["date_str"] = _df["date"].dt.strftime("%b %d")
+
+                # Summary stats
+                _avg = _df["score"].mean()
+                _latest_avg = _df.sort_values("date").tail(max(1,len(_df)//3))["score"].mean()
+                _earliest_avg = _df.sort_values("date").head(max(1,len(_df)//3))["score"].mean()
+                _trend_dir = "📈" if _latest_avg > _earliest_avg else ("📉" if _latest_avg < _earliest_avg else "➡️")
+                _improvement = _latest_avg - _earliest_avg
+
+                _m1, _m2, _m3, _m4 = st.columns(4)
+                with _m1:
+                    st.metric("Avg Score", f"{_avg:.0f}/100")
+                with _m2:
+                    st.metric("Assignments Graded", len(_filtered))
+                with _m3:
+                    st.metric("Trend", f"{_trend_dir} {'+' if _improvement>0 else ''}{_improvement:.1f}pts")
+                with _m4:
+                    _pass_rate = len(_df[_df["score"]>=50])/len(_df)*100
+                    st.metric("Pass Rate (≥50)", f"{_pass_rate:.0f}%")
+
+                # Per-student scores over time
+                st.markdown("**Student Performance Over Time**")
+                _pivot = _df.groupby(["date_str","student"])["score"].mean().reset_index()
+                _chart_data = _pivot.pivot(index="date_str", columns="student", values="score")
+
+                # Add projected improvement line (target: 5% improvement per assessment)
+                if len(_chart_data) > 1:
+                    _baseline = _df.sort_values("date").head(max(1,len(_df)//3))["score"].mean()
+                    _proj = []
+                    for idx, dt in enumerate(_chart_data.index):
+                        _proj.append(_baseline + (idx * 5))  # 5pts projected improvement per session
+                    _chart_data["🎯 Projected Target"] = [min(100, p) for p in _proj]
+
+                st.line_chart(_chart_data, use_container_width=True)
+
+                # Subject breakdown
+                if len(_all_subj) > 1:
+                    st.markdown("**Average by Subject**")
+                    _subj_avg = _df.groupby("subject")["score"].agg(["mean","count"]).round(1)
+                    _subj_avg.columns = ["Avg Score", "Assignments"]
+                    st.dataframe(_subj_avg, use_container_width=True)
+
+                # At-risk students (below 50 average)
+                _stu_avg = _df.groupby("student")["score"].mean()
+                _at_risk = _stu_avg[_stu_avg < 50].sort_values()
+                if len(_at_risk):
+                    st.markdown(f'<div style="background:rgba(239,83,80,.1);border:2px solid #EF5350;border-radius:10px;padding:12px;margin:8px 0">'
+                                f'<strong style="color:#EF5350">⚠️ Students Needing Intervention ({len(_at_risk)})</strong><br>'
+                                + "<br>".join(f'<span style="color:#F0D5D5">• <strong>{name}</strong>: {score:.0f}/100 avg</span>' for name,score in _at_risk.items())
+                                + '</div>', unsafe_allow_html=True)
+
+                # Export grades
+                _exp1, _exp2 = st.columns(2)
+                with _exp1:
+                    _csv = _df[["student","subject","topic","score","date_str","grade_level"]].to_csv(index=False)
+                    st.download_button("📥 Export Grades (CSV)", data=_csv, file_name=f"teacher_pehpeh_grades_{school_name or 'class'}.csv", mime="text/csv", key="exp_grades")
+                with _exp2:
+                    if st.button("🗑️ Clear Grade History", key="clr_grades"):
+                        st.session_state.grade_history = []; st.rerun()
+
     # TAB 3: CHAT
     if t3:
      with t3:
@@ -1159,7 +1866,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                         st.write(T("asking_claude"))
                         st.write(T("asking_chatgpt"))
                         st.write(T("asking_gemini"))
-                        r,m,allr=best_all(build_chat(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,school_name),ex,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[:-1]])
+                        r,m,allr=best_all(build_chat(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,school_name,_chat_curr_ctx,_chat_mano_ctx),ex,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[:-1]])
                         status.update(label=T("response_ready"),state="complete",expanded=False)
                     st.session_state.chat_messages.append({"role":"assistant","content":r,"model":m,"all_responses":allr}); st.rerun()
         st.markdown("---")
@@ -1208,7 +1915,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             want_chat_img=any(uq.lower().startswith(k) or k in uq.lower() for k in img_keywords)
             with st.status(T("thinking"),expanded=True) as status:
                 st.write(f"{T('asking_claude')} {T('asking_chatgpt')} {T('asking_gemini')}")
-                r,m,allr=best_all(build_chat(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,school_name),uq,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]])
+                r,m,allr=best_all(build_chat(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,school_name,_chat_curr_ctx,_chat_mano_ctx),uq,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]])
                 msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
                 if want_chat_img:
                     st.write(T("creating_img"))
