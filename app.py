@@ -20,10 +20,27 @@ except: PIL_OK=False
 from dotenv import load_dotenv
 load_dotenv()  # loads .env file from project folder
 
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
-GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
-ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY", "")
+def _get_key(name):
+    """Get API key from env vars OR Streamlit secrets, strip quotes/whitespace."""
+    v = os.environ.get(name, "")
+    if not v:
+        try:
+            v = st.secrets.get(name, "")
+        except: pass
+    if not v:
+        # Try lowercase and variations in st.secrets
+        try:
+            for k in st.secrets:
+                if k.upper() == name.upper():
+                    v = st.secrets[k]
+                    break
+        except: pass
+    return str(v).strip().strip("'\"")
+
+OPENAI_API_KEY = _get_key("OPENAI_API_KEY")
+ANTHROPIC_API_KEY = _get_key("ANTHROPIC_API_KEY")
+GOOGLE_API_KEY = _get_key("GOOGLE_API_KEY")
+ELEVENLABS_API_KEY = _get_key("ELEVENLABS_API_KEY")
 LOGO_FILENAME = "logo.png"
 
 try:
@@ -219,7 +236,7 @@ def speak_elevenlabs(text, voice_id="woq6F0K3YYEpoS7T2Rx4", model_id="eleven_fla
     """Generate speech using ElevenLabs streaming API. Returns base64 audio or None."""
     if not ELEVENLABS_API_KEY: return None, "No ElevenLabs API key"
     try:
-        import re, urllib.request, json as jlib
+        import re, urllib.request, urllib.error, json as jlib
         clean = str(text)
         clean = re.sub(r'<[^>]+>', '', clean)
         clean = re.sub(r'[#*_`~\[\](){}|>]', '', clean)
@@ -249,11 +266,21 @@ def speak_elevenlabs(text, voice_id="woq6F0K3YYEpoS7T2Rx4", model_id="eleven_fla
         })
         # Stream response in chunks
         chunks = []
-        with urllib.request.urlopen(req, timeout=120) as resp:
-            while True:
-                chunk = resp.read(4096)
-                if not chunk: break
-                chunks.append(chunk)
+        try:
+            with urllib.request.urlopen(req, timeout=120) as resp:
+                while True:
+                    chunk = resp.read(4096)
+                    if not chunk: break
+                    chunks.append(chunk)
+        except urllib.error.HTTPError as he:
+            _klen = len(ELEVENLABS_API_KEY)
+            _kpre = ELEVENLABS_API_KEY[:4] + "..." if _klen > 4 else "(empty)"
+            if he.code == 401:
+                return None, f"Voice error: 401 Unauthorized. Key length={_klen}, starts with '{_kpre}'. Go to elevenlabs.io → Profile+API Key → regenerate a new key. Then update it in your Streamlit secrets.toml or environment."
+            elif he.code == 429:
+                return None, "Voice error: Rate limit or quota exceeded. Check your ElevenLabs plan usage."
+            else:
+                return None, f"Voice error: HTTP {he.code}"
         audio_bytes = b"".join(chunks)
         if len(audio_bytes) < 100: return None, "Empty audio response"
         b64 = base64.b64encode(audio_bytes).decode()
@@ -1230,7 +1257,12 @@ def main():
         if img_html: bar_parts.append(img_html)
         # Voice section
         if ELEVENLABS_API_KEY:
-            voice_html=f'<span style="color:#81D4A8">{T("voice_ready")}</span>'
+            _klen=len(ELEVENLABS_API_KEY)
+            _kpre=ELEVENLABS_API_KEY[:3]+"…" if _klen>3 else "?"
+            voice_html=f'<span style="color:#81D4A8">{T("voice_ready")} <span style="font-size:.7rem;color:#6a8a6a">(key:{_kpre} len:{_klen})</span></span>'
+            bar_parts.append(voice_html)
+        else:
+            voice_html='<span style="color:#EF9A9A">🔇 No voice key found</span>'
             bar_parts.append(voice_html)
         # MOE Curriculum section
         if moe_on and CURRICULA:
