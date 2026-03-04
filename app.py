@@ -1801,17 +1801,31 @@ def main():
         # === Mano Language: vocabulary preview for selected topic ===
         _mano_prompt_ctx = ""
         if not _IS_PARENT_LETTER and _show_moe and mano_on and MANO_AVAILABLE:
-            _mano_prompt_ctx = build_mano_prompt_context(_topic_en, _subj_en)
-            _mano_preview = get_mano_preview(_topic_en, _subj_en)
+            try:
+                _mano_prompt_ctx = build_mano_prompt_context(_topic_en, _subj_en) or ""
+            except Exception:
+                _mano_prompt_ctx = ""
+            try:
+                _mano_preview = get_mano_preview(_topic_en, _subj_en)
+            except TypeError:
+                try:
+                    _mano_preview = get_mano_preview(_topic_en)
+                except Exception:
+                    _mano_preview = []
+            except Exception:
+                _mano_preview = []
             if _mano_preview:
                 st.markdown(f'<div style="display:inline-block;background:linear-gradient(135deg,#E65100,#F57C00);'
                             f'color:white;padding:3px 10px;border-radius:16px;font-size:.72rem;font-weight:600;margin:2px 0">'
                             f'🗣️ Mano Vocabulary Matched</div>', unsafe_allow_html=True)
                 with st.expander(f"🗣️ Mano Vocabulary for This Topic ({len(_mano_preview)} words)"):
                     _mv_cols = st.columns(2)
-                    for idx, (eng, mano) in enumerate(_mano_preview):
+                    for idx, entry in enumerate(_mano_preview):
                         with _mv_cols[idx % 2]:
-                            st.markdown(f"**{eng}** → {mano}")
+                            if isinstance(entry, (list, tuple)) and len(entry) >= 2:
+                                st.markdown(f"**{entry[0]}** → {entry[1]}")
+                            else:
+                                st.markdown(f"• {entry}")
                     st.markdown(f'<div style="font-size:.75rem;color:var(--text-muted);margin-top:8px">'
                                 f'💡 These Mano words will be woven into the generated lesson for bilingual teaching.</div>',
                                 unsafe_allow_html=True)
