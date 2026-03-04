@@ -921,7 +921,10 @@ def main():
     # === PENDING PROFILE LOAD — must run BEFORE any widgets render ===
     if st.session_state.get("_pending_load"):
         _lp=st.session_state.pop("_pending_load")
-        for _k,_v in [("school_name",_lp.get("school","")),("teacher_name",_lp.get("teacher","")),("teacher_phone",_lp.get("phone","")),("country_sel",_lp.get("country","Liberia")),("lang_sel",_lp.get("lang","English"))]:
+        st.session_state["_school_confirmed"]=_lp.get("school","")
+        st.session_state["_teacher_confirmed"]=_lp.get("teacher","")
+        st.session_state["_phone_confirmed"]=_lp.get("phone","")
+        for _k,_v in [("country_sel",_lp.get("country","Liberia")),("lang_sel",_lp.get("lang","English"))]:
             st.session_state[_k]=_v
         st.session_state.profile_set=True
     for sk in QUIZ: 
@@ -1015,6 +1018,10 @@ def main():
     [data-testid="stSidebar"] .stExpander {{ background:linear-gradient(135deg,#1a3a6b,#2B7DE9);border-radius:10px;border:none !important }}
     [data-testid="stSidebar"] .stExpander summary {{ color:white !important;font-weight:700 }}
     [data-testid="stSidebar"] .stExpander [data-testid="stExpanderDetails"] {{ background:rgba(0,0,0,.15);border-radius:0 0 10px 10px }}
+    /* Sidebar text inputs — bright text, clear borders */
+    section[data-testid="stSidebar"] .stTextInput > div > div > input {{color:#FFFFFF !important;background:#3D0C0C !important;border:1.5px solid #D4A843 !important;border-radius:8px !important;caret-color:#F5D998 !important}}
+    section[data-testid="stSidebar"] .stTextInput > div > div > input::placeholder {{color:#C0A070 !important;opacity:1 !important}}
+    section[data-testid="stSidebar"] .stTextArea > div > div > textarea {{color:#FFFFFF !important;background:#3D0C0C !important;border:1.5px solid #D4A843 !important;border-radius:8px !important}}
     @keyframes throb {{ 0%,100% {{ opacity:.3;transform:scale(1) }} 50% {{ opacity:1;transform:scale(1.2) }} }}
     [data-testid="collapsedControl"] {{ animation:throb 2s ease-in-out infinite }}
     [data-testid="collapsedControl"]:hover {{ animation:none;opacity:1 !important;transform:scale(1.1) }}
@@ -1062,7 +1069,10 @@ def main():
         lang=st.selectbox("🌍 Language / Langue / Lugha",list(LANGS.keys()),key="lang_sel")
         st.markdown("---")
         _cls_word={"en":"Classroom","fr":"Classe","sw":"Darasa"}.get(_lang_key(),"Classroom")
-        _sn = st.session_state.get("school_name","")
+        # Confirmed values persist; input fields clear after entry
+        for _ck in ["_school_confirmed","_teacher_confirmed","_phone_confirmed"]:
+            if _ck not in st.session_state: st.session_state[_ck]=""
+        _sn = st.session_state.get("_school_confirmed","")
         classroom_label=f"{_sn} {_cls_word}" if _sn.strip() else T("my_classroom")
         _logo_b64=get_b64()
         if _logo_b64:
@@ -1070,12 +1080,29 @@ def main():
         else:
             _logo_html="🌶️ "
         st.markdown(f'<div style="display:flex;align-items:center;margin:8px 0 4px">{_logo_html}<span style="font-family:Playfair Display,serif;font-size:1.3rem;font-weight:700;color:#F5D998">{classroom_label}</span></div>',unsafe_allow_html=True)
-        school_name=st.text_input(T("school_name"),value="",placeholder=T("school_placeholder"),key="school_name",label_visibility="collapsed")
+        school_name=st.text_input(T("school_name"),value="",placeholder=T("school_placeholder") if not _sn.strip() else f"✅ {_sn} (type to change)",key="school_name",label_visibility="collapsed")
+        if school_name.strip() and school_name.strip()!=st.session_state.get("_school_confirmed",""):
+            st.session_state["_school_confirmed"]=school_name.strip()
+            st.session_state["school_name"]=""
+            st.rerun()
+        school_name=st.session_state["_school_confirmed"]  # Use confirmed value downstream
         _tn_col,_tp_col=st.columns([3,2])
+        _tn_confirmed=st.session_state.get("_teacher_confirmed","")
+        _tp_confirmed=st.session_state.get("_phone_confirmed","")
         with _tn_col:
-            teacher_name=st.text_input("Teacher Name",value="",placeholder="e.g., Mr. Kollie",key="teacher_name",label_visibility="collapsed")
+            teacher_name=st.text_input("Teacher Name",value="",placeholder="e.g., Mr. Kollie" if not _tn_confirmed else f"✅ {_tn_confirmed}",key="teacher_name",label_visibility="collapsed")
+            if teacher_name.strip() and teacher_name.strip()!=_tn_confirmed:
+                st.session_state["_teacher_confirmed"]=teacher_name.strip()
+                st.session_state["teacher_name"]=""
+                st.rerun()
+            teacher_name=st.session_state["_teacher_confirmed"]
         with _tp_col:
-            teacher_phone=st.text_input("Phone",value="",placeholder="e.g., 0886-XXX-XXX",key="teacher_phone",label_visibility="collapsed")
+            teacher_phone=st.text_input("Phone",value="",placeholder="e.g., 0886-XXX-XXX" if not _tp_confirmed else f"✅ {_tp_confirmed}",key="teacher_phone",label_visibility="collapsed")
+            if teacher_phone.strip() and teacher_phone.strip()!=_tp_confirmed:
+                st.session_state["_phone_confirmed"]=teacher_phone.strip()
+                st.session_state["teacher_phone"]=""
+                st.rerun()
+            teacher_phone=st.session_state["_phone_confirmed"]
         if not school_name.strip() and not teacher_name.strip():
             st.caption("✏️ Enter school & teacher name to personalize")
         elif not teacher_name.strip():
@@ -1083,7 +1110,7 @@ def main():
         else:
             _tinfo=teacher_name
             if teacher_phone.strip(): _tinfo+=f" • {teacher_phone.strip()}"
-            st.caption(f"👤 {_tinfo}")
+            st.markdown(f'<div style="background:#3D0C0C;border:1px solid #D4A843;border-radius:8px;padding:6px 12px;margin:4px 0;font-size:.85rem;color:#F5D998">👤 {_tinfo}</div>',unsafe_allow_html=True)
         if "profile_set" not in st.session_state: st.session_state.profile_set=False
         # All classroom settings inside collapsible Configure block
         with st.expander("🌶️ Configure Your Classroom", expanded=False):
