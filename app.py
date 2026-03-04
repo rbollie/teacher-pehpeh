@@ -1069,10 +1069,25 @@ def main():
         lang=st.selectbox("🌍 Language / Langue / Lugha",list(LANGS.keys()),key="lang_sel")
         st.markdown("---")
         _cls_word={"en":"Classroom","fr":"Classe","sw":"Darasa"}.get(_lang_key(),"Classroom")
-        # Confirmed values persist; input fields clear after entry
+        # Confirmed values persist; input fields clear via on_change callbacks
         for _ck in ["_school_confirmed","_teacher_confirmed","_phone_confirmed"]:
             if _ck not in st.session_state: st.session_state[_ck]=""
-        _sn = st.session_state.get("_school_confirmed","")
+
+        # Callbacks — fire before next render, clear widget key reliably
+        def _on_school_enter():
+            v=st.session_state.get("_school_input","").strip()
+            if v: st.session_state["_school_confirmed"]=v
+            st.session_state["_school_input"]=""
+        def _on_teacher_enter():
+            v=st.session_state.get("_teacher_input","").strip()
+            if v: st.session_state["_teacher_confirmed"]=v
+            st.session_state["_teacher_input"]=""
+        def _on_phone_enter():
+            v=st.session_state.get("_phone_input","").strip()
+            if v: st.session_state["_phone_confirmed"]=v
+            st.session_state["_phone_input"]=""
+
+        _sn = st.session_state["_school_confirmed"]
         classroom_label=f"{_sn} {_cls_word}" if _sn.strip() else T("my_classroom")
         _logo_b64=get_b64()
         if _logo_b64:
@@ -1080,37 +1095,25 @@ def main():
         else:
             _logo_html="🌶️ "
         st.markdown(f'<div style="display:flex;align-items:center;margin:8px 0 4px">{_logo_html}<span style="font-family:Playfair Display,serif;font-size:1.3rem;font-weight:700;color:#F5D998">{classroom_label}</span></div>',unsafe_allow_html=True)
-        school_name=st.text_input(T("school_name"),value="",placeholder=T("school_placeholder") if not _sn.strip() else f"✅ {_sn} (type to change)",key="school_name",label_visibility="collapsed")
-        if school_name.strip() and school_name.strip()!=st.session_state.get("_school_confirmed",""):
-            st.session_state["_school_confirmed"]=school_name.strip()
-            st.session_state["school_name"]=""
-            st.rerun()
-        school_name=st.session_state["_school_confirmed"]  # Use confirmed value downstream
+        st.text_input(T("school_name"),placeholder=T("school_placeholder") if not _sn.strip() else f"✅ {_sn} (type to change)",key="_school_input",label_visibility="collapsed",on_change=_on_school_enter)
+        school_name=st.session_state["_school_confirmed"]
+        _tn_confirmed=st.session_state["_teacher_confirmed"]
+        _tp_confirmed=st.session_state["_phone_confirmed"]
         _tn_col,_tp_col=st.columns([3,2])
-        _tn_confirmed=st.session_state.get("_teacher_confirmed","")
-        _tp_confirmed=st.session_state.get("_phone_confirmed","")
         with _tn_col:
-            teacher_name=st.text_input("Teacher Name",value="",placeholder="e.g., Mr. Kollie" if not _tn_confirmed else f"✅ {_tn_confirmed}",key="teacher_name",label_visibility="collapsed")
-            if teacher_name.strip() and teacher_name.strip()!=_tn_confirmed:
-                st.session_state["_teacher_confirmed"]=teacher_name.strip()
-                st.session_state["teacher_name"]=""
-                st.rerun()
+            st.text_input("👤 Teacher",placeholder="e.g., Mr. Kollie" if not _tn_confirmed else f"✅ {_tn_confirmed}",key="_teacher_input",label_visibility="collapsed",on_change=_on_teacher_enter)
             teacher_name=st.session_state["_teacher_confirmed"]
         with _tp_col:
-            teacher_phone=st.text_input("Phone",value="",placeholder="e.g., 0886-XXX-XXX" if not _tp_confirmed else f"✅ {_tp_confirmed}",key="teacher_phone",label_visibility="collapsed")
-            if teacher_phone.strip() and teacher_phone.strip()!=_tp_confirmed:
-                st.session_state["_phone_confirmed"]=teacher_phone.strip()
-                st.session_state["teacher_phone"]=""
-                st.rerun()
+            st.text_input("📞 Phone",placeholder="e.g., 0886-XXX-XXX" if not _tp_confirmed else f"✅ {_tp_confirmed}",key="_phone_input",label_visibility="collapsed",on_change=_on_phone_enter)
             teacher_phone=st.session_state["_phone_confirmed"]
         if not school_name.strip() and not teacher_name.strip():
             st.caption("✏️ Enter school & teacher name to personalize")
         elif not teacher_name.strip():
             st.caption("✏️ Add your name — parents will see it on letters")
         else:
-            _tinfo=teacher_name
-            if teacher_phone.strip(): _tinfo+=f" • {teacher_phone.strip()}"
-            st.markdown(f'<div style="background:#3D0C0C;border:1px solid #D4A843;border-radius:8px;padding:6px 12px;margin:4px 0;font-size:.85rem;color:#F5D998">👤 {_tinfo}</div>',unsafe_allow_html=True)
+            _tinfo=f'<strong style="color:#FFFFFF;font-size:.95rem">{teacher_name}</strong>'
+            if teacher_phone.strip(): _tinfo+=f' <span style="color:#F5D998;font-size:.88rem">• {teacher_phone.strip()}</span>'
+            st.markdown(f'<div style="background:#3D0C0C;border:1px solid #D4A843;border-radius:8px;padding:8px 14px;margin:4px 0">👤 {_tinfo}</div>',unsafe_allow_html=True)
         if "profile_set" not in st.session_state: st.session_state.profile_set=False
         # All classroom settings inside collapsible Configure block
         with st.expander("🌶️ Configure Your Classroom", expanded=False):
