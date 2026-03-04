@@ -1504,26 +1504,18 @@ def main():
                             unsafe_allow_html=True)
         else:
             moe_on = False
-        # Mano Language Toggle — Liberia + Rural only
+        # Mano Language Toggle — Liberia + Rural only (hidden silently if data not deployed)
         mano_on = False
-        if country == "Liberia" and _regions()[region] == "rural":
-            if not MANO_AVAILABLE:
-                st.markdown(
-                    f'<div style="background:rgba(212,168,67,.06);border:1px solid {C_GOLD};border-radius:8px;'
-                    f'padding:8px 12px;margin:4px 0;font-size:.78rem;color:#D4A843">'
-                    f'🗣️ <strong>Mano Bilingual</strong> — Upload <code>mano_context.py</code> + <code>mano_language_data.json</code> to GitHub to enable</div>',
-                    unsafe_allow_html=True
-                )
-            else:
-                mano_on = st.checkbox("🗣️ Mano Language (Bilingual)", value=False, key="mano_toggle",
-                                      help="When ON, lessons include Mano vocabulary, grammar, and cultural context for Nimba County")
-                _mano_stats = get_mano_stats()
-                if _mano_stats and mano_on:
-                    st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:8px;'
-                                f'padding:8px 12px;margin:4px 0;font-size:.8rem;color:#F0D5D5">'
-                                f'🗣️ <strong>Mano Library:</strong> {_mano_stats["total"]}+ words<br>'
-                                f'<span style="font-size:.72rem;opacity:.8">{", ".join(_mano_stats["categories"][:5])}...</span></div>',
-                                unsafe_allow_html=True)
+        if country == "Liberia" and _regions()[region] == "rural" and MANO_AVAILABLE:
+            mano_on = st.checkbox("🗣️ Mano Language (Bilingual)", value=False, key="mano_toggle",
+                                  help="When ON, lessons include Mano vocabulary, grammar, and cultural context for Nimba County")
+            _mano_stats = get_mano_stats()
+            if _mano_stats and mano_on:
+                st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:8px;'
+                            f'padding:8px 12px;margin:4px 0;font-size:.8rem;color:#F0D5D5">'
+                            f'🗣️ <strong>Mano Library:</strong> {_mano_stats["total"]}+ words<br>'
+                            f'<span style="font-size:.72rem;opacity:.8">{", ".join(_mano_stats["categories"][:5])}...</span></div>',
+                            unsafe_allow_html=True)
         st.markdown("---")
         # Save / Load Classroom Profile
         _pf1,_pf2=st.columns(2)
