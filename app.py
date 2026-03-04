@@ -17,8 +17,11 @@ try:
 except: PIL_OK=False
 
 # === API KEYS ===
-from dotenv import load_dotenv
-load_dotenv()  # loads .env file from project folder
+try:
+    from dotenv import load_dotenv
+    load_dotenv()  # loads .env file from project folder
+except ImportError:
+    pass  # Running on Streamlit Cloud — uses st.secrets instead
 
 def _get_key(name):
     """Get API key from env vars OR Streamlit secrets, strip quotes/whitespace."""
@@ -232,7 +235,7 @@ def gen_image(prompt):
 
 # === TEXT TO SPEECH ===
 
-def speak_elevenlabs(text, voice_id="woq6F0K3YYEpoS7T2Rx4", model_id="eleven_flash_v2_5"):
+def speak_elevenlabs(text, voice_id="VU4qoZUtDRUWXB09nrAd", model_id="eleven_flash_v2_5"):
     """Generate speech using ElevenLabs streaming API. Returns base64 audio or None."""
     if not ELEVENLABS_API_KEY: return None, "No ElevenLabs API key"
     try:

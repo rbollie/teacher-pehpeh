@@ -2,8 +2,7 @@ streamlit
 openai
 anthropic
 google-generativeai
-elevenlabs
-openpyxl
-Pillow
-requests
 python-dotenv
+pandas
+qrcode
+Pillow
