@@ -648,6 +648,9 @@ UI_TEXT={
   "photo_ask":"What would you like to know about this photo?",
   "photo_default":"Please analyze this image and explain what you see. Provide educational context relevant to the subject.",
   "analyzing_photo":"📸 Analyzing your photo...","start_recording":"Start Recording","stop_recording":"Stop Recording",
+  "transcribing_handwriting":"📝 Transcribing handwriting to Word document...",
+  "transcribe_done":"📝 Transcription complete! Download your Word document below.",
+  "download_docx":"📥 Download Word Document (.docx)",
  },
  "fr":{
   "generate":"📋 Générer","chat":"💬 Discussion","quiz":"🌶️ Quiz","students":"🧑‍🎓 Élèves",
@@ -691,6 +694,9 @@ UI_TEXT={
   "photo_ask":"Que voulez-vous savoir sur cette photo ?",
   "photo_default":"Veuillez analyser cette image et expliquer ce que vous voyez. Fournissez un contexte éducatif pertinent.",
   "analyzing_photo":"📸 Analyse de votre photo...","start_recording":"Commencer","stop_recording":"Arrêter",
+  "transcribing_handwriting":"📝 Transcription en document Word...",
+  "transcribe_done":"📝 Transcription terminée ! Téléchargez votre document Word ci-dessous.",
+  "download_docx":"📥 Télécharger le document Word (.docx)",
  },
  "sw":{
   "generate":"📋 Tengeneza","chat":"💬 Mazungumzo","quiz":"🌶️ Maswali","students":"🧑‍🎓 Wanafunzi",
@@ -734,6 +740,9 @@ UI_TEXT={
   "photo_ask":"Unataka kujua nini kuhusu picha hii?",
   "photo_default":"Tafadhali changanua picha hii na ueleze unachokiona. Toa muktadha wa kielimu unaofaa.",
   "analyzing_photo":"📸 Kuchambua picha yako...","start_recording":"Anza Kurekodi","stop_recording":"Simamisha",
+  "transcribing_handwriting":"📝 Kunakili maandishi ya mkono kuwa hati ya Word...",
+  "transcribe_done":"📝 Unakili umekamilika! Pakua hati yako ya Word hapa chini.",
+  "download_docx":"📥 Pakua Hati ya Word (.docx)",
  }
 }
 def _lang_key():
@@ -947,6 +956,95 @@ def best_all(sp,q,h=None):
         if pref in rs: return rs[pref],pref,rs
     first=list(rs.items())[0]
     return first[1],first[0],rs
+
+# === HANDWRITING TO DOCX ===
+TRANSCRIBE_PROMPT = (
+    "You are a handwriting transcription expert. Your ONLY job is to read the handwritten text "
+    "in this image and transcribe it EXACTLY as written — word for word, line by line. "
+    "Preserve paragraph breaks, numbering, bullet points, and any formatting the writer used. "
+    "Do NOT add commentary, do NOT analyze, do NOT summarize. "
+    "If you cannot read a word, put [illegible] in its place. "
+    "If the image contains diagrams or drawings, briefly note them as [diagram: description]. "
+    "Output ONLY the transcribed text."
+)
+
+def generate_docx_from_text(text, title="Transcribed Notes", school="", teacher="", subject="", grade=""):
+    """Generate a Word document from transcribed text. Returns bytes."""
+    try:
+        from docx import Document as DocxDocument
+        from docx.shared import Pt, Inches, Cm, RGBColor
+        from docx.enum.text import WD_ALIGN_PARAGRAPH
+        import io
+        doc = DocxDocument()
+        # Set default font
+        style = doc.styles['Normal']
+        font = style.font
+        font.name = 'Calibri'
+        font.size = Pt(11)
+        # Title
+        t_para = doc.add_heading(title, level=1)
+        t_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        for run in t_para.runs:
+            run.font.color.rgb = RGBColor(0x8B, 0x1A, 0x1A)  # IBT red
+        # Metadata line
+        meta_parts = []
+        if school: meta_parts.append(f"School: {school}")
+        if teacher: meta_parts.append(f"Teacher: {teacher}")
+        if subject: meta_parts.append(subject)
+        if grade: meta_parts.append(grade)
+        if meta_parts:
+            meta = doc.add_paragraph(" | ".join(meta_parts))
+            meta.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            for run in meta.runs:
+                run.font.size = Pt(9)
+                run.font.color.rgb = RGBColor(0x66, 0x66, 0x66)
+            doc.add_paragraph("")  # spacer
+        # Add a thin line
+        border_para = doc.add_paragraph()
+        border_para.paragraph_format.space_after = Pt(12)
+        pPr = border_para._p.get_or_add_pPr()
+        from docx.oxml.ns import qn
+        from lxml import etree
+        pBdr = etree.SubElement(pPr, qn('w:pBdr'))
+        bottom = etree.SubElement(pBdr, qn('w:bottom'))
+        bottom.set(qn('w:val'), 'single')
+        bottom.set(qn('w:sz'), '6')
+        bottom.set(qn('w:color'), 'D4A843')  # IBT gold
+        bottom.set(qn('w:space'), '1')
+        # Body text — split by paragraphs
+        paragraphs = text.split('\n')
+        for para_text in paragraphs:
+            stripped = para_text.strip()
+            if not stripped:
+                doc.add_paragraph("")
+                continue
+            # Detect headings (lines that are all caps or very short + bold-looking)
+            if stripped.startswith('#'):
+                level = min(stripped.count('#'), 3)
+                doc.add_heading(stripped.lstrip('#').strip(), level=level)
+            elif stripped.startswith(('- ', '• ', '* ')):
+                doc.add_paragraph(stripped[2:].strip(), style='List Bullet')
+            elif len(stripped) > 2 and stripped[0].isdigit() and stripped[1] in '.):':
+                doc.add_paragraph(stripped[2:].strip(), style='List Number')
+            elif len(stripped) > 3 and stripped[:2].isdigit() and stripped[2] in '.):':
+                doc.add_paragraph(stripped[3:].strip(), style='List Number')
+            else:
+                doc.add_paragraph(stripped)
+        # Footer
+        doc.add_paragraph("")
+        footer_p = doc.add_paragraph("Transcribed by Teacher Pehpeh — Institute of Basic Technology (IBT)")
+        footer_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        for run in footer_p.runs:
+            run.font.size = Pt(8)
+            run.font.color.rgb = RGBColor(0x99, 0x99, 0x99)
+            run.font.italic = True
+        # Save to bytes
+        buf = io.BytesIO()
+        doc.save(buf)
+        buf.seek(0)
+        return buf.getvalue()
+    except Exception as e:
+        return None
 
 def synth(sp,q,resps):
     v={k:v for k,v in resps.items() if v and not str(v).startswith("⚠️")}
@@ -2079,7 +2177,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                         status.update(label=T("response_ready"),state="complete",expanded=False)
                     st.session_state.chat_messages.append({"role":"assistant","content":r,"model":m,"all_responses":allr}); st.rerun()
         st.markdown("---")
-        st.markdown(f'<div style="font-size:.8rem;color:#8899AA;margin-bottom:4px">💡 Tip: Start your message with "draw" or "illustrate" to generate a visual (e.g., "draw a plant cell diagram")</div>',unsafe_allow_html=True)
+        st.markdown(f'<div style="font-size:.8rem;color:#8899AA;margin-bottom:4px">💡 Tips: Start with "draw" to generate images &nbsp;|&nbsp; 📸 Upload a photo + say "transcribe" to get a Word document of handwritten notes</div>',unsafe_allow_html=True)
         st.markdown("---")
         for mi,msg in enumerate(st.session_state.chat_messages):
             _you_label={"en":"🧑‍🏫 You","fr":"🧑‍🏫 Vous","sw":"🧑‍🏫 Wewe"}.get(_lang_key(),"🧑‍🏫 You")
@@ -2096,6 +2194,17 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                 st.markdown(f'<div class="cp"><div style="font-size:.75rem;font-weight:700;color:{C_GOLD};margin-bottom:4px">{ico(16)} Teacher Pehpeh</div>{highlight_result(msg["content"])}<div style="font-size:.65rem;color:#556;margin-top:4px">{_by_label} {msg.get("model","AI")}</div></div>',unsafe_allow_html=True)
                 if msg.get("image"):
                     st.image(msg["image"],caption=f"🎨 Generated by {msg.get('image_src','AI')}",use_container_width=True)
+                if msg.get("docx_bytes"):
+                    try:
+                        _docx_data = base64.b64decode(msg["docx_bytes"])
+                        _docx_fname = msg.get("docx_name", "transcribed_notes.docx")
+                        st.markdown(f'<div style="background:rgba(76,175,80,.1);border:2px solid #4CAF50;border-radius:10px;padding:12px 16px;margin:8px 0"><strong style="color:#4CAF50">📝 {T("transcribe_done")}</strong></div>', unsafe_allow_html=True)
+                        st.download_button(
+                            T("download_docx"), data=_docx_data,
+                            file_name=_docx_fname, mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                            key=f"docx_dl_{mi}", type="primary", use_container_width=True
+                        )
+                    except: pass
                 if len(allr)>1:
                     with st.expander(f"{T('see_all')} {len(allr)} {T('model_responses')}",expanded=False):
                         for mname,mresp in allr.items():
@@ -2197,16 +2306,36 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
             st.session_state.chat_messages.append({"role":"user","content":_display_content,"photo_b64":_attached_photo,"photo_mime":_attached_mime})
             img_keywords=["draw","illustrate","sketch","diagram","picture","image","visual","create an image","make an image","generate an image","show me","dessiner","dessine","diagramme","illustrer","chora","picha","mchoro"]
             want_chat_img=any(uq.lower().startswith(k) or k in uq.lower() for k in img_keywords) and not _attached_photo
+            # Detect transcription request
+            transcribe_keywords=["transcribe","transcription","handwriting","convert to doc","convert to word","notes to doc","write out","type up","type out","handwritten","transcrire","écriture","manuscrit","nakili","maandishi"]
+            want_transcribe = _attached_photo and any(k in uq.lower() for k in transcribe_keywords)
             with st.status(T("thinking"),expanded=True) as status:
-                if _attached_photo:
+                if _attached_photo and want_transcribe:
+                    st.write(T("transcribing_handwriting"))
+                    r, m = best_vision("You are a precise handwriting transcription assistant.", TRANSCRIBE_PROMPT, _attached_photo, _attached_mime or "image/jpeg")
+                    allr = {m: r} if m else {"AI": r}
+                    # Generate .docx
+                    _school_name = st.session_state.get("school_name", "")
+                    _teacher_name = st.session_state.get("teacher_name", "")
+                    _docx_bytes = generate_docx_from_text(
+                        r, title="Transcribed Handwritten Notes",
+                        school=_school_name, teacher=_teacher_name,
+                        subject=_subj_en, grade=_grade_en
+                    )
+                    if _docx_bytes:
+                        msg_data={"role":"assistant","content":f"📝 **Transcription Complete**\n\n{r}","model":m,"all_responses":allr,"docx_bytes":base64.b64encode(_docx_bytes).decode(),"docx_name":f"transcribed_notes_{_subj_en.lower().replace(' ','_')}.docx"}
+                    else:
+                        msg_data={"role":"assistant","content":f"📝 **Transcription** (Word doc generation failed — here is the text):\n\n{r}","model":m,"all_responses":allr}
+                elif _attached_photo:
                     st.write(T("analyzing_photo"))
                     _vision_sp = build_chat(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,school_name,_chat_curr_ctx,_chat_mano_ctx)
                     r, m = best_vision(_vision_sp, uq, _attached_photo, _attached_mime or "image/jpeg")
                     allr = {m: r} if m else {"AI": r}
+                    msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
                 else:
                     st.write(f"{T('asking_claude')} {T('asking_chatgpt')} {T('asking_gemini')}")
                     r,m,allr=best_all(build_chat(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,school_name,_chat_curr_ctx,_chat_mano_ctx),uq,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]])
-                msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
+                    msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
                 if want_chat_img:
                     st.write(T("creating_img"))
                     img_url,img_model=gen_image(f"{_subj_en}: {uq} for {_grade_en} in {country}")

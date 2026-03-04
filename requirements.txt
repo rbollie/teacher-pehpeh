@@ -6,3 +6,4 @@ python-dotenv
 pandas
 qrcode
 Pillow
+python-docx
