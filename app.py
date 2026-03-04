@@ -1060,10 +1060,10 @@ def main():
     .ft a {{color:{C_GOLD};text-decoration:none}}
 
     /* Solid blue Configure expander */
-    /* Mic recording styles — black default, red when recording */
+    /* Mic recording styles — visible on dark backgrounds */
     .mic-wrapper {{ text-align:center }}
-    .mic-wrapper [data-testid="stAudioInput"] button {{ transition: all 0.3s ease }}
-    .mic-wrapper [data-testid="stAudioInput"] {{ border-radius:50%;overflow:hidden }}
+    .mic-wrapper [data-testid="stAudioInput"] {{ border:2px solid rgba(239,83,80,.4) !important;border-radius:12px !important;background:rgba(239,83,80,.06) !important }}
+    .mic-wrapper [data-testid="stAudioInput"]:hover {{ border-color:rgba(239,83,80,.7) !important;background:rgba(239,83,80,.12) !important }}
     .mic-label {{ font-size:.72rem;color:var(--text-muted);margin-top:2px;text-align:center;font-weight:600 }}
     /* Photo upload area in chat */
     .photo-upload-area {{ background:rgba(43,125,233,.06);border:2px dashed rgba(43,125,233,.3);border-radius:12px;padding:12px;margin-bottom:8px }}
@@ -2113,21 +2113,23 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
         with voice_col:
             st.markdown('<div class="mic-wrapper">', unsafe_allow_html=True)
             chat_audio = st.audio_input("🎤", key="chat_mic", label_visibility="collapsed")
-            st.markdown(f'<div class="mic-label">{T("start_recording")}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="font-size:.75rem;color:#EF5350;font-weight:700;text-align:center;margin-top:4px">🎤 {T("start_recording")}</div>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
         with photo_col:
-            st.markdown('<div style="text-align:center">', unsafe_allow_html=True)
+            st.markdown('<div style="text-align:center;padding-top:6px">', unsafe_allow_html=True)
             _show_cam = st.toggle("📸", key="chat_cam_toggle", help=T("photo_hint"))
-            st.markdown(f'<div class="mic-label">Photo</div>', unsafe_allow_html=True)
+            _cam_color = "#4CAF50" if _show_cam else "#2B7DE9"
+            _cam_label = "✅ Photo ON" if _show_cam else "📸 Photo"
+            st.markdown(f'<div style="font-size:.75rem;color:{_cam_color};font-weight:700;text-align:center;margin-top:2px">{_cam_label}</div>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
         with label_col:
-            st.markdown(f'<div style="font-size:.8rem;color:var(--text-muted);margin-top:8px">{T("mic_hint")}<br>{T("photo_hint")}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="background:rgba(43,125,233,.08);border:1px solid rgba(43,125,233,.2);border-radius:10px;padding:10px 14px;margin-top:4px"><span style="font-size:.82rem;color:#7BB8F5;line-height:1.6">🎤 {T("mic_hint")}<br>📸 {T("photo_hint")}</span></div>', unsafe_allow_html=True)
 
         # Photo upload / camera area (shown when toggled on)
         chat_photo_b64 = None
         chat_photo_mime = None
         if _show_cam:
-            st.markdown(f'<div class="photo-upload-area">', unsafe_allow_html=True)
+            st.markdown(f'<div style="background:rgba(76,175,80,.08);border:2px dashed rgba(76,175,80,.4);border-radius:12px;padding:4px 12px;margin-bottom:8px">', unsafe_allow_html=True)
             cam_tab1, cam_tab2 = st.tabs([f"📁 {T('photo_upload')}", f"📷 {T('photo_camera')}"])
             with cam_tab1:
                 chat_upload = st.file_uploader(T("photo_upload"), type=["jpg","jpeg","png","heic","webp"], key="chat_photo_up", label_visibility="collapsed")
@@ -2147,6 +2149,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                     st.image(chat_cam, caption="📸 Captured", use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
             if chat_photo_b64:
+                st.markdown(f'<div style="background:rgba(76,175,80,.1);border-radius:8px;padding:8px 12px;margin-top:6px"><span style="color:#66BB6A;font-size:.85rem;font-weight:600">✅ Photo ready — type a question or send with default prompt</span></div>', unsafe_allow_html=True)
                 _photo_q = st.text_input(T("photo_ask"), value="", key="chat_photo_question", placeholder=T("photo_default"))
 
         voice_text = None
