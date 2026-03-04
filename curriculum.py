@@ -34,7 +34,9 @@ def load_all_curricula():
         try:
             with open(filepath, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            subject_key = data.get("subject", filepath.stem).strip().lower()
+            subject_key = data.get("subject", "").strip().lower()
+            if not subject_key:
+                continue  # skip non-curriculum JSON files (e.g. mano_language_data.json)
             curricula[subject_key] = data
         except (json.JSONDecodeError, KeyError) as e:
             print(f"[Curriculum] Warning: Could not load {filepath.name}: {e}")
@@ -44,7 +46,7 @@ def load_all_curricula():
 def get_available_subjects(curricula):
     """Return a sorted list of subject names that have curriculum data."""
     return sorted(
-        [c["subject"] for c in curricula.values()],
+        [c["subject"] for c in curricula.values() if c.get("subject")],
         key=str.lower,
     )
 
