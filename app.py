@@ -1760,7 +1760,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     else:
                         st.warning(f"Could not generate card: {card_fname}")
         if st.session_state.students:
-            st.markdown("---"); st.markdown(f"#### {ico(16)} {T('grade_work')}")
+            st.markdown("---"); st.markdown(f"#### {ico(16)} {T('grade_work')}",unsafe_allow_html=True)
             gs=st.selectbox("Student:",[s["name"] for s in st.session_state.students],key="gs")
             gw_col, gw_mic = st.columns([5,1])
             with gw_col:
