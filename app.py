@@ -1288,30 +1288,18 @@ def main():
         _res_val=_resources()[res]
         _abl_val=_ability()[abl]
         st.markdown("---"); 
-        # MOE Curriculum Toggle — Liberia only
+        # MOE Curriculum Toggle — Liberia only (hidden silently if data not deployed)
         moe_on = False
-        if country == "Liberia":
-            if not CURRICULUM_AVAILABLE:
-                st.warning("⚠️ curriculum.py not found — MOE alignment unavailable.", icon="📂")
-            elif not CURRICULA:
-                from pathlib import Path as _P
-                _cdir = _P(__file__).parent / "curriculum_data"
-                st.warning(
-                    f"⚠️ No curriculum JSON files found in `curriculum_data/`. "
-                    f"Expected path: `{_cdir}`. "
-                    f"Make sure your subject JSON files are in that folder.",
-                    icon="📂"
-                )
-            else:
-                moe_on = st.checkbox("🇱🇷 Align to MOE Curriculum", value=False, key="moe_toggle",
-                                     help="When ON, topics and prompts align to Liberia Ministry of Education standards")
-                curr_subjects = get_available_subjects(CURRICULA)
-                if moe_on:
-                    st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:8px;'
-                                f'padding:8px 12px;margin:4px 0;font-size:.8rem;color:#F0D5D5">'
-                                f'📘 <strong>Aligned:</strong> {", ".join(curr_subjects)}<br>'
-                                f'<span style="font-size:.72rem;opacity:.8">Lessons will match MOE learning objectives, content outlines, and assessment strategies</span></div>',
-                                unsafe_allow_html=True)
+        if country == "Liberia" and CURRICULUM_AVAILABLE and CURRICULA:
+            moe_on = st.checkbox("🇱🇷 Align to MOE Curriculum", value=False, key="moe_toggle",
+                                 help="When ON, topics and prompts align to Liberia Ministry of Education standards")
+            curr_subjects = get_available_subjects(CURRICULA)
+            if moe_on:
+                st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:8px;'
+                            f'padding:8px 12px;margin:4px 0;font-size:.8rem;color:#F0D5D5">'
+                            f'📘 <strong>Aligned:</strong> {", ".join(curr_subjects)}<br>'
+                            f'<span style="font-size:.72rem;opacity:.8">Lessons will match MOE learning objectives, content outlines, and assessment strategies</span></div>',
+                            unsafe_allow_html=True)
         # Mano Language Toggle — Rural Liberia only
         if MANO_AVAILABLE and country == "Liberia" and _regions()[region] == "rural":
             mano_on = st.checkbox("🗣️ Mano Language (Bilingual)", value=False, key="mano_toggle",
