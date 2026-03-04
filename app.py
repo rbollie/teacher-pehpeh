@@ -2723,28 +2723,142 @@ def wassce_shading_modal():
         st.error("🚨 **#1 mistake in Liberian schools:** Students shade a tick (✓) instead of filling the bubble. Drill this until it's automatic — *fill, don't tick.*")
 
     elif _wtab == "📋 Practice Sheet":
-        st.info("💡 **For teachers:** Print this sheet. Have students shade a full mock set before exam day using HB pencil. Time them — 60 bubbles cleanly should take under 4 minutes.")
-        rows_html = ""
-        for q in range(1, 61):
-            bubbles = "".join([
-                f'<div style="width:17px;height:17px;border-radius:50%;border:1.5px solid #bbb;display:flex;align-items:center;justify-content:center;font-size:7px;color:#999">{o}</div>'
-                for o in "ABCDE"
-            ])
-            rows_html += (
-                f'<div style="display:flex;align-items:center;gap:5px;padding:2px 4px">' +
-                f'<span style="width:20px;text-align:right;font-size:10px;color:#555;font-weight:700">{q}.</span>' +
-                bubbles + '</div>'
-            )
-        st.markdown(
-            '<div style="background:white;border-radius:10px;padding:18px;font-family:Courier New,monospace">' +
-            '<div style="background:#1a1a2e;border-radius:6px;padding:8px;text-align:center;margin-bottom:14px">' +
-            '<div style="color:#D4A843;font-weight:700;font-size:13px;letter-spacing:2px">WASSCE PRACTICE ANSWER SHEET</div>' +
-            '<div style="color:#D0D8E8;font-size:11px;margin-top:2px">Use HB pencil · Shade ONE bubble · Erase cleanly</div></div>' +
-            '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:3px 20px">' +
-            rows_html + '</div>' +
-            '<div style="margin-top:10px;font-size:9px;color:#999;text-align:center">⚠️ Use HB pencil only · Do not fold · Erase completely when changing answers</div></div>',
-            unsafe_allow_html=True
-        )
+        st.info("💡 **For teachers:** Click any bubble to shade it — just like the real exam. Click again to unshade (erase). Two shaded bubbles = zero marks warning shown automatically.")
+        import streamlit.components.v1 as _components
+        _sheet_html = """
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0e1a; font-family: 'Courier New', monospace; padding: 12px; }
+  .header { background: #0F2247; border-radius: 8px; padding: 10px; text-align: center; margin-bottom: 12px; border: 1px solid #D4A84344; }
+  .header-title { color: #D4A843; font-weight: 700; font-size: 13px; letter-spacing: 2px; }
+  .header-sub { color: #D0D8E8; font-size: 10px; margin-top: 3px; opacity: .8; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px 16px; }
+  .row { display: flex; align-items: center; gap: 5px; padding: 2px 4px; border-radius: 4px; transition: background .15s; }
+  .row:hover { background: rgba(212,168,67,.05); }
+  .qnum { width: 22px; text-align: right; font-size: 10px; color: #666; font-weight: 700; flex-shrink: 0; }
+  .bubble {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 1.5px solid #999;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; color: #888; font-weight: 700;
+    cursor: pointer; transition: all .18s; user-select: none;
+    flex-shrink: 0;
+  }
+  .bubble:hover { border-color: #D4A843; color: #D4A843; transform: scale(1.15); }
+  .bubble.shaded {
+    background: #1a1a2e; border-color: #D4A843;
+    color: transparent; box-shadow: inset 0 0 0 3px #1a1a2e;
+  }
+  .bubble.double-error {
+    background: #8B1A1A; border-color: #EF5350;
+    animation: pulse-err .6s ease-in-out infinite alternate;
+  }
+  @keyframes pulse-err { from { box-shadow: 0 0 4px #EF535088; } to { box-shadow: 0 0 10px #EF5350cc; } }
+  .warning { display:none; background:rgba(139,26,26,.25); border:1px solid #EF535088;
+    border-radius:6px; padding:6px 10px; font-size:10px; color:#EF9A9A;
+    margin-bottom:8px; text-align:center; }
+  .warning.show { display:block; }
+  .score-bar { background:#0F2247; border-radius:6px; padding:7px 12px; margin-top:10px;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; }
+  .score-label { color:#D4A843; font-size:11px; font-weight:700; }
+  .score-val { color:#81C784; font-size:12px; font-weight:700; }
+  .clear-btn { background:#8B1A1A; color:#F5D98E; border:1px solid #D4A843;
+    border-radius:6px; padding:4px 12px; font-size:11px; font-weight:700;
+    cursor:pointer; font-family:inherit; }
+  .clear-btn:hover { background:#B22234; }
+  .footer { margin-top:8px; font-size:9px; color:#555; text-align:center; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-title">🌶️ WASSCE INTERACTIVE ANSWER SHEET</div>
+  <div class="header-sub">Click a bubble to shade it &nbsp;·&nbsp; Click again to erase &nbsp;·&nbsp; Shade ONE per question</div>
+</div>
+<div id="warning" class="warning">⚠️ Two shaded bubbles detected! That question scores ZERO marks — erase one.</div>
+<div class="grid" id="sheet"></div>
+<div class="score-bar">
+  <span class="score-label">Questions answered: <span id="count" class="score-val">0 / 60</span></span>
+  <button class="clear-btn" onclick="clearAll()">🗑️ Clear Sheet</button>
+</div>
+<div class="footer">⚠️ Real exam uses HB pencil only · Erase completely · Do not fold sheet</div>
+
+<script>
+  const options = ['A','B','C','D','E'];
+  const state = {}; // q -> Set of selected options
+  const sheet = document.getElementById('sheet');
+  const warning = document.getElementById('warning');
+  const countEl = document.getElementById('count');
+
+  for (let q = 1; q <= 60; q++) {
+    state[q] = new Set();
+    const row = document.createElement('div');
+    row.className = 'row';
+    const qnum = document.createElement('span');
+    qnum.className = 'qnum';
+    qnum.textContent = q + '.';
+    row.appendChild(qnum);
+    options.forEach(opt => {
+      const b = document.createElement('div');
+      b.className = 'bubble';
+      b.textContent = opt;
+      b.id = 'b_' + q + '_' + opt;
+      b.onclick = () => toggle(q, opt);
+      row.appendChild(b);
+    });
+    sheet.appendChild(row);
+  }
+
+  function toggle(q, opt) {
+    const b = document.getElementById('b_' + q + '_' + opt);
+    if (state[q].has(opt)) {
+      state[q].delete(opt);
+      b.classList.remove('shaded', 'double-error');
+      b.textContent = opt;
+    } else {
+      state[q].add(opt);
+      b.classList.add('shaded');
+      b.textContent = '';
+    }
+    // Check for double-shade error
+    let hasError = false;
+    for (let qq = 1; qq <= 60; qq++) {
+      const isDouble = state[qq].size > 1;
+      options.forEach(o => {
+        const el = document.getElementById('b_' + qq + '_' + o);
+        if (isDouble && state[qq].has(o)) {
+          el.classList.add('double-error');
+        } else if (!isDouble) {
+          el.classList.remove('double-error');
+        }
+      });
+      if (isDouble) hasError = true;
+    }
+    warning.className = 'warning' + (hasError ? ' show' : '');
+    // Update count
+    const answered = Object.values(state).filter(s => s.size === 1).length;
+    countEl.textContent = answered + ' / 60';
+  }
+
+  function clearAll() {
+    for (let q = 1; q <= 60; q++) {
+      state[q].clear();
+      options.forEach(opt => {
+        const b = document.getElementById('b_' + q + '_' + opt);
+        b.classList.remove('shaded', 'double-error');
+        b.textContent = opt;
+      });
+    }
+    warning.className = 'warning';
+    countEl.textContent = '0 / 60';
+  }
+</script>
+</body>
+</html>
+"""
+        _components.html(_sheet_html, height=780, scrolling=True)
 
     elif _wtab == "💡 Exam Tips":
         tips = [
