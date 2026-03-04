@@ -60,8 +60,11 @@ def get_grade_topics(curricula, subject, grade_number):
     if subject_key not in curricula:
         return []
 
-    grade_data = curricula[subject_key].get("grades", {}).get(str(grade_number))
-    if not grade_data:
+    grades_val = curricula[subject_key].get("grades", {})
+    if not isinstance(grades_val, dict):
+        return []
+    grade_data = grades_val.get(str(grade_number))
+    if not grade_data or not isinstance(grade_data, dict):
         return []
 
     topics = []
@@ -227,11 +230,17 @@ def get_curriculum_summary(curricula):
     lines = []
     for subject_key, data in sorted(curricula.items()):
         subject_name = data.get("subject", subject_key.title())
-        grades = sorted(data.get("grades", {}).keys())
-        topic_count = sum(
-            len(get_grade_topics(curricula, subject_name, int(g)))
-            for g in grades
-        )
+        grades_val = data.get("grades", {})
+        if not isinstance(grades_val, dict):
+            continue  # skip malformed entries
+        grades = sorted(grades_val.keys())
+        try:
+            topic_count = sum(
+                len(get_grade_topics(curricula, subject_name, int(g)))
+                for g in grades
+            )
+        except Exception:
+            topic_count = 0
         lines.append(f"📘 {subject_name}: Grades {', '.join(grades)} ({topic_count} topics)")
     return "\n".join(lines)
 
