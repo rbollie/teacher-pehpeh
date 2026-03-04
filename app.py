@@ -214,13 +214,25 @@ def speak_elevenlabs(text, voice_id="woq6F0K3YYEpoS7T2Rx4", model_id="eleven_fla
     if not ELEVENLABS_API_KEY: return None, "No ElevenLabs API key"
     try:
         import re, urllib.request, json as jlib
-        clean = re.sub(r'<[^>]+>', '', text)
-        clean = re.sub(r'[#*_`~\[\](){}|]', '', clean)
+        clean = str(text)
+        # Strip HTML tags
+        clean = re.sub(r'<[^>]+>', '', clean)
+        # Strip markdown formatting chars
+        clean = re.sub(r'[#*_`~\[\](){}|>]', '', clean)
+        # Strip markdown horizontal rules
         clean = re.sub(r'-{3,}', ' ', clean)
+        clean = re.sub(r'={3,}', ' ', clean)
+        # Normalize unicode chars Claude tends to use
+        for old, new in [('\u2014', '-'), ('\u2013', '-'), ('\u2018', "'"), ('\u2019', "'"), ('\u201c', '"'), ('\u201d', '"'), ('\u2026', '...'), ('\u2022', ','), ('\u00a0', ' ')]:
+            clean = clean.replace(old, new)
+        # Collapse whitespace and newlines
         clean = re.sub(r'\n{2,}', '. ', clean)
         clean = re.sub(r'\n', '. ', clean)
         clean = re.sub(r' {2,}', ' ', clean)
         clean = re.sub(r'\.{2,}', '.', clean)
+        clean = re.sub(r'\.\s*\.', '.', clean)
+        clean = clean.strip()
+        if not clean or len(clean) < 10: return None, "Text too short after cleaning"
         # Cap at 1200 chars for fast generation
         if len(clean) > 1200: clean = clean[:1200] + ". See the full written version for complete details."
         # Use streaming endpoint for faster first-byte
@@ -308,10 +320,11 @@ def tts_player(text, key_suffix):
     # Show cached audio if already generated
     if audio_key in st.session_state and st.session_state[audio_key]:
         aud = st.session_state[audio_key]
-        st.markdown(f'<audio controls autoplay style="width:100%;margin:8px 0;border-radius:8px"><source src="data:audio/mp3;base64,{aud["b64"]}" type="audio/mp3"></audio>', unsafe_allow_html=True)
+        audio_data = base64.b64decode(aud["b64"])
+        st.audio(audio_data, format="audio/mp3", autoplay=True)
         ac1, ac2 = st.columns([2,1])
         with ac1:
-            st.download_button("📥 Download MP3", data=base64.b64decode(aud["b64"]), file_name=f"teacher_pehpeh_{key_suffix}.mp3", mime="audio/mp3", key=f"tts_dl_{key_suffix}")
+            st.download_button("📥 Download MP3", data=audio_data, file_name=f"teacher_pehpeh_{key_suffix}.mp3", mime="audio/mp3", key=f"tts_dl_{key_suffix}")
         with ac2:
             if st.button("🗑️ Clear", key=f"tts_clr_{key_suffix}"):
                 del st.session_state[audio_key]; st.rerun()
@@ -1043,34 +1056,104 @@ def main():
             mano_on = False
         st.markdown("---")
         # Save / Load Classroom Profile
+        _profile_data={"school":school_name,"teacher":teacher_name,"phone":teacher_phone,"country":country,"lang":lang,"region":region,"grade":grade,"subject":subject,"class_size":clsz,"resources":res,"ability":abl,"moe_on":moe_on,"mano_on":mano_on}
+        # Initialize named profiles storage
+        if "named_profiles" not in st.session_state:
+            st.session_state.named_profiles={}
+
         _pf1,_pf2=st.columns(2)
         with _pf1:
             if st.button("💾 Save Configuration",use_container_width=True,key="sv_prof"):
-                st.session_state.saved_profile={"school":school_name,"teacher":teacher_name,"phone":teacher_phone,"country":country,"lang":lang,"region":region,"grade":grade,"subject":subject,"class_size":clsz,"resources":res,"ability":abl,"moe_on":moe_on,"mano_on":mano_on}
-                st.session_state.profile_set=True
-                st.success("Saved!")
+                st.session_state["_show_save_opts"]=not st.session_state.get("_show_save_opts",False)
+                st.session_state["_show_load_opts"]=False
+                st.rerun()
         with _pf2:
             if st.button("📂 Load Configuration",use_container_width=True,key="ld_prof"):
                 st.session_state["_show_load_opts"]=not st.session_state.get("_show_load_opts",False)
+                st.session_state["_show_save_opts"]=False
                 st.rerun()
+
+        # === SAVE DROPDOWN ===
+        if st.session_state.get("_show_save_opts"):
+            st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:8px;padding:10px 14px;margin:6px 0"><strong style="color:{C_GOLD}">💾 Save to...</strong></div>',unsafe_allow_html=True)
+            _save_dest=st.selectbox("Choose where to save:",
+                ["Quick Save (Session)","Download to Desktop","Save as Named Profile"],
+                key="save_destination",label_visibility="collapsed")
+            if _save_dest=="Quick Save (Session)":
+                if st.button("✅ Save Now",use_container_width=True,key="sv_quick",type="primary"):
+                    st.session_state.saved_profile=_profile_data
+                    st.session_state.profile_set=True
+                    st.session_state["_show_save_opts"]=False
+                    st.success("✅ Saved to session!")
+                    time.sleep(0.8); st.rerun()
+            elif _save_dest=="Download to Desktop":
+                _pj=json.dumps(_profile_data,indent=2)
+                _fname=f"teacher_pehpeh_{school_name or 'profile'}".replace(" ","_").lower()[:40]+".json"
+                st.download_button("📥 Download JSON File",data=_pj,file_name=_fname,mime="application/json",key="dl_prof_save",use_container_width=True)
+                st.caption("Save this file to load your configuration on any device.")
+            elif _save_dest=="Save as Named Profile":
+                _prof_name=st.text_input("Profile name:",placeholder="e.g. SHS 2 Physics, My Chemistry Class",key="prof_name_input")
+                if st.button("✅ Save Profile",use_container_width=True,key="sv_named",type="primary") and _prof_name.strip():
+                    st.session_state.named_profiles[_prof_name.strip()]=_profile_data.copy()
+                    st.session_state.saved_profile=_profile_data
+                    st.session_state.profile_set=True
+                    st.session_state["_show_save_opts"]=False
+                    st.success(f'✅ Saved as "{_prof_name.strip()}"!')
+                    time.sleep(0.8); st.rerun()
+                if st.session_state.named_profiles:
+                    st.caption(f"📋 {len(st.session_state.named_profiles)} saved profile(s): {', '.join(st.session_state.named_profiles.keys())}")
+
+        # === LOAD DROPDOWN ===
         if st.session_state.get("_show_load_opts"):
+            st.markdown(f'<div style="background:rgba(43,125,233,.08);border:1px solid {C_BLUE};border-radius:8px;padding:10px 14px;margin:6px 0"><strong style="color:{C_BLUE}">📂 Load from...</strong></div>',unsafe_allow_html=True)
+            # Build load options dynamically
+            _load_choices=[]
             if "saved_profile" in st.session_state:
-                if st.button("Restore last saved profile",use_container_width=True,key="ld_restore"):
+                _load_choices.append("Last Saved (Session)")
+            if st.session_state.named_profiles:
+                for pn in st.session_state.named_profiles:
+                    _load_choices.append(f"📋 {pn}")
+            _load_choices.append("Upload from File")
+            if not _load_choices:
+                _load_choices=["Upload from File"]
+            _load_pick=st.selectbox("Choose configuration to load:",_load_choices,key="load_source",label_visibility="collapsed")
+            if _load_pick=="Last Saved (Session)":
+                _sp=st.session_state.saved_profile
+                st.markdown(f'<div style="font-size:.82rem;color:#8899BB;margin:4px 0">🏫 {_sp.get("school","—")} · {_sp.get("grade","—")} · {_sp.get("subject","—")} · {_sp.get("country","—")}</div>',unsafe_allow_html=True)
+                if st.button("✅ Load This Profile",use_container_width=True,key="ld_session",type="primary"):
                     st.session_state["_pending_load"]=st.session_state.saved_profile
                     st.session_state["_show_load_opts"]=False
                     st.rerun()
+            elif _load_pick.startswith("📋 "):
+                _pname=_load_pick[2:].strip()
+                _sp=st.session_state.named_profiles[_pname]
+                st.markdown(f'<div style="font-size:.82rem;color:#8899BB;margin:4px 0">🏫 {_sp.get("school","—")} · {_sp.get("grade","—")} · {_sp.get("subject","—")} · {_sp.get("country","—")}</div>',unsafe_allow_html=True)
+                _lc1,_lc2=st.columns([3,1])
+                with _lc1:
+                    if st.button("✅ Load This Profile",use_container_width=True,key="ld_named",type="primary"):
+                        st.session_state.saved_profile=_sp.copy()
+                        st.session_state["_pending_load"]=_sp.copy()
+                        st.session_state["_show_load_opts"]=False
+                        st.rerun()
+                with _lc2:
+                    if st.button("🗑️",use_container_width=True,key="del_named"):
+                        del st.session_state.named_profiles[_pname]
+                        st.rerun()
+            elif _load_pick=="Upload from File":
+                _up_prof=st.file_uploader("Choose JSON file:",type=["json"],key="up_prof",label_visibility="visible")
+                if _up_prof:
+                    try:
+                        _loaded=json.loads(_up_prof.read().decode("utf-8"))
+                        st.session_state.saved_profile=_loaded
+                        st.session_state["_pending_load"]=_loaded
+                        st.session_state["_show_load_opts"]=False
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Invalid file: {e}")
+            # Download current session profile as backup
+            if "saved_profile" in st.session_state:
                 _pj=json.dumps(st.session_state.saved_profile,indent=2)
-                st.download_button("Download Profile to Desktop",data=_pj,file_name="teacher_pehpeh_profile.json",mime="application/json",key="dl_prof",use_container_width=True)
-            _up_prof=st.file_uploader("Load from file:",type=["json"],key="up_prof",label_visibility="visible")
-            if _up_prof:
-                try:
-                    _loaded=json.loads(_up_prof.read().decode("utf-8"))
-                    st.session_state.saved_profile=_loaded
-                    st.session_state["_pending_load"]=_loaded
-                    st.session_state["_show_load_opts"]=False
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"Invalid file: {e}")
+                st.download_button("📥 Download Current Profile",data=_pj,file_name="teacher_pehpeh_profile.json",mime="application/json",key="dl_prof_load",use_container_width=True)
         st.caption("© 2026 Institute of Basic Technology")
         st.markdown("[🌐 Visit our website](https://www.institutebasictechnology.org/index.php)")
 
@@ -1496,8 +1579,9 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     if _vk in st.session_state and st.session_state[_vk]:
                         _aud=st.session_state[_vk]
                         st.markdown(f'<div style="background:linear-gradient(135deg,#2E7D32,#1B5E20);border-radius:10px;padding:12px 16px;margin:6px 0;color:white"><strong>Voice Message</strong> &mdash; Send this audio to the parent via WhatsApp or play on their phone</div>',unsafe_allow_html=True)
-                        st.markdown(f'<audio controls autoplay style="width:100%;margin:4px 0;border-radius:8px"><source src="data:audio/mp3;base64,{_aud["b64"]}" type="audio/mp3"></audio>',unsafe_allow_html=True)
-                        st.download_button("Download MP3 to Send",data=base64.b64decode(_aud["b64"]),file_name="voice_message_for_parent.mp3",mime="audio/mp3",key="gen_pl_dl_mp3",use_container_width=True)
+                        _aud_data=base64.b64decode(_aud["b64"])
+                        st.audio(_aud_data, format="audio/mp3", autoplay=True)
+                        st.download_button("Download MP3 to Send",data=_aud_data,file_name="voice_message_for_parent.mp3",mime="audio/mp3",key="gen_pl_dl_mp3",use_container_width=True)
                     else:
                         st.markdown('<div style="background:linear-gradient(135deg,#2E7D32,#1B5E20);border-radius:10px;padding:12px 16px;margin:6px 0;color:white"><strong>Voice Message</strong> &mdash; Generate audio to send to the parent</div>',unsafe_allow_html=True)
                         if st.button("Generate Voice Message",type="primary",use_container_width=True,key="gen_pl_voice_btn"):
