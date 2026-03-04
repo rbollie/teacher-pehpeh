@@ -9,6 +9,12 @@ from urllib.parse import quote as urlquote
 try:
     import pandas as pd; PD=True
 except: PD=False
+try:
+    import qrcode; QR=True
+except: QR=False
+try:
+    from PIL import Image, ImageDraw, ImageFont; PIL_OK=True
+except: PIL_OK=False
 
 # === API KEYS ===
 from dotenv import load_dotenv
@@ -215,17 +221,12 @@ def speak_elevenlabs(text, voice_id="woq6F0K3YYEpoS7T2Rx4", model_id="eleven_fla
     try:
         import re, urllib.request, json as jlib
         clean = str(text)
-        # Strip HTML tags
         clean = re.sub(r'<[^>]+>', '', clean)
-        # Strip markdown formatting chars
         clean = re.sub(r'[#*_`~\[\](){}|>]', '', clean)
-        # Strip markdown horizontal rules
         clean = re.sub(r'-{3,}', ' ', clean)
         clean = re.sub(r'={3,}', ' ', clean)
-        # Normalize unicode chars Claude tends to use
         for old, new in [('\u2014', '-'), ('\u2013', '-'), ('\u2018', "'"), ('\u2019', "'"), ('\u201c', '"'), ('\u201d', '"'), ('\u2026', '...'), ('\u2022', ','), ('\u00a0', ' ')]:
             clean = clean.replace(old, new)
-        # Collapse whitespace and newlines
         clean = re.sub(r'\n{2,}', '. ', clean)
         clean = re.sub(r'\n', '. ', clean)
         clean = re.sub(r' {2,}', ' ', clean)
@@ -233,7 +234,6 @@ def speak_elevenlabs(text, voice_id="woq6F0K3YYEpoS7T2Rx4", model_id="eleven_fla
         clean = re.sub(r'\.\s*\.', '.', clean)
         clean = clean.strip()
         if not clean or len(clean) < 10: return None, "Text too short after cleaning"
-        # Cap at 1200 chars for fast generation
         if len(clean) > 1200: clean = clean[:1200] + ". See the full written version for complete details."
         # Use streaming endpoint for faster first-byte
         url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}/stream"
@@ -316,8 +316,7 @@ def clean_parent_output(text):
 def tts_player(text, key_suffix):
     """Simple 'Hear Results' button — one click, plays audio."""
     audio_key = f"tts_audio_{key_suffix}"
-    if not ELEVENLABS_API_KEY: return  # No voice configured, show nothing
-    # Show cached audio if already generated
+    if not ELEVENLABS_API_KEY: return
     if audio_key in st.session_state and st.session_state[audio_key]:
         aud = st.session_state[audio_key]
         audio_data = base64.b64decode(aud["b64"])
@@ -351,6 +350,82 @@ def transcribe_audio(audio_bytes):
         return r.text.strip() if r.text else None
     except Exception as e:
         return None
+
+# === STUDENT ID CARD ===
+def generate_student_card(student, school_name="", grade="", subject="", country="Liberia"):
+    """Generate a student ID card as PNG bytes. Returns (png_bytes, filename) or (None, error)."""
+    import io
+    if not PIL_OK:
+        return None, "Pillow not installed"
+    try:
+        W, H = 600, 340
+        card = Image.new("RGB", (W, H), "#0F2247")
+        draw = ImageDraw.Draw(card)
+        # Try loading fonts, fall back to default
+        try:
+            font_title = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 20)
+            font_name = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 24)
+            font_body = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 15)
+            font_small = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 12)
+        except:
+            font_title = ImageFont.load_default()
+            font_name = font_title
+            font_body = font_title
+            font_small = font_title
+        # Gold header bar
+        draw.rectangle([0, 0, W, 56], fill="#D4A843")
+        draw.text((20, 14), f"TEACHER PEHPEH - STUDENT ID", fill="#0F2247", font=font_title)
+        # School name
+        _school = school_name or "School"
+        draw.text((20, 68), _school, fill="#F5D998", font=font_body)
+        # Student name
+        draw.text((20, 100), student["name"], fill="#FFFFFF", font=font_name)
+        # Details
+        y = 140
+        details = [
+            f"Grade: {grade}",
+            f"Subject Focus: {subject}",
+            f"Siblings: {student.get('sib', '—')}",
+            f"Mother Education: {student.get('mom', '—')}",
+            f"Computer Access: {student.get('cp', '—')}",
+        ]
+        for d in details:
+            draw.text((20, y), d, fill="#C0C8D8", font=font_body)
+            y += 22
+        # Risk level
+        rsk = []
+        if student.get("mom") == "No HS": rsk.append("No HS Mom")
+        if student.get("sm") == "Yes": rsk.append("Single Mom")
+        if student.get("sib") == "8+": rsk.append("8+ siblings")
+        if student.get("wk") == "Yes": rsk.append("Works")
+        risk_color = "#EF5350" if len(rsk) >= 2 else "#FFA726" if rsk else "#66BB6A"
+        risk_label = "Higher Risk" if len(rsk) >= 2 else "Some Risk" if rsk else "Lower Risk"
+        draw.rectangle([20, y + 5, 170, y + 28], fill=risk_color, outline=risk_color)
+        draw.text((28, y + 7), risk_label, fill="#FFFFFF", font=font_body)
+        # QR Code
+        if QR:
+            qr_data = json.dumps({"name": student["name"], "school": _school, "grade": grade, "risk": risk_label}, ensure_ascii=False)
+            qr = qrcode.QRCode(version=1, box_size=4, border=2)
+            qr.add_data(qr_data)
+            qr.make(fit=True)
+            qr_img = qr.make_image(fill_color="#0F2247", back_color="#FFFFFF").convert("RGB")
+            qr_img = qr_img.resize((120, 120))
+            card.paste(qr_img, (W - 145, 80))
+        else:
+            draw.rectangle([W - 145, 80, W - 25, 200], fill="#1A2D50", outline="#D4A843")
+            draw.text((W - 130, 130), "QR N/A", fill="#D4A843", font=font_body)
+        # Footer
+        draw.rectangle([0, H - 36, W, H], fill="#8B1A1A")
+        draw.text((20, H - 30), f"Institute of Basic Technology (IBT) - {country}", fill="#F5D998", font=font_small)
+        draw.text((W - 130, H - 30), "teacherpehpeh.org", fill="#F5D998", font=font_small)
+        # Export as PNG bytes
+        buf = io.BytesIO()
+        card.save(buf, format="PNG")
+        buf.seek(0)
+        fname = f"student_card_{student['name'].replace(' ','_').lower()}.png"
+        return buf.getvalue(), fname
+    except Exception as e:
+        return None, f"Card error: {e}"
 
 # === QUIZ BANK ===
 QUIZ = {
@@ -1056,104 +1131,34 @@ def main():
             mano_on = False
         st.markdown("---")
         # Save / Load Classroom Profile
-        _profile_data={"school":school_name,"teacher":teacher_name,"phone":teacher_phone,"country":country,"lang":lang,"region":region,"grade":grade,"subject":subject,"class_size":clsz,"resources":res,"ability":abl,"moe_on":moe_on,"mano_on":mano_on}
-        # Initialize named profiles storage
-        if "named_profiles" not in st.session_state:
-            st.session_state.named_profiles={}
-
         _pf1,_pf2=st.columns(2)
         with _pf1:
             if st.button("💾 Save Configuration",use_container_width=True,key="sv_prof"):
-                st.session_state["_show_save_opts"]=not st.session_state.get("_show_save_opts",False)
-                st.session_state["_show_load_opts"]=False
-                st.rerun()
+                st.session_state.saved_profile={"school":school_name,"teacher":teacher_name,"phone":teacher_phone,"country":country,"lang":lang,"region":region,"grade":grade,"subject":subject,"class_size":clsz,"resources":res,"ability":abl,"moe_on":moe_on,"mano_on":mano_on}
+                st.session_state.profile_set=True
+                st.success("Saved!")
         with _pf2:
             if st.button("📂 Load Configuration",use_container_width=True,key="ld_prof"):
                 st.session_state["_show_load_opts"]=not st.session_state.get("_show_load_opts",False)
-                st.session_state["_show_save_opts"]=False
                 st.rerun()
-
-        # === SAVE DROPDOWN ===
-        if st.session_state.get("_show_save_opts"):
-            st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:8px;padding:10px 14px;margin:6px 0"><strong style="color:{C_GOLD}">💾 Save to...</strong></div>',unsafe_allow_html=True)
-            _save_dest=st.selectbox("Choose where to save:",
-                ["Quick Save (Session)","Download to Desktop","Save as Named Profile"],
-                key="save_destination",label_visibility="collapsed")
-            if _save_dest=="Quick Save (Session)":
-                if st.button("✅ Save Now",use_container_width=True,key="sv_quick",type="primary"):
-                    st.session_state.saved_profile=_profile_data
-                    st.session_state.profile_set=True
-                    st.session_state["_show_save_opts"]=False
-                    st.success("✅ Saved to session!")
-                    time.sleep(0.8); st.rerun()
-            elif _save_dest=="Download to Desktop":
-                _pj=json.dumps(_profile_data,indent=2)
-                _fname=f"teacher_pehpeh_{school_name or 'profile'}".replace(" ","_").lower()[:40]+".json"
-                st.download_button("📥 Download JSON File",data=_pj,file_name=_fname,mime="application/json",key="dl_prof_save",use_container_width=True)
-                st.caption("Save this file to load your configuration on any device.")
-            elif _save_dest=="Save as Named Profile":
-                _prof_name=st.text_input("Profile name:",placeholder="e.g. SHS 2 Physics, My Chemistry Class",key="prof_name_input")
-                if st.button("✅ Save Profile",use_container_width=True,key="sv_named",type="primary") and _prof_name.strip():
-                    st.session_state.named_profiles[_prof_name.strip()]=_profile_data.copy()
-                    st.session_state.saved_profile=_profile_data
-                    st.session_state.profile_set=True
-                    st.session_state["_show_save_opts"]=False
-                    st.success(f'✅ Saved as "{_prof_name.strip()}"!')
-                    time.sleep(0.8); st.rerun()
-                if st.session_state.named_profiles:
-                    st.caption(f"📋 {len(st.session_state.named_profiles)} saved profile(s): {', '.join(st.session_state.named_profiles.keys())}")
-
-        # === LOAD DROPDOWN ===
         if st.session_state.get("_show_load_opts"):
-            st.markdown(f'<div style="background:rgba(43,125,233,.08);border:1px solid {C_BLUE};border-radius:8px;padding:10px 14px;margin:6px 0"><strong style="color:{C_BLUE}">📂 Load from...</strong></div>',unsafe_allow_html=True)
-            # Build load options dynamically
-            _load_choices=[]
             if "saved_profile" in st.session_state:
-                _load_choices.append("Last Saved (Session)")
-            if st.session_state.named_profiles:
-                for pn in st.session_state.named_profiles:
-                    _load_choices.append(f"📋 {pn}")
-            _load_choices.append("Upload from File")
-            if not _load_choices:
-                _load_choices=["Upload from File"]
-            _load_pick=st.selectbox("Choose configuration to load:",_load_choices,key="load_source",label_visibility="collapsed")
-            if _load_pick=="Last Saved (Session)":
-                _sp=st.session_state.saved_profile
-                st.markdown(f'<div style="font-size:.82rem;color:#8899BB;margin:4px 0">🏫 {_sp.get("school","—")} · {_sp.get("grade","—")} · {_sp.get("subject","—")} · {_sp.get("country","—")}</div>',unsafe_allow_html=True)
-                if st.button("✅ Load This Profile",use_container_width=True,key="ld_session",type="primary"):
+                if st.button("Restore last saved profile",use_container_width=True,key="ld_restore"):
                     st.session_state["_pending_load"]=st.session_state.saved_profile
                     st.session_state["_show_load_opts"]=False
                     st.rerun()
-            elif _load_pick.startswith("📋 "):
-                _pname=_load_pick[2:].strip()
-                _sp=st.session_state.named_profiles[_pname]
-                st.markdown(f'<div style="font-size:.82rem;color:#8899BB;margin:4px 0">🏫 {_sp.get("school","—")} · {_sp.get("grade","—")} · {_sp.get("subject","—")} · {_sp.get("country","—")}</div>',unsafe_allow_html=True)
-                _lc1,_lc2=st.columns([3,1])
-                with _lc1:
-                    if st.button("✅ Load This Profile",use_container_width=True,key="ld_named",type="primary"):
-                        st.session_state.saved_profile=_sp.copy()
-                        st.session_state["_pending_load"]=_sp.copy()
-                        st.session_state["_show_load_opts"]=False
-                        st.rerun()
-                with _lc2:
-                    if st.button("🗑️",use_container_width=True,key="del_named"):
-                        del st.session_state.named_profiles[_pname]
-                        st.rerun()
-            elif _load_pick=="Upload from File":
-                _up_prof=st.file_uploader("Choose JSON file:",type=["json"],key="up_prof",label_visibility="visible")
-                if _up_prof:
-                    try:
-                        _loaded=json.loads(_up_prof.read().decode("utf-8"))
-                        st.session_state.saved_profile=_loaded
-                        st.session_state["_pending_load"]=_loaded
-                        st.session_state["_show_load_opts"]=False
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"Invalid file: {e}")
-            # Download current session profile as backup
-            if "saved_profile" in st.session_state:
                 _pj=json.dumps(st.session_state.saved_profile,indent=2)
-                st.download_button("📥 Download Current Profile",data=_pj,file_name="teacher_pehpeh_profile.json",mime="application/json",key="dl_prof_load",use_container_width=True)
+                st.download_button("Download Profile to Desktop",data=_pj,file_name="teacher_pehpeh_profile.json",mime="application/json",key="dl_prof",use_container_width=True)
+            _up_prof=st.file_uploader("Load from file:",type=["json"],key="up_prof",label_visibility="visible")
+            if _up_prof:
+                try:
+                    _loaded=json.loads(_up_prof.read().decode("utf-8"))
+                    st.session_state.saved_profile=_loaded
+                    st.session_state["_pending_load"]=_loaded
+                    st.session_state["_show_load_opts"]=False
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Invalid file: {e}")
         st.caption("© 2026 Institute of Basic Technology")
         st.markdown("[🌐 Visit our website](https://www.institutebasictechnology.org/index.php)")
 
@@ -1693,7 +1698,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             if s["cp"]=="Never": rsk.append("🟡 No computer")
             st.markdown(f'<div class="sc"><strong style="color:{C_BLUE}">{s["name"]}</strong> — {s["sib"]} sib, Mom:{s["mom"]}<br><span style="font-size:.82rem">{" · ".join(rsk) or "🟢 Lower risk"}</span></div>',unsafe_allow_html=True)
             info=f'{s["name"]},{s["sib"]}sib,Mom:{s["mom"]},SM:{s["sm"]},Works:{s["wk"]},Comp:{s["cp"]},{s["nt"]}'
-            b1,b2,b3=st.columns(3)
+            b1,b2,b3,b4=st.columns([3,3,3,1])
             with b1:
                 if st.button(T("assignment"),key=f"a{i}"):
                     with st.spinner(T("creating")):
@@ -1719,7 +1724,41 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     email_result(r, f"Teacher Pehpeh — Risk Analysis for {s['name']} ({subject}, {grade})", f"rsk_{i}")
                     tts_player(r, f"rsk_{i}")
             with b3:
+                if st.button("🪪 ID Card",key=f"card{i}"):
+                    st.session_state[f"_show_card_{i}"]=not st.session_state.get(f"_show_card_{i}",False)
+                    st.rerun()
+            with b4:
                 if st.button("🗑️",key=f"d{i}"): st.session_state.students.pop(i); st.rerun()
+            # Student ID Card display with save options
+            if st.session_state.get(f"_show_card_{i}"):
+                with st.container():
+                    card_bytes, card_fname = generate_student_card(s, school_name, _grade_en, _subj_en, country)
+                    if card_bytes:
+                        st.image(card_bytes, caption=f"Student ID — {s['name']}", use_container_width=True)
+                        _save_label={"en":"Save card to...","fr":"Enregistrer la carte...","sw":"Hifadhi kadi..."}.get(_lang_key(),"Save card to...")
+                        _save_dest=st.selectbox(_save_label,["📥 Download to Device","📧 Email Card"],key=f"card_save_{i}",label_visibility="visible")
+                        if _save_dest.startswith("📥"):
+                            st.download_button(
+                                "📥 Download Student Card",
+                                data=card_bytes,
+                                file_name=card_fname,
+                                mime="image/png",
+                                key=f"dl_card_{i}",
+                                use_container_width=True
+                            )
+                        elif _save_dest.startswith("📧"):
+                            _card_b64=base64.b64encode(card_bytes).decode()
+                            email_result(f"Student ID Card for {s['name']}\nSchool: {school_name}\nGrade: {_grade_en}\nSubject: {_subj_en}", f"Teacher Pehpeh — Student Card: {s['name']}", f"card_em_{i}")
+                            st.download_button(
+                                "📥 Also Download Copy",
+                                data=card_bytes,
+                                file_name=card_fname,
+                                mime="image/png",
+                                key=f"dl_card_em_{i}",
+                                use_container_width=True
+                            )
+                    else:
+                        st.warning(f"Could not generate card: {card_fname}")
         if st.session_state.students:
             st.markdown("---"); st.markdown(f"#### {ico(16)} {T('grade_work')}")
             gs=st.selectbox("Student:",[s["name"] for s in st.session_state.students],key="gs")
