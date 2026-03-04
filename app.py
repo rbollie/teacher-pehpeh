@@ -643,6 +643,11 @@ UI_TEXT={
   "asking_claude":"🟣 Asking Claude...","asking_chatgpt":"🟢 Asking ChatGPT...","asking_gemini":"🔵 Asking Gemini...",
   "chat_ex1":"How to teach fractions with no textbooks?","chat_ex2":"My students keep failing WASSCE.","chat_ex3":"Managing 60+ students?",
   "combining":"🔀 Combining the best...","creating_img":"🎨 Creating illustration...",
+  "photo_hint":"📸 Upload or snap a photo to ask Teacher Pehpeh about it",
+  "photo_upload":"Upload image","photo_camera":"📷 Take photo",
+  "photo_ask":"What would you like to know about this photo?",
+  "photo_default":"Please analyze this image and explain what you see. Provide educational context relevant to the subject.",
+  "analyzing_photo":"📸 Analyzing your photo...","start_recording":"Start Recording","stop_recording":"Stop Recording",
  },
  "fr":{
   "generate":"📋 Générer","chat":"💬 Discussion","quiz":"🌶️ Quiz","students":"🧑‍🎓 Élèves",
@@ -681,6 +686,11 @@ UI_TEXT={
   "asking_claude":"🟣 Consultation de Claude...","asking_chatgpt":"🟢 Consultation de ChatGPT...","asking_gemini":"🔵 Consultation de Gemini...",
   "chat_ex1":"Comment enseigner les fractions sans manuels ?","chat_ex2":"Mes élèves échouent au WASSCE.","chat_ex3":"Gérer plus de 60 élèves ?",
   "combining":"🔀 Combinaison des meilleurs...","creating_img":"🎨 Création d'illustration...",
+  "photo_hint":"📸 Téléchargez ou prenez une photo pour demander à Teacher Pehpeh",
+  "photo_upload":"Télécharger image","photo_camera":"📷 Prendre une photo",
+  "photo_ask":"Que voulez-vous savoir sur cette photo ?",
+  "photo_default":"Veuillez analyser cette image et expliquer ce que vous voyez. Fournissez un contexte éducatif pertinent.",
+  "analyzing_photo":"📸 Analyse de votre photo...","start_recording":"Commencer","stop_recording":"Arrêter",
  },
  "sw":{
   "generate":"📋 Tengeneza","chat":"💬 Mazungumzo","quiz":"🌶️ Maswali","students":"🧑‍🎓 Wanafunzi",
@@ -719,6 +729,11 @@ UI_TEXT={
   "asking_claude":"🟣 Kuuliza Claude...","asking_chatgpt":"🟢 Kuuliza ChatGPT...","asking_gemini":"🔵 Kuuliza Gemini...",
   "chat_ex1":"Jinsi ya kufundisha sehemu bila vitabu?","chat_ex2":"Wanafunzi wangu wanashindwa WASSCE.","chat_ex3":"Kusimamia wanafunzi 60+?",
   "combining":"🔀 Kuchanganya bora zaidi...","creating_img":"🎨 Kuunda mchoro...",
+  "photo_hint":"📸 Pakia au piga picha kumuuliza Teacher Pehpeh",
+  "photo_upload":"Pakia picha","photo_camera":"📷 Piga picha",
+  "photo_ask":"Unataka kujua nini kuhusu picha hii?",
+  "photo_default":"Tafadhali changanua picha hii na ueleze unachokiona. Toa muktadha wa kielimu unaofaa.",
+  "analyzing_photo":"📸 Kuchambua picha yako...","start_recording":"Anza Kurekodi","stop_recording":"Simamisha",
  }
 }
 def _lang_key():
@@ -1045,6 +1060,14 @@ def main():
     .ft a {{color:{C_GOLD};text-decoration:none}}
 
     /* Solid blue Configure expander */
+    /* Mic recording styles — black default, red when recording */
+    .mic-wrapper {{ text-align:center }}
+    .mic-wrapper [data-testid="stAudioInput"] button {{ transition: all 0.3s ease }}
+    .mic-wrapper [data-testid="stAudioInput"] {{ border-radius:50%;overflow:hidden }}
+    .mic-label {{ font-size:.72rem;color:var(--text-muted);margin-top:2px;text-align:center;font-weight:600 }}
+    /* Photo upload area in chat */
+    .photo-upload-area {{ background:rgba(43,125,233,.06);border:2px dashed rgba(43,125,233,.3);border-radius:12px;padding:12px;margin-bottom:8px }}
+    .photo-upload-area:hover {{ border-color:rgba(43,125,233,.5);background:rgba(43,125,233,.1) }}
     [data-testid="stSidebar"] .stExpander {{ background:linear-gradient(135deg,#1a3a6b,#2B7DE9);border-radius:10px;border:none !important }}
     [data-testid="stSidebar"] .stExpander summary {{ color:white !important;font-weight:700 }}
     [data-testid="stSidebar"] .stExpander [data-testid="stExpanderDetails"] {{ background:rgba(0,0,0,.15);border-radius:0 0 10px 10px }}
@@ -2061,7 +2084,13 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
         for mi,msg in enumerate(st.session_state.chat_messages):
             _you_label={"en":"🧑‍🏫 You","fr":"🧑‍🏫 Vous","sw":"🧑‍🏫 Wewe"}.get(_lang_key(),"🧑‍🏫 You")
             _by_label={"en":"by","fr":"par","sw":"na"}.get(_lang_key(),"by")
-            if msg["role"]=="user": st.markdown(f'<div class="ct"><div style="font-size:.75rem;font-weight:700;color:{C_BLUE};margin-bottom:4px">{_you_label}</div>{msg["content"]}</div>',unsafe_allow_html=True)
+            if msg["role"]=="user":
+                st.markdown(f'<div class="ct"><div style="font-size:.75rem;font-weight:700;color:{C_BLUE};margin-bottom:4px">{_you_label}</div>{msg["content"]}</div>',unsafe_allow_html=True)
+                if msg.get("photo_b64"):
+                    try:
+                        _ph_bytes = base64.b64decode(msg["photo_b64"])
+                        st.image(_ph_bytes, caption="📸 Attached photo", width=300)
+                    except: pass
             else:
                 allr=msg.get("all_responses",{})
                 st.markdown(f'<div class="cp"><div style="font-size:.75rem;font-weight:700;color:{C_GOLD};margin-bottom:4px">{ico(16)} Teacher Pehpeh</div>{highlight_result(msg["content"])}<div style="font-size:.65rem;color:#556;margin-top:4px">{_by_label} {msg.get("model","AI")}</div></div>',unsafe_allow_html=True)
@@ -2079,29 +2108,101 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                 user_q = st.session_state.chat_messages[mi-1]["content"] if mi>0 else "Chat"
                 email_result(msg["content"], f"Teacher Pehpeh — {user_q[:50]} ({grade}, {subject})", f"chat_{mi}")
                 tts_player(msg["content"], f"chat_{mi}")
-        # Voice input for chat
-        voice_col, label_col = st.columns([1, 4])
+        # Voice input for chat — with red recording indicator
+        voice_col, photo_col, label_col = st.columns([1, 1, 3])
         with voice_col:
+            st.markdown('<div class="mic-wrapper">', unsafe_allow_html=True)
             chat_audio = st.audio_input("🎤", key="chat_mic", label_visibility="collapsed")
+            st.markdown(f'<div class="mic-label">{T("start_recording")}</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        with photo_col:
+            st.markdown('<div style="text-align:center">', unsafe_allow_html=True)
+            _show_cam = st.toggle("📸", key="chat_cam_toggle", help=T("photo_hint"))
+            st.markdown(f'<div class="mic-label">Photo</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
         with label_col:
-            st.markdown(f'<div style="font-size:.8rem;color:var(--text-muted);margin-top:8px">{T("mic_hint")}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="font-size:.8rem;color:var(--text-muted);margin-top:8px">{T("mic_hint")}<br>{T("photo_hint")}</div>', unsafe_allow_html=True)
+
+        # Photo upload / camera area (shown when toggled on)
+        chat_photo_b64 = None
+        chat_photo_mime = None
+        if _show_cam:
+            st.markdown(f'<div class="photo-upload-area">', unsafe_allow_html=True)
+            cam_tab1, cam_tab2 = st.tabs([f"📁 {T('photo_upload')}", f"📷 {T('photo_camera')}"])
+            with cam_tab1:
+                chat_upload = st.file_uploader(T("photo_upload"), type=["jpg","jpeg","png","heic","webp"], key="chat_photo_up", label_visibility="collapsed")
+                if chat_upload:
+                    st.image(chat_upload, caption="📸 Uploaded", use_container_width=True)
+                    _img_bytes = chat_upload.read()
+                    chat_photo_b64 = base64.b64encode(_img_bytes).decode()
+                    chat_photo_mime = chat_upload.type if hasattr(chat_upload, 'type') and chat_upload.type else "image/jpeg"
+                    chat_upload.seek(0)
+            with cam_tab2:
+                chat_cam = st.camera_input(T("photo_camera"), key="chat_cam_input", label_visibility="collapsed")
+                if chat_cam:
+                    _cam_bytes = chat_cam.read()
+                    chat_photo_b64 = base64.b64encode(_cam_bytes).decode()
+                    chat_photo_mime = "image/jpeg"
+                    chat_cam.seek(0)
+                    st.image(chat_cam, caption="📸 Captured", use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+            if chat_photo_b64:
+                _photo_q = st.text_input(T("photo_ask"), value="", key="chat_photo_question", placeholder=T("photo_default"))
+
         voice_text = None
         if chat_audio:
             with st.spinner(T("transcribing")):
                 voice_text = transcribe_audio(chat_audio.read())
             if voice_text:
                 st.success(f'{T("heard")}: "{voice_text[:80]}..."' if len(voice_text) > 80 else f'{T("heard")}: "{voice_text}"')
+
+        # Inject CSS to make mic red while recording
+        st.markdown("""<style>
+        /* Make ALL mic buttons red while recording (Streamlit changes aria-label to Stop) */
+        [data-testid="stAudioInput"] > div > button[aria-label*="Stop"],
+        [data-testid="stAudioInput"] > div > button[aria-label*="stop"],
+        [data-testid="baseButton-minimal"][aria-label*="Stop"],
+        [data-testid="baseButton-minimal"][aria-label*="stop"] {
+            background-color: #D32F2F !important;
+            color: white !important;
+            border-color: #D32F2F !important;
+            box-shadow: 0 0 12px rgba(211,47,47,.5) !important;
+            animation: pulse-red 1.2s ease-in-out infinite !important;
+        }
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 8px rgba(211,47,47,.4); }
+            50% { box-shadow: 0 0 20px rgba(211,47,47,.7); }
+        }
+        </style>""", unsafe_allow_html=True)
+
         uq = st.chat_input(f"{T('ask_about')} {subject}... {T('draw_hint')}")
         # Voice input takes priority
         if voice_text:
             uq = voice_text
+        # Photo submission — either with typed question or default prompt
+        if chat_photo_b64 and not uq:
+            _pq = st.session_state.get("chat_photo_question", "").strip()
+            if _show_cam and st.button("📸 Ask Teacher Pehpeh about this photo", type="primary", key="photo_send"):
+                uq = _pq if _pq else T("photo_default")
         if uq:
-            st.session_state.chat_messages.append({"role":"user","content":uq})
+            # Check if there's a photo attached
+            _attached_photo = chat_photo_b64 if (_show_cam and chat_photo_b64) else None
+            _attached_mime = chat_photo_mime if _attached_photo else None
+            _display_content = uq
+            if _attached_photo:
+                _display_content = f"📸 [Photo attached] {uq}"
+            st.session_state.chat_messages.append({"role":"user","content":_display_content,"photo_b64":_attached_photo,"photo_mime":_attached_mime})
             img_keywords=["draw","illustrate","sketch","diagram","picture","image","visual","create an image","make an image","generate an image","show me","dessiner","dessine","diagramme","illustrer","chora","picha","mchoro"]
-            want_chat_img=any(uq.lower().startswith(k) or k in uq.lower() for k in img_keywords)
+            want_chat_img=any(uq.lower().startswith(k) or k in uq.lower() for k in img_keywords) and not _attached_photo
             with st.status(T("thinking"),expanded=True) as status:
-                st.write(f"{T('asking_claude')} {T('asking_chatgpt')} {T('asking_gemini')}")
-                r,m,allr=best_all(build_chat(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,school_name,_chat_curr_ctx,_chat_mano_ctx),uq,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]])
+                if _attached_photo:
+                    st.write(T("analyzing_photo"))
+                    _vision_sp = build_chat(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,school_name,_chat_curr_ctx,_chat_mano_ctx)
+                    r, m = best_vision(_vision_sp, uq, _attached_photo, _attached_mime or "image/jpeg")
+                    allr = {m: r} if m else {"AI": r}
+                else:
+                    st.write(f"{T('asking_claude')} {T('asking_chatgpt')} {T('asking_gemini')}")
+                    r,m,allr=best_all(build_chat(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,school_name,_chat_curr_ctx,_chat_mano_ctx),uq,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]])
                 msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
                 if want_chat_img:
                     st.write(T("creating_img"))
