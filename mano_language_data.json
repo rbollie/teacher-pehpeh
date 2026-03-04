@@ -1,0 +1,679 @@
+{
+  "metadata": {
+    "language_name": "Mano",
+    "alternate_names": [
+      "Mah",
+      "Mahwe (Guinea dialect)"
+    ],
+    "iso_code": "mev",
+    "language_family": "Mande (Southern Mande)",
+    "region": "Nimba County, Liberia; Guinea",
+    "writing_system": "Roman alphabet with IAA phonetic extensions",
+    "orthography_established": 1928,
+    "orthography_developer": "Dietrich Westermann / International Institute of African Languages (IAI)",
+    "is_tonal": true,
+    "source": "Gibbs, James L. (1988) Peoples of Africa, Cultures of Africa South of the Sahara. Waveland Press, pp. 583-584.",
+    "structural_rules": [
+      "All words end in vowels (no consonant-final words)",
+      "No R, J, C, or Q in Liberian Mano",
+      "ɔ is used for the R sound",
+      "Z is used for the J sound",
+      "No Mano word ends with the letter S",
+      "kp and gb are always pronounced as single labiovelar sounds, never separately",
+      "Tonal markers (accents/diacritics) over or under letters affect pronunciation and meaning",
+      "Adjectives follow nouns (noun + adjective order, like French)",
+      "No possessive pronouns - place pronoun before noun for possession",
+      "No grammatical gender in pronouns - qualifying noun required for gender",
+      "Base-5 counting system - numbers restart after 5",
+      "No concept of zero",
+      "Time is event-based, not calendar/date-based",
+      "One word can mean many different things depending on tone and context (homonyms)",
+      "Greetings are structured as questions"
+    ],
+    "dialect_regions": {
+      "upper_nimba": "Upper Nimba",
+      "middle_nimba": "Middle Nimba",
+      "lower_nimba": "Lower Nimba",
+      "guinea_mahwe": "Guinea Mahwe"
+    }
+  },
+  "consonants": {
+    "b": {
+      "name": "be",
+      "type": "standard"
+    },
+    "ɓ": {
+      "name": "ɓa",
+      "type": "implosive",
+      "description": "No English equivalent. Implosive b - slight sucking in of air."
+    },
+    "d": {
+      "name": "de",
+      "type": "standard"
+    },
+    "ɗ": {
+      "name": "ɗa",
+      "type": "implosive"
+    },
+    "f": {
+      "name": "ef",
+      "type": "labiodental"
+    },
+    "g": {
+      "name": "ga",
+      "type": "standard"
+    },
+    "h": {
+      "name": "ha",
+      "type": "standard"
+    },
+    "k": {
+      "name": "ke",
+      "type": "standard"
+    },
+    "l": {
+      "name": "el",
+      "type": "standard"
+    },
+    "m": {
+      "name": "em",
+      "type": "standard"
+    },
+    "m̃": {
+      "name": "hum",
+      "type": "labionasal",
+      "description": "Both a letter AND a word meaning I/Me/My/Myself/Mine."
+    },
+    "n": {
+      "name": "en",
+      "type": "standard"
+    },
+    "ŋ": {
+      "name": "eng",
+      "type": "palatal_nasal",
+      "description": "Palatal consonant with labiovelar articulation."
+    },
+    "p": {
+      "name": "pe",
+      "type": "standard"
+    },
+    "s": {
+      "name": "es",
+      "type": "standard"
+    },
+    "t": {
+      "name": "te",
+      "type": "standard"
+    },
+    "v": {
+      "name": "ve",
+      "type": "labiodental"
+    },
+    "w": {
+      "name": "wa",
+      "type": "labiovelar"
+    },
+    "y": {
+      "name": "ya",
+      "type": "standard"
+    },
+    "z": {
+      "name": "z",
+      "type": "standard",
+      "description": "Used for J sound in Liberian Mano"
+    }
+  },
+  "compound_consonants": {
+    "kp": {
+      "type": "labiovelar",
+      "description": "ONE sound. NEVER pronounced separately.",
+      "examples": [
+        "Kpain",
+        "Kpuapa"
+      ]
+    },
+    "gb": {
+      "type": "labiovelar",
+      "description": "ONE sound. NEVER pronounced separately.",
+      "examples": [
+        "Gban",
+        "gbɔ"
+      ]
+    }
+  },
+  "vowels": {
+    "a": {
+      "pronunciation": "as 'a' in adult or at",
+      "type": "standard"
+    },
+    "e": {
+      "pronunciation": "as first 'e' in ever or 'e' in bet",
+      "type": "standard"
+    },
+    "ɛ": {
+      "pronunciation": "open e, as first 'e' in ever",
+      "type": "open"
+    },
+    "é": {
+      "pronunciation": "as 'e' in eight or 'a' in age",
+      "type": "closed_high"
+    },
+    "i": {
+      "pronunciation": "as 'e' in eat",
+      "type": "standard"
+    },
+    "o": {
+      "pronunciation": "as in old",
+      "type": "standard"
+    },
+    "ɔ": {
+      "pronunciation": "open 'o' as in 'or' without 'r'; 'ou' as in ought",
+      "type": "open"
+    },
+    "u": {
+      "pronunciation": "as 'oo' in loose",
+      "type": "standard"
+    }
+  },
+  "pronouns": {
+    "singular": {
+      "I/me/my/mine/myself": "m̃ / m̃m̃",
+      "you (singular)": "ì",
+      "you (singular alt)": "ɓà",
+      "his/her/it": "là"
+    },
+    "plural": {
+      "our/we": "Ko / Kwà",
+      "we are/will/shall/do": "Kóó",
+      "your/you (plural)": "Kà / Kàà",
+      "their/them": "Wà",
+      "they": "óó"
+    },
+    "third_person_forms": {
+      "he/she/it (negative)": "lɛ̀ɛ̀",
+      "he/she/it (affirmative)": "lɛ́ɛ̀"
+    },
+    "gender_rule": "No grammatical gender. Qualifying noun needed: gɔ̃ɔ̃ (man) or lé (woman) before pronoun.",
+    "possessive_rule": "Pronoun + Noun = possession. m̃ ɓu = my rice, Wà ɓu = their rice."
+  },
+  "grammar": {
+    "adjective_placement": "NOUN + ADJECTIVE (like French). ka pulu = house white = the white house",
+    "question_formation": "[pronoun] [noun] le ɓé? = Is this [someone's] [noun]?",
+    "interrogative": "Double pronoun vowel: ì (statement) -> ìì (question)",
+    "future_marker": "lo (also means 'go')",
+    "lets_imperative": "nú ko [verb] = Come let's [verb]",
+    "negation_third": "lɛ̀ɛ̀ before verb",
+    "negation_first": "m̃ĩn before verb",
+    "negation_existence": "wã = there is no",
+    "is_not": "à wã [adjective]",
+    "want_pattern": "M̃m nã m̃ [food] dò ɓèlè = I want to eat some [food]",
+    "give_pattern": "[food] dò nɔ̃ m̃ lɛɛ = Give me some [food]",
+    "locative_on": "le [place] la = on the [place]",
+    "locative_in": "le [container] yi = in the [container]",
+    "yes": "Mm̃",
+    "no": "Ɓao",
+    "because": "ɓwaká / ɓìì",
+    "and": "wã (between noun phrases)",
+    "with": "kà"
+  },
+  "nouns": {
+    "house": "ka",
+    "home": "pa",
+    "in the house": "kɛ̀ì",
+    "rice kitchen": "ɓu kpa",
+    "village/town": "plèyíì",
+    "table": "téɓo",
+    "pot": "gbɔ",
+    "bed": "kpĩĩŋ",
+    "chair": "tagànaŋ",
+    "mat": "sàà",
+    "bottle": "kpòòó",
+    "lantern": "nàbò",
+    "rice": "ɓu",
+    "bread/donuts": "béllè",
+    "eggs": "tɔɔɔ nyãn",
+    "milk": "nyɔ̃ yíí",
+    "corn": "kpɛyìì",
+    "cassava": "béì / béì bili",
+    "potatoes": "kwisõũn",
+    "plantain": "bolo fèlé",
+    "banana (ripe)": "bolo tãa",
+    "eddoes/taro": "gbìà",
+    "eddo leaves": "gbìà lèè",
+    "sugar cane": "kwiyɔ",
+    "sugar": "suga",
+    "mango": "m̃ágɔɔ̃lo / pùnũn",
+    "mushroom": "tolo",
+    "kola nut (whole)": "gɔ wèlè",
+    "kola nut (split)": "gɔ̀ pèŋ",
+    "smoked fish": "wèĩ kpààŋ",
+    "chopped cassava": "pē wā",
+    "red palm oil": "nyɔ́nɔ́ zòlò",
+    "shrimp": "kpasèlé",
+    "food": "ɓélepè",
+    "water": "yíí",
+    "fire": "tìé",
+    "smoke": "tìé gɓèì",
+    "ashes": "tùmɛ̀n",
+    "charcoal": "ùwè",
+    "firewood": "kwoii",
+    "kerosene/propane": "tìé yíí",
+    "tree": "yíli",
+    "leaves": "lèè",
+    "stars": "sìàŋɛ̀lè",
+    "moon": "mĩnɛn",
+    "hill/mountain": "túnù",
+    "farm": "nyɛ̃ɛ̃í",
+    "country/land": "ku-gɓoo",
+    "clothes/cloth": "sɔ",
+    "shirt/blouse": "Sɔ̃ wì-Sɔ̃",
+    "trousers": "dùmn",
+    "dress/skirt": "sèŋgèé",
+    "shoes/boots": "sàkpà",
+    "slippers/sandals": "gùwàã",
+    "lappa/wrapper": "Yɛ́lɛ́ sɔ̀-lãppà",
+    "hat": "gbàlà",
+    "knife": "laa",
+    "cutlass/machete": "gɛɛi",
+    "bow and arrow": "sãã wã ìtà",
+    "fishing basket": "Zòùnlée",
+    "dip fishing net": "Dĩò",
+    "bicycle": "soo",
+    "talking drum": "Dãmã",
+    "drum": "ɓàlã",
+    "sickness": "yá",
+    "sleeping sickness": "yìvà",
+    "thing": "Pɛ́",
+    "name": "tò",
+    "God": "Wálà",
+    "congratulations": "ũwélɔ"
+  },
+  "animals": {
+    "animal (general)": "wi",
+    "cat": "gwinin",
+    "cat (Lower Nimba)": "nyãnmã",
+    "dog": "gbãŋŋ",
+    "goat": "ɓò",
+    "cow": "dii",
+    "chicken": "tɔɔ",
+    "rooster": "tɔɔ gɔ̃",
+    "hen": "tɔɔ mú",
+    "chick": "tɔɔ nyũnɔ̃",
+    "pig": "kwìa ɓɔ",
+    "horse": "sòò",
+    "donkey": "Sòò fanné",
+    "elephant": "bììé",
+    "monkey": "wèìì",
+    "baboon": "kiyéé",
+    "deer": "zòló / vèle",
+    "snake": "mĩnɛn",
+    "turtle": "kuoo",
+    "fish": "kpãã",
+    "shrimp": "kpasèlé",
+    "crab": "kàã",
+    "bird (general)": "mɔ̀ɔ̀",
+    "tsetse fly": "mĩnɛ̀n",
+    "caterpillar": "zéégbãŋ",
+    "grasshopper": "tòkòíló",
+    "cockroach": "gòò",
+    "rat/mouse": "gìà"
+  },
+  "body_parts": {
+    "head": "wũ",
+    "face/forehead": "pélà / pìà",
+    "eye(s)": "nyìɛɛ",
+    "tears": "nyìɛɛ yíí",
+    "eyeball": "nyìɛɛ kpõ",
+    "ear(s)": "tóó",
+    "nose": "nyũ",
+    "lips": "bèé",
+    "tooth/teeth": "sũŋ",
+    "tongue": "nana",
+    "chin": "kpéna",
+    "throat": "kpèì",
+    "neck": "kpéé",
+    "hand(s)/arm(s)": "kɔ",
+    "elbow": "kɔsùĩn",
+    "fist": "kɔkpo",
+    "wrist": "kɔkpéí",
+    "palm": "kèìɛ̀",
+    "finger(s)": "kɔ wɛ̀nɛ̀",
+    "thumb": "kɔ wɛ̀nɛ̀ gɔ̃",
+    "belly/stomach": "gíì kpàlà",
+    "breast(s)": "nyɔ̃",
+    "navel": "Vulu",
+    "back": "ko",
+    "spine": "kozéì",
+    "waist": "dìĩn",
+    "leg(s)/foot": "gã",
+    "knee(s)": "kpuó",
+    "heart": "zo",
+    "liver": "ɓùu",
+    "brain": "kɔ̀ɛ̀",
+    "blood": "wèlè",
+    "skin/bone/book": "kìì",
+    "flesh": "mùɛ̀"
+  },
+  "family": {
+    "mother": "nóó / lèe / lòkòò / dàa",
+    "father": "dàa",
+    "grandmother": "mà",
+    "uncle": "zíɛ̃ɓao",
+    "wife": "nãã",
+    "husband": "dèè",
+    "daughter": "lù",
+    "son": "gbé",
+    "man": "gɔ̃",
+    "men": "gɔ̃ã",
+    "woman": "lé",
+    "child": "mɛ̀ŋùà",
+    "children": "wèmì",
+    "boys": "nĩɔ̃ɓé",
+    "girls": "nĩàã",
+    "people": "Mìàn",
+    "sister (same mother)": "lèe-gé lèzè",
+    "younger sister": "lèké lèzè",
+    "older sister": "lìdìè lèzè",
+    "brother (same mother)": "lèe-gé gɔ̃ zè",
+    "younger brother": "lèké gɔ̃zè",
+    "older brother": "lìdíé gɔ̃zè",
+    "sister (male speaker only)": "lulɔ",
+    "brother (female speaker, taboo)": "mũàŋgàn",
+    "nephew": "bèí",
+    "sister's children": "bèlàmì",
+    "co-wives/marital mates": "tɔ̃ã"
+  },
+  "verbs": {
+    "come": "nùù / nú (imperative)",
+    "go": "lo",
+    "eat": "ɓélé / ɓèlè",
+    "drink": "mi",
+    "love": "lɔkɛ / ɓke",
+    "want": "nã",
+    "know": "dɔ",
+    "listen": "tóó dɔ",
+    "stand up": "wèlè ì dɔ",
+    "sit down": "wàtàã ì nù",
+    "get up and go": "wèlè ì lo",
+    "sleep": "yi",
+    "to sleep": "yìzè",
+    "wake up": "vuo",
+    "lie down": "wɔɔtãã",
+    "give": "nɔ̃",
+    "buy": "ìɔ̃",
+    "sell/make market": "ɓɔɓɔ",
+    "count": "loni / Pɛloni",
+    "sing": "pã ɓó",
+    "dance": "ké",
+    "cry": "gbòì",
+    "laugh": "yéɓóke",
+    "smile": "yèísùwèè",
+    "respect/honor": "ɓèleyà",
+    "thank": "gàmì",
+    "curse": "hàné",
+    "start fire": "tìé dà",
+    "extinguish fire": "tìé lumè",
+    "boil": "télé",
+    "burn": "gélé",
+    "born": "tòló / yíé",
+    "converse": "dɔdɔ",
+    "refuse": "kìì",
+    "breast feed child": "nyɔ̃ da mɛ̀ŋùà lé"
+  },
+  "adjectives": {
+    "_rule": "NOUN + ADJECTIVE. Example: ka pulu = white house",
+    "red": "zòlò (covers maroon and similar)",
+    "white": "pùlū / plu",
+    "black/gray/dark": "tii",
+    "yellow": "wéinzɛ",
+    "green": "béí lèè ɓɔbà (resembling cassava leaf)",
+    "tall": "gbekéní",
+    "short": "ɓulu",
+    "ripe": "kpolo",
+    "unripe/green": "tàà / tãã",
+    "hot": "tíéèì",
+    "cold": "dɔ̀ɔ̀lɔ̀",
+    "sweet": "nɛ̃ĩ-nɛ̃ĩ",
+    "well/healthy": "kéléŋ kèlèŋ",
+    "big": "gɔ̃",
+    "small": "nè mɛ̀í",
+    "many/multiple": "bìnùùɛ̀",
+    "enough": "kpã kpã",
+    "new/fresh": "dɛɛ",
+    "dry": "kpàà"
+  },
+  "numbers": {
+    "system": "Base-5. No zero. Numbers restart after 5.",
+    "base": {
+      "1": "doó",
+      "2": "pèèlè",
+      "3": "yàaka",
+      "4": "yìise",
+      "5": "sɔ̀lì"
+    },
+    "6_to_10": {
+      "6": "sàlà-doó",
+      "7": "sàlà-pèèlè",
+      "8": "sàlà-ka",
+      "9": "sèɛ̀ìse",
+      "10": "vũ doó"
+    },
+    "teens": {
+      "11": "vũ doó wélé doó",
+      "12": "vũ doó wélé péèlè",
+      "13": "vũ doó wélé yàaka",
+      "14": "vũ doó wélé yìsɛ",
+      "15": "vũ doó wélé sɔli",
+      "16": "vũ doó wélé sàlà-doó",
+      "17": "vũ doó wélé sàlà-pééle",
+      "18": "vũ doó wélé sàlà-ka",
+      "19": "vũ doó wélé séléìsɛ",
+      "20": "Vũ pééle"
+    },
+    "tens": {
+      "10": "vũ doó",
+      "20": "vũ pééle",
+      "30": "vũ yàaka",
+      "40": "vũ yìsɛ",
+      "50": "vũ sɔli",
+      "60": "vũ sàlà-doó",
+      "70": "vũ sàlà-pééle",
+      "80": "vũ sàlà-ka",
+      "90": "vũ séléìsɛ"
+    },
+    "large": {
+      "100": "wũ doó (one head)",
+      "1000": "Wa-doó",
+      "1000000": "lèè kwoi (in the midst of leaves)"
+    },
+    "units": {
+      "tens": "vũ",
+      "hundreds": "wũ (head)",
+      "thousands": "Wa",
+      "connector": "wélé (and)"
+    }
+  },
+  "time": {
+    "future": {
+      "today": "pìɛ̀nɛ̀",
+      "tomorrow": "tòó",
+      "day after tomorrow": "dìì",
+      "this coming week": "mìmàŋ é nàà"
+    },
+    "past": {
+      "today": "pìɛ̀nɛ̀",
+      "a few hours ago": "nàùn",
+      "last night": "pɛ̀ bìmìàa",
+      "yesterday": "yàlà",
+      "day before yesterday": "yàlà bòmòo",
+      "about a month ago": "kpa",
+      "about 6-9 months": "pànà",
+      "after a year": "kìà",
+      "after many years": "kìà kìà",
+      "over a decade": "mù",
+      "long ago (legends)": "mù, mù"
+    },
+    "time_of_day": {
+      "morning": "lààpié",
+      "dawn": "lè kpɛi gàlà",
+      "mid-day": "nyènè sòsò",
+      "evening": "nyègĩŋ pié",
+      "night": "bĩmíàa",
+      "midnight": "bĩmìàa zéyi"
+    },
+    "concept": "Time is event-based, not calendar-based. No dates. Generations span ~2 decades."
+  },
+  "seasons": {
+    "dry": {
+      "mano": "nyɛ̀nì pɛ́",
+      "months": "November-April"
+    },
+    "pre-rainy": {
+      "mano": "Kpɔyɔ pɛ́",
+      "months": "April-July"
+    },
+    "full rainy": {
+      "mano": "Lɛɛyíì pɛ́",
+      "months": "July-October"
+    }
+  },
+  "days_of_week": {
+    "Sunday": "Sunné lúó",
+    "Monday": "Sèklépié lɔ lúó (Saclapea)",
+    "Tuesday": "Flumpa lɔ lúó",
+    "Wednesday": "Gompa lɔ lúó",
+    "Thursday": "Tappipa lɔ lúó",
+    "Friday": "Kpain lɔ minyii",
+    "Saturday": "Kpain lɔ lúó / Sanngbéin lɔ lúó",
+    "_note": "Days named after market towns where weekly markets were held."
+  },
+  "greetings": {
+    "morning": {
+      "greeting": "Yah, ɓàvuo?",
+      "meaning": "Are you awake?",
+      "response": "m̃m, [name], ɓàvuo?"
+    },
+    "afternoon": {
+      "greeting": "Yah, ì tuo?",
+      "response": "m̃m, [name], ì tuoa?"
+    },
+    "good_night": {
+      "greeting": "ɓà ɓá lɛ̀ɛ̀ kpɛyì",
+      "meaning": "May your day break"
+    },
+    "whats_your_name": {
+      "ask": "ì tò le déíŋ?",
+      "answer": "M̃ tò le [name]"
+    },
+    "where_from": {
+      "ask": "ìì go mɛ̃ŋ?",
+      "answer": "m̃m̃ go [place]"
+    },
+    "any_news": "Komã (let's hear)",
+    "everything_fine": "À lè lé sè",
+    "are_you_well": {
+      "ask": "I kéléŋ kèlèŋ?",
+      "answer": "m̃m m̃ kéléŋ kèlèŋ"
+    },
+    "i_am_happy": "M̃ gé lìà lè (my stomach is good)",
+    "thanks_to_god": "Wɔ̃ yié, Wálà sàalèì",
+    "congratulations": "ũwélɔ",
+    "sos": "Kà nú ǹ mèé óóóó (Save our souls)"
+  },
+  "common_phrases": {
+    "thank you": "ɓà lɔkè m̃ kã / ì zuo",
+    "I love you": "m̃m̃ lɔkɛ ì kã",
+    "I am hungry": "lɔ̃ɔ̃ lèe m̃ kè",
+    "drink water": "yíí mi",
+    "come here (Upper/Middle Nimba)": "Nú zézá",
+    "come here (Lower Nimba)": "Nú zàzé",
+    "yes": "Mm̃",
+    "no": "Ɓao"
+  },
+  "classroom_commands": {
+    "stand up": "wèlè ì dɔ",
+    "sit down": "wàtàã ì nù",
+    "get up and go": "wèlè ì lo",
+    "listen": "tóó dɔ",
+    "come let's count": "Nú ko sìàŋɛ̀lè loni",
+    "identify body parts": "Mia dɔpè loni",
+    "I am counting": "m̃ pɛloni pìé"
+  },
+  "birth_order_names": {
+    "male": {
+      "1": "Saye/Sei",
+      "2": "Nya",
+      "3": "Paye",
+      "4": "Wuo",
+      "5": "Zawolo",
+      "6": "Fong",
+      "7": "Saye Paleh"
+    },
+    "female": {
+      "1": "Kau/Kou",
+      "2": "Yah",
+      "3": "Yei",
+      "4": "Nau/Nohn",
+      "5": "Koo",
+      "6": "Famia",
+      "7": "Kau Paleh"
+    },
+    "special": {
+      "Konah": "child born after triplets",
+      "Youn": "second name for twins",
+      "Belleh": "non-twin child",
+      "Paleh": "second/repeat"
+    }
+  },
+  "cultural_concepts": {
+    "naming": "Names reflect birth order and define character/self-worth.",
+    "time": "Event-based, 3 categories: past/present/near-future. No calendar dates.",
+    "greetings": "Structured as questions. 'Good morning' = 'Are you awake?'",
+    "colors": "Only 5 color words. Green = 'resembling cassava leaf.'",
+    "rice": "Staple food. Most villagers are rice farmers. Has its own storage (bu kpa).",
+    "counting": "Base-5 system. No zero. '100' = 'one head'. '1 million' = 'in the midst of leaves.'",
+    "gender": "Genderless pronouns. Context/qualifying nouns specify gender.",
+    "belami": "Nephew had special rights in uncle's home - could take livestock freely.",
+    "jealousy": "Gendered terms: fonla (male), toake (female). Not interchangeable."
+  },
+  "integration": {
+    "unicode_required": [
+      "ɓ",
+      "Ɓ",
+      "ɗ",
+      "ɖ",
+      "ɔ",
+      "Ɔ",
+      "ɛ",
+      "Ɛ",
+      "ŋ",
+      "Ŋ",
+      "m̃",
+      "é",
+      "ã",
+      "ĩ",
+      "ũ",
+      "ɛ̃",
+      "ɔ̃"
+    ],
+    "font": "Must support Latin Extended + IPA Extensions Unicode blocks",
+    "bilingual_format": {
+      "primary": "English",
+      "target": "Mano",
+      "layout": "side_by_side",
+      "include_pronunciation": true,
+      "include_tones": true,
+      "audience": "Rural teachers, Nimba County, Liberia"
+    },
+    "dialect_handling": {
+      "default": "Upper/Middle Nimba",
+      "flag_variants": true,
+      "regions": [
+        "Upper Nimba",
+        "Middle Nimba",
+        "Lower Nimba",
+        "Guinea Mahwe"
+      ]
+    }
+  }
+}

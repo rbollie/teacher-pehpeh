@@ -1,0 +1,946 @@
+{
+  "subject": "Economics",
+  "grades": ["10", "11", "12"],
+  "source": "Liberia Ministry of Education - National Curriculum for Senior Secondary Schools",
+  "total_topics": 18,
+  "topics": [
+    {
+      "id": "econ_g10_s1_p1",
+      "grade": "10",
+      "semester": 1,
+      "period": "I",
+      "topic": "Nature and Scope of Economics",
+      "learning_outcomes": [
+        "Learners are able to explain the meaning and fundamental concepts of Economics.",
+        "Learners are able to distinguish the branches of Economics and analyze basic economic problems."
+      ],
+      "objectives": [
+        "Define and explain the origin of Economics",
+        "List and discuss the fundamental concepts in Economics",
+        "Relate the basic concepts of Economics to day-to-day experiences",
+        "Identify and discuss the basic problems in Economics",
+        "Categorize and explain the branches and types of Economic Systems"
+      ],
+      "content": [
+        "What is Economics — Definitions and origin of Economics",
+        "Fundamental Concepts of Economics: Scarcity, Choice, Scale of preference, Opportunity cost, Wants and Needs",
+        "Basic Economic Problems: What to produce, How to produce, For whom to produce",
+        "Branches of Economics — Micro and Macro Economics",
+        "Economic Systems: Capitalism/Free Enterprise, Socialism, Mixed Economy"
+      ],
+      "activities": [
+        "Give the origin and definitions of Economics",
+        "Exploration of basic Economics concepts — scarcity, choice, scale of preference, needs and wants and opportunity cost",
+        "Assign learners to research basic problems in Economics and types of Economic systems",
+        "Ask learners to debate the advantages and disadvantages of the different types of Economic systems",
+        "Discuss which system of Economics is practiced in Liberia"
+      ],
+      "primary_text": "Stanlake's Economics by S.J. Grant, 8th Edition",
+      "secondary_texts": [
+        "Essential Economics for Senior Secondary Schools (Cole Esan Ande), 5th Edition, 2017",
+        "Comprehensive Economics for Senior Secondary School (Johnson U. Anyaele, 1997)"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills"
+      ],
+      "assessment_strategies": [
+        "Presentation (Individual and Group)",
+        "Written Assignment (Individual and Group)",
+        "Quiz (Individual)",
+        "Written Test"
+      ]
+    },
+    {
+      "id": "econ_g10_s1_p2",
+      "grade": "10",
+      "semester": 1,
+      "period": "II",
+      "topic": "The Concepts of Demand and Supply",
+      "learning_outcomes": [
+        "Learners are able to analyze the behaviors of consumers (demand side) and producers (supply side) in the market place and make rational decisions that relate to their consumption and production of goods and services."
+      ],
+      "objectives": [
+        "Explain the meaning of demand and supply",
+        "Draw the demand and supply schedules",
+        "Derive the market demand and supply curves and establish the equilibrium or market price of a community",
+        "Identify and explain the factors affecting demand and supply of a commodity",
+        "Demonstrate the movement and shift of demand and supply curves",
+        "List and discuss the types of demand and supply for a commodity"
+      ],
+      "content": [
+        "Definitions: Demand and Supply laws",
+        "Demand and Supply schedules",
+        "Kinds of demand and supply",
+        "Relationship between supply and demand",
+        "Different graphs of demand and supply curves",
+        "Determination of equilibrium price and quantity",
+        "Determination of market clearing price, Shortages and Surplus",
+        "Movements and shift of demand and supply",
+        "Exceptional Demand Curve",
+        "Price ceiling and price floor"
+      ],
+      "activities": [
+        "Lead learners to discuss the laws of demand and supply and how they can apply the concept to consumption and production of goods and services",
+        "Group learners to analyze supply and demand based on factors and types",
+        "Assign learners to derive hypothetical supply and demand schedules to determine equilibrium price and quantity, changes in price at each level of demand and supply",
+        "Group learners to discuss the exceptional demand curves and give reasons for the abnormal behavior of the demand curve",
+        "Ask learners to discuss the concept of price floor and price ceiling and demonstrate its effects in the market"
+      ],
+      "primary_text": "Stanlake's Economics by S.J. Grant, 8th Edition",
+      "secondary_texts": [
+        "Essential Economics for Senior Secondary Schools (Cole Esan Ande), 5th Edition, 2017",
+        "Comprehensive Economics for Senior Secondary School (Johnson U. Anyaele, 1997)"
+      ],
+      "web_resources": [
+        "www.khanacademy.com",
+        "www.economist.com",
+        "www.investopedia.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills"
+      ],
+      "assessment_strategies": [
+        "Presentation (Individual and Group)",
+        "Written Assignment (Individual and Group)",
+        "Quiz (Individual)",
+        "Written Test"
+      ]
+    },
+    {
+      "id": "econ_g10_s1_p3",
+      "grade": "10",
+      "semester": 1,
+      "period": "III",
+      "topic": "The Factors of Production",
+      "learning_outcomes": [
+        "Learners are able to describe production and its types and the roles of each factor of production, examine the impact technological change can have in the production of goods and services and economic growth."
+      ],
+      "objectives": [
+        "Define Production and its types",
+        "Describe the factors of production",
+        "Derive the production possibility curve",
+        "Explain the relationship between technology change and economic growth",
+        "Discuss division of labor, the concept of specialization and the law of diminishing returns"
+      ],
+      "content": [
+        "Definition and types of production",
+        "Factors of production: Land, Labor, Capital, Entrepreneurship and Technology",
+        "Factor remunerations: Land — Rent, Labor — Wages/Salary, Capital — Interest, Entrepreneurship — Profit",
+        "Production Possibility Curve/Frontier",
+        "Concept of division of labor, specialization and law of diminishing returns"
+      ],
+      "activities": [
+        "Lead discussion to brainstorm on the meaning of production and its types",
+        "Facilitate discussion to identify the factors of production and their importance and corresponding remunerations",
+        "Ask learners to research production, specialization and the law of diminishing returns",
+        "Assign learners to derive the production possibility curve of a hypothetical firm producing two goods to determine: Attainable region, Unattainable region, Full employment, Underutilization of resources"
+      ],
+      "primary_text": "Stanlake's Economics by S.J. Grant, 8th Edition",
+      "secondary_texts": [
+        "Essential Economics for Senior Secondary Schools (Cole Esan Ande), 5th Edition, 2017",
+        "Comprehensive Economics for Senior Secondary School (Johnson U. Anyaele, 1997)"
+      ],
+      "web_resources": [
+        "www.khanacademy.com",
+        "www.economist.com",
+        "www.investopedia.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills"
+      ],
+      "assessment_strategies": [
+        "Presentation (Individual and Group)",
+        "Written Assignment (Individual and Group)",
+        "Quiz (Individual)",
+        "Written Test"
+      ]
+    },
+    {
+      "id": "econ_g10_s2_p4",
+      "grade": "10",
+      "semester": 2,
+      "period": "IV",
+      "topic": "The Theory of Consumer Behavior",
+      "learning_outcomes": [
+        "Learners are able to analyze and appreciate the concept of consumer behavior and demonstrate how utility works according to the laws of supply and demand.",
+        "Learners are able to demonstrate the ability to explain the indifference curve, budget line and consumer surplus."
+      ],
+      "objectives": [
+        "Explain the Concepts of Utility",
+        "Discuss the Laws of Diminishing Marginal Utility (DMU)",
+        "Demonstrate the relationship between Total Utility and Marginal Utility",
+        "Cite examples to demonstrate the Marginal Utility Theory",
+        "Draw and discuss the graphs of indifference curve and consumer budget line",
+        "Illustrate the concept of consumer surplus"
+      ],
+      "content": [
+        "The concept of utility: Total and marginal utility, Utility maximization, The laws of diminishing utility",
+        "The relationship between Total and Marginal Utility",
+        "Application of Marginal Utility Theory",
+        "Indifference curve and marginal rate of substitution",
+        "Characteristics of the indifference curve and budget line",
+        "The concept of consumer surplus"
+      ],
+      "activities": [
+        "Lead learners to discuss definition and concept of utility, utility maximization, total and marginal utility",
+        "Form groups to discuss the importance of consumer behavior relative to the consumer budget line and the indifference curve",
+        "Assign learners to use the hypothetical firm utility schedule to demonstrate the concept of total and marginal utility, consumer budget line and consumer surplus"
+      ],
+      "primary_text": "Stanlake's Economics by S.J. Grant, 8th Edition",
+      "secondary_texts": [
+        "Essential Economics for Senior Secondary Schools (Cole Esan Ande), 5th Edition, 2017",
+        "Comprehensive Economics for Senior Secondary School (Johnson U. Anyaele, 1997)"
+      ],
+      "web_resources": [
+        "www.khanacademy.com",
+        "www.economist.com",
+        "www.investopedia.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills"
+      ],
+      "assessment_strategies": [
+        "Presentation (Individual and Group)",
+        "Written Assignment (Individual and Group)",
+        "Quiz (Individual)",
+        "Written Test (Individual)"
+      ]
+    },
+    {
+      "id": "econ_g10_s2_p5",
+      "grade": "10",
+      "semester": 2,
+      "period": "V",
+      "topic": "Basic Tools of Economic Analysis",
+      "learning_outcomes": [
+        "Learners are able to demonstrate the skills of collecting, interpreting and analyzing economic data through percentage, ratios, tables, charts and graphical presentations.",
+        "Learners are able to interpret social data."
+      ],
+      "objectives": [
+        "Define basic Economic tools and state their use and importance",
+        "Construct a Frequency Distribution Table",
+        "Measurement of Central Tendency — Mean, Median and Mode of any given set of data"
+      ],
+      "content": [
+        "Definition of basic economics tools: Tables, charts and graphs",
+        "Frequency distribution: Line graph, histograms, bar charts, pie-charts, component bar charts, pictograms",
+        "Measurement of Central Tendency: Calculation of Arithmetic Mean, Median and Mode"
+      ],
+      "activities": [
+        "Ask learners to determine the usages and importance of the basic tools of economic analysis",
+        "Community survey activity: Interview 100 teenage girls and boys about contraceptive use, present findings using pie chart/graph, and process information to show implication of data",
+        "Ask learners to present the ages of learners in class (data); calculate the mean, median and mode and show the implication of the data"
+      ],
+      "primary_text": "Stanlake's Economics by S.J. Grant, 8th Edition",
+      "secondary_texts": [
+        "Essential Economics for Senior Secondary Schools (Cole Esan Ande), 5th Edition, 2017",
+        "Comprehensive Economics for Senior Secondary School (Johnson U. Anyaele, 1997)"
+      ],
+      "web_resources": [
+        "www.khanacademy.com",
+        "www.economist.com",
+        "www.investopedia.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills"
+      ],
+      "assessment_strategies": [
+        "Presentation (Individual and Group)",
+        "Written Assignment (Individual and Group)",
+        "Quiz (Individual)",
+        "Written Test (Individual)"
+      ]
+    },
+    {
+      "id": "econ_g10_s2_p6",
+      "grade": "10",
+      "semester": 2,
+      "period": "VI",
+      "topic": "Types of Business Organizations",
+      "learning_outcomes": [
+        "Learners are able to demonstrate understanding of how businesses are established and operated."
+      ],
+      "objectives": [
+        "Define Sole-proprietorship, Partnership, Corporation, Joint-stock companies, Cooperatives, Statutory corporation, and Joint-ventures",
+        "State the main features of each type of business organization",
+        "Explain the advantages and disadvantages of Sole-proprietorship, Partnership and Corporation",
+        "Explain the sources of capital for each type of business organization"
+      ],
+      "content": [
+        "Definition of: Sole-proprietorship, Partnership, Corporation, Joint-stock companies, Cooperatives, Statutory corporation, and Joint-ventures",
+        "Main features of each business organization type",
+        "Advantages and Disadvantages of each type",
+        "Sources of funding for each type",
+        "Business enterprise policy on: Privatization, Commercialization, Indigenization, Nationalization"
+      ],
+      "activities": [
+        "Lead class discussion on the various types of businesses",
+        "Group learners to do presentations on the advantages and disadvantages of the types of business organizations",
+        "Assign tasks to individual learners to research the various sources of funding for sole-proprietorship, partnership and corporation",
+        "Ask learners to research the impact of Privatization, Commercialization, Indigenization and Nationalization policies on the Liberian economy"
+      ],
+      "primary_text": "Stanlake's Economics by S.J. Grant, 8th Edition",
+      "secondary_texts": [
+        "Essential Economics for Senior Secondary Schools (Cole Esan Ande), 5th Edition, 2017",
+        "Comprehensive Economics for Senior Secondary School (Johnson U. Anyaele, 1997)"
+      ],
+      "web_resources": [
+        "www.khanacademy.com",
+        "www.economist.com",
+        "www.investopedia.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills"
+      ],
+      "assessment_strategies": [
+        "Presentation (Individual and Group)",
+        "Written Assignment (Individual and Group)",
+        "Quiz (Individual)",
+        "Written Test"
+      ]
+    },
+    {
+      "id": "econ_g11_s1_p1",
+      "grade": "11",
+      "semester": 1,
+      "period": "I",
+      "topic": "Price Determination",
+      "learning_outcomes": [
+        "Learners are able to demonstrate understanding of market forces of supply and demand.",
+        "Analyze price elasticity of demand and supply, and determine how changes in price will affect total revenue."
+      ],
+      "objectives": [
+        "Identify and explain the interactions between supply and demand in determining the market price",
+        "Analyze the definitions of elasticity of demand and supply",
+        "Examine the price elasticity of demand and determine whether demand is elastic or inelastic",
+        "Calculate the price elasticity of demand using information from a demand curve",
+        "Analyze how changes in the price of a good affect total revenue and total expenditure",
+        "Compare cross-price elasticity of demand and income elasticity of demand",
+        "Discuss the price elasticity of supply",
+        "Calculate the price elasticity of supply using information from a supply curve"
+      ],
+      "content": [
+        "Determination of price by supply and demand: Equilibrium price and quantity, Shortage and Surplus, Changes in Equilibrium",
+        "Definition of: Price elasticity of demand and supply, Income elasticity, Inelasticity, Cross price-elasticity",
+        "Calculation of: Price elasticity of demand and supply, Income elasticity of demand and cross-elasticity",
+        "Calculation of: Price elasticity of demand and total revenue",
+        "Price elasticity of supply and total revenue",
+        "Determinants of price elasticity of demand and supply"
+      ],
+      "activities": [
+        "Group learners to identify and distinguish: Price elasticity of demand and supply, Income elasticity, Inelasticity, Cross price-elasticity",
+        "Pair learners to derive the formula for Elasticity and use available data to calculate Price elasticity of demand and supply, Income elasticity, Income Inelasticity, Cross price-elasticity",
+        "Pair learners to calculate the elasticity of a good based on its determinants",
+        "Ask individual learners to visit a local business center to investigate revenue (sales) and profit"
+      ],
+      "primary_text": "Stanlake's Economics by S.J. Grant, 8th Edition",
+      "secondary_texts": [
+        "Essential Economics for Senior Secondary Schools (Cole Esan Ande), 5th Edition, 2017",
+        "Comprehensive Economics for Senior Secondary School (Johnson U. Anyaele, 1997)"
+      ],
+      "web_resources": [
+        "www.khanacademy.com",
+        "www.economist.com",
+        "www.investopedia.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills"
+      ],
+      "assessment_strategies": [
+        "Presentation (Individual and Group)",
+        "Written Assignment (Individual and Group)",
+        "Quiz (Individual)",
+        "Written Test"
+      ]
+    },
+    {
+      "id": "econ_g11_s1_p2",
+      "grade": "11",
+      "semester": 1,
+      "period": "II",
+      "topic": "Market Structures",
+      "learning_outcomes": [
+        "Learners are able to describe the various types of markets and demonstrate how prices and total revenue are determined in those markets."
+      ],
+      "objectives": [
+        "Explain the concept of market and distinguish it from the market place",
+        "Distinguish between perfect and imperfect markets",
+        "Compare and contrast perfect competitive and monopolistic markets",
+        "Draw graphs to illustrate price and quantity determination under Perfect competition, monopoly and oligopoly"
+      ],
+      "content": [
+        "Definitions and Features of market types: Perfect Market and Imperfect market, Monopolistic market, Oligopoly market",
+        "Advantages and Disadvantages of market types: Perfect competitive market, monopoly and oligopoly markets",
+        "Comparison and contrast of Perfect competitive market and Monopolistic market",
+        "Graphic illustrations of: Perfect competitive market and monopoly"
+      ],
+      "activities": [
+        "Group learners to research the features of various market structures",
+        "Pair learners into teams to discuss and illustrate advantages and disadvantages of the types of market structures",
+        "Assign individual learners tasks to compare and contrast perfect competitive market and monopolistic market"
+      ],
+      "primary_text": "Stanlake's Economics by S.J. Grant, 8th Edition",
+      "secondary_texts": [
+        "Essential Economics for Senior Secondary Schools (Cole Esan Ande), 5th Edition, 2017",
+        "Comprehensive Economics for Senior Secondary School (Johnson U. Anyaele, 1997)"
+      ],
+      "web_resources": [
+        "www.khanacademy.com",
+        "www.economist.com",
+        "www.investopedia.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills"
+      ],
+      "assessment_strategies": [
+        "Presentation (Individual and Group)",
+        "Written Assignment (Individual and Group)",
+        "Quiz (Individual)",
+        "Written Test"
+      ]
+    },
+    {
+      "id": "econ_g11_s1_p3",
+      "grade": "11",
+      "semester": 1,
+      "period": "III",
+      "topic": "The Theory of Production and Distribution",
+      "learning_outcomes": [
+        "Learners are able to demonstrate skills in analyzing the processes of production and distribution of goods and services."
+      ],
+      "objectives": [
+        "Explain the theory of production and distribution",
+        "Distinguish the various types of production",
+        "Determine the types of goods and wealth",
+        "Contrast firms, plant and industry",
+        "Distinguish fixed and variable inputs",
+        "Categorize the channels of distribution and their functions (producer, wholesaler, retailer)",
+        "Discuss the problems of Distribution and Marketing of Commodities in Liberia"
+      ],
+      "content": [
+        "The theory of Production and Distribution: Meaning of production, types of production, Classification of goods and description of the concept of wealth in Liberia",
+        "Differentiation of: firm, plant, industry, Fixed inputs, Variable inputs",
+        "Exploration of the distinguishing features of: Producer, Wholesaler, Retailer",
+        "Relating the concepts of producer, wholesaler, retailer and marketing practices in Liberia"
+      ],
+      "activities": [
+        "Lead discussions on the classification of goods and services, and understanding of the concepts of wealth in Liberian setting",
+        "Form groups to find distinguishing features of firm, plant and industry",
+        "Form pairs of learners to distinguish between Fixed inputs and Variable inputs",
+        "Individual learners to distinguish among Producer, wholesaler and retailer"
+      ],
+      "primary_text": "Stanlake's Economics by S.J. Grant, 8th Edition",
+      "secondary_texts": [
+        "Essential Economics for Senior Secondary Schools (Cole Esan Ande), 5th Edition, 2017",
+        "Comprehensive Economics for Senior Secondary School (Johnson U. Anyaele, 1997)"
+      ],
+      "web_resources": [
+        "www.khanacademy.com",
+        "www.economist.com",
+        "www.investopedia.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills"
+      ],
+      "assessment_strategies": [
+        "Presentation (Individual and Group)",
+        "Written Assignment (Individual and Group)",
+        "Quiz (Individual)",
+        "Written Test"
+      ]
+    },
+    {
+      "id": "econ_g11_s2_p4",
+      "grade": "11",
+      "semester": 2,
+      "period": "IV",
+      "topic": "Population and Labor Market",
+      "learning_outcomes": [
+        "Learners are able to analyze population dynamics and its influence on economic growth and development."
+      ],
+      "objectives": [
+        "Define population and discuss the factors that influence population dynamics",
+        "Describe population size and its implication on the economy",
+        "State and critique the Malthusian theory of population",
+        "Analyze the links between population and the labor market",
+        "Explain population census, types of population census, importance and problems"
+      ],
+      "content": [
+        "Definition of: Population, Population census",
+        "Types of population census: De facto population census, De jure Population census",
+        "Importance of population census",
+        "Characteristics and problems associated with population census",
+        "Determinants of population size and growth: Birth rate, Death rate, Migration",
+        "Calculation of population density",
+        "Malthusian theory of population growth",
+        "Geographical distribution, age, sex and occupation distribution of population",
+        "Optimum population, under-population and over-population"
+      ],
+      "activities": [
+        "Lead discussion on the meaning of population and population census",
+        "Group learners to outline the types of population census according to the given features",
+        "Individual learners assign task to do head count of family members by gender and age distribution as well as determine dependence age and those of working age",
+        "Pair learners to respond to: What will happen to the labor force that is making significant contribution to national development, if they are struck with pandemic such as HIV/AIDS or other diseases — Give the social economic and development impact it has on the country, say Liberia"
+      ],
+      "primary_text": "Stanlake's Economics by S.J. Grant, 8th Edition",
+      "secondary_texts": [
+        "Essential Economics for Senior Secondary Schools (Cole Esan Ande), 5th Edition, 2017",
+        "Comprehensive Economics for Senior Secondary School (Johnson U. Anyaele, 1997)"
+      ],
+      "web_resources": [
+        "www.khanacademy.com",
+        "www.economist.com",
+        "www.investopedia.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills"
+      ],
+      "assessment_strategies": [
+        "Presentation (Individual and Group)",
+        "Written Assignment (Individual and Group)",
+        "Quiz (Individual)",
+        "Written Test"
+      ]
+    },
+    {
+      "id": "econ_g11_s2_p5",
+      "grade": "11",
+      "semester": 2,
+      "period": "V",
+      "topic": "Theory of Cost and Revenue",
+      "learning_outcomes": [
+        "Learners are able to analyze the reasons business firms make decisions on production, profit and losses."
+      ],
+      "objectives": [
+        "Demonstrate understanding of the meaning of costs and revenue",
+        "Distinguish between the various cost concepts",
+        "Analyze different costs and revenue curves",
+        "Calculate costs and revenue"
+      ],
+      "content": [
+        "Definitions of Cost and Revenue: Cost of Production and Revenue, Economist's and Accountant's view of cost, Explicit and Implicit cost",
+        "Cost Concepts: Fixed, Variable and Marginal cost; Average and Total cost; Short run and Long run cost",
+        "Derivation of cost and Revenue curves: Cost tables, Cost curves, Calculations of cost and Revenue"
+      ],
+      "activities": [
+        "Lead discussion to brainstorm on the definitions of cost and revenue",
+        "Group learners to demonstrate the cost of production and revenue concepts",
+        "Group learners to debate using the concepts of opportunity cost to discuss the effects of early marriage as against the benefit of Education relative to social and economic development of the individual — Cite regions or sections that are still practicing early marriage in Liberia (Girls vs Boys)",
+        "Group learners to formulate hypothetical firm cost schedule to calculate: Average cost, variable cost, marginal cost, total fixed cost, total variable cost, and total average cost"
+      ],
+      "primary_text": "Stanlake's Economics by S.J. Grant, 8th Edition",
+      "secondary_texts": [
+        "Essential Economics for Senior Secondary Schools (Cole Esan Ande), 5th Edition, 2017",
+        "Comprehensive Economics for Senior Secondary School (Johnson U. Anyaele, 1997)"
+      ],
+      "web_resources": [
+        "www.khanacademy.com",
+        "www.economist.com",
+        "www.investopedia.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills"
+      ],
+      "assessment_strategies": [
+        "Presentation (Individual and Group)",
+        "Written Assignment (Individual and Group)",
+        "Quiz (Individual)",
+        "Written Test"
+      ]
+    },
+    {
+      "id": "econ_g11_s2_p6",
+      "grade": "11",
+      "semester": 2,
+      "period": "VI",
+      "topic": "The Role of Agriculture in Economic Development",
+      "learning_outcomes": [
+        "Learners are able to analyze and appreciate the role and importance of agriculture in social economic development of a nation."
+      ],
+      "objectives": [
+        "Identify and discuss the major agriculture products in Liberia and West African Countries, and major export and import products/crops",
+        "Analyze the factors that hamper the agriculture sector in Liberia and elsewhere in West Africa",
+        "Explain the importance of agriculture products to economic development using Liberia as a case",
+        "Formulate recommendations that will enhance government agriculture policies"
+      ],
+      "content": [
+        "Agriculture products in Liberia/West Africa: Cash crops, Food crops, Livestock, Fisheries",
+        "Challenges of Agriculture production in Liberia/West Africa: Land, Subsidy, Storage, Education, Infrastructure (Roads), Technology"
+      ],
+      "activities": [
+        "Lead learners to brainstorm and discuss the importance of agriculture to national development — check for participation and inclusiveness",
+        "Ask learners to discuss the challenges faced in the Agriculture sector of Liberia and recommend how these challenges can be alleviated"
+      ],
+      "primary_text": "Stanlake's Economics by S.J. Grant, 8th Edition",
+      "secondary_texts": [
+        "Essential Economics for Senior Secondary Schools (Cole Esan Ande), 5th Edition, 2017",
+        "Comprehensive Economics for Senior Secondary School (Johnson U. Anyaele, 1997)"
+      ],
+      "web_resources": [
+        "www.khanacademy.com",
+        "www.economist.com",
+        "www.investopedia.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills"
+      ],
+      "assessment_strategies": [
+        "Presentation (Individual and Group)",
+        "Written Assignment (Individual and Group)",
+        "Quiz (Individual)",
+        "Written Test"
+      ]
+    },
+    {
+      "id": "econ_g12_s1_p1",
+      "grade": "12",
+      "semester": 1,
+      "period": "I",
+      "topic": "Economic Development and Planning (The Liberian Economy)",
+      "learning_outcomes": [
+        "Learners are able to demonstrate the concept of economic development and appreciate the important role planning plays in the development of a nation."
+      ],
+      "objectives": [
+        "Explain the concept of Economic Development and Planning",
+        "Distinguish between Economic growth and Economic Development",
+        "Explain the features of underdeveloped, developing and developed economy",
+        "Analyze the concept of Liberian Traditional Economy",
+        "Determine the factors which influence economic development in Liberia and West African Countries"
+      ],
+      "content": [
+        "Overview of the concepts of Economic Development and Planning; Economic Growth and Economic Development",
+        "Features of underdeveloped, developing and developed economy",
+        "Concept of Liberian Traditional Economy",
+        "Factors which influence economic development in Liberia and West African Countries"
+      ],
+      "activities": [
+        "Lead learners to discuss Economic Development and Planning; Economic Growth and Economic Development",
+        "Ask learners to research and chart the features of underdeveloped, developing and developed economy",
+        "Group learners to research and debate the Concept of Liberian Traditional Economy",
+        "Pair learners to research the factors which influence economic development in Liberia and West African Countries and propose recommendations"
+      ],
+      "primary_text": "Stanlake's Economics by S.J. Grant, 8th Edition",
+      "secondary_texts": [
+        "Essential Economics for Senior Secondary Schools (Cole Esan Ande), 5th Edition, 2017",
+        "Comprehensive Economics for Senior Secondary School (Johnson U. Anyaele, 1997)"
+      ],
+      "web_resources": [
+        "www.khanacademy.com",
+        "www.economist.com",
+        "www.investopedia.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills"
+      ],
+      "assessment_strategies": [
+        "Presentation (Individual and Group)",
+        "Written Assignment (Individual and Group)",
+        "Quiz (Individual)",
+        "Written Test"
+      ]
+    },
+    {
+      "id": "econ_g12_s1_p2",
+      "grade": "12",
+      "semester": 1,
+      "period": "II",
+      "topic": "Industrialization of the Liberian Economy and Concepts of National Income",
+      "learning_outcomes": [
+        "Learners are able to determine how decisions made by policy makers can influence economic development and growth of a country."
+      ],
+      "objectives": [
+        "Analyze the concept of industrialization and discuss how it is related to Liberia's economic development",
+        "Analyze the process involved in industrialization",
+        "Determine measures of the country's economic activities",
+        "Outline the methods used to calculate economic activities in the economy",
+        "Discuss the limitations/pitfalls of calculating national income",
+        "Suggest policy options that could improve the economy of Liberia"
+      ],
+      "content": [
+        "Meaning of: Industrialization, Industrialization policies, Localization of industries",
+        "Role of Industrialization in economic development: Optimum Utilization of Scarce Resources, Provision of Machinery to increase Agriculture productivity",
+        "Measuring national income: GNP, NNP, GDP per capita",
+        "Uses of national income statistics",
+        "Circular flow diagram of income and expenditure",
+        "Methods of calculating national income",
+        "Advantages and limitations of GNP, Per Capita Income calculation"
+      ],
+      "activities": [
+        "Group learners to research and debate industrialization in the context of Liberia and other countries in West Africa",
+        "Organize a field trip with learners to an industrial site and allow learners to observe the processes of production and distribution and present report on their findings",
+        "Facilitate discussions to explore the meaning and importance of National Income",
+        "Pair learners to research and determine the methods and measures of calculation of National Income",
+        "Pair learners to research and determine the limitations of National Income",
+        "Group learners to identify major development projects financed by national income to compare government expenditure on each project and how these projects have impacted the lives of Liberians",
+        "Group assignment: Demonstrate linkages of the different actors in the economy — Circular Flow Diagram"
+      ],
+      "primary_text": "Stanlake's Economics by S.J. Grant, 8th Edition",
+      "secondary_texts": [
+        "Essential Economics for Senior Secondary Schools (Cole Esan Ande), 5th Edition, 2017",
+        "Comprehensive Economics for Senior Secondary School (Johnson U. Anyaele, 1997)"
+      ],
+      "web_resources": [
+        "www.khanacademy.com",
+        "www.economist.com",
+        "www.investopedia.com",
+        "www.ukessays.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills"
+      ],
+      "assessment_strategies": [
+        "Presentation (Individual and Group)",
+        "Written Assignment (Individual and Group)",
+        "Report Writing (Individual and Group)",
+        "Quiz (Individual)",
+        "Written Test"
+      ]
+    },
+    {
+      "id": "econ_g12_s1_p3",
+      "grade": "12",
+      "semester": 1,
+      "period": "III",
+      "topic": "Money, Banking and the Financial Institutions",
+      "learning_outcomes": [
+        "Learners are able to determine the importance of money and the role banking institutions play in the economy."
+      ],
+      "objectives": [
+        "Analyze and discuss the origin, meaning, functions and types of money",
+        "Catalogue and discuss the characteristics of money",
+        "Analyze the types and functions of banks and other financial institutions",
+        "Catalogue and discuss inflation, types, causes and how it can be controlled",
+        "Demonstrate the relations between inflation and unemployment"
+      ],
+      "content": [
+        "Money: Definition and origin (development of), Characteristics and functions, Value for money and price",
+        "Functions of Banks/Financial Institutions: Central Bank, Commercial Banks, Merchant Banks, Development Banks, Saving Banks, Insurance companies, Building societies",
+        "Definition of: Inflation, Unemployment",
+        "Types of inflation and unemployment: Demand pull, Cost push inflation, Structural unemployment, Cyclical unemployment, Frictional unemployment"
+      ],
+      "activities": [
+        "Lead learners to brainstorm and discuss the definition, origin, characteristics, and the functions of money",
+        "Group learners to research: Central Bank, Commercial Banks, Merchant Banks, Development Banks, Saving Banks, Insurance companies and Building societies",
+        "Organize learners into two groups to debate the merits and demerits of inflation and unemployment in the economy",
+        "Pair learners to research and discuss: Demand pull, Cost push inflation, Structural unemployment, Cyclical unemployment, Frictional unemployment"
+      ],
+      "primary_text": "Stanlake's Economics by S.J. Grant, 8th Edition",
+      "secondary_texts": [
+        "Essential Economics for Senior Secondary Schools (Cole Esan Ande), 5th Edition, 2017",
+        "Comprehensive Economics for Senior Secondary School (Johnson U. Anyaele, 1997)"
+      ],
+      "web_resources": [
+        "www.khanacademy.com",
+        "www.economist.com",
+        "www.investopedia.com",
+        "www.ukessays.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills"
+      ],
+      "assessment_strategies": [
+        "Presentation (Individual and Group)",
+        "Written Assignment (Individual and Group)",
+        "Quiz (Individual)",
+        "Written Test"
+      ]
+    },
+    {
+      "id": "econ_g12_s2_p4",
+      "grade": "12",
+      "semester": 2,
+      "period": "IV",
+      "topic": "International Trade and Balance of Payments",
+      "learning_outcomes": [
+        "Learners can utilize their skills and knowledge to analyze the effects of policies on international trade and its benefits to the economic development of the nation."
+      ],
+      "objectives": [
+        "Discuss the term International Trade",
+        "Elaborate on acceptable reasons for trade between nations",
+        "Determine and discuss factors that are involved in international trade",
+        "Analyze the reasons for the variance in currencies among countries",
+        "Discuss the concept of Legal tender"
+      ],
+      "content": [
+        "Definition: International Trade, Domestic Trade, Regional Trade, Terms of Trade, Balance of Trade",
+        "Features/Reasons for International Trade",
+        "Differences between domestic and International trade",
+        "The law of comparative cost: Free Trade and protection (UNCTAD), Law of comparative and Absolute Advantage",
+        "Balance of Payments (BOP): The use of foreign currency, Disequilibrium/Adjustment, Correcting balance of payments, Devaluation and Depreciation of currency, Balance of Payment deficit and surplus"
+      ],
+      "activities": [
+        "Group learners to discuss: International Trade, Domestic Trade, Regional Trade, Terms of Trade, Balance of Trade",
+        "Pair learners to research: Importance of international trade in relationship to the development of the country, Advantages and disadvantages of international trade, Comparative and absolute advantage of international trade"
+      ],
+      "primary_text": "Stanlake's Economics by S.J. Grant, 8th Edition",
+      "secondary_texts": [
+        "Essential Economics for Senior Secondary Schools (Cole Esan Ande), 5th Edition, 2017",
+        "Comprehensive Economics for Senior Secondary School (Johnson U. Anyaele, 1997)"
+      ],
+      "web_resources": [
+        "www.khanacademy.com",
+        "www.economist.com",
+        "www.investopedia.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills"
+      ],
+      "assessment_strategies": [
+        "Presentation (Individual and Group)",
+        "Written Assignment (Individual and Group)",
+        "Quiz (Individual)",
+        "Written Test"
+      ]
+    },
+    {
+      "id": "econ_g12_s2_p5",
+      "grade": "12",
+      "semester": 2,
+      "period": "V",
+      "topic": "Public Finance and International Organizations",
+      "learning_outcomes": [
+        "Learners are able to explain government fiscal policy and appreciate how it is used to provide better services that improve the livelihood of the citizenry."
+      ],
+      "objectives": [
+        "Determine what public finance is and how it is important to public expenditure",
+        "Explain government fiscal measures (taxation and expenditure)",
+        "Explain the role of taxation in the economy",
+        "Illustrate graphically the incidence of taxation",
+        "Catalogue and discuss the roles of major international economics organizations"
+      ],
+      "content": [
+        "Meaning of Public finance: Fiscal policy and its objectives, Sources of Government Revenue (Taxation), Economic Effect of taxation",
+        "Types of taxes: Direct and Indirect Taxes",
+        "Advantages and Disadvantages of direct and Indirect Taxes",
+        "Tax incidence, Elasticity of Demand/Supply and Taxation",
+        "System of taxation: Progressive tax, Proportional tax, Regressive tax",
+        "International Economic Organizations: IMF, IBRD, IFC, ADB, OPEC, ECA, UNCTAD, AfDB"
+      ],
+      "activities": [
+        "Group learners to discuss the meaning of public finance and its objectives",
+        "Assign small groups of learners to business institutions that generate revenues and are paying taxes; let learners examine the types and amount of taxes paid and revenue earned in a fiscal year and report to class",
+        "Pair learners to discuss: Elasticity of demand/supply and taxation, Indicate tax incidence (burden of tax), Tax systems — distinguish and analyze the effects of tax on a family income, business firm and government",
+        "Assign individual learners to develop a research paper on international economic organizations and indicate how Liberia has benefited from: IMF, IBRD, IFC, ADB, OPEC, ECA, UNCTAD, AfDB"
+      ],
+      "primary_text": "Stanlake's Economics by S.J. Grant, 8th Edition",
+      "secondary_texts": [
+        "Essential Economics for Senior Secondary Schools (Cole Esan Ande), 5th Edition, 2017",
+        "Comprehensive Economics for Senior Secondary School (Johnson U. Anyaele, 1997)"
+      ],
+      "web_resources": [
+        "www.khanacademy.com",
+        "www.economist.com",
+        "www.investopedia.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills"
+      ],
+      "assessment_strategies": [
+        "Presentation (Individual and Group)",
+        "Written Assignment (Individual and Group)",
+        "Quiz (Individual)",
+        "Written Test"
+      ]
+    },
+    {
+      "id": "econ_g12_s2_p6",
+      "grade": "12",
+      "semester": 2,
+      "period": "VI",
+      "topic": "Economic Integration and Natural Resources",
+      "learning_outcomes": [
+        "Learners are able to appreciate the value of regional cooperation and trade."
+      ],
+      "objectives": [
+        "Determine the rationale for Economic Integration in the sub-region",
+        "Discuss and analyze the concept of Economic integration and its impact on regional trade",
+        "Catalogue the advantages and disadvantages of Economic Integration",
+        "Discuss the stages of Economic Integration",
+        "Compare natural resources of Liberia to countries in the sub-region"
+      ],
+      "content": [
+        "Definition of Economic Integration and key concepts: Trade benefits, Employment, Political cooperation, Market Expansion, Technology sharing, Cross-border Investment flows",
+        "Stages of Economic Integration: Preferential trading area, Free trading area, Customs union, Common market, Economic and monetary union and fiscal policy harmonization",
+        "Advantages and Disadvantages of Economic Integration",
+        "Natural resources of Liberia/Sub-region"
+      ],
+      "activities": [
+        "Group learners to research and discuss Economics Integration concepts: Trade benefits, Employment, Political cooperation, Market expansion, Technology sharing, Investment flow — observe learner participation and interactions",
+        "Assign learners to research the stages of Economic Integration and determine whether it has impacted the economy of Liberia. Let learners analyze the advantages and disadvantages of regional trade and cooperation"
+      ],
+      "primary_text": "Stanlake's Economics by S.J. Grant, 8th Edition",
+      "secondary_texts": [
+        "Essential Economics for Senior Secondary Schools (Cole Esan Ande), 5th Edition, 2017",
+        "Comprehensive Economics for Senior Secondary School (Johnson U. Anyaele, 1997)"
+      ],
+      "web_resources": [
+        "www.khanacademy.com",
+        "www.economist.com",
+        "www.investopedia.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills"
+      ],
+      "assessment_strategies": [
+        "Presentation (Individual and Group)",
+        "Written Assignment (Individual and Group)",
+        "Quiz (Individual)",
+        "Written Test"
+      ]
+    }
+  ]
+}

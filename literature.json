@@ -1,0 +1,774 @@
+{
+  "subject": "Literature in English",
+  "grade_range": "10-12",
+  "source": "Liberia Ministry of Education National Curriculum",
+  "total_topics": 18,
+  "topics": [
+    {
+      "id": "LIT-G10-S1-P1",
+      "grade": 10,
+      "semester": 1,
+      "period": 1,
+      "topic": "Figurative Expressions and Shakespearean Drama",
+      "objectives": [
+        "Discuss literary devices in a given drama",
+        "Identify various themes in a drama with textual evidence",
+        "Identify the various characters and their roles",
+        "Identify the major and minor conflicts in the drama"
+      ],
+      "content": [
+        "Elements of Literature",
+        "Literary Devices: Metaphor, Simile, Personification",
+        "Main issues running through the drama",
+        "Major and minor characters",
+        "Kinds of drama: Tragedy, Comedy, Tragic-comedy",
+        "Identifying different themes"
+      ],
+      "activities": [
+        "Class discussion on figurative expressions (Metaphor, Simile, Personification)",
+        "Assign learners to read selected Shakespearean drama",
+        "Group learners to discuss main issues running through the drama",
+        "Learners to dramatize the play",
+        "Assign learners to write their own play"
+      ],
+      "primary_texts": [
+        "A Midsummer Night's Dream by William Shakespeare",
+        "Let Me Die Alone by John K. Kargbo",
+        "A Government Driver On His Retirement by Onu Chibuike"
+      ],
+      "supplementary_resources": [
+        "Prentice Hall Literature",
+        "Listen to the Story Teller — A Critical Thinking Liberian Anthology (T. Michael Weah & Llord Aidoo)"
+      ],
+      "competencies": [
+        "Creativity and Innovation Skills",
+        "Effective Communication Skills",
+        "Digital Skills"
+      ],
+      "assessment": ["Quizzes", "Class work", "Homework", "Dramatization"]
+    },
+    {
+      "id": "LIT-G10-S1-P2",
+      "grade": 10,
+      "semester": 1,
+      "period": 2,
+      "topic": "Figurative Expressions and Shakespearean Drama (Continued)",
+      "objectives": [
+        "Interpret Shakespearean drama",
+        "Distinguish various types of drama",
+        "Outline the traits and roles of characters in the drama",
+        "Utilize figurative expressions in a given work of arts"
+      ],
+      "content": [
+        "Various types of drama",
+        "The traits and roles of characters in a drama",
+        "Shakespearean Drama: Midsummer Night's Dream",
+        "Figurative expressions",
+        "Drama writing"
+      ],
+      "activities": [
+        "Discuss types of drama, traits and roles of characters in the drama",
+        "Assign learners to read selected Shakespearean drama",
+        "Assign learners to identify and discuss figurative expressions as used in the drama",
+        "Group learners to write their own drama"
+      ],
+      "primary_texts": [
+        "A Midsummer Night's Dream by William Shakespeare",
+        "The Lion and the Jewel by Wole Soyinka",
+        "Black Woman by L.S. Senghor",
+        "Bats by D.H. Lawrence"
+      ],
+      "supplementary_resources": [
+        "Prentice Hall Literature"
+      ],
+      "competencies": [
+        "Effective Communication Skills",
+        "Analytical Skills",
+        "Creative and Innovation Skills",
+        "Digital Skills"
+      ],
+      "assessment": ["Quizzes", "Classwork", "Homework", "Group Dramatization"]
+    },
+    {
+      "id": "LIT-G10-S1-P3",
+      "grade": 10,
+      "semester": 1,
+      "period": 3,
+      "topic": "African Drama",
+      "objectives": [
+        "Sequence drama by scenes and acts",
+        "Explain Drama Exposition",
+        "Distinguish the different types of drama",
+        "Develop drama writing skills",
+        "Relate events in a drama to real life situations"
+      ],
+      "content": [
+        "African Drama",
+        "Literary devices: Exposition, Plot, Conflict, Climax, Resolution, Tragic Hero, Tragic Flaw, Protagonist, Antagonist, Irony, Dialogue",
+        "Comedy, Tragedy, Tragic-comedy, Melodrama",
+        "Similarities and differences in drama",
+        "Play writing and Acting"
+      ],
+      "activities": [
+        "Assign learners to read selected African drama",
+        "Divide learners into groups to brainstorm on the similarities and differences of the different types of drama",
+        "Learners discuss drama exposition and critically answer questions on selected African drama",
+        "Assign learners to identify and discuss Literary devices",
+        "Divide learners in pairs to write their own plays and act out the best play in class"
+      ],
+      "primary_texts": [
+        "The Lion and the Jewel by Wole Soyinka",
+        "Second Class Citizen by Buchi Emecheta",
+        "The Rock by Darlington Johnson",
+        "The Definition of Love by Andrew Marvell"
+      ],
+      "supplementary_resources": [
+        "Prentice Hall Literature",
+        "Listen to the Story Teller — A Critical Thinking Liberian Anthology (T. Michael Weah & Llord Aidoo)"
+      ],
+      "competencies": [
+        "Effective Communication Skills",
+        "Analytical Skills",
+        "Organizational Skills",
+        "Digital Skills"
+      ],
+      "assessment": ["Quizzes", "Classwork", "Homework", "Dramatization"]
+    },
+    {
+      "id": "LIT-G10-S2-P4",
+      "grade": 10,
+      "semester": 2,
+      "period": 4,
+      "topic": "African Prose",
+      "objectives": [
+        "Interpret different types of Prose",
+        "Appreciate Prose as a work of art",
+        "Analyze Prose using Literary devices"
+      ],
+      "content": [
+        "Types of Prose: Fictional Prose, Non-fictional Prose, Heroic Prose"
+      ],
+      "activities": [
+        "Group learners to discuss and interpret different types of prose",
+        "Assign learners to read selected African Prose and present report",
+        "Learners discuss and analyze Prose using figurative expression"
+      ],
+      "primary_texts": [
+        "Second Class Citizen by Buchi Emecheta",
+        "The Invisible Man by Ralph Ellison",
+        "Caged Bird by Maya Angelou",
+        "The Song Of Women Of My Land by Oumar Farouk Sesay"
+      ],
+      "supplementary_resources": [
+        "Village Son by Dr. Kandakai",
+        "The Spot by T. Michael Weah"
+      ],
+      "competencies": [
+        "Analytical Skills",
+        "Organizational Skills",
+        "Effective Communication Skills",
+        "Digital Skills"
+      ],
+      "assessment": ["Quizzes", "Classwork", "Homework", "Book Report"]
+    },
+    {
+      "id": "LIT-G10-S2-P5",
+      "grade": 10,
+      "semester": 2,
+      "period": 5,
+      "topic": "African Prose (Continued)",
+      "objectives": [
+        "Outline subject matter, conflict, setting, moral, cultural values and implementations in selected African Prose",
+        "Utilize figurative expressions",
+        "Summarize African Prose in the form of book reports",
+        "Analyze different kinds of writings",
+        "Make inferences of the point of view of a novel"
+      ],
+      "content": [
+        "African Prose",
+        "Figurative expression",
+        "Elements of Literature",
+        "Point of view from which a Prose is written",
+        "Effective book report"
+      ],
+      "activities": [
+        "Guide learners to read African Prose",
+        "Discuss the use of figurative expressions",
+        "Discuss the format of a book report; have learners write book report",
+        "Learners write Prose using figures of speech to create images",
+        "Discuss the writing process of different kinds of writings; have learners prepare essay and descriptions",
+        "Discuss the point of view from which a Prose is written",
+        "Write a book report"
+      ],
+      "primary_texts": [
+        "Unexpected Joy at Dawn by Alex Agyei-Agyiri",
+        "Fences by August Wilson",
+        "The Leader and the Lead by Nugi Osundare",
+        "Journey of the Magi by T.S. Eliot"
+      ],
+      "supplementary_resources": [
+        "The Rain and the Night by Wilton Sankawulo"
+      ],
+      "competencies": [
+        "Creativity and Innovation Skills",
+        "Effective Communication Skills",
+        "Digital Skills"
+      ],
+      "assessment": ["Quizzes", "Classwork", "Homework", "Book Report"]
+    },
+    {
+      "id": "LIT-G10-S2-P6",
+      "grade": 10,
+      "semester": 2,
+      "period": 6,
+      "topic": "Drama and Prose (Review)",
+      "objectives": [
+        "Analyze African Drama and Prose based on theme, mood, setting and literary devices",
+        "Discuss the kinds of Drama and Prose"
+      ],
+      "content": [
+        "Elements of drama and prose: Theme, Setting, Mood, Plot, Conflict, Climax, Literary devices"
+      ],
+      "activities": [
+        "Assign learners to read selected Shakespearean drama",
+        "Divide learners into groups to discuss the elements of drama and prose",
+        "Learners work in groups to analyze given drama and prose"
+      ],
+      "primary_texts": [
+        "Look Back In Anger by John Osborne",
+        "Wuthering Heights by Emily Bronte",
+        "The Grieved Lands by Agostinho Neto",
+        "Do Not Go Gentle Into That Good Night by Dylan Thomas",
+        "Felled-1879-Binsey Poplars by G.M. Hopkins"
+      ],
+      "supplementary_resources": [
+        "Prentice Hall Literature"
+      ],
+      "competencies": [
+        "Organizational Ability",
+        "Effective Communication",
+        "Analytical Skills",
+        "Creativity and Innovation Skills",
+        "Digital Skills"
+      ],
+      "assessment": ["Quizzes", "Class work", "Homework", "Assignments", "Dramatization"]
+    },
+    {
+      "id": "LIT-G11-S1-P1",
+      "grade": 11,
+      "semester": 1,
+      "period": 1,
+      "topic": "Non-African Prose",
+      "objectives": [
+        "Identify elements of non-African prose",
+        "Analyze roles of characters in selected non-African prose",
+        "Prepare a summary report of selected non-African prose using approved formats",
+        "Utilize figurative expressions in given texts"
+      ],
+      "content": [
+        "Non-African prose: Themes, Style, Content, Plot, Conflict",
+        "Use of Figurative Expressions",
+        "Book report format: Title, Author/Genre, Published date, Summary (setting, theme), Characters, Purpose, Plot",
+        "Points of view"
+      ],
+      "activities": [
+        "Learners read selected non-African prose and discuss themes, style, plot, content, and conflict",
+        "Assign learners to outline and discuss figurative expressions used in non-African prose",
+        "Learners adopt and use sample format to write book report of selected non-African prose"
+      ],
+      "primary_texts": [
+        "Native Son by Richard Wright",
+        "She Stoops To Conquer by Oliver Goldsmith",
+        "Vanity by Birago Diop",
+        "Birches by Robert Frost"
+      ],
+      "supplementary_resources": [
+        "The Village Son by Dr. E. Kandakai"
+      ],
+      "competencies": [
+        "Research and Problem Solving",
+        "Effective Communication Skills",
+        "Creativity and Innovation Skills",
+        "Digital Skills"
+      ],
+      "assessment": ["Quizzes", "Class work", "Homework", "Assignments", "Oral Presentations", "Book Report"]
+    },
+    {
+      "id": "LIT-G11-S1-P2",
+      "grade": 11,
+      "semester": 1,
+      "period": 2,
+      "topic": "Prose and Poetry",
+      "objectives": [
+        "Analyze African Prose in relation to the writer's point of view",
+        "Determine textual evidence in an African prose",
+        "Identify literary devices used in African Prose",
+        "Formulate and defend personal opinions on selected African Prose",
+        "Discuss sexuality issues based on the selected African Prose text"
+      ],
+      "content": [
+        "African Prose: Selected African Prose",
+        "Figurative Expressions",
+        "Cultural background of texts noting important ideas and major substance of the storyline",
+        "Themes in a prose: grief, social class, land issue, love, women's role in society, family loyalty, violence",
+        "Composing prose",
+        "Sexuality"
+      ],
+      "activities": [
+        "Assign learners to read selected African prose and formulate/defend personal opinions",
+        "Learners discuss author's background and style, various themes, the story's main line, and cultural relevance",
+        "Discuss Sexuality issues emanating from the African Prose",
+        "Learners compose own short stories"
+      ],
+      "primary_texts": [
+        "Lonely Days by Bayo Adebowale",
+        "Faceless by Amma Darko",
+        "Piano And Drum by Gabriel Okara",
+        "Crossing The Bar by Alfred Tennyson",
+        "Africa's Plea by Roland T. Dempster",
+        "The Human But by Roland T. Dempster",
+        "A Song Out of Midnight by Roland T. Dempster"
+      ],
+      "supplementary_resources": [],
+      "competencies": [
+        "Creativity and Innovation Skills",
+        "Analytical Skills",
+        "Effective Communication Skills",
+        "Digital Skills"
+      ],
+      "assessment": ["Quizzes", "Classwork", "Homework", "Oral Presentations"]
+    },
+    {
+      "id": "LIT-G11-S1-P3",
+      "grade": 11,
+      "semester": 1,
+      "period": 3,
+      "topic": "Poetry",
+      "objectives": [
+        "Differentiate the types of poetry and their forms",
+        "Appreciate poetry using literary devices and imageries",
+        "Apply poetic devices in poetry"
+      ],
+      "content": [
+        "Types of Poetry: Narrative, Lyric, Dramatic, Pastoral, Didactic, Satiric, Sonnet, Elegy, Ballad",
+        "Selected poems and Unseen Poems",
+        "Use of Figurative expressions",
+        "Literary devices: Foreshadowing, Suspense, Flashback, Symbolism",
+        "Writing poems"
+      ],
+      "activities": [
+        "Assign learners to read and appreciate selected poems",
+        "Group learners to review and discuss poetic devices",
+        "Divide learners into groups to discuss the types of poems; characteristics of Shakespearean and Petrarchan sonnets",
+        "Assign learners project to write short poem"
+      ],
+      "primary_texts": [
+        "The Panic of Growing Older by Lenre Peters",
+        "Shall I Compare Thee to a Summer's Day — Shakespearean Sonnet",
+        "The Dining Table by Gbanabom Hallowell",
+        "A Government Driver on His Retirement (African)",
+        "The Song of the Women of My Land",
+        "Caged Bird (Non-African)",
+        "Journey of the Magi",
+        "Bat by David H. Lawrence (Non-African)"
+      ],
+      "supplementary_resources": [],
+      "competencies": [
+        "Organizational Ability",
+        "Effective Communication Skills",
+        "Analytical Skills",
+        "Digital Skills"
+      ],
+      "assessment": ["Quizzes", "Class work", "Homework", "Assignments", "Oral Presentations", "Project"]
+    },
+    {
+      "id": "LIT-G11-S2-P4",
+      "grade": 11,
+      "semester": 2,
+      "period": 4,
+      "topic": "Non-African Drama",
+      "objectives": [
+        "Discuss non-African drama and elements",
+        "Utilize figurative language in Non-African Drama",
+        "Analyze Non-African drama by scenes and acts",
+        "Appreciate cultural values, practices, and implications in non-African drama"
+      ],
+      "content": [
+        "Non-African Drama",
+        "Use of Figurative Language",
+        "Exposition (plot, conflict, climax, resolution), theme, tragedy, comedy",
+        "Literary Devices: Irony, Flashback, Foreshadowing, Dialogue, Tragic Hero",
+        "Cultural values, practices and implications",
+        "Plot (rising, climax and falling actions)",
+        "Constructing drama from Non-African Drama"
+      ],
+      "activities": [
+        "Assign learners to read and summarize selected Non-African drama",
+        "Learners discuss the plot diagram, theme, tragedy, comedy, and tragic-comedy in non-African drama",
+        "Learners discuss and outline literary devices used by writers in Non-African drama",
+        "Place learners in groups to discuss the implications of cultural values and practices in non-African drama",
+        "Learners write and role play drama in groups"
+      ],
+      "primary_texts": [
+        "The Castle Of Otranto by Horace Walpole",
+        "The Proud King by William Morris",
+        "Native Son by Richard Wright"
+      ],
+      "supplementary_resources": [],
+      "competencies": [
+        "Research and Problem Solving",
+        "Effective Communication Skills",
+        "Creativity and Innovation Skills",
+        "Digital Skills"
+      ],
+      "assessment": ["Quizzes", "Class work", "Homework", "Assignments", "Oral Presentations", "Role Play"]
+    },
+    {
+      "id": "LIT-G11-S2-P5",
+      "grade": 11,
+      "semester": 2,
+      "period": 5,
+      "topic": "African Drama and Poetry",
+      "objectives": [
+        "Discuss the exposition, themes, and characters of selected African drama",
+        "Explain the different types of drama",
+        "Compare and contrast dramatic forms from different cultures"
+      ],
+      "content": [
+        "African Drama: Selected African Drama",
+        "Drama is written in acts and scenes",
+        "Drama consists of different characters",
+        "Culture, values, norms, and their significance to society",
+        "Main issues and ideas running through the drama",
+        "Composing drama"
+      ],
+      "activities": [
+        "Assign learners to read selected African Drama and share opinions with the class",
+        "Organize learners to outline and discuss the use of literary terminologies in drama writing",
+        "Demonstrate acts and scenes of drama by depicting characteristics of the characters",
+        "Learners analyze themes and characters from selected dramas making connections to self, text and the world"
+      ],
+      "primary_texts": [
+        "Harvest of Corruption by Frank Ogodo Ogbeche",
+        "The Blood of a Stranger by Dele Charley",
+        "Ambush by Gbemisola Adeoti",
+        "The School Boy by William Blake",
+        "Let Me Die Alone by John K. Kargbo",
+        "The Lion and the Jewel by Wole Soyinka"
+      ],
+      "supplementary_resources": [],
+      "competencies": [
+        "Creativity and Innovation Skills",
+        "Effective Communication Skills",
+        "Organizational Skills",
+        "Digital Skills"
+      ],
+      "assessment": ["Quizzes", "Classwork", "Homework", "Assignments", "Oral Presentations"]
+    },
+    {
+      "id": "LIT-G11-S2-P6",
+      "grade": 11,
+      "semester": 2,
+      "period": 6,
+      "topic": "African and Non-African Prose, Poetry and Drama (Review)",
+      "objectives": [
+        "Examine issues of marriage and faithfulness in the story as well as the treatment of widows",
+        "Analyze the roles of major and minor characters in a story",
+        "Describe the techniques used by poets to convey feelings and emotions",
+        "Depict character roles using graphic organizers"
+      ],
+      "content": [
+        "African Prose Themes: Cultural beliefs, Maltreatment, Loneliness, Widowhood, Hostility, Death",
+        "Literary devices: Foreshadowing, Suspense, Flashback, Symbolism",
+        "Using graphic organizers",
+        "Writing Prose/short story, Poetry/poem, Drama/play"
+      ],
+      "activities": [
+        "Assign learners to read selected Non-African prose, drama and poetry",
+        "Class discussion on various themes in selected prose",
+        "Divide learners into groups to discuss and develop graphic organizers to depict character roles",
+        "Pair learners to write short stories, plays and poems"
+      ],
+      "primary_texts": [
+        "Lonely Days by Bayo Adebowale",
+        "She Stoops to Conquer by Oliver Goldsmith",
+        "Native Son by Richard Wright",
+        "The Blood of a Stranger by Dele Charley",
+        "Invisible Man by Ralph Ellison",
+        "Let Me Die Alone by John K. Kargbo",
+        "Piano and Drums by Gabriel Okara",
+        "The Panic of Growing Older by Lenre Peters",
+        "Crossing the Bar by Alfred Tennyson",
+        "Shall I Compare Thee to a Summer's Day — Shakespearean Sonnet",
+        "A Government Driver on His Retirement",
+        "The Song of the Women of My Land",
+        "Caged Bird",
+        "Journey of the Magi",
+        "Let Me Live My Life by Roland T. Dempster",
+        "Citizen ID Card by Lekpele M. Nyamalon"
+      ],
+      "supplementary_resources": [],
+      "competencies": [
+        "Organizational Ability",
+        "Effective Communication Skills",
+        "Analytical Skills",
+        "Digital Skills"
+      ],
+      "assessment": ["Quizzes", "Class work", "Homework", "Assignments"]
+    },
+    {
+      "id": "LIT-G12-S1-P1",
+      "grade": 12,
+      "semester": 1,
+      "period": 1,
+      "topic": "Review African Poems and Figurative Expressions",
+      "objectives": [
+        "Analyze a poem based on theme, form, tone, mood, literary devices, cultural and societal relevance",
+        "Create short poems using different themes",
+        "Utilize figurative expressions in poems"
+      ],
+      "content": [
+        "African Poems: Subject-matter, Tone, Atmosphere, Mood, Literary devices, Relevance to society, Form",
+        "Figurative Expressions",
+        "Writing of poems"
+      ],
+      "activities": [
+        "Assign learners to review and analyze elements of selected African poems",
+        "Review figurative expressions and discuss literary devices and their cultural and societal relevance",
+        "Learners analyze and write poems using different themes and figurative expressions"
+      ],
+      "primary_texts": [
+        "The Panic of Growing Older by Lenre Peters",
+        "Vanity by Birago Diop",
+        "The Anvil and the Hammer by Kofi Awoonor",
+        "Piano and Drums by Gabriel Okara",
+        "The Dining Table by Gbanabom Hallowell",
+        "Ambush by Gbemisola Adeoti",
+        "Black Woman by Leopold Sedar Senghor",
+        "A Government Driver on His Retirement by Onu Chibuike"
+      ],
+      "supplementary_resources": [],
+      "competencies": [
+        "Research and Problem Solving",
+        "Analytical Skills",
+        "Creativity and Innovation Skills",
+        "Effective Communication Skills",
+        "Digital Skills"
+      ],
+      "assessment": ["Quizzes", "Classwork", "Homework", "Oral Presentations"]
+    },
+    {
+      "id": "LIT-G12-S1-P2",
+      "grade": 12,
+      "semester": 1,
+      "period": 2,
+      "topic": "African Prose, Poetry and Literary Devices",
+      "objectives": [
+        "Summarize the selected novel in the form of a book report",
+        "Examine the main issues running through the story",
+        "Relate themes in novel to society or other situations",
+        "Analyze characters in a novel using graphic organizers"
+      ],
+      "content": [
+        "Non-African prose: Themes, Style, Conflict, Plot",
+        "Use of Literary Devices: Symbolism, Characterization, Imagery, Foreshadowing, Suspense, Flashback",
+        "Writing Book Report"
+      ],
+      "activities": [
+        "Assign learners to review and summarize selected novels",
+        "Class discussion on the various themes of the novel",
+        "Learners work in groups to outline and discuss literary devices",
+        "Assign learners to summarize the novel in the form of book reports and present to class"
+      ],
+      "primary_texts": [
+        "Lonely Days by Bayo Adebowale",
+        "Faceless by Amma Darko",
+        "The Leader and the Lead by Niyi Osundare",
+        "The Grieved Lands by Agostinho Neto",
+        "The Song of the Women of My Land by Oumar Farouk Sesay",
+        "Raider of the Treasure Trove by Lade Wosonu",
+        "Wuthering Heights by Emily Bronte",
+        "The Mystic Reformation of Gondolia by Roland T. Dempster"
+      ],
+      "supplementary_resources": [],
+      "competencies": [
+        "Research and Problem Solving",
+        "Analytical Skills",
+        "Creativity and Innovation Skills",
+        "Effective Communication Skills",
+        "Digital Skills"
+      ],
+      "assessment": ["Quizzes", "Classwork", "Homework", "Oral Presentations", "Book Report"]
+    },
+    {
+      "id": "LIT-G12-S1-P3",
+      "grade": 12,
+      "semester": 1,
+      "period": 3,
+      "topic": "Review of Non-African Drama, Poetry and Literary Devices",
+      "objectives": [
+        "Discuss drama as a representation of life, style, culture, values, and norms",
+        "Review literary devices",
+        "Distinguish the types of drama, their cultural and contemporary relevance",
+        "Explain the use of flashback and imagery in non-African Drama"
+      ],
+      "content": [
+        "Non-African Drama",
+        "Reviewing Literary devices: Comedy, Tragedy, Tragic-Comedy, Melodrama",
+        "Cultural Significance and Contemporary relevance",
+        "Flashback, Imagery, Suspense",
+        "Dictions used by authors"
+      ],
+      "activities": [
+        "Group learners to list and discuss literary devices used in non-African drama",
+        "Assign learners to review the use of flashback, imagery, suspense and dictions in selected non-African drama",
+        "Assign learners to review and write a report on selected Non-African drama"
+      ],
+      "primary_texts": [
+        "Othello by Shakespeare",
+        "She Stoops to Conquer by Oliver Goldsmith",
+        "A Raisin in the Sun by Lorraine Hansberry",
+        "A Midsummer Night's Dream by Shakespeare",
+        "Felled-1879-Binsey Poplars by G.M. Hopkins",
+        "Do Not Go Gentle into the Good Night by Dylan Thomas"
+      ],
+      "supplementary_resources": [],
+      "competencies": [
+        "Analytical Skills",
+        "Organizational Ability",
+        "Effective Communication Skills",
+        "Digital Skills"
+      ],
+      "assessment": ["Quizzes", "Classwork", "Homework", "Assignments", "Oral Presentations"]
+    },
+    {
+      "id": "LIT-G12-S2-P4",
+      "grade": 12,
+      "semester": 2,
+      "period": 4,
+      "topic": "Prose, Poetry, Drama and Literary Devices",
+      "objectives": [
+        "Compare and contrast prose, poetry, and drama as part of literary work",
+        "Summarize the themes and lessons learned in selected prose, poetry and drama",
+        "Compose prose, poetry, and drama using literary devices"
+      ],
+      "content": [
+        "Prose, Poetry and Drama",
+        "Literary Devices: Style, Content, Character roles and traits, Theme, Tone, Mood",
+        "Writing prose, poetry and drama"
+      ],
+      "activities": [
+        "Assign learners in groups to compare and contrast prose, poetry, and drama and make presentation",
+        "Discuss and review literary devices derived from selected literary works",
+        "Assign learners to analyze selected literary works, summarize themes and explain lessons learned",
+        "Assign each learner a project to write short prose, poetry and drama"
+      ],
+      "primary_texts": [
+        "Faceless by Amma Darko",
+        "Lonely Days by Bayo Adebowale",
+        "Native Son by Richard Wright",
+        "A Raisin in the Sun by Lorraine Hansberry",
+        "Crossing the Bar by Lord Alfred Tennyson",
+        "I Thank God — A Birthday Poem by Roland T. Dempster"
+      ],
+      "supplementary_resources": [],
+      "competencies": [
+        "Analytical Skills",
+        "Creativity and Innovation Skills",
+        "Effective Communication Skills",
+        "Digital Skills"
+      ],
+      "assessment": ["Quizzes", "Class work", "Homework", "Assignments", "Oral Presentations", "Project"]
+    },
+    {
+      "id": "LIT-G12-S2-P5",
+      "grade": 12,
+      "semester": 2,
+      "period": 5,
+      "topic": "Reviewing Past Examination Papers (WASSCE)",
+      "objectives": [
+        "Answer examination questions observing content, expression, mechanics, and style",
+        "Apply knowledge gained from past examinations to respond effectively to future examinations"
+      ],
+      "content": [
+        "Answer questions from past WASSCE papers",
+        "Literary Devices",
+        "Discuss past questions in prose, poetry, drama",
+        "Discuss various themes, characters, exposition, tone, mood",
+        "Review contents, expressions, mechanics, and styles",
+        "Drill for literary devices using examples"
+      ],
+      "activities": [
+        "Review past WASSCE examinations, especially on how to answer public test questions",
+        "Discuss literary devices",
+        "Review and discuss questions in prose, poetry, and drama",
+        "Review and discuss themes, characters, exposition, tone, and mood",
+        "Review and discuss different mechanics, diction, and styles used in writings",
+        "Review and discuss various literary devices with examples"
+      ],
+      "primary_texts": [
+        "Faceless by Amma Darko",
+        "Lonely Days by Bayo Adebowale",
+        "The Last Goodman by Patience Swift",
+        "She Stoops to Conquer by Oliver Goldsmith",
+        "Vanity by Birago Diop"
+      ],
+      "supplementary_resources": [
+        "Past WASSCE Examination Papers"
+      ],
+      "competencies": [
+        "Research and Problem Solving",
+        "Organizational Skills",
+        "Effective Communication Skills",
+        "Digital Skills"
+      ],
+      "assessment": ["Quizzes", "Class work", "Homework", "Assignments", "Oral Presentations", "Debates"]
+    },
+    {
+      "id": "LIT-G12-S2-P6",
+      "grade": 12,
+      "semester": 2,
+      "period": 6,
+      "topic": "More Review with Past Examination Papers, Prose, Poems, and Drama",
+      "objectives": [
+        "Answer examination questions observing content, expression, mechanics, and style",
+        "Analyze past examination questions",
+        "Summarize any given poem, novel, and play",
+        "Utilize literary devices effectively"
+      ],
+      "content": [
+        "Reviewing past examination questions on selected Poems, Novels and Plays",
+        "Survey of literary devices",
+        "Discuss past questions in Prose, Poetry, Drama",
+        "Discuss Themes, Characters, Exposition, Tone, Mood, and Plots",
+        "Content, expression, mechanics, style",
+        "Drill for literary devices using examples"
+      ],
+      "activities": [
+        "Reviewing and discussing past WASSCE examinations questions on selected poems, novels, and plays",
+        "Survey of literary devices",
+        "Review and discuss various themes, characters, exposition, tone, mood and plots",
+        "Review and discuss the mechanics, diction, and style used in given work"
+      ],
+      "primary_texts": [
+        "Faceless by Amma Darko",
+        "Lonely Days by Bayo Adebowale",
+        "Native Son by Richard Wright",
+        "The Castle of Otranto by Horace Walpole",
+        "Othello by Shakespeare",
+        "The Rain and the Night by Wilton Sankawulo"
+      ],
+      "supplementary_resources": [
+        "Past WASSCE Examination Papers and Syllabuses"
+      ],
+      "competencies": [
+        "Research and Problem Solving Skills",
+        "Analytical Skills",
+        "Effective Communication Skills",
+        "Organizational Skills",
+        "Digital Skills"
+      ],
+      "assessment": ["Quizzes", "Class work", "Homework", "Assignments", "Oral Presentations", "Debates"]
+    }
+  ]
+}

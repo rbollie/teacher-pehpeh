@@ -1,0 +1,1800 @@
+{
+  "subject": "Geography",
+  "grades": "10-12",
+  "source": "Liberia Ministry of Education National Curriculum",
+  "topics": [
+    {
+      "id": "GEO-G10-S1-P1-T1",
+      "grade": 10,
+      "semester": 1,
+      "period": 1,
+      "unit": "Physical Geography – The Solar System",
+      "topic": "The Earth as a Planet",
+      "outcomes": "Learners are able to relate life on the earth to its planetary position in space and determine time difference in relation to the earth rotation.",
+      "objectives": [
+        "Describe the formation of the universe",
+        "Describe the solar system in relation to its formation",
+        "Draw a diagram of the solar system to show the planets in orbit around the sun"
+      ],
+      "contents": [
+        "The formation and composition of the universe",
+        "The formation and structure of the solar system",
+        "The planets",
+        "The moon and its impact"
+      ],
+      "activities": [
+        "Learners draw the solar system and explain its structure and formation",
+        "In a group, learners demonstrate the concept of the moon's rotation and revolution by walking around a chair with one side of the body always facing the chair",
+        "Learners draw the various phases of the moon as it revolves around the earth",
+        "Use flash light and football to demonstrate the causes of day and night"
+      ],
+      "materials": [
+        "General Geography in Diagrams for West Africa",
+        "Chicken egg", "Tennis ball", "Classroom chair", "White paper", "Lamp",
+        "Internet researcher", "Picture of the moon phases", "Globe", "Flash light",
+        "Football", "Pictures of the solar system",
+        "DISCOVER A-Z OF GEOGRAPHY", "WASSCE Q & A (Paper 1 & 2)"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills"],
+      "assessment": ["Oral questions", "Assignments", "Quiz", "Group presentation"]
+    },
+    {
+      "id": "GEO-G10-S1-P1-T2",
+      "grade": 10,
+      "semester": 1,
+      "period": 1,
+      "unit": "Physical Geography – The Solar System",
+      "topic": "Shape and Size of the Earth",
+      "outcomes": "Learners are able to elaborate the concepts of Diameters and Circumferences and prove the shape of the earth.",
+      "objectives": [
+        "Explain the concepts of Equatorial Circumference, Equatorial Diameter, Polar Circumference, and Polar Diameter",
+        "Measure the Equatorial circumference, Polar circumference, Polar diameter, and Equatorial diameter",
+        "Prove the shape of the earth by calculating the differences between the polar and equatorial diameters and the circumferences"
+      ],
+      "contents": [
+        "Earth's Dimension: Equatorial circumference, Equatorial diameter, Polar circumference, Polar diameter",
+        "Differences in length between equatorial and polar circumference",
+        "Differences in length between equatorial diameter and polar diameter",
+        "Shape of the Earth: Description",
+        "Proof of the Earth's spherical shape: inferential proof, aerial photographs, circumnavigation of the earth, lunar eclipse, earth's curved horizon, apparent sunrise/sunset, Bedford canal experiment"
+      ],
+      "activities": [
+        "Using a string, ruler and orange or egg, learners in a small group measure Equatorial circumference, Polar circumference, Polar diameter, and Equatorial diameter",
+        "As an exercise, learners plant three poles of equal height on a level ground and observe the height of the center pole to prove the spherical shape of the earth"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "Map reading for West Africa",
+        "Certificate Physical and Human Geography",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Globe", "Thread", "Three sticks of equal length", "Table", "Picture of the planets"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills"],
+      "assessment": ["Oral questions", "Assignments", "Quiz", "Group presentation"]
+    },
+    {
+      "id": "GEO-G10-S1-P1-T3",
+      "grade": 10,
+      "semester": 1,
+      "period": 1,
+      "unit": "Physical Geography – The Solar System",
+      "topic": "Latitude, Longitude and Time",
+      "outcomes": "Learners are able to demonstrate understanding of latitudes and longitudes.",
+      "objectives": [
+        "Relate the terms latitudes and longitudes",
+        "Discuss the major latitudes and longitudes",
+        "Explain the uses of longitudes and latitudes"
+      ],
+      "contents": [
+        "Lines of Latitude: definition, major lines, characteristics, uses, linear distance calculation",
+        "Lines of Longitude: definition, major lines, characteristics, uses",
+        "Great and small circles",
+        "Local time calculation",
+        "Graticules",
+        "North and South Poles, True North, Magnetic North, Grid North, Magnetic declination"
+      ],
+      "activities": [
+        "Learners work in small groups to identify and show the importance of longitude and latitude",
+        "Learners outline major latitude and longitude lines on the globe",
+        "Using Venn diagrams, learners identify similarities and differences between lines of latitude and longitude",
+        "Using Venn diagram, learners identify similarities and differences between Great Circles",
+        "Calculate time in different time zones"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "Map reading for West Africa",
+        "Certificate Physical and Human Geography",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Orange", "Marker", "Globe", "Wall map with lines of latitude and longitude",
+        "Calculator", "Time zone chart", "Internet researcher"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills"],
+      "assessment": ["Oral questions", "Assignments", "Quiz", "Group presentation"]
+    },
+    {
+      "id": "GEO-G10-S1-P1-T4",
+      "grade": 10,
+      "semester": 1,
+      "period": 1,
+      "unit": "Physical Geography – The Solar System",
+      "topic": "The Earth's Movements",
+      "outcomes": "Learners are able to distinguish the concepts of earth rotation and revolution as well as apply the Ferrell's law of deflection.",
+      "objectives": [
+        "Differentiate between the concepts of rotation and revolution of the earth",
+        "Explain the terms associated with the rotation and revolution of the earth",
+        "Describe the effects of the earth's rotation and revolution",
+        "Discuss the deflection of winds and ocean currents using Ferrell's law",
+        "Distinguish between lunar eclipse and solar eclipse",
+        "Describe the formation of solar eclipse and lunar eclipse"
+      ],
+      "contents": [
+        "The Rotation of the Earth: definition, effects of rotation",
+        "The Revolution of the Earth: definition, terms associated with revolution, effects of revolution",
+        "Similarities and differences between rotation and revolution",
+        "Eclipse: definition, formation, types (solar and lunar)"
+      ],
+      "activities": [
+        "Learners carry out experiment by pointing flash light at a football to demonstrate the appearance of day and night",
+        "Learners spin the globe or football to indicate movement of the earth",
+        "Learners draw a simplified diagram of the earth showing the movement of winds to the north and south of the equator",
+        "Learners illustrate solar and lunar eclipse by diagrams"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Flash light", "Lamp", "Globe", "Candle and matches", "Dark room",
+        "Atlas", "Illustrated diagrams", "Pencil for drawing"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills"],
+      "assessment": ["Oral questions", "Assignments", "Quiz", "Group presentation"]
+    },
+    {
+      "id": "GEO-G10-S1-P2-T1",
+      "grade": 10,
+      "semester": 1,
+      "period": 2,
+      "unit": "Physical Geography – The Earth's Structure",
+      "topic": "The External and Internal Structure of the Earth",
+      "outcomes": "Learners are able to discuss features of the earth's surface.",
+      "objectives": [
+        "Distinguish between the external and internal layers of the earth",
+        "Discuss the features of the geologic layers of the earth's surface",
+        "Describe the characteristics of the external and internal layers of the earth"
+      ],
+      "contents": [
+        "External Structure (major spheres): Atmosphere, Hydrosphere, Biosphere, Lithosphere",
+        "Characteristics of the spheres",
+        "Importance of the spheres to living organisms",
+        "Relationship within and among the spheres",
+        "Internal Structure layers: Crust, Mantle, Core",
+        "Characteristics of the layers"
+      ],
+      "activities": [
+        "Draw a simplified diagram of the earth's internal and external structure to show the different types of layers",
+        "Field trip to identify external and internal layers of the earth",
+        "Use clay to mold the internal structure of the earth"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Boiled and raw chicken egg", "Knife", "Plate", "Butter pear",
+        "Slice of bread", "Yam", "Cassava or bread fruit",
+        "Picture of the earth internal", "Internet researcher",
+        "Venn diagram of three circles", "Sheet of paper"
+      ],
+      "competencies": ["Analytical Skill", "Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills"],
+      "assessment": ["Field report", "Oral questions", "Assignments", "Quizzes", "Group presentation"]
+    },
+    {
+      "id": "GEO-G10-S1-P2-T2",
+      "grade": 10,
+      "semester": 1,
+      "period": 2,
+      "unit": "Physical Geography",
+      "topic": "Rocks of the Earth",
+      "outcomes": "Learners are able to differentiate between rocks and minerals, outline the characteristics of rocks and minerals and state the economic importance of rocks.",
+      "objectives": [
+        "Distinguish between rocks and minerals",
+        "Classify rocks in relation to mode of formation",
+        "List the main characteristics and uses of each type of rock"
+      ],
+      "contents": [
+        "Types of rocks: Igneous, Metamorphic, Sedimentary",
+        "Characteristics of rock: texture, structure, color, permeability",
+        "Characteristics and mode of formation: Igneous rocks, Metamorphic rocks, Sedimentary rocks",
+        "Uses of Igneous Rocks, Metamorphic Rocks, Sedimentary Rocks",
+        "Importance of rocks to man"
+      ],
+      "activities": [
+        "Group discussion: learners collect different types of rocks from the community/school and classify different samples of rock types",
+        "Group discussion on rock texture, hardness and color of rock pieces/samples; the mode of formation and uses"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Rock samples", "Modeled dry clay", "Sand", "Funnel",
+        "Empty rice bag", "Marble stone"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills"],
+      "assessment": ["Oral questions", "Assignments", "Quiz", "Group presentation"]
+    },
+    {
+      "id": "GEO-G10-S1-P3-T1",
+      "grade": 10,
+      "semester": 1,
+      "period": 3,
+      "unit": "Human and Regional Geography – World Population and Settlement",
+      "topic": "Population",
+      "outcomes": "Learners are able to explain world population and distribution patterns; recognize factors that influence population movements, the importance of family planning and empowerment as well as population census.",
+      "objectives": [
+        "Discuss the term 'World population'",
+        "Explain population distribution patterns of the world",
+        "Distinguish between overpopulation and under population",
+        "Explain the factors that influence population movements",
+        "Demonstrate the conduct of population census",
+        "Recognize the importance of family planning and empowerment as a means of controlling population growth"
+      ],
+      "contents": [
+        "World Population: definition, characteristics, size",
+        "Terms associated with population growth",
+        "Factors affecting population growth",
+        "Reasons for rapid growth of world population",
+        "Pattern of world population distribution: densely populated areas, moderately populated areas, sparsely populated areas",
+        "Advantages and disadvantages of high and low population densities",
+        "Population control and family planning"
+      ],
+      "activities": [
+        "Draw population maps indicating densely and sparsely populated regions",
+        "List some overpopulated and underpopulated counties/countries",
+        "Hold debates to discuss population control in relation to family planning and women empowerment"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Population data", "Demographic map", "Atlas",
+        "Pictures and diagrams of places where population data can be collected",
+        "Internet researcher", "Video clips of densely and sparsely populated areas",
+        "Illustrative pictures of controlled and uncontrolled population",
+        "Video clip on family planning"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills"],
+      "assessment": ["Field Trip", "Oral questions", "Assignments", "Quiz", "Group presentation"]
+    },
+    {
+      "id": "GEO-G10-S1-P3-T2",
+      "grade": 10,
+      "semester": 1,
+      "period": 3,
+      "unit": "Human and Regional Geography",
+      "topic": "Settlement and Migration",
+      "outcomes": "Learners are able to distinguish between rural and urban settlements, outline the consequences of migration and suggest ways to minimize migration.",
+      "objectives": [
+        "Classify settlement according to types, pattern, size, and function",
+        "Analyze the factors affecting siting and growth of settlement",
+        "Explain the functions of settlements",
+        "Describe the characteristics of settlement according to types, pattern, and function",
+        "Explain the consequences of migration at the source and receiving regions",
+        "Advance possible solutions to migration"
+      ],
+      "contents": [
+        "Settlement: definition, site and situation, factors affecting siting and growth",
+        "Classification by type: Urban and Rural",
+        "Classification by pattern: nucleated, linear, dispersed, isolated",
+        "Classification by function: commercial, religious, administrative, industrial",
+        "Classification by size: Cities, Towns, Metropolis, Satellite towns",
+        "Classification of villages: Homestead, Hamlet, Farmstead",
+        "Characteristics and functions of rural and urban settlements",
+        "Reasons for patterns of settlement",
+        "Urbanization: definition, causes, problems, solutions",
+        "Migration: definition, forms and types, causes (push and pull factors), effects, controls"
+      ],
+      "activities": [
+        "Learners discuss factors affecting settlement growth, and draw diagrams of settlements",
+        "List the contribution of rural and urban settlements to mankind",
+        "Learners work in groups to outline the consequences of migration at the source and receiving regions",
+        "Learners work in groups to identify problems associated with migration and suggest solutions",
+        "Field trip to identify types of settlements, over and underpopulated regions of Liberia"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Atlas", "World map", "Pictures of settlements",
+        "Illustrative diagrams of settlements according to pattern",
+        "Illustrative pictures of migrants",
+        "Statistics and data on migration",
+        "Reports of International Organization of Migration (IOM)",
+        "Internet researcher"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills"],
+      "assessment": ["Field Trip", "Oral questions", "Assignments", "Quizzes", "Group presentation"]
+    },
+    {
+      "id": "GEO-G10-S2-P4-T1",
+      "grade": 10,
+      "semester": 2,
+      "period": 4,
+      "unit": "Practical Geography – Using Maps",
+      "topic": "Map Reading",
+      "outcomes": "Learners are able to interpret map information and convert scales; design diagrams and determine positions of places.",
+      "objectives": [
+        "Interpret map information",
+        "Distinguish kinds of maps",
+        "Convert from one scale to another",
+        "Apply skills to reduce, enlarge, and calculate areas and ground distances of maps using map scales",
+        "Calculate the gradient of slopes",
+        "Discover the positions of places using the grid system, or longitudes and latitudes",
+        "Determine directions using the compass and bearing",
+        "Design diagrams, profiles and sketches resulting from survey exercises"
+      ],
+      "contents": [
+        "Map: definition, characteristics, types, importance/uses, limitations",
+        "Map Scale: definition, types (Representative Fraction, Statement, Linear)",
+        "Advantages and disadvantages of each type",
+        "Conversion of Map Scales"
+      ],
+      "activities": [
+        "Learners outline and discuss the kinds of map and indicate their features",
+        "Learners draw map to scale, reduce and enlarge maps and state the limitations of maps",
+        "Draw the prismatic compass and illustrate its direction and bearing",
+        "Prepare an annotated map using the three types of map scales"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Atlas", "Topographical maps", "Road maps", "Cadastral maps",
+        "Ruler", "Calculator", "Pencil", "Geological maps",
+        "Demographic map", "Geometry set"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills"],
+      "assessment": ["Oral questions", "Assignments", "Quizzes", "Group presentation"]
+    },
+    {
+      "id": "GEO-G10-S2-P5-T1",
+      "grade": 10,
+      "semester": 2,
+      "period": 5,
+      "unit": "Physical Geography – Environmental Science",
+      "topic": "Land and Water Distribution",
+      "outcomes": "Learners are able to elaborate on the various forms of land and water masses, their importance to mankind; explain the major environmental hazards that result from natural and human activities.",
+      "objectives": [
+        "Determine the ratio of land to water",
+        "Determine how much land is suitable for agriculture",
+        "Identify the various forms of water masses",
+        "Discuss the importance of land and water masses to man",
+        "Describe the major environment",
+        "Identify the major components of the environment",
+        "Discuss the importance of the environment",
+        "Identify the problems facing the environment"
+      ],
+      "contents": [
+        "The continents",
+        "The islands",
+        "Vegetation resources",
+        "Mineral resources",
+        "Case study: Mineral resources of Liberia, West Africa and other parts of Africa",
+        "Water Resources: Oceans, Seas, Rivers, Lakes, Rias",
+        "Environment: definition, types, components, domains, importance, problems"
+      ],
+      "activities": [
+        "Learners diagram the earth's surface to identify land and water positions, providing the ratio of land and water",
+        "Group learners to discuss the relevance of the atmosphere to living organisms and challenges posed by the atmosphere",
+        "Brainstorm and discuss the continents and oceans of the world and show their locations using maps",
+        "Field trip to identify variations in vegetation and mineral types"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "World physical map", "Atlas", "Geological maps of Liberia, West Africa and Africa",
+        "Illustrative diagrams and pictures of water bodies",
+        "Video clips/tapes of continent and island", "Picture of garbage"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills"],
+      "assessment": ["Field Trip", "Oral questions", "Assignments", "Quizzes", "Test"]
+    },
+    {
+      "id": "GEO-G10-S2-P5-T2",
+      "grade": 10,
+      "semester": 2,
+      "period": 5,
+      "unit": "Physical Geography – Environmental Science",
+      "topic": "Pollution of Land and Water",
+      "outcomes": "Learners are able to identify the different types of pollution, their effects on the ecosystem, and create awareness for control measures.",
+      "objectives": [
+        "Elaborate on pollution and its kinds",
+        "State the effects of pollution on the environment",
+        "Suggest ways through which pollution can be minimized and controlled",
+        "Discuss land ecosystem"
+      ],
+      "contents": [
+        "Land Pollution: sources, effects, prevention/control",
+        "Water Pollution: sources (river contamination, DDT use, industrial waste), effects",
+        "Land Ecosystem: meaning and components, food chain, land reclamation, nitrogen cycle, problems and solutions"
+      ],
+      "activities": [
+        "Learners work in groups to identify sources of land and water pollution in the environment",
+        "Group discussion and presentation on the ways of controlling land and water pollution",
+        "Outline the chemicals responsible for the contamination of water and land",
+        "Class discussion/assignment: Define land ecosystem and name the components, identifying the elements that make up the ecosystem"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Spray gun", "Insecticide", "Picture of bush burning",
+        "Illustrative picture of food chain", "Pollutants"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills"],
+      "assessment": ["Oral questions", "Assignments", "Quizzes", "Test"]
+    },
+    {
+      "id": "GEO-G10-S2-P5-T3",
+      "grade": 10,
+      "semester": 2,
+      "period": 5,
+      "unit": "Physical Geography – Environmental Science",
+      "topic": "Environmental Balance – Soils",
+      "outcomes": "Learners are able to identify the different types of soil, state their importance to the growth and development of plants and animals to mankind.",
+      "objectives": [
+        "Classify the different soil types based on their characteristics",
+        "Discuss the factors involved in soil formation",
+        "Examine the influences on soil fertility",
+        "Elaborate on the importance of soil to human and animal life"
+      ],
+      "contents": [
+        "Soil types and characteristics",
+        "Soil formation",
+        "Processes of soil formation: humidification, mineralization",
+        "Soil fertility",
+        "Importance of soil: plant life, provision of minerals, source of raw materials, base for construction, habitat for fauna and flora"
+      ],
+      "activities": [
+        "Group learners to identify the different soil types and their characteristics using their school environment",
+        "Draw soil profile and label the layers",
+        "Group discussion on the formation of soil and the importance for agricultural and construction activities",
+        "Learners outline different soil types in Liberia"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Soil samples", "Illustrative diagrams and pictures of soil profiles",
+        "Internet researcher"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills"],
+      "assessment": ["Oral questions", "Assignments", "Quizzes", "Test"]
+    },
+    {
+      "id": "GEO-G10-S2-P5-T4",
+      "grade": 10,
+      "semester": 2,
+      "period": 5,
+      "unit": "Physical Geography – Environmental Science",
+      "topic": "Environmental Hazards",
+      "outcomes": "Learners are able to outline the kinds of environmental hazards and propose prevention mechanisms.",
+      "objectives": [
+        "List the different kinds of environmental hazards",
+        "Propose ways to avoid or manage environmental hazards",
+        "Explain the effects of environmental hazards on human activities"
+      ],
+      "contents": [
+        "Environmental Hazards: meaning, types, causes, effects and control",
+        "Soil Erosion and Depletion",
+        "Drought",
+        "Deforestation, global warming, desertification: meaning, causes, loss of farmlands, aridity, change in pattern of agriculture, prevention/control",
+        "Flooding: meaning, causes (precipitation, melting of ice), effects (displacement of population, loss of life and property), prevention and control"
+      ],
+      "activities": [
+        "Learners identify and discuss incidences of environmental hazards locally and elsewhere",
+        "Group discussions on the causes and effects of environmental hazards",
+        "Using poster sheets, learners list and describe the different kinds of environmental hazards; outline preventive methods to constructively control hazards",
+        "Field trip to identify areas affected by environmental hazards"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Illustrative pictures and diagrams of logging, flooding, pollution, desert landscape, greenhouse effect/global warming",
+        "Internet researcher"
+      ],
+      "competencies": ["Analytical Skill", "Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quizzes", "Tests"]
+    },
+    {
+      "id": "GEO-G10-S2-P6-T1",
+      "grade": 10,
+      "semester": 2,
+      "period": 6,
+      "unit": "Physical Geography – Major Landforms",
+      "topic": "Introduction to Landforms",
+      "outcomes": "Learners are able to classify landforms as they relate to the formation of mountains, plateaus and plains.",
+      "objectives": [
+        "Describe landforms",
+        "Classify landforms in relation to structure",
+        "State the importance of landforms",
+        "Summarize the formation of mountains, plateaus and plains"
+      ],
+      "contents": [
+        "Landforms: Mountains, Plateaus, Plains",
+        "Types of mountains: Fold mountain, Volcanic mountain, Block mountain, Residual mountain",
+        "Characteristics and formation of the four types of mountains",
+        "Economic importance of the four types of mountains",
+        "Advantages and disadvantages of mountains",
+        "Plateaus: types, characteristics, formation, advantages and disadvantages",
+        "Plains: types, characteristics, advantages and disadvantages"
+      ],
+      "activities": [
+        "Class exercise: Diagram the four types of mountains",
+        "Group discussion on the importance of the four types of mountains",
+        "Field trip to a mountain to show the base and peak, and differences between mountains, plateau and plains",
+        "Illustrate fold mountain formation by compressing two sides of a paper",
+        "Learners shake and open a bottle of Coca-Cola to demonstrate the formation of volcanic mountains"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Atlas", "World physical map", "Paper",
+        "Illustrative diagrams of mountains", "Candles and matches",
+        "Bottle of Coca-Cola"
+      ],
+      "competencies": ["Analytical Skill", "Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quizzes", "Tests"]
+    },
+    {
+      "id": "GEO-G10-S2-P6-T2",
+      "grade": 10,
+      "semester": 2,
+      "period": 6,
+      "unit": "Physical Geography – Water Cycle",
+      "topic": "Hydrosphere",
+      "outcomes": "Learners are able to demonstrate knowledge of the hydrosphere in relation to its importance and discuss the water cycle.",
+      "objectives": [
+        "Identify the components of the hydrosphere",
+        "Highlight the importance of hydrosphere to life on planet Earth",
+        "Relate the hydrosphere to other natural features of the earth",
+        "Analyze the water cycle"
+      ],
+      "contents": [
+        "Water cycle: definition, processes",
+        "Definition and components of the hydrosphere: Oceans, Seas, Rivers, Lakes",
+        "Diagram and analysis of the water cycle",
+        "Importance of hydrosphere"
+      ],
+      "activities": [
+        "Group discussion on the meaning and the components of the hydrosphere",
+        "Field trip to identify the various water bodies that constitute the hydrosphere",
+        "State the importance of hydrosphere to life on planet earth",
+        "Diagram the water cycle"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Poster sheet", "Marker", "Ice block", "Beaker",
+        "Heated iron and wet towel", "Illustrative diagram of water cycle"
+      ],
+      "competencies": ["Analytical Skill", "Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quizzes", "Tests"]
+    },
+    {
+      "id": "GEO-G10-S2-P6-T3",
+      "grade": 10,
+      "semester": 2,
+      "period": 6,
+      "unit": "Physical Geography – Internal Structure of the Earth",
+      "topic": "Lithosphere (Crust)",
+      "outcomes": "Learners are able to discuss the lithosphere as the land block of the earth with emphasis on its external and internal portions, and its importance to life on earth.",
+      "objectives": [
+        "Classify the internal and external composition of the Lithosphere",
+        "Outline the different land blocks (the continents)",
+        "Compare the lithosphere to other natural features of the earth"
+      ],
+      "contents": [
+        "Definition and composition of lithosphere",
+        "Land blocks (continents)",
+        "Internal composition: Sial and Sima",
+        "External composition (continents)",
+        "Map of the continents",
+        "Diagram of the internal and external compositions",
+        "Importance of the lithosphere"
+      ],
+      "activities": [
+        "Group discussion on the meaning and the composition of the lithosphere",
+        "Field trip outside the school compound to observe the land mass and differentiate lithosphere from other layers",
+        "State the importance of lithosphere to life on planet earth",
+        "Learners draw diagram to illustrate the internal and external parts of the lithosphere"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Illustrative diagram of the sial and sima",
+        "Internet researcher"
+      ],
+      "competencies": ["Analytical Skill", "Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quizzes", "Tests"]
+    },
+    {
+      "id": "GEO-G10-S2-P6-T4",
+      "grade": 10,
+      "semester": 2,
+      "period": 6,
+      "unit": "Physical Geography – Earth's Life Layer",
+      "topic": "Biosphere",
+      "outcomes": "Learners are able to elaborate on the biosphere and its importance to man, plants and animals.",
+      "objectives": [
+        "Explain the Biosphere and its composition",
+        "Discuss the importance of Biosphere as life layer of the earth",
+        "Identify the various biochores in the biosphere",
+        "Compare and contrast the biosphere to other natural features of the earth"
+      ],
+      "contents": [
+        "Definition and composition of biosphere: Forest, Swamps, Deserts",
+        "Identification and discussion on the various biochores in the biosphere",
+        "Importance of biosphere as life layer of the earth",
+        "Diagram of the composition of the biosphere",
+        "Differentiation of aquatic bio cycle from terrestrial bio cycle in the biosphere"
+      ],
+      "activities": [
+        "Learners brainstorm on the components of the biosphere using poster sheets",
+        "Group discussion on the composition of the biosphere",
+        "Field trip outside the school compound to observe different plants and animals that make up the biosphere",
+        "Draw the aquatic and the terrestrial bio cycle in the biosphere",
+        "Learners draw Venn diagram to show the position of the biosphere in relation to other spheres"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Venn diagram of three circles"
+      ],
+      "competencies": ["Analytical Skill", "Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quizzes", "Tests"]
+    },
+    {
+      "id": "GEO-G11-S1-P1-T1",
+      "grade": 11,
+      "semester": 1,
+      "period": 1,
+      "unit": "Physical Geography – Landforms Resulting From",
+      "topic": "Faulting and Folding (Diastrophism)",
+      "outcomes": "Learners are able to effectively describe faulting and folding; demonstrate knowledge in natural internal geomorphic forces moulding landforms.",
+      "objectives": [
+        "Discuss faulting and folding as forces that produce landforms",
+        "Differentiate between faulting and folding in relation to land formation",
+        "Identify the major landforms resulting from faulting and folding",
+        "Explain plate tectonics and the theory of continental drift",
+        "Analyze the proofs of the theory of continental drift"
+      ],
+      "contents": [
+        "Plate tectonics: definition, oceanic and continental plates, plate boundaries, effects of plate tectonics",
+        "The theory of continental drift: definition, evidence/proofs (minerals, rock, coastal)",
+        "Types of folding: simple fold, asymmetrical fold, recumbent fold",
+        "Types of faulting: normal fault, reverse fault, tear fault"
+      ],
+      "activities": [
+        "Field trip: Organize field trips to observe various landforms in Liberia and make sketches",
+        "Learners mould clay to illustrate vertical and lateral earth movements",
+        "Stretch rubber bands to demonstrate faulting",
+        "Compress face towel to illustrate folding",
+        "Learners trace continents, cut and join them together to prove the theory of continental drift"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Slice of bread", "Cassava", "Towel", "Painting color",
+        "World map", "Tracing paper", "Pencil",
+        "Illustrative diagrams of plate tectonics",
+        "Sheet of paper", "Rubber bands"
+      ],
+      "competencies": ["Analytical Skill", "Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quizzes", "Tests"]
+    },
+    {
+      "id": "GEO-G11-S1-P1-T2",
+      "grade": 11,
+      "semester": 1,
+      "period": 1,
+      "unit": "Physical Geography – Internal Forces Producing Landforms",
+      "topic": "Vulcanicity",
+      "outcomes": "Learners are able to explain vulcanicity and identify features produced as the result of vulcanicity; demonstrate knowledge of the positive and negative impact of natural phenomena.",
+      "objectives": [
+        "Explain the term 'Vulcanicity'",
+        "Identify the causes of vulcanicity",
+        "Describe the features produced by volcanic action",
+        "Discuss the effects of vulcanicity and earthquake"
+      ],
+      "contents": [
+        "Vulcanicity: definition and terms, causes",
+        "Intrusive features: Batholiths, Dykes, Sills, Laccoliths, Geysers",
+        "Extrusive features: Composite cone, Ash and cinder cone, Lava plateau, Lava plain, Crater, Caldera",
+        "Effects of vulcanicity and earthquake: tourist attraction, mineral deposits, fertile soils, pollution",
+        "Effects of earthquake: death, displacement of people, destruction of property"
+      ],
+      "activities": [
+        "Group discussion on ways vulcanicity and earthquake affect the population; identify affected regions; economic importance of volcanic landforms",
+        "Classwork/assignment: Draw diagrams indicating the formation of volcanic features",
+        "Learners shake a bottle of Coca-Cola and open it to demonstrate volcanic eruption"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Bottle of Coca-Cola", "Candles", "Matches",
+        "Illustrative diagrams and pictures of volcanic action",
+        "Internet researcher"
+      ],
+      "competencies": ["Analytical Skill", "Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quizzes", "Tests"]
+    },
+    {
+      "id": "GEO-G11-S1-P1-T3",
+      "grade": 11,
+      "semester": 1,
+      "period": 1,
+      "unit": "Physical Geography – Process of Denudation",
+      "topic": "Weathering and Mass Wasting",
+      "outcomes": "Learners will acquire the knowledge and skills of minimizing the negative impact of the agents modifying landforms.",
+      "objectives": [
+        "Distinguish between weathering and mass wasting",
+        "Outline the factors affecting weathering and mass wasting/movement",
+        "Discuss the types of weathering and mass wasting",
+        "Analyze the effects of weathering and mass wasting"
+      ],
+      "contents": [
+        "Denudation: definition, factors affecting denudation, sequences of denudation",
+        "Weathering: definition, factors affecting weathering",
+        "Types of weathering: Physical, Biological, Chemical",
+        "Processes involved in the three types of weathering",
+        "Effects of weathering",
+        "Mass wasting/mass movement: definition, factors affecting, types, effects"
+      ],
+      "activities": [
+        "Learners identify regions of the world where the types of weathering are very peculiar",
+        "Learners go on a field trip to observe soil creeps, landslide and rock fall"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Chalk", "Water", "Rusty and non-rusty nail",
+        "Illustrative diagrams and pictures of mass wasting"
+      ],
+      "competencies": ["Analytical Skill", "Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quizzes", "Tests"]
+    },
+    {
+      "id": "GEO-G11-S1-P1-T4",
+      "grade": 11,
+      "semester": 1,
+      "period": 1,
+      "unit": "Physical Geography – External Processes Modifying Landforms",
+      "topic": "Action of Running Water (Rivers), Winds and Waves",
+      "outcomes": "Learners adopt means of minimizing river, wind and wave erosion.",
+      "objectives": [
+        "Describe the processes of river, wind and wave erosion",
+        "Identify landforms produced by river, wind and wave",
+        "Analyze the destructive and constructive actions of river, wind and wave",
+        "Describe the mode and formation of landforms produced by river, wind and wave"
+      ],
+      "contents": [
+        "Action of running water (river): factors affecting velocity, development of river valley, processes of erosion, processes of transportation, landforms by erosion, landforms by deposition, importance of rivers",
+        "Action of winds: characteristics of deserts, types of desert landscape, processes of wind erosion, processes of wind transportation, landforms by wind erosion, landforms by wind deposition",
+        "Action of waves: development of wave, processes of wave erosion, processes of wave transportation, landforms by wave erosion, landforms by wave deposition",
+        "Types of coast: submergence coastline, emergence coastline"
+      ],
+      "activities": [
+        "Organize field trip to observe the impacts of river, wind and wave actions",
+        "Illustrate river profile by diagrams",
+        "Identify the different types of coastlines in Africa"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Atlas", "World physical map",
+        "Illustrative diagrams and pictures of landforms produced by rivers, wind and wave",
+        "Internet researcher"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Field report", "Oral questions", "Assignments", "Quizzes"]
+    },
+    {
+      "id": "GEO-G11-S1-P2-T1",
+      "grade": 11,
+      "semester": 1,
+      "period": 2,
+      "unit": "Physical Geography – Internal Process of Landform Development",
+      "topic": "Hydrological Cycle and Underground Water",
+      "outcomes": "Learners will appreciate the importance of underground water to man; develop strategies to harness vulcanicity to the benefit of man.",
+      "objectives": [
+        "Describe the processes that cause the development of the hydrological cycle",
+        "Explain the hydrological cycle",
+        "Define underground water",
+        "Explain the terms associated with underground water",
+        "Discuss the mode of formation of surface and underground limestone features"
+      ],
+      "contents": [
+        "Hydrological cycle: definition, terms (overland flow, infiltration, through flow, evaporation, condensation), importance",
+        "Ground water: definition, terms (zone of permanent saturation, springs, wells, artesian basin), importance of underground water",
+        "Features produced by groundwater: stalagmites, stalactites, pillars"
+      ],
+      "activities": [
+        "Learners illustrate hydrological cycle through drawing",
+        "Collect samples and identify permeable and impermeable rocks",
+        "Conduct experiment to practicalize water table"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Diagrams and pictures of hydrological cycle", "Karst Topography"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quiz"]
+    },
+    {
+      "id": "GEO-G11-S1-P2-T2",
+      "grade": 11,
+      "semester": 1,
+      "period": 2,
+      "unit": "Physical Geography – Environment",
+      "topic": "Atmosphere",
+      "outcomes": "Learners are able to elaborate on the atmosphere, its characteristics and usefulness.",
+      "objectives": [
+        "Elaborate on the Atmosphere and its composition",
+        "Outline the layers of the atmosphere and their characteristics",
+        "Discuss the usefulness of the atmosphere",
+        "Identify atmospheric pollution",
+        "List methods of protecting the atmosphere"
+      ],
+      "contents": [
+        "Atmosphere: definition, characteristics and composition, importance, problems and solutions"
+      ],
+      "activities": [
+        "Class exercise: List the composition and layers of the atmosphere using poster sheets",
+        "Group discussion on the meaning and usefulness of the atmosphere",
+        "Group work: Research on the causes of atmospheric pollution and ways to minimize pollution",
+        "Draw the atmosphere showing the different layers"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Internet researcher", "Pictures of atmospheric pollution"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Oral questions", "Assignments", "Quizzes"]
+    },
+    {
+      "id": "GEO-G11-S1-P2-T3",
+      "grade": 11,
+      "semester": 1,
+      "period": 2,
+      "unit": "Physical Geography – Environment",
+      "topic": "Atmospheric Pressure and Air Pollution in Liberia",
+      "outcomes": "Learners are able to explain atmospheric pressure and air pollution in Liberia.",
+      "objectives": [
+        "Explain atmospheric pressure",
+        "Discuss the types of wind on the basis of temperature variation",
+        "Explain air pollution",
+        "Outline the causes and impact of air pollution in Liberia"
+      ],
+      "contents": [
+        "Atmospheric Pressure: definition, temperature variation (wind direction/speed, pressure belts, zones of convergence/divergence)",
+        "Planetary wind system",
+        "Deflection of winds",
+        "Land and sea breezes",
+        "Warm and cool/cold air",
+        "Currents, shape of coastline",
+        "Air pollution: definition, causes, effects, control",
+        "Case study: Air pollution in Liberia"
+      ],
+      "activities": [
+        "Class work: Draw a barometer on poster sheet and explain its usage",
+        "Home work: Outline the different types of winds on the basis of temperature variation",
+        "Group work: Learners research and report on some causes of air pollution in Liberia",
+        "Group discussion/Brainstorm on the control of air pollution, outline the causes of wind"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Dust", "Ashes", "Insecticide", "Internet researcher"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quizzes"]
+    },
+    {
+      "id": "GEO-G11-S1-P3-T1",
+      "grade": 11,
+      "semester": 1,
+      "period": 3,
+      "unit": "Physical Geography – Climatology",
+      "topic": "Effects of Weather and Climatic Elements; Climatic Classification and Climatic Regions",
+      "outcomes": "Learners are able to differentiate between weather and climate and analyze climatic data.",
+      "objectives": [
+        "Differentiate between Weather and Climate",
+        "List the elements of weather and climate",
+        "Calculate and analyze climatic data using charts"
+      ],
+      "contents": [
+        "Weather: definition, elements, weather station, weather record (temperature, humidity, rainfall, atmospheric pressure), attributes, importance",
+        "Climate: definition, differences between weather and climate, factors affecting climate, elements of climate, climatograph, importance",
+        "Classification of climate: Greeks and Koppen's classifications, basis, advantages and disadvantages",
+        "Climatic regions: Equatorial, Tropical, Mediterranean, Hot and cold deserts, Warm temperate, Cool temperate, Cold temperate, Polar"
+      ],
+      "activities": [
+        "Class Discussion: group learners to discuss the causes of weather and climatic changes; state the importance of climate",
+        "Group presentation on the weather instruments and their uses",
+        "Class exercise: Prepare a climatic chart and calculate mean annual temperature, mean monthly temperature, range of rainfall and temperature",
+        "Outdoor observation to feel changes in the weather condition"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Pictures and diagrams of weather instruments",
+        "Climatic data", "Climatic graph",
+        "Rain gauge", "Thermometer", "Hygrometer", "Barometer",
+        "Venn diagram", "Internet researcher"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quiz"]
+    },
+    {
+      "id": "GEO-G11-S2-P4-T1",
+      "grade": 11,
+      "semester": 2,
+      "period": 4,
+      "unit": "Physical Geography – Weather and Climate",
+      "topic": "Natural Vegetation and Human Economic Activity",
+      "outcomes": "Learners are able to discuss vegetation and the related economic activities in Liberia.",
+      "objectives": [
+        "Discuss vegetation",
+        "List the different types of natural vegetation",
+        "Summarize the factors that affect vegetation",
+        "Outline the economic activities in Liberia that are related to the natural vegetation"
+      ],
+      "contents": [
+        "Natural Vegetation: definition and types",
+        "Development of vegetation: climatic, biotic, soil",
+        "Human Economic Activities: primary, secondary, problems and solutions",
+        "Case Study: Liberia (Forest, Mountain, Savanna, Mangrove Swamps and Marshlands)"
+      ],
+      "activities": [
+        "Class Discussion/Brainstorm: Define vegetation and relate it to climate; Name human economic activities that affect natural vegetation",
+        "Field trip with learners to show the various species of plants",
+        "Home work: Outline the various types of natural and cultivated vegetation; research and report on deforestation, afforestation and reforestation"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Grass", "Leaves", "World vegetation map", "Internet researcher"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quizzes"]
+    },
+    {
+      "id": "GEO-G11-S2-P4-T2",
+      "grade": 11,
+      "semester": 2,
+      "period": 4,
+      "unit": "Human Geography – Primary Industry",
+      "topic": "Agriculture",
+      "outcomes": "Learners are able to discuss agriculture and systems of farming as well as outline factors affecting agriculture.",
+      "objectives": [
+        "Outline primary industries",
+        "Identify factors affecting the development of primary industries",
+        "Discuss agriculture as a primary industry",
+        "Classify agriculture according to type",
+        "Compare the systems of farming",
+        "Explain the factors that affect agriculture and their importance"
+      ],
+      "contents": [
+        "Definition of Primary Industries",
+        "Major Primary Industries",
+        "Agriculture classification: Subsistence and Commercial, Crop and Animal Farming",
+        "Systems of farming: Shifting cultivation, Bush fallowing, Mechanized farming, Crop rotation, Truck farming, Pastoralism, Nomadism, Dairy farming",
+        "Problems affecting agriculture"
+      ],
+      "activities": [
+        "Class discussion: Learners define agriculture and relate it to primary industry",
+        "Group work and debate on mechanized and subsistence farming in Liberia (boys vs girls)",
+        "Field trip for learners to observe farming sites",
+        "Homework: Distinguish between intensive and extensive farming; outline farming methods",
+        "Learners research and report on why agriculture is a primary industry"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Illustrative pictures and diagrams of subsistence and commercial farming",
+        "Agricultural maps", "Data and statistics of world agricultural produce",
+        "Food and Agriculture Organization (FAO) reports"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quizzes"]
+    },
+    {
+      "id": "GEO-G11-S2-P4-T3",
+      "grade": 11,
+      "semester": 2,
+      "period": 4,
+      "unit": "Human Geography – Primary Industry",
+      "topic": "Fishing",
+      "outcomes": "Learners are able to explain fishing and its importance as well as outline conditions that favor fishing.",
+      "objectives": [
+        "Locate the major fishing grounds in the world",
+        "List the local and international methods of fishing",
+        "Explain conditions that favor fishing",
+        "Discuss the importance of fishing"
+      ],
+      "contents": [
+        "Major Fishing Grounds: The Grand Banks, The coast of Peru, The Sea of Japan",
+        "Methods of Fishing: Hook and line, The use of nets, The use of wicker baskets",
+        "Conditions that favor fishing: Meeting of warm and cool ocean currents, Abundance of plankton",
+        "Importance of fishing, problems and solutions",
+        "Case study: Fishing in West Africa"
+      ],
+      "activities": [
+        "Class discussion: Define fishing and relate it to primary industry; State importance to development; Outline conditions favoring fishing in Liberia",
+        "Home work: Outline the major fishing grounds in the World",
+        "Group work and presentation on the methods of fishing (boys vs girls)",
+        "Field trip to observe major breeding sites and fishing grounds in and around the community"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Pictures and diagrams of major world fishing",
+        "Atlas and maps"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quizzes"]
+    },
+    {
+      "id": "GEO-G11-S2-P4-T4",
+      "grade": 11,
+      "semester": 2,
+      "period": 4,
+      "unit": "Human Geography – Primary Industry",
+      "topic": "Mining",
+      "outcomes": "Learners are able to discuss mining and relate the importance of mining to national development.",
+      "objectives": [
+        "Explain mining",
+        "Classify the different types of minerals",
+        "Identify the major mineral producing countries of the world",
+        "Outline the uses of major minerals in the world",
+        "Analyze the importance of mining to national economies",
+        "Discuss problems facing the mining industry in Liberia and other West African states"
+      ],
+      "contents": [
+        "Mining: definition, types of minerals (Metallic: Ferrous and Non-Ferrous; Non-Metallic; Mineral Fuels)",
+        "Uses of selected minerals",
+        "Methods of Mining: Open Pit/Open Cast, Adit, Shaft/Underground, Dredging, Drilling",
+        "Importance of the Mining Industry: infrastructural development",
+        "Problems and solutions",
+        "Case Studies: Iron ore mining in Liberia, Gold mining in Ghana and South Africa, Oil mining in Delta Region of Nigeria, Copper mining in Katanga Region of Congo DR"
+      ],
+      "activities": [
+        "Group work: Use chart/pictures to classify different types of mineral resources; outline advantages and disadvantages of mining in Liberia",
+        "Class discussion: Outline the minerals extracted in Liberia",
+        "Field trip to a mining site to see how minerals are extracted",
+        "Home work: Draw map of the World and locate major mineral producing countries"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "World geological maps", "Atlas",
+        "Pictures and diagrams of mining site"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quizzes"]
+    },
+    {
+      "id": "GEO-G11-S2-P4-T5",
+      "grade": 11,
+      "semester": 2,
+      "period": 4,
+      "unit": "Human Geography – Primary Industry",
+      "topic": "Lumbering",
+      "outcomes": "Learners are able to discuss lumbering with emphasis on the economic values of tree species and provide solutions to lumbering related problems.",
+      "objectives": [
+        "Explain lumbering",
+        "Classify the different methods of lumbering based on the type of forest",
+        "List the choice trees in lumbering",
+        "Outline the factors affecting lumbering in Liberia and elsewhere",
+        "Discuss the importance of lumbering",
+        "Recommend solutions to the problems facing lumbering in Liberia"
+      ],
+      "contents": [
+        "Lumbering: definition, methods of exploitation, factors affecting lumbering",
+        "Importance of lumbering: provision of jobs, construction, foreign exchange earner",
+        "Problems and solutions",
+        "Case Studies: Lumbering in Liberia, Lumbering in the Congo Basin of Central Africa, Lumbering in West Africa"
+      ],
+      "activities": [
+        "Demonstration/Class exercise: Observe pictures/illustrations of lumbering activities and report on methods",
+        "Class discussions: Learners provide information on methods of exploitation and factors affecting these",
+        "Illustrations: learners identify types and species of plants in lumbering",
+        "Field visit to a Saw Mill and write a report",
+        "Case study: lumbering in Liberia"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "World vegetation map", "Atlas",
+        "Pictures depicting logging scene",
+        "World timber production statistics"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quizzes"]
+    },
+    {
+      "id": "GEO-G11-S2-P5-T1",
+      "grade": 11,
+      "semester": 2,
+      "period": 5,
+      "unit": "Human Geography – Secondary and Tertiary Industries",
+      "topic": "Manufacturing",
+      "outcomes": "Learners are able to categorize industries as well as elaborate on the economic importance of industries in Liberia.",
+      "objectives": [
+        "Categorize secondary industries",
+        "List the factors that affect the location of manufacturing industries",
+        "Examine the impact of manufacturing industries on the health of communities",
+        "Emphasize the role of secondary industries in industrial development",
+        "Classify manufacturing industries and briefly describe each class",
+        "Discuss the categories of tertiary industries"
+      ],
+      "contents": [
+        "Manufacturing: definition, classification, major industrial regions",
+        "Factors affecting the location of manufacturing industries",
+        "Importance of Manufacturing Industries",
+        "Problems facing Manufacturing Industries",
+        "Trade and Commerce: definition, types (Internal, External)",
+        "Transport and Development: definition, means of transport"
+      ],
+      "activities": [
+        "Field trips and excursions to selected factory/plants in Liberia to observe manufacturing processes and write report",
+        "Group discussion on the negative and positive impacts of manufacturing industries",
+        "Home work: List factors that influence the location and development of manufacturing industries"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "World map showing industrial regions", "Atlas",
+        "Pictures depicting scene of manufacturing"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quiz", "Group presentation", "Tests"]
+    },
+    {
+      "id": "GEO-G11-S2-P5-T2",
+      "grade": 11,
+      "semester": 2,
+      "period": 5,
+      "unit": "Human Geography – Secondary Industries",
+      "topic": "Sources of Energy, Location and Distribution",
+      "outcomes": "Learners are able to identify and classify sources of energy, and state their importance to economic development.",
+      "objectives": [
+        "Classify the different sources of energy",
+        "Explain the forms of energy",
+        "Analyze the factors affecting sources of energy"
+      ],
+      "contents": [
+        "Sources of Energy classification: Renewable and Non-Renewable",
+        "Forms of Energy - Mineral/Fossil Fuels: Coal, Natural Gas, Petroleum, Uranium",
+        "Location and Distribution of Power Sources: Hydro-Electric Power (Rivers, Waterfalls, Dams), Solar, Wind, Tidal, Geothermal, Underground, Biomass",
+        "Factors affecting sources of energy: Capital, Technology, Climate",
+        "Importance of energy",
+        "Problems and solutions of energy harnessing"
+      ],
+      "activities": [
+        "Class discussion: Outline source of energy and state categories/forms",
+        "Home work: differentiate between renewable and non-renewable energy; outline factors affecting sources of energy",
+        "Field trip to a hydro-electric plant to identify sources of solar and electrical energy",
+        "Group work: learners carry out research and report on the application of energy to industrial activities"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "World energy map", "Atlas",
+        "Pictures of HEP, waterfall, solar plant, wind mill",
+        "World energy production reports"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quiz", "Group presentation", "Tests"]
+    },
+    {
+      "id": "GEO-G11-S2-P6-T1",
+      "grade": 11,
+      "semester": 2,
+      "period": 6,
+      "unit": "Practical Geography – Map Reading",
+      "topic": "Principles of Geographic Investigation",
+      "outcomes": "Learners are able to analyze map information and reshape distances on maps; locate positions on the earth using grid system as well as calculate the gradient of slope.",
+      "objectives": [
+        "Analyze map information",
+        "Distinguish various kinds of maps",
+        "Apply map scales to reduce, enlarge, and calculate areas and ground distances",
+        "Calculate the gradient of slopes",
+        "Convert from one scale to another",
+        "Discover positions of places using the grid system, or longitudes and latitudes",
+        "Detect directions using the compass and bearing",
+        "Design diagrams, profiles and sketches resulting from survey exercises"
+      ],
+      "contents": [
+        "Map: definition, characteristics, types, importance/uses, limitations",
+        "Map Scale: definition, types, characteristics of each type",
+        "Conversion of Map Scales"
+      ],
+      "activities": [
+        "Class Discussion: Outline the kinds of map and indicate their characteristics",
+        "Home work/class exercise: Draw map to scale, reduce and enlarge maps; practice uses of rulers, protractors; Draw the prismatic compass and illustrate direction and bearing",
+        "Group work: survey the school compound or playground and prepare a sketch draft"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Topographical maps", "Ruler", "Pencil", "Paper",
+        "Calculator", "Geometry set"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quiz", "Group presentation", "Tests"]
+    },
+    {
+      "id": "GEO-G11-S2-P6-T2",
+      "grade": 11,
+      "semester": 2,
+      "period": 6,
+      "unit": "Practical Geography – Map Reading",
+      "topic": "Statistical Maps and Diagrams",
+      "outcomes": "Learners are able to translate statistical information into diagrams and graphs.",
+      "objectives": [
+        "Discuss the sources of statistical data",
+        "Design different kinds of graphs based on statistical data",
+        "Explain the advantages and disadvantages of the various kinds of graphs"
+      ],
+      "contents": [
+        "Sources of Statistical Data",
+        "The Use of Statistics and Diagrams",
+        "Limitations of Statistics",
+        "Tabulation of Statistics",
+        "Graphical Representation of Statistics",
+        "Types: Line graphs, Bar graphs (histograms, simple bar, divergent bar, percentage bar), Circle graphs (pie charts, proportional pie charts, proportional circles)",
+        "Advantages and Disadvantages of each type"
+      ],
+      "activities": [
+        "Group work/Survey: collection and presentation of statistical data on bar and pie charts (boys vs girls)",
+        "Home work/assignment: Outline the importance of statistical data in map reading",
+        "Class discussion/exercise: State differences among statistics, diagrams and graphs; outline advantages and disadvantages"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Graph sheets", "Geometry set", "Data",
+        "Illustrative diagrams and graphs"
+      ],
+      "competencies": ["Analytical Skill", "Research and Problem Solving", "Effective Communication"],
+      "assessment": ["Survey report", "Oral questions", "Assignments", "Quiz", "Group presentation", "Tests"]
+    },
+    {
+      "id": "GEO-G12-S1-P1-T1",
+      "grade": 12,
+      "semester": 1,
+      "period": 1,
+      "unit": "Practical Geography – Map Reading",
+      "topic": "Kinds of Maps and Their Uses",
+      "outcomes": "Learners are able to analyze map information and convert between map scales.",
+      "objectives": [
+        "Explain map information",
+        "Distinguish between the various kinds of maps",
+        "Apply map scales to reduce, enlarge, and calculate areas and ground distances",
+        "Convert from one map scale to another"
+      ],
+      "contents": [
+        "Map: definition, characteristics",
+        "Types of Maps: Road maps, Weather maps, Atlases, Topographical maps",
+        "Importance/Uses of Maps: Give information, Identify landscape, Interpret landscape, Find directions/positions, Find distances",
+        "Limitations of Maps",
+        "Map Scale: definition, types"
+      ],
+      "activities": [
+        "Group work: Draw maps to scale, reduce and enlarge maps and scales, practice uses of rulers, protractors and strings",
+        "Group discussion: Learners discuss the uses of maps",
+        "Field work: Visit to Department of Cartography at Ministry of Lands and Mines & Energy/LISGIS to observe map types and write report",
+        "Class exercise: convert from one map scale to another",
+        "Home work: Draw linear scale using ruler"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Graph sheets", "Geometry set",
+        "Illustrative diagrams and graphs"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quiz", "Group presentation", "Tests"]
+    },
+    {
+      "id": "GEO-G12-S1-P1-T2",
+      "grade": 12,
+      "semester": 1,
+      "period": 1,
+      "unit": "Practical Geography – Map Reading",
+      "topic": "Finding Positions, Directions and Using Conventional Signs and Symbols",
+      "outcomes": "Learners are able to locate positions on the earth and recognize conventional signs and symbols.",
+      "objectives": [
+        "Determine positions using lines of latitude and longitude",
+        "Apply compass points and angular bearings to show direction",
+        "Interpret conventional signs and symbols",
+        "Identify the types of signs and symbols",
+        "Explain the importance and uses of conventional signs and symbols",
+        "Outline the limitations of conventional signs and symbols"
+      ],
+      "contents": [
+        "Locate positions on maps using latitude and longitude",
+        "Locate positions using Grid References",
+        "Direction: compass points, angular bearings",
+        "Types of North: Magnetic, True, Grid North",
+        "Conventional Signs and Symbols: definition, types (Point, Line, Literal, Pictorial, Color symbols)",
+        "Importance and Uses of Conventional Signs and Symbols",
+        "Limitations in the Use of Signs and Symbols"
+      ],
+      "activities": [
+        "Class exercise/Assignment: Draw grid map to show eastings and northings; divide learners into two groups and draw sixteen intermediate points of the compass; use compass points and angular bearing to find directions; draw types of conventional signs and symbols"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Geometry set", "Illustrative diagrams and graphs"
+      ],
+      "competencies": ["Analytical Skill", "Research and Problem Solving", "Effective Communication", "Creative Skills"],
+      "assessment": ["Oral questions", "Assignments", "Group presentation", "Quizzes", "Tests"]
+    },
+    {
+      "id": "GEO-G12-S1-P2-T1",
+      "grade": 12,
+      "semester": 1,
+      "period": 2,
+      "unit": "Practical Geography – Map Reading",
+      "topic": "Methods of Representing Relief and Simple Contour Landforms",
+      "outcomes": "Learners are able to explain contour and gradient as well as calculate gradient of slopes.",
+      "objectives": [
+        "Describe contour lines",
+        "Distinguish the characteristic features of the different methods of showing relief on maps",
+        "Discuss the advantages and disadvantages of the different methods of showing relief",
+        "Identify the different contour landforms",
+        "Describe gradient",
+        "Calculate the gradient of slopes"
+      ],
+      "contents": [
+        "Methods of Representation of relief: contours, spot height, trigonometrical station, bench mark, hill shading, form lines, hachures",
+        "Slope types: concave, convex, steep, gentle, even, uneven",
+        "Contour Landforms: Plateau, Ridge, Valley, Spur, Col, Saddle, Pass, Gap, Knoll, Cuesta",
+        "Gradient: definition, calculation, vertical exaggeration",
+        "Cross sectional drawing/annotated cross profile: framework, alignment"
+      ],
+      "activities": [
+        "Home work: Draw the different symbols used to show reliefs on maps",
+        "Class discussion: learners discuss different types of slopes and methods of calculating gradients",
+        "Group work: identify all contour landforms; differentiate relief map from other types",
+        "Class exercise: Using profile/cross-section, calculate the vertical exaggeration"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Topographical maps", "Graph sheets", "Geometry set",
+        "Thread", "Sheet of paper", "Calculator"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Oral questions", "Group presentation", "Quizzes", "Assignments", "Tests"]
+    },
+    {
+      "id": "GEO-G12-S1-P2-T2",
+      "grade": 12,
+      "semester": 1,
+      "period": 2,
+      "unit": "Practical and Regional Geography – Map Reading",
+      "topic": "Graphical Representation of Statistical Data",
+      "outcomes": "Learners are able to discuss the sources of statistical data and design different kinds of graphs.",
+      "objectives": [
+        "Discuss the sources of statistical data",
+        "Design different kinds of graphs based on statistical data",
+        "Explain the advantages and disadvantages of the various kinds of graphs"
+      ],
+      "contents": [
+        "Sources of Statistical Data",
+        "The Use of Statistics and Diagrams",
+        "Limitations of Statistics",
+        "Tabulation of Statistics",
+        "Graphical Representation of Statistics: choice of scale, use of squared-paper",
+        "Types of graphs: Line graphs (simple, combined, compound), Bar graphs (histograms, simple bar, divergent bar, percentage bar), Circle graphs (pie charts, proportional pie charts, proportional circles)"
+      ],
+      "activities": [
+        "Group discussion: learners discuss the difference between statistical diagrams and statistical maps and their uses; discuss advantages and disadvantages of graphs",
+        "Class work: Draw the types of graphs on poster sheets",
+        "Assignment: Group presentation on the sources of statistical data"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Graph sheets", "Pencil", "Geometry set",
+        "Data", "Illustrative diagrams and graphs"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Oral questions", "Assignments", "Group presentation", "Quizzes", "Test"]
+    },
+    {
+      "id": "GEO-G12-S1-P2-T3",
+      "grade": 12,
+      "semester": 1,
+      "period": 2,
+      "unit": "Practical and Regional Geography – Map Reading",
+      "topic": "Drainage and River Basins",
+      "outcomes": "Learners are able to classify drainage patterns and explain the influence it has on settlement and communication.",
+      "objectives": [
+        "Describe drainage and drainage systems",
+        "Identify drainage patterns",
+        "Explain the influence of drainage on settlement and communication",
+        "Describe drainage basin"
+      ],
+      "contents": [
+        "Drainage: definition",
+        "Drainage Systems: inland drainage, river capture",
+        "Types of Drainage Patterns: Dendritic, Trellis, Radial",
+        "River Profile: Upper course, Middle course, Lower course",
+        "Influence of Drainage on Settlement",
+        "Influence of Drainage on Communication"
+      ],
+      "activities": [
+        "Group discussion: learners discuss drainage and its systems; distinguish between natural and artificial drainage; state the economic importance",
+        "Home work/Class work: Learners draw a diagram of the different drainage patterns",
+        "Brainstorm: Learners relate drainage to activities in settlements"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Topographical maps", "Illustrative diagrams",
+        "Internet researcher"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Oral questions", "Assignments", "Group presentation", "Quizzes", "Tests"]
+    },
+    {
+      "id": "GEO-G12-S1-P3-T1",
+      "grade": 12,
+      "semester": 1,
+      "period": 3,
+      "unit": "Practical and Regional Geography – Map Reading",
+      "topic": "Elementary Surveying",
+      "outcomes": "Learners are able to demonstrate skills and techniques to conduct survey.",
+      "objectives": [
+        "Identify the instruments used by surveyors in surveying",
+        "Demonstrate skills and techniques of survey on the field",
+        "Design diagrams, profiles and sketches resulting from survey exercises",
+        "Identify obstacles in ranging and chaining",
+        "Explain the different methods of survey",
+        "Outline the advantages and disadvantages of the different survey methods"
+      ],
+      "contents": [
+        "Definition of Survey",
+        "Description and uses of Chain Survey Equipment",
+        "Types of Traverse surveying: Closed traverse, Open traverse",
+        "Methods of Traverse surveying",
+        "Advantages and disadvantages of survey methods"
+      ],
+      "activities": [
+        "Group discussion: Discuss the different survey instruments and their uses; State advantages/disadvantages of different methods of survey",
+        "Group exercise on survey field work and prepare chart from information gathered",
+        "Assignment: Learners draw a diagram of the different drainage patterns"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Field note book", "Chain arrows or pins", "Compasses",
+        "Surveyor's band", "Station pegs", "Theodolite",
+        "Ranging poles", "Tape measure", "Optical square",
+        "Offset staff", "Cross-staff", "Watkin's clinometer",
+        "Global Position System or their pictures"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Field survey report", "Oral questions", "Assignments"]
+    },
+    {
+      "id": "GEO-G12-S1-P3-T2",
+      "grade": 12,
+      "semester": 1,
+      "period": 3,
+      "unit": "Practical and Regional Geography – Map Reading",
+      "topic": "Basic Concept of GIS",
+      "outcomes": "Learners are able to elaborate on the Geographic Information System.",
+      "objectives": [
+        "Explain Geographic Information System (GIS)",
+        "Outline the sources of geographical data",
+        "Discuss the importance of geographical data and the GIS",
+        "Examine the components of GIS",
+        "Describe the procedure of GIS",
+        "Explain the relationship between GIS and remote sensing"
+      ],
+      "contents": [
+        "Meaning of Geographic Information System (GIS)",
+        "Geographic Data",
+        "Sources of GIS",
+        "Importance of Geographic Data and The GIS",
+        "Components of GIS: Hardware and Software",
+        "Procedures",
+        "Satellite Remote Sensing: definition of concepts",
+        "GIS Implementation"
+      ],
+      "activities": [
+        "Class discussion/Exercise/Assignment: Group learners to discuss GIS",
+        "Name the components of GIS hardware and software and the procedures of GIS",
+        "Learners explain the relationship between GIS and Remote Sensing",
+        "Learners outline the importance of GIS as a source of geographic information"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Computer system with GIS software installed", "Maps",
+        "Air photo", "Satellite images",
+        "Sketches showing GIS components",
+        "GPS", "Computer", "Models", "Pictures", "Films"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Oral questions", "Assignments", "Quizzes", "Tests", "Group presentation"]
+    },
+    {
+      "id": "GEO-G12-S2-P4-T1",
+      "grade": 12,
+      "semester": 2,
+      "period": 4,
+      "unit": "Human and Regional Geography of Liberia and Africa",
+      "topic": "Liberia",
+      "outcomes": "Learners are able to describe Liberia in terms of vegetation, size, soil types and settlement.",
+      "objectives": [
+        "Discuss climate and the factors that affect climate",
+        "List the vegetation zones of Liberia and factors that affect vegetation",
+        "Classify soil types of Liberia",
+        "Outline the causes of soil erosion",
+        "Compare the settlement pattern of Liberia",
+        "Describe the five geographical regions of Liberia",
+        "Outline the location and size of Liberia"
+      ],
+      "contents": [
+        "Location, Position and Size of Liberia",
+        "Relief of Liberia",
+        "Drainage and lakes",
+        "Climate of Liberia",
+        "Natural Vegetation of Liberia",
+        "Soils of Liberia: soil types, soil erosion",
+        "Population and Settlement"
+      ],
+      "activities": [
+        "Class work/Exercise: learners discuss the location, position and size of Liberia using appropriate map; outline and discuss the natural features of Liberia; discuss the size, distribution and majority of the population of Liberia",
+        "Assignment: Learners research and report on how erosion affects population and settlement in Liberia"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Atlas", "Political, relief, drainage, vegetation, demographic, land use maps",
+        "Soil samples",
+        "Pictures showing towns, cities, villages",
+        "Climatic data"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Oral questions", "Assignments", "Quizzes", "Tests", "Group presentation"]
+    },
+    {
+      "id": "GEO-G12-S2-P4-T2",
+      "grade": 12,
+      "semester": 2,
+      "period": 4,
+      "unit": "Human and Regional Geography of Africa",
+      "topic": "West, East, North, South and Central Africa",
+      "outcomes": "Learners are able to outline the geopolitical regions of Africa, identify the territorial boundaries and distinguish the natural features.",
+      "objectives": [
+        "Discuss the countries, size and the political boundaries of the various regions of Africa",
+        "Examine the physical features and natural resources of the various African regions",
+        "Discuss trade and communications relative to the population of the various regions",
+        "Analyze factors influencing climate and agricultural activities of Africa"
+      ],
+      "contents": [
+        "The Geography of West Africa",
+        "Geography of East Africa",
+        "Geography of Equatorial and Central Africa",
+        "The Geography of North Africa",
+        "The Geography of Southern Africa"
+      ],
+      "activities": [
+        "Class Discussion/Exercise: learners discuss the regions of Africa, the countries, size, and population with appropriate maps; outline and discuss natural features of the various African regions",
+        "Group assignment: Learners research and report on how trade, agriculture and communication technology influence economic development of the various African regions"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Atlas", "Political and relief maps", "Vegetation, drainage, demographic, land use, climatic maps",
+        "Documentaries", "Model",
+        "Pictures showing manufacturing industries, cities, mining sites and major sea ports"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Oral questions", "Assignments", "Quizzes", "Tests", "Group presentation"]
+    },
+    {
+      "id": "GEO-G12-S2-P5-T1",
+      "grade": 12,
+      "semester": 2,
+      "period": 5,
+      "unit": "Human and Regional Geography of Liberia",
+      "topic": "Primary and Tertiary Industries of Liberia",
+      "outcomes": "Learners are able to analyze the Liberian economy and recommend solutions to improve the economic system.",
+      "objectives": [
+        "Differentiate the primary, secondary, and tertiary sectors of the economy of Liberia",
+        "Discuss the importance of each sector to the economic and infrastructural development of Liberia",
+        "Debate the problems hampering the growth and development of Liberia's economy",
+        "Recommend ways to improve the primary, secondary and tertiary industries of Liberia"
+      ],
+      "contents": [
+        "Agriculture: Case Study of Rubber plantation in Liberia (Firestone Operations), current trend and prospects",
+        "Lumbering",
+        "Fishing",
+        "Trade and Commerce",
+        "Transport and Development",
+        "Tourism"
+      ],
+      "activities": [
+        "Class discussion: learners discuss the three sectors of the Liberian economy",
+        "Group assignment: Group report on problems affecting economic growth and recommend possible solutions",
+        "Field trip/excursion: visit to industrial sites to observe activities and problems associated with production processes",
+        "Individual assignment: Learners research and report on the different industries and their production processes"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Atlas", "Vegetation and drainage maps",
+        "Documentaries on commercial activities, exports and imports",
+        "Scene of industrial site", "Scene of mining site",
+        "Tracing paper", "Picture of beaches and holiday resort"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Field report", "Oral questions", "Assignments", "Quizzes", "Tests", "Group presentation"]
+    },
+    {
+      "id": "GEO-G12-S2-P5-T2",
+      "grade": 12,
+      "semester": 2,
+      "period": 5,
+      "unit": "Human and Regional Geography – World Population and Settlement",
+      "topic": "Population and Settlement",
+      "outcomes": "Learners are able to describe world population in relation to distribution and movements; discuss settlement patterns and the consequences of migration; adopt family planning as a means of population control.",
+      "objectives": [
+        "Explain the concept of world population",
+        "Describe population distribution patterns of the world",
+        "Distinguish between overpopulation and under population",
+        "Outline factors which influence population movements",
+        "Discuss why and how population census is conducted",
+        "Identify the types of settlements and settlement patterns",
+        "Explain the consequences of migration at the source and receiving regions",
+        "Delineate family planning and empowerment"
+      ],
+      "contents": [
+        "World Population: definition, distribution, factors affecting growth, terms associated with population growth",
+        "Settlement: definition, types, factors affecting settlement growth, settlement patterns and functions",
+        "Population control and family planning"
+      ],
+      "activities": [
+        "Home work: Draw population maps indicating densely and sparsely populated regions",
+        "Class Debate: Hold debate to discuss population control in relation to family planning and women empowerment",
+        "Class work: List some overpopulated and underpopulated countries",
+        "Field trip/exercise: to identify types of settlements, over and under-populated regions of Liberia"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)",
+        "Atlas", "Globe", "Demographic map", "Population data",
+        "Pictures showing densely and sparsely populated areas"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Field report", "Oral questions", "Assignments", "Quizzes", "Tests", "Group report"]
+    },
+    {
+      "id": "GEO-G12-S2-P5-T3",
+      "grade": 12,
+      "semester": 2,
+      "period": 5,
+      "unit": "Physical Geography",
+      "topic": "Climate and Vegetation",
+      "outcomes": "Learners are able to relate climate and vegetation as well as analyze climatic data.",
+      "objectives": [
+        "Differentiate between climate and vegetation",
+        "List the elements of weather and climate",
+        "Analyze climatic data using charts",
+        "Discuss the different types of natural vegetation",
+        "Examine the factors that affect vegetation"
+      ],
+      "contents": [
+        "Define climate and name its elements",
+        "Differences between weather and climate",
+        "Elements of weather and climate",
+        "Preparation of climatic chart",
+        "Natural Vegetation: definition",
+        "Factors affecting the development of vegetation",
+        "Case Study: Liberia (Forest, Mountain, Savanna, Mangrove Swamps and Marshlands)"
+      ],
+      "activities": [
+        "Class discussion: the causes of weather and climate changes; importance of climate and vegetation",
+        "Group work: Group presentation on the weather instruments and their uses",
+        "Class work/exercise: Prepare a climatic chart and calculate mean annual temperature, mean monthly temperature, range of rainfall and temperature",
+        "Assignment: Learners research and report on deforestation, afforestation and reforestation",
+        "Field trip: learners move outdoor to feel and observe changes in weather condition"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Oral questions", "Assignments", "Quizzes", "Tests"]
+    },
+    {
+      "id": "GEO-G12-S2-P6-T1",
+      "grade": 12,
+      "semester": 2,
+      "period": 6,
+      "unit": "General Revision",
+      "topic": "General Revision – Map Reading, Industries of Liberia, Climate and Vegetation, Regional Geography of Africa, Population and Settlement",
+      "outcomes": "Learners are able to demonstrate understanding of Geographic related topics.",
+      "objectives": [
+        "Recap and remember the definitions, elements, description and activities of the geographic topics covered, and prepare for school as well as WASSCE exams"
+      ],
+      "contents": [
+        "Map Reading",
+        "Types of industries of Liberia",
+        "Climate and natural vegetation",
+        "Regional Geography of Africa",
+        "Population and Settlement"
+      ],
+      "activities": [
+        "Class discussion",
+        "Group presentation",
+        "Individual Project",
+        "Facilitator provides clarity on questions learners may post"
+      ],
+      "materials": [
+        "General Geography in Diagrams (Pearson)",
+        "Abegunde et al. Senior Secondary Geography Bk. 1",
+        "WASSCE Q & A (Papers 1 & 2)"
+      ],
+      "competencies": ["Research and Problem Solving", "Effective Communication Skills", "Creativity and Innovation Skills", "Digital Skills", "Analytical Skills"],
+      "assessment": ["Field trip", "Oral questions", "Assignments", "Quizzes", "Tests"]
+    }
+  ]
+}

@@ -1,0 +1,698 @@
+{
+  "subject": "French",
+  "grades": ["10", "11", "12"],
+  "source": "Liberia MOE National Curriculum - French Grades 10-12",
+  "total_topics": 18,
+  "curriculum": [
+    {
+      "grade": "10",
+      "semester": 1,
+      "period": "I",
+      "topic": "Les Verbes et Négation (Verbs and Negation)",
+      "learning_outcomes": [
+        "Apply verb-noun agreement in speaking and writing French",
+        "Distinguish and identify verb groups in sentences",
+        "Translate sentences from French to English or English to French (oral and written)"
+      ],
+      "objectives": [
+        "Define verb in French",
+        "Identify and discuss verbs in sentences using French Language",
+        "Name the verb groups",
+        "Conjugate and construct sentences using the appropriate verb tense in the affirmative and negative forms"
+      ],
+      "key_content": [
+        "Groups of verbs",
+        "Conjugation (er, ir, oire, re) verbs in present, past, future tenses",
+        "Oral and written expressions in French",
+        "Grammar: sentence construction (e.g., Mariam mange le riz)",
+        "Negation: ne + verb + pas, ne plus, ne jamais"
+      ],
+      "vocabulary": ["conjuguer", "verbe", "groupe", "présent", "passé", "futur", "affirmatif", "négatif", "ne...pas", "ne...plus", "ne...jamais"],
+      "activities": [
+        "Construct sentences using verb tenses",
+        "State the importance of different verbs and their usage",
+        "Group discussions",
+        "Identifying verbs in sentences",
+        "Visual dialogue with posters"
+      ],
+      "materials": ["Textbooks (Mastery for French)", "Verbs chart", "Conjugation chart", "Posters", "Colorful markers"],
+      "assessment": [
+        "Continuous assessment",
+        "Group assignments and presentations",
+        "Oral and written drills",
+        "Students' demonstration of conjugation"
+      ]
+    },
+    {
+      "grade": "10",
+      "semester": 1,
+      "period": "II",
+      "topic": "Les Adjectifs (Adjectives)",
+      "learning_outcomes": [
+        "Build and develop vocabulary skills through the effective use of adjectives",
+        "Develop skills with the appropriate use of adjectives through speaking and writing",
+        "Translate sentences from French to English or English to French (oral and written)"
+      ],
+      "objectives": [
+        "Define adjective in French",
+        "Identify different kinds of adjectives used in sentences to describe persons, places, and things in French",
+        "Distinguish the masculine and feminine forms of adjectives used to describe person, place, or thing (color, size, and shape)"
+      ],
+      "key_content": [
+        "Vocabulary development: petit, grand, gros, méchant",
+        "Oral and written expressions in French",
+        "Grammar: describing objects, people, and places (physical, size, structure, shape, state of being)",
+        "Être + adjective (masculine and feminine): Il est gros/petit, Elle est grosse/petite",
+        "Article + adjective (Nationality): un Chinois, un Libérien, une Libérienne"
+      ],
+      "vocabulary": ["petit", "grand", "gros", "grosse", "méchant", "méchante", "chinois", "libérien", "libérienne", "masculin", "féminin"],
+      "activities": [
+        "Construct sentences using adjective words",
+        "Write sentences describing and showing possessions of persons",
+        "Group discussions",
+        "Identifying adjectives in sentences",
+        "Oral and written drills",
+        "Describe the class in French"
+      ],
+      "materials": ["Textbooks (Mastery for French, Et Vous?)", "Adjectives chart", "Posters", "Colorful markers, pencils"],
+      "assessment": [
+        "Continuous assessment",
+        "Group assignments and presentations",
+        "Oral and written drills",
+        "Students' demonstration describing various objects and persons (physical, structure, state of being, possession)"
+      ]
+    },
+    {
+      "grade": "10",
+      "semester": 1,
+      "period": "III",
+      "topic": "Les Noms et Les Articles (Nouns and Articles)",
+      "learning_outcomes": [
+        "Build and develop vocabulary skills through the effective use of nouns and articles",
+        "Develop skills with the appropriate use of nouns and articles through speaking and writing",
+        "Translate sentences from French to English or English to French (oral and written)",
+        "Identify the gender of nouns and articles in sentences"
+      ],
+      "objectives": [
+        "State the definition of noun and article",
+        "Identify and describe nouns and articles in French",
+        "Explain nouns and articles",
+        "Construct sentences using nouns and articles"
+      ],
+      "key_content": [
+        "Vocabulary development: le nez, etc.",
+        "Oral and written expressions in French",
+        "Grammar: gender of nouns",
+        "Articles: definite, indefinite, singular, plural",
+        "Example: Le père d'Ali attrappe son cabris"
+      ],
+      "vocabulary": ["le", "la", "les", "un", "une", "des", "nom", "article", "défini", "indéfini", "singulier", "pluriel"],
+      "activities": [
+        "Construct sentences using nouns and articles",
+        "Write sentences describing and showing nouns and articles",
+        "Group discussions",
+        "Identifying nouns and articles in sentences",
+        "Oral and written drills",
+        "State important points about the usage of nouns and articles"
+      ],
+      "materials": ["Textbooks (Mastery for French, Et Vous?, Easy French Step-by-Step)", "Nouns and articles charts", "Posters"],
+      "assessment": [
+        "Continuous assessment",
+        "Group assignments and presentations",
+        "Oral and written drills",
+        "Students' demonstration answering questions on activities related to articles and nouns",
+        "Debate (boys vs girls) on gender of nouns and articles"
+      ]
+    },
+    {
+      "grade": "10",
+      "semester": 2,
+      "period": "IV",
+      "topic": "Les Prépositions (Prepositions)",
+      "learning_outcomes": [
+        "Build and develop vocabulary skills through the effective use of prepositions",
+        "Develop skills with the appropriate use of prepositions through speaking and writing",
+        "Translate sentences from French to English or English to French (oral and written)"
+      ],
+      "objectives": [
+        "Identify and describe the use of prepositions in French Language",
+        "Explain the definition of preposition",
+        "Construct sentences using prepositions",
+        "Differentiate the kinds of prepositions"
+      ],
+      "key_content": [
+        "Vocabulary development: à, avant, avec, devant, pour, derrière, à côté de",
+        "Oral and written expressions in French",
+        "Grammar: prepositions of location, time, and sequence",
+        "Interrogative + preposition: Qui est-ce dans la maison?"
+      ],
+      "vocabulary": ["à", "avant", "avec", "devant", "pour", "derrière", "à côté de", "dans", "sur", "sous", "entre"],
+      "activities": [
+        "Construct sentences using prepositions",
+        "Write sentences describing and showing different kinds of prepositions",
+        "Group discussions",
+        "Identifying prepositions in sentences",
+        "Oral and written drills",
+        "Dramatization"
+      ],
+      "materials": ["Textbooks (Mastery for French, Et Vous?)", "Prepositions charts", "Map (world)", "Posters", "Colorful markers, pencils"],
+      "assessment": [
+        "Continuous assessment",
+        "Group assignments and presentations",
+        "Oral and written drills",
+        "Students' demonstration using maps to show which county/country each student comes from",
+        "Debate (boys vs girls) on prepositions"
+      ]
+    },
+    {
+      "grade": "10",
+      "semester": 2,
+      "period": "V",
+      "topic": "Les Parties du Corps Humain (Parts of the Human Body)",
+      "learning_outcomes": [
+        "Identify, describe, and name parts of the human body in French",
+        "Use short conversation in French to describe the human body",
+        "Translate words (body parts) from French to English or English to French (oral and written)",
+        "Use simple adjectives to describe the parts of the human body"
+      ],
+      "objectives": [
+        "Describe, identify, and name the different parts of the human body in French",
+        "Develop short conversation in French to tell the function of each part of the human body",
+        "List the parts of the human body in French"
+      ],
+      "key_content": [
+        "Vocabulary development: le nez, la main, la tête, le visage, le pied",
+        "Grammar: possessive + noun (mon pied, ma tête, la main)",
+        "Simple conversation: voici ma main, c'est mon pied, ce sont mes yeux, voici mon genou"
+      ],
+      "vocabulary": ["le nez", "la main", "la tête", "le visage", "le pied", "les yeux", "le genou", "mon", "ma", "mes", "voici"],
+      "activities": [
+        "Body parts recognition in French",
+        "Role play using short conversation in French to describe the human body parts",
+        "Draw and label the basic parts of the human body",
+        "Oral and written participation"
+      ],
+      "materials": ["Parts of the body poster", "Audio", "Textbook (Easy French Step-by-Step)", "Posters", "Colorful markers, pencils"],
+      "assessment": [
+        "Class participation and presentation using short conversation in French (boys vs girls)",
+        "Illustrate and label each part of the body in French (students' demonstration)",
+        "Puzzles",
+        "Individual and group assignments and presentations"
+      ]
+    },
+    {
+      "grade": "10",
+      "semester": 2,
+      "period": "VI",
+      "topic": "Les Professions (Professions)",
+      "learning_outcomes": [
+        "Identify, describe, and list different professions in French",
+        "Use short conversation in French to describe each profession and their importance",
+        "Translate words (professions) from French to English or English to French (oral and written)"
+      ],
+      "objectives": [
+        "Describe, identify, and list the different kinds of professions in French",
+        "Develop short conversation in French to tell about each profession",
+        "Discuss the various kinds of professions in French"
+      ],
+      "key_content": [
+        "Vocabulary development: musicien, chanteuse, médecin",
+        "Grammar: noun + être + article + profession (je suis un médecin, tu es une musicienne)",
+        "Simple conversation: nous sommes des chanteurs"
+      ],
+      "vocabulary": ["musicien", "musicienne", "chanteuse", "chanteur", "médecin", "profession", "je suis", "tu es", "nous sommes"],
+      "activities": [
+        "Discuss the various professions in French",
+        "Role play using short conversation in French to describe each profession and their importance",
+        "Oral and written participation"
+      ],
+      "materials": ["Different professions poster", "Audio", "Textbook (Modern French)", "Posters", "Colorful markers, pencils"],
+      "assessment": [
+        "Continuous assessment",
+        "Group assignments and presentations",
+        "Oral and written drills",
+        "Students' demonstration modeling each profession",
+        "Debate (boys vs girls) on the importance of each profession",
+        "Individual and group assignments and presentations"
+      ]
+    },
+    {
+      "grade": "11",
+      "semester": 1,
+      "period": "I",
+      "topic": "Les Verbes et Négation (Verbs and Negation)",
+      "learning_outcomes": [
+        "Apply verb-noun agreement in speaking and writing French",
+        "Distinguish and identify verb groups in sentences",
+        "Translate sentences from French to English or English to French (oral and written)"
+      ],
+      "objectives": [
+        "Identify and describe the verbs in sentences using French Language",
+        "Name the verb groups",
+        "Conjugate and construct sentences using the appropriate verb tense in the affirmative and negative forms"
+      ],
+      "key_content": [
+        "Conjugation (er, ir, oire, re) verbs in present, past, imperfect, and future tenses",
+        "Oral and written expressions in French",
+        "Grammar: sentence construction and essay writing (subject and verb)",
+        "Examples: Mariam mange le riz, René regarde la télé",
+        "Negation: ne + verb + pas, ne plus, ne jamais"
+      ],
+      "vocabulary": ["conjuguer", "imparfait", "essai", "sujet", "verbe", "affirmatif", "négatif", "ne...pas", "ne...plus", "ne...jamais"],
+      "activities": [
+        "Construct sentences using verb tenses",
+        "State the importance of different verbs and their usage",
+        "Group discussions",
+        "Identifying verbs in sentences"
+      ],
+      "materials": ["Textbooks (Mastery for French)", "Verbs chart", "Conjugation chart", "Posters", "Colorful markers"],
+      "assessment": [
+        "Continuous assessment",
+        "Group assignments and presentations",
+        "Oral and written drills",
+        "Students' demonstration of conjugation"
+      ]
+    },
+    {
+      "grade": "11",
+      "semester": 1,
+      "period": "II",
+      "topic": "Les Adjectifs Comparatifs et Superlatifs (Comparative and Superlative Degree of Adjectives)",
+      "learning_outcomes": [
+        "Build and develop skills through the effective use of comparatives according to their gender and number",
+        "Develop skills with the appropriate use of comparatives and superlatives through speaking and writing",
+        "Translate sentences from French to English or English to French (oral and written)"
+      ],
+      "objectives": [
+        "Identify, describe, and distinguish the comparative and superlative degree of adjective according to gender and number in French Language",
+        "Compare nouns, adjectives, and adverbs using the comparative degree in French",
+        "Compare adjectives and adverbs using the superlative degree in French"
+      ],
+      "key_content": [
+        "Vocabulary development: plus, moins, aussi",
+        "Comparative degree: plus...que, moins...que, autant...que",
+        "Superlative degree: le plus, la plus, les plus",
+        "Examples: Sylvie a plus de frères que toi, Daniel est plus grand que vous, Marie est la plus grande fille"
+      ],
+      "vocabulary": ["plus", "moins", "aussi", "autant", "que", "le plus", "la plus", "les plus", "comparatif", "superlatif"],
+      "activities": [
+        "Construct sentences using comparative degree according to gender and number",
+        "Write sentences comparing nouns, adjectives, and verbs",
+        "Group discussions",
+        "Identifying comparative and superlative adjectives in sentences",
+        "Oral and written drills"
+      ],
+      "materials": ["Textbooks (Mastery for French, Et Vous?)", "Adjectives chart", "Posters", "Colorful markers, pencils"],
+      "assessment": [
+        "Continuous assessment",
+        "Group assignments and presentations",
+        "Oral and written drills",
+        "Students' demonstration",
+        "Describe the class in French"
+      ]
+    },
+    {
+      "grade": "11",
+      "semester": 1,
+      "period": "III",
+      "topic": "Les Noms et Les Articles (Nouns and Articles)",
+      "learning_outcomes": [
+        "Build and develop vocabulary skills through the effective use of nouns and articles",
+        "Develop skills with the appropriate use of nouns and articles according to their gender and number through speaking and writing",
+        "Translate sentences from French to English or English to French"
+      ],
+      "objectives": [
+        "Identify and describe nouns and articles in French Language",
+        "Explain nouns and articles and state the definition of each",
+        "Construct sentences using nouns and articles",
+        "Group nouns according to categories (identifying nouns and articles in sentences)"
+      ],
+      "key_content": [
+        "Vocabulary development: le riz, un, une banane",
+        "Oral and written expressions in French",
+        "Grammar: gender of nouns (un garçon, une fille, des garçons, des filles, un cahier, une chaise)",
+        "Example: le cahier est sur la table",
+        "Articles: definite, indefinite, singular, plural",
+        "Example: Le père d'Ali attrappe son cabris"
+      ],
+      "vocabulary": ["le", "la", "les", "un", "une", "des", "garçon", "fille", "cahier", "chaise", "table"],
+      "activities": [
+        "Construct sentences using nouns and articles",
+        "Write sentences describing and showing nouns and articles",
+        "Group discussions",
+        "Identifying nouns and articles in sentences (genders of nouns)",
+        "Oral and written drills",
+        "State the important points about the usage of nouns and articles"
+      ],
+      "materials": ["Textbooks (Mastery for French, Et Vous?, Easy French Step-by-Step)", "Nouns and articles charts", "Posters"],
+      "assessment": [
+        "Continuous assessment",
+        "Group assignments and presentations",
+        "Oral and written drills",
+        "Students' demonstration answering questions on activities related to articles and nouns",
+        "Debate (boys vs girls) on gender of nouns and articles"
+      ]
+    },
+    {
+      "grade": "11",
+      "semester": 2,
+      "period": "IV",
+      "topic": "Les Prépositions (Prepositions)",
+      "learning_outcomes": [
+        "Build and develop vocabulary skills through the effective use of prepositions",
+        "Develop skills with the appropriate use of prepositions through speaking and writing",
+        "Translate sentences from French to English or English to French (oral and written)"
+      ],
+      "objectives": [
+        "Identify and describe the use of prepositions in French Language",
+        "Explain the definition of preposition",
+        "Construct sentences using prepositions",
+        "Differentiate the kinds of prepositions"
+      ],
+      "key_content": [
+        "Vocabulary development: qui, quoi",
+        "Oral and written expressions in French",
+        "Grammar: prepositions of location, time, and sequence",
+        "Interrogative + preposition (qui and quoi)"
+      ],
+      "vocabulary": ["qui", "quoi", "où", "dans", "sur", "sous", "devant", "derrière", "entre", "à côté de"],
+      "activities": [
+        "Construct sentences using prepositions",
+        "Write sentences describing and showing different kinds of prepositions",
+        "Group discussions",
+        "Identifying prepositions in sentences",
+        "Oral and written drills",
+        "Dramatization"
+      ],
+      "materials": ["Textbooks (Mastery for French, Et Vous?, Easy French Step-by-Step)", "Prepositions charts", "Map (world)", "Posters"],
+      "assessment": [
+        "Continuous assessment",
+        "Group assignments and presentations",
+        "Oral and written drills",
+        "Students' demonstration using maps to show which county/country each student comes from",
+        "Debate (boys vs girls) on prepositions"
+      ]
+    },
+    {
+      "grade": "11",
+      "semester": 2,
+      "period": "V",
+      "topic": "Les Parties du Corps Humain (Parts of the Human Body)",
+      "learning_outcomes": [
+        "Identify, describe, and name parts of the human body in French",
+        "Use short conversation in French to describe the human body",
+        "Translate words (body parts) from French to English or English to French (oral and written)",
+        "Use simple adjectives to describe the parts of the human body"
+      ],
+      "objectives": [
+        "Describe, identify, and name the different parts of the human body in French",
+        "Develop short conversation in French to tell the function of each part of the human body",
+        "List the parts of the human body in French"
+      ],
+      "key_content": [
+        "Vocabulary development: le nez, la main, la tête, le visage, le pied",
+        "Grammar: possessive + noun (mon pied, ma tête, la main)",
+        "Simple conversation: voici ma main, c'est mon pied, ce sont mes yeux, voici mon genou"
+      ],
+      "vocabulary": ["le nez", "la main", "la tête", "le visage", "le pied", "les yeux", "le genou", "mon", "ma", "mes"],
+      "activities": [
+        "Body parts recognition in French",
+        "Role play using short conversation in French to describe the human body parts",
+        "Draw and label the basic parts of the human body",
+        "Oral and written participation"
+      ],
+      "materials": ["Parts of the body poster", "Audio", "Textbook (Easy French Step-by-Step)", "Posters", "Colorful markers, pencils"],
+      "assessment": [
+        "Class participation and presentation using short conversation in French (boys vs girls)",
+        "Illustrate and label each part of the body in French (students' demonstration)",
+        "Puzzles",
+        "Individual and group assignments and presentations"
+      ]
+    },
+    {
+      "grade": "11",
+      "semester": 2,
+      "period": "VI",
+      "topic": "Les Professions (Professions)",
+      "learning_outcomes": [
+        "Identify, describe, and list different professions in French",
+        "Use short conversation in French to describe each profession and their importance",
+        "Translate words (professions) from French to English or English to French (oral and written)"
+      ],
+      "objectives": [
+        "Describe, identify, and list the different kinds of professions in French",
+        "Develop short conversation in French to tell about each profession",
+        "Discuss the various kinds of professions in French"
+      ],
+      "key_content": [
+        "Vocabulary development: musicien, chanteuse, médecin",
+        "Grammar: noun + être + article + profession (je suis un médecin, tu es une musicienne)",
+        "Simple conversation: nous sommes des chanteurs"
+      ],
+      "vocabulary": ["musicien", "musicienne", "chanteuse", "chanteur", "médecin", "profession", "je suis", "tu es", "nous sommes"],
+      "activities": [
+        "Discuss the various professions in French",
+        "Role play using short conversation in French to describe each profession and their importance",
+        "Oral and written participation"
+      ],
+      "materials": ["Different professions poster", "Audio", "Textbook (Modern French)", "Posters", "Colorful markers, pencils"],
+      "assessment": [
+        "Continuous assessment",
+        "Group assignments and presentations",
+        "Oral and written drills",
+        "Students' demonstration modeling each profession",
+        "Debate (boys vs girls) on the importance of each profession",
+        "Individual and group assignments and presentations"
+      ]
+    },
+    {
+      "grade": "12",
+      "semester": 1,
+      "period": "I",
+      "topic": "Les Verbes et Négation (Verbs and Negation)",
+      "learning_outcomes": [
+        "Apply verb-noun agreement in speaking and writing French",
+        "Distinguish and identify verb groups in sentences",
+        "Translate sentences from French to English or English to French (oral and written)"
+      ],
+      "objectives": [
+        "Identify and describe the verbs in sentences using French Language",
+        "Name the verb groups",
+        "Conjugate and construct sentences using the appropriate verb tense in the affirmative and negative forms"
+      ],
+      "key_content": [
+        "Conjugation (er, ir, oire, re) verbs in present, past, imperfect, and future tenses",
+        "Oral and written expressions in French",
+        "Grammar: sentence construction and essay writing (subject and verb)",
+        "Examples: Mariam mange le riz, René regarde la télé",
+        "Negation: ne + verb + pas, ne plus, ne jamais"
+      ],
+      "vocabulary": ["conjuguer", "imparfait", "essai", "sujet", "verbe", "affirmatif", "négatif", "ne...pas", "ne...plus", "ne...jamais"],
+      "activities": [
+        "Construct sentences using verb tenses",
+        "State the importance of different verbs and their usage",
+        "Group discussions",
+        "Identifying verbs in sentences"
+      ],
+      "materials": ["Textbooks (Mastery for French)", "Verbs chart", "Conjugation chart", "Posters", "Colorful markers"],
+      "assessment": [
+        "Continuous assessment",
+        "Group assignments and presentations",
+        "Oral and written drills",
+        "Students' demonstration of conjugation"
+      ]
+    },
+    {
+      "grade": "12",
+      "semester": 1,
+      "period": "II",
+      "topic": "Les Adjectifs (Adjectives)",
+      "learning_outcomes": [
+        "Build and develop vocabulary skills through the effective use of descriptive words",
+        "Develop skills with the appropriate use of adjectives through speaking and writing",
+        "Translate sentences from French to English or English to French (oral and written)"
+      ],
+      "objectives": [
+        "Identify and discuss the different kinds of adjectives to describe persons, places, and things in French Language",
+        "Distinguish the masculine and feminine forms of adjectives to modify a person, place, or thing using possessive words"
+      ],
+      "key_content": [
+        "Vocabulary development: petit, grand, gros, méchant",
+        "Oral and written expressions in French",
+        "Grammar: describing objects, people, and places (physical, size, structure, shape, state of being)",
+        "Être + adjective (masculine and feminine): Il est gros/petit, Elle est grosse/petite",
+        "Kinds of adjectives: demonstrative, possessive, descriptive, indefinite, interrogative (agreement and position)"
+      ],
+      "vocabulary": ["démonstratif", "possessif", "descriptif", "indéfini", "interrogatif", "accord", "position", "petit", "grand", "gros"],
+      "activities": [
+        "Construct sentences using adjective words",
+        "Write sentences describing and showing possessions of persons",
+        "Group discussions",
+        "Identifying adjectives in sentences",
+        "Oral and written drills"
+      ],
+      "materials": ["Textbooks (Mastery for French, Et Vous?)", "Adjectives chart", "Posters", "Colorful markers, pencils"],
+      "assessment": [
+        "Continuous assessment",
+        "Group assignments and presentations",
+        "Oral and written drills",
+        "Students' demonstration describing various objects, persons (physical, structure, state of being, possession, gender, abilities, learning styles)",
+        "Describe the class in French"
+      ]
+    },
+    {
+      "grade": "12",
+      "semester": 1,
+      "period": "III",
+      "topic": "Les Noms et Les Articles (Nouns and Articles)",
+      "learning_outcomes": [
+        "Build and develop vocabulary skills through the effective use of nouns and articles",
+        "Develop skills with the appropriate use of nouns and articles according to their gender and number through speaking and writing",
+        "Translate sentences from French to English or English to French"
+      ],
+      "objectives": [
+        "Identify and describe nouns and articles in French Language",
+        "Explain nouns and articles and state the definition of each",
+        "Construct sentences using nouns and articles",
+        "Group nouns according to categories (identifying nouns and articles in sentences)"
+      ],
+      "key_content": [
+        "Vocabulary development: le nez, un cahier, une fille",
+        "Oral and written expressions in French",
+        "Grammar: gender of nouns singular and plural (un garçon, une fille, des garçons, des filles, un cahier, une chaise)",
+        "Example: un cahier est sur la table",
+        "Articles: definite, indefinite, singular, plural",
+        "Example: Le père d'Ali attrappe son cabris"
+      ],
+      "vocabulary": ["le", "la", "les", "un", "une", "des", "garçon", "fille", "cahier", "chaise", "singulier", "pluriel"],
+      "activities": [
+        "Construct sentences using nouns and articles",
+        "Write sentences describing and showing nouns and articles",
+        "Group discussions",
+        "Identifying nouns and articles in sentences (genders of nouns)",
+        "Oral and written drills",
+        "State the important points about the usage of nouns and articles"
+      ],
+      "materials": ["Textbooks (Mastery for French, Et Vous?, Easy French Step-by-Step)", "Nouns and articles charts", "Posters"],
+      "assessment": [
+        "Continuous assessment",
+        "Group assignments and presentations",
+        "Oral and written drills",
+        "Students' demonstration answering questions on activities related to articles and nouns",
+        "Debate (boys vs girls) on gender of nouns and articles"
+      ]
+    },
+    {
+      "grade": "12",
+      "semester": 2,
+      "period": "IV",
+      "topic": "Les Prépositions (Prepositions)",
+      "learning_outcomes": [
+        "Build and develop vocabulary skills through the effective use of prepositions",
+        "Translate sentences from French to English or English to French (oral and written)",
+        "Differentiate the kinds of prepositions"
+      ],
+      "objectives": [
+        "Give the definition of preposition",
+        "Identify and describe the use of prepositions in French",
+        "Construct sentences using prepositions",
+        "Differentiate the kinds of prepositions"
+      ],
+      "key_content": [
+        "Vocabulary development: devant, avant, pour, derrière, à côté de",
+        "Oral and written expressions in French",
+        "Grammar: prepositions of location, time, and sequence",
+        "Interrogative + preposition (qui and quoi)"
+      ],
+      "vocabulary": ["devant", "avant", "pour", "derrière", "à côté de", "qui", "quoi", "où", "dans", "sur"],
+      "activities": [
+        "Construct sentences using prepositions",
+        "Write sentences describing and showing different kinds of prepositions",
+        "Group discussions",
+        "Identifying prepositions in sentences",
+        "Oral and written drills",
+        "Dramatization"
+      ],
+      "materials": ["Textbooks (Mastery for French, Et Vous?, Easy French Step-by-Step)", "Prepositions charts", "Map (world)", "Posters"],
+      "assessment": [
+        "Continuous assessment",
+        "Group assignments and presentations",
+        "Oral and written drills",
+        "Students' demonstration using maps to show which county/country each student comes from",
+        "Debate (boys vs girls) on prepositions"
+      ]
+    },
+    {
+      "grade": "12",
+      "semester": 2,
+      "period": "V",
+      "topic": "Les Parties du Corps Humain (Parts of the Human Body)",
+      "learning_outcomes": [
+        "Identify, describe, and name parts of the human body in French",
+        "Use short conversation in French to describe the human body",
+        "Translate words (body parts) from French to English or English to French (oral and written)",
+        "Use simple adjectives to describe the parts of the human body"
+      ],
+      "objectives": [
+        "Describe, identify, and name the different parts of the human body in French",
+        "Develop short conversation in French to tell the function of each part of the human body",
+        "List the parts of the human body in French"
+      ],
+      "key_content": [
+        "Vocabulary development: le nez, la main, la tête, le visage, le pied",
+        "Grammar: possessive + noun (mon pied, ma tête, la main)",
+        "Simple conversation: voici ma main, c'est mon pied, ce sont mes yeux, voici mon genou"
+      ],
+      "vocabulary": ["le nez", "la main", "la tête", "le visage", "le pied", "les yeux", "le genou", "mon", "ma", "mes"],
+      "activities": [
+        "Body parts recognition in French",
+        "Role play using short conversation in French to describe the human body parts",
+        "Draw and label the basic parts of the human body",
+        "Oral and written participation"
+      ],
+      "materials": ["Parts of the body poster", "Audio", "Textbook (Easy French Step-by-Step)", "Posters", "Colorful markers, pencils"],
+      "assessment": [
+        "Class participation and presentation using short conversation in French (boys vs girls)",
+        "Illustrate and label each part of the body in French (students' demonstration)",
+        "Puzzles",
+        "Individual and group assignments and presentations"
+      ]
+    },
+    {
+      "grade": "12",
+      "semester": 2,
+      "period": "VI",
+      "topic": "Les Professions (Professions)",
+      "learning_outcomes": [
+        "Identify, describe, and list different professions in French",
+        "Use short conversation in French to describe each profession and their importance",
+        "Translate words (professions) from French to English or English to French (oral and written)"
+      ],
+      "objectives": [
+        "Describe, identify, and list the different kinds of professions in French",
+        "Develop short conversation in French to tell about each profession",
+        "Discuss the various kinds of professions in French"
+      ],
+      "key_content": [
+        "Vocabulary development: musicien, chanteuse, médecin",
+        "Grammar: noun + être + article + profession (je suis un médecin, tu es une musicienne)",
+        "Simple conversation: nous sommes des chanteurs"
+      ],
+      "vocabulary": ["musicien", "musicienne", "chanteuse", "chanteur", "médecin", "profession", "je suis", "tu es", "nous sommes"],
+      "activities": [
+        "Discuss the various professions in French",
+        "Role play using short conversation in French to describe each profession and their importance",
+        "Oral and written participation"
+      ],
+      "materials": ["Different professions poster", "Audio", "Textbook (Modern French)", "Posters", "Colorful markers, pencils"],
+      "assessment": [
+        "Continuous assessment",
+        "Group assignments and presentations",
+        "Oral and written drills",
+        "Students' demonstration modeling each profession",
+        "Debate (boys vs girls) on the importance of each profession",
+        "Individual and group assignments and presentations"
+      ]
+    }
+  ]
+}

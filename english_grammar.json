@@ -1,0 +1,1006 @@
+{
+  "subject": "English Grammar",
+  "grades": ["10", "11", "12"],
+  "source": "Liberia Ministry of Education - National Curriculum for Senior Secondary Schools",
+  "total_topics": 18,
+  "topics": [
+    {
+      "id": "eng_g10_s1_p1",
+      "grade": "10",
+      "semester": 1,
+      "period": "I",
+      "topic": "Grammar: Nouns and Pronouns",
+      "learning_outcomes": [
+        "Learners are able to use correct nouns and pronouns in writing different types of compositions."
+      ],
+      "objectives": [
+        "Construct sentences using nouns and pronouns correctly",
+        "Distinguish nouns from pronouns in different types of compositions",
+        "Use nouns and pronouns effectively in oral and written English",
+        "Define nouns and pronouns",
+        "Identify and use the kinds of nouns and pronouns correctly in spoken and written English"
+      ],
+      "content": [
+        "Nouns: Common and Proper, Concrete and Abstract, Singular and Plural, Compound and Collective, Countable and Uncountable",
+        "Narration: Autobiographical Writing",
+        "Pronouns (Antecedents of Pronouns): Personal Pronouns, Possessive Pronouns, Indefinite Pronouns, Demonstrative Pronouns, Interrogative Pronouns",
+        "Narration: Short Story",
+        "Vocabulary Development"
+      ],
+      "activities": [
+        "Assign learners to point out that words that name persons, places, things, or ideas are nouns; ask learners to list the different kinds of nouns in a given piece of work",
+        "Group learners and give at least ten words every week; assign learners into groups to emphasize that pronouns replace nouns and ask them to give examples",
+        "Discuss pronouns and their antecedents; help learners understand the more difficult concepts of pronouns standing for entire groups of words and antecedents that follow pronouns",
+        "Vocabulary Development: Learners to learn spellings and meanings and be able to use them in sentences",
+        "Review study skills and note taking"
+      ],
+      "primary_text": "Gateway to English for Senior High Schools, N. Grant & A B K Dadzie (Eds.), Students' Book 1 (Longman & Sedco, 2008)",
+      "secondary_texts": [
+        "Senior Secondary Guide English - Pearson",
+        "Living English Structure for Schools (Longman, 2008) W. Stannard Allen",
+        "Writing and Grammar — Communication in Action, Prentice Hall",
+        "Longman Dictionary of Contemporary English (5th Edition)"
+      ],
+      "web_resources": [
+        "www.grammarly.com",
+        "www.quora.com",
+        "www.myenglishpages.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills",
+        "Organizational ability",
+        "Creativity and Innovation skills"
+      ],
+      "assessment_strategies": [
+        "Quizzes",
+        "Homework",
+        "Assignments",
+        "Oral Presentations",
+        "Projects"
+      ]
+    },
+    {
+      "id": "eng_g10_s1_p2",
+      "grade": "10",
+      "semester": 1,
+      "period": "II",
+      "topic": "Grammar: Verbs — Part 1",
+      "learning_outcomes": [
+        "Learners are able to effectively construct composition using different tenses of verbs; learners will use verbs correctly when speaking."
+      ],
+      "objectives": [
+        "Write sentences using verbs correctly",
+        "Distinguish between visible and mental action verbs",
+        "Distinguish between transitive and intransitive verbs",
+        "Identify helping verbs and how they are used",
+        "Use the different tenses of verbs correctly"
+      ],
+      "content": [
+        "Verbs Part 1: Action Verbs — Transitive and Intransitive",
+        "Linking Verbs",
+        "Helping and Modal auxiliaries",
+        "Tenses of Verbs (present, past and future)",
+        "Progressive forms of Verbs",
+        "Descriptive Writing",
+        "Narrative Writing"
+      ],
+      "activities": [
+        "Assign learners to construct sentences with appropriate action verbs and point out the action words, whether visible or mental",
+        "Divide learners into small groups to identify transitive verbs in sentences and the objects that receive the action of the verb; emphasize that intransitive verbs do not",
+        "Assign learners to distinguish between the main and helping verbs in passages",
+        "Assign learners to construct sentences using the three verb tenses",
+        "Help learners go through the writing process and develop given topics into descriptive essays"
+      ],
+      "primary_text": "Gateway to English for Senior High Schools, N. Grant & A B K Dadzie (Eds.), Students' Book 1 (Longman & Sedco, 2008)",
+      "secondary_texts": [
+        "Senior Secondary Guide English - Pearson",
+        "Living English Structure for Schools (Longman, 2008) W. Stannard Allen",
+        "Writing and Grammar — Communication in Action, Prentice Hall",
+        "Longman Dictionary of Contemporary English (5th Edition)"
+      ],
+      "web_resources": [
+        "www.khanacademy.org"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills",
+        "Organizational ability",
+        "Creativity and Innovation skills"
+      ],
+      "assessment_strategies": [
+        "Quizzes",
+        "Classwork",
+        "Homework/Assignment",
+        "Oral Presentations",
+        "Debates"
+      ]
+    },
+    {
+      "id": "eng_g10_s1_p3",
+      "grade": "10",
+      "semester": 1,
+      "period": "III",
+      "topic": "Grammar: Verbs — Part 2",
+      "learning_outcomes": [
+        "Learners are able to construct different types of essays using the three verb tenses, regular and irregular verbs correctly."
+      ],
+      "objectives": [
+        "Utilize the perfect tenses of verbs correctly",
+        "Distinguish between regular and irregular verbs and how they form their past tenses",
+        "Write persuasive essays using the relevant mechanics"
+      ],
+      "content": [
+        "Verbs Part 2: Tenses (present perfect, past perfect and future perfect tenses)",
+        "Regular Verbs",
+        "Irregular Verbs",
+        "Comparative and Superlative forms",
+        "Persuasion: Persuasive Essay"
+      ],
+      "activities": [
+        "Assign learners to explain and demonstrate the perfect tenses of verbs",
+        "Group learners to construct sentences using the perfect tenses",
+        "Assign learners to list regular and irregular verbs discussing how their past tense is formed",
+        "Group learners to construct sentences using regular and irregular verbs in their present and past tenses",
+        "Group learners to do persuasive writing and discuss the issues involved for presentation"
+      ],
+      "primary_text": "Gateway to English for Senior High Schools, N. Grant & A B K Dadzie (Eds.), Students' Book 1 (Longman & Sedco, 2008)",
+      "secondary_texts": [
+        "Senior Secondary Guide English - Pearson",
+        "Living English Structure for Schools (Longman, 2008) W. Stannard Allen",
+        "Writing and Grammar — Communication in Action, Prentice Hall",
+        "Longman Dictionary of Contemporary English (5th Edition)"
+      ],
+      "web_resources": [
+        "www.eslbuzz.com",
+        "www.englishhints.com",
+        "www.languagelearningbase.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills",
+        "Organizational ability",
+        "Creativity and Innovation skills"
+      ],
+      "assessment_strategies": [
+        "Assignment",
+        "Quizzes",
+        "Debate"
+      ]
+    },
+    {
+      "id": "eng_g10_s2_p4",
+      "grade": "10",
+      "semester": 2,
+      "period": "IV",
+      "topic": "Grammar: Adjectives and Adverbs",
+      "learning_outcomes": [
+        "Learners are able to demonstrate proper use of Adjectives and Adverbs in compositions."
+      ],
+      "objectives": [
+        "Distinguish adjectives from other parts of speech and explain how they modify nouns and pronouns",
+        "Apply adjectives and adverbs appropriately to make writing vivid or precise",
+        "Recognize adverbs and how they modify verbs, adjectives, and adverbs",
+        "Debate the four questions adverbs answer (Where? When? In what way? To what extent?)",
+        "Discuss adjectives and ask questions such as what kind, which one, how much, or how many"
+      ],
+      "content": [
+        "Adjectives: Proper Adjectives, Compound Adjectives",
+        "Adverbs: Conjunctive Adverbs"
+      ],
+      "activities": [
+        "Learners identify adjectives and the nouns or pronouns they modify",
+        "Learners write adjectives and adverbs in speech and writings",
+        "Learners classify adjectives and adverbs"
+      ],
+      "primary_text": "Gateway to English for Senior High Schools, N. Grant & A B K Dadzie (Eds.), Students' Book 1 (Longman & Sedco, 2008)",
+      "secondary_texts": [
+        "Senior Secondary Guide English - Pearson",
+        "Living English Structure for Schools (Longman, 2008) W. Stannard Allen",
+        "Writing and Grammar — Communication in Action, Prentice Hall",
+        "Longman Dictionary of Contemporary English (5th Edition)"
+      ],
+      "web_resources": [
+        "www.eslbuzz.com",
+        "www.englishhints.com",
+        "www.languagelearningbase.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills",
+        "Organizational ability",
+        "Creativity and Innovation skills"
+      ],
+      "assessment_strategies": [
+        "Quizzes",
+        "Classwork",
+        "Homework",
+        "Assignments",
+        "Oral Presentations",
+        "Projects"
+      ]
+    },
+    {
+      "id": "eng_g10_s2_p5",
+      "grade": "10",
+      "semester": 2,
+      "period": "V",
+      "topic": "Grammar: Prepositions, Conjunctions, and Interjections",
+      "learning_outcomes": [
+        "Learners are able to effectively demonstrate the correct use of Prepositions, Conjunctions, and Interjections in written and spoken English."
+      ],
+      "objectives": [
+        "Establish that a prepositional phrase consists of a preposition and a noun or pronoun",
+        "Distinguish prepositions with their objects from adverbs",
+        "Pinpoint coordinating, subordinating, and correlative conjunctions",
+        "Properly use conjunctive adverbs",
+        "Demonstrate that interjections express feelings or emotions and function independently of a sentence"
+      ],
+      "content": [
+        "Prepositions: Prepositions and Prepositional phrase, Telling Prepositions and Adverbs apart",
+        "Conjunctions: Coordinating conjunctions, Correlative conjunctions, Subordinating conjunctions, Conjunctive adverbs",
+        "Interjections",
+        "Persuasion: Advertisement"
+      ],
+      "activities": [
+        "Assign learners in groups to discuss that prepositions perform the important task of relating words in a sentence; they show relationships including location, direction, cause, and possession",
+        "Learners identify prepositions in sentences and point out the relationships shown",
+        "Teacher writes sentences on the board omitting the conjunctions and have learners supply them",
+        "Learners discuss the functions of conjunctions",
+        "Divide learners in groups to identify the different types of conjunctions and provide examples",
+        "Learners discuss what a conjunctive adverb is, list examples, and explain the correlation between two ideas (contrast, similarity, emphasis)"
+      ],
+      "primary_text": "Gateway to English for Senior High Schools, N. Grant & A B K Dadzie (Eds.), Students' Book 1 (Longman & Sedco, 2008)",
+      "secondary_texts": [
+        "Senior Secondary Guide English - Pearson",
+        "Living English Structure for Schools, W. Stannard Allen"
+      ],
+      "web_resources": [
+        "www.eslbuzz.com",
+        "www.englishhints.com",
+        "www.languagelearningbase.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills",
+        "Organizational ability",
+        "Creativity and Innovation skills"
+      ],
+      "assessment_strategies": [
+        "Quizzes",
+        "Classwork",
+        "Homework",
+        "Assignments",
+        "Oral Presentations",
+        "Project"
+      ]
+    },
+    {
+      "id": "eng_g10_s2_p6",
+      "grade": "10",
+      "semester": 2,
+      "period": "VI",
+      "topic": "Grammar: Phrases and Clauses",
+      "learning_outcomes": [
+        "Learners are able to demonstrate the ability to use correct English phrases in written and spoken English."
+      ],
+      "objectives": [
+        "Recognize kinds of phrases in sentences",
+        "Distinguish prepositional phrases from adjective and adverb phrases in sentences",
+        "Identify appositives and appositive phrases and the words they name",
+        "Apply participle and participial phrases in sentences",
+        "Identify gerunds and gerund phrases in sentences",
+        "Construct sentences using infinitives and infinitive phrases",
+        "Compare and contrast independent and subordinate clauses"
+      ],
+      "content": [
+        "Phrases: Noun phrase, Verb phrase",
+        "Verbal Phrases: Participle Phrase, Gerund Phrase, Infinitive Phrase",
+        "Phrasal Verbs: Verb followed by a preposition or adverb (e.g., ran across, broke down, get away)",
+        "Prepositional Phrases",
+        "Clauses: Independent Clauses, Dependent Clauses, Noun Clauses, Adjective Clauses, Adverb Clauses",
+        "Exposition: Comparison and Contrast Literature"
+      ],
+      "activities": [
+        "Learners discuss kinds of phrases and provide examples",
+        "Learners differentiate between noun phrases and verb phrases",
+        "Learners brainstorm and generate examples of various phrases",
+        "Learners explain what appositives are, and identify them in sentences; give examples of appositive phrases",
+        "Organize learners into groups to discuss gerunds, infinitives, and participles in various sentences with examples",
+        "Learners classify verbal phrases that function as noun, adjective, or adverb",
+        "Learners write comparison-and-contrast essay; learners should develop topics"
+      ],
+      "primary_text": "Gateway to English for Senior High Schools, N. Grant & A B K Dadzie (Eds.), Students' Book 1 (Longman & Sedco, 2008)",
+      "secondary_texts": [
+        "Senior Secondary Guide English - Pearson",
+        "Living English Structure for Schools (Longman, 2008) W. Stannard Allen",
+        "Writing and Grammar — Communication in Action, Prentice Hall",
+        "Longman Dictionary of Contemporary English (5th Edition)"
+      ],
+      "web_resources": [
+        "www.eslbuzz.com",
+        "www.englishhints.com",
+        "www.languagelearningbase.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills",
+        "Organizational ability",
+        "Creativity and Innovation skills"
+      ],
+      "assessment_strategies": [
+        "Quizzes",
+        "Classwork",
+        "Homework",
+        "Assignments",
+        "Oral Presentations"
+      ]
+    },
+    {
+      "id": "eng_g11_s1_p1",
+      "grade": "11",
+      "semester": 1,
+      "period": "I",
+      "topic": "Grammar: Verb Usage — Part 1",
+      "learning_outcomes": [
+        "Learners are able to apply previous knowledge gained to use verbs correctly in written composition and write book reports."
+      ],
+      "objectives": [
+        "Classify and use the six tenses of verb correctly, including the progressive forms",
+        "Use the five forms of verbs correctly",
+        "Write effective book reports"
+      ],
+      "content": [
+        "The five forms of a verb: Base form (start), s-form (starts), ing form (starting), Past tense (started), Past Participle (has/have started)",
+        "Using the six tenses of verb correctly (including the progressive forms)",
+        "Writing book reports in the context of literature"
+      ],
+      "activities": [
+        "Assign learners to write a cause and effect passage and state the problem",
+        "Learners discuss contemporary issues to develop topics into cause-and-effect essay",
+        "Learners read passages from any given text and identify as many verb tenses as possible; classify the identified verbs into verb tenses",
+        "Learners incorporate sentences using the six tenses of verb",
+        "Assign learners to read short stories and write book report using the standard format"
+      ],
+      "primary_text": "Gateway to English for Senior Secondary Schools, N. Grant & A B K Dadzie (Eds.), Students' Book 2 (Longman & Sedco, 2007)",
+      "secondary_texts": [
+        "Senior Secondary Guide English - Pearson",
+        "Living English Structure for Schools (Longman, 2008) W. Stannard Allen",
+        "Common Mistakes in English (Longman, 2000) T.J. Fitikides",
+        "Writing and Grammar — Communication in Action, Prentice Hall",
+        "Longman Dictionary of Contemporary English (5th Edition)"
+      ],
+      "web_resources": [
+        "www.eslbuzz.com",
+        "www.englishhints.com",
+        "www.languagelearningbase.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills",
+        "Organizational ability",
+        "Creativity and Innovation skills"
+      ],
+      "assessment_strategies": [
+        "Quizzes",
+        "Classwork",
+        "Homework",
+        "Assignments",
+        "Oral Presentations"
+      ]
+    },
+    {
+      "id": "eng_g11_s1_p2",
+      "grade": "11",
+      "semester": 1,
+      "period": "II",
+      "topic": "Grammar: Verb Usage — Active and Passive Voice",
+      "learning_outcomes": [
+        "Learners are able to write effective paragraphs using passive and active voices of the verb tenses."
+      ],
+      "objectives": [
+        "Classify the active and passive voices of sentences, and construct sentences effectively",
+        "Construct effective paragraphs using the elements of a paragraph",
+        "Apply proper mechanics to write sentences effectively"
+      ],
+      "content": [
+        "Verb usage: Proper verb usage, Active and Passive voices",
+        "Writing Paragraph: The Topic Sentence, The Body, The Conclusion, Unity, Coherence",
+        "Proofreading: Mechanics of grammar, Misspelled words, Grammatical errors (run-on sentences, sentence fragments, shift in pronouns, wrong capitalization, abbreviation)"
+      ],
+      "activities": [
+        "Learners review previous lesson on the verb tenses",
+        "Learners write the past tense of given irregular verbs",
+        "Learners construct verbs whose present principal part ends in 'y' by adding 'i' to form the third person singular",
+        "Learners read short paragraphs and identify the main idea; develop topic sentences and supporting details using current events topics",
+        "Compose effective paragraphs explicitly stating an opinion"
+      ],
+      "primary_text": "Gateway to English for Senior Secondary Schools, N. Grant & A B K Dadzie (Eds.), Students' Books 1, 2 & 3 (Longman & Sedco, 2007)",
+      "secondary_texts": [
+        "Senior Secondary Guide English - Pearson",
+        "Living English Structure for Schools (Longman, 2008) W. Stannard Allen",
+        "Common Mistakes in English (Longman, 2000) T.J. Fitikides",
+        "Writing and Grammar — Communication in Action, Prentice Hall",
+        "Longman Dictionary of Contemporary English (5th Edition)"
+      ],
+      "web_resources": [
+        "www.eslbuzz.com",
+        "www.englishhints.com",
+        "www.languagelearningbase.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills",
+        "Organizational ability",
+        "Creativity and Innovation skills"
+      ],
+      "assessment_strategies": [
+        "Quizzes",
+        "Classwork",
+        "Homework",
+        "Assignments",
+        "Oral Presentations"
+      ]
+    },
+    {
+      "id": "eng_g11_s1_p3",
+      "grade": "11",
+      "semester": 1,
+      "period": "III",
+      "topic": "Grammar: Verb Usage — Part 3 and Essay Writing",
+      "learning_outcomes": [
+        "Learners are able to demonstrate more proficient use of verbs in spoken and written English by writing proper expositions."
+      ],
+      "objectives": [
+        "Use verbs in the past progressive, present simple, past simple, past continuous, and future tenses",
+        "Identify the thesis statement of the essay",
+        "Use the dictionary effectively in defining words"
+      ],
+      "content": [
+        "Verb usage Part 3: Using past continuous, Using present simple, Past simple, Using past continuous",
+        "Writing Essays: Selecting writing topics, The thesis statement, The Organization of the Essay, Unity, Coherence, Mechanics",
+        "Dictionary skills: Words arranged in alphabetical order, Using guide words, Finding the meaning of each word, Parts of speech"
+      ],
+      "activities": [
+        "Assign learners in groups to discuss thesis statement and have them identify the central idea as the thesis statement of a paragraph",
+        "Learners must identify supporting ideas in each body part that relates to the thesis statement",
+        "Learners must identify the concluding paragraph",
+        "Learners give a series of topics; formulate thesis statements on various topics",
+        "Learners demonstrate usage of the dictionary"
+      ],
+      "primary_text": "Gateway to English for Senior High Schools, N. Grant & A B K Dadzie (Eds.), Students' Book 2 (Longman & Sedco, 2008)",
+      "secondary_texts": [
+        "Senior Secondary Guide English - Pearson",
+        "Living English Structure for Schools (Longman, 2008) W. Stannard Allen",
+        "Writing and Grammar — Communication in Action, Prentice Hall",
+        "Longman Dictionary of Contemporary English (5th Edition)"
+      ],
+      "web_resources": [
+        "www.eslbuzz.com",
+        "www.englishhints.com",
+        "www.languagelearningbase.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills",
+        "Organizational ability",
+        "Creativity and Innovation skills"
+      ],
+      "assessment_strategies": [
+        "Quizzes",
+        "Classwork",
+        "Homework",
+        "Assignments",
+        "Oral Presentations"
+      ]
+    },
+    {
+      "id": "eng_g11_s2_p4",
+      "grade": "11",
+      "semester": 2,
+      "period": "IV",
+      "topic": "Grammar: Vocabulary and Spelling",
+      "learning_outcomes": [
+        "Learners are able to demonstrate proper use of words with similar meanings, opposite meanings, prefixes, suffixes, and root words in compositions."
+      ],
+      "objectives": [
+        "Explain the differences amongst synonyms, antonyms, and homophones",
+        "Define prefix, root, and suffix to learn words",
+        "Apply spelling rules"
+      ],
+      "content": [
+        "Synonyms, Antonyms, and Homophones/Homographs",
+        "Prefixes and meaning: Word Analysis, Root and Meaning, Affixes",
+        "Suffixes and meaning",
+        "Commonly Misspelled words",
+        "Vocabulary and Spelling: Using Context Clues, Spelling Rules"
+      ],
+      "activities": [
+        "Learners discuss Synonyms, Antonyms, Homophones, and Homographs and indicate examples of each",
+        "Learners review and discuss root words and use context clues to arrive at word meanings",
+        "Learners review commonly misspelled words for proper spellings",
+        "Learners take turns constructing sentences using context clues",
+        "Learners generate a list of synonyms, homographs, antonyms and homophones",
+        "Learners write words with prefixes and suffixes",
+        "Learners explore the use of roots as a way of finding out the meanings of unfamiliar words",
+        "Learners review and discuss the difference between base words and root words",
+        "Learners analyze word parts to distinguish meaning"
+      ],
+      "primary_text": "Gateway to English for Senior High Schools, N. Grant & A B K Dadzie (Eds.), Students' Book 2 (Longman & Sedco, 2008)",
+      "secondary_texts": [
+        "Senior Secondary Guide English - Pearson",
+        "Living English Structure for Schools (Longman, 2008) W. Stannard Allen",
+        "Common Mistakes in English (Longman, 2000) T.J. Fitikides",
+        "Writing and Grammar — Communication in Action, Prentice Hall",
+        "Longman Dictionary of Contemporary English (5th Edition)"
+      ],
+      "web_resources": [
+        "www.eslbuzz.com",
+        "www.englishhints.com",
+        "www.languagelearningbase.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills",
+        "Organizational ability",
+        "Creativity and Innovation skills"
+      ],
+      "assessment_strategies": [
+        "Quizzes",
+        "Classwork",
+        "Homework",
+        "Assignments",
+        "Oral Presentations"
+      ]
+    },
+    {
+      "id": "eng_g11_s2_p5",
+      "grade": "11",
+      "semester": 2,
+      "period": "V",
+      "topic": "Grammar: Library Skills and Reading Comprehension",
+      "learning_outcomes": [
+        "Learners are able to demonstrate proper use of Card Catalog to find materials in library to develop critical thinking and reading skills."
+      ],
+      "objectives": [
+        "Use the card catalog or online catalog to find information in the library",
+        "Provide correct answers to comprehension and critical thinking questions from given text",
+        "Apply the various reading methods to get meaning from passages"
+      ],
+      "content": [
+        "Library Skills: Using Card Catalog/Online Catalog to find materials in the library, Call number, Information in the catalog, Materials in the Library",
+        "Reading Comprehension: Answering reading comprehension questions, Direct questions, Critical thinking questions",
+        "Active Reading: Activity before reading, Activity when reading, Activity after reading",
+        "Reading Methods: Scanning, Skimming, SQ4R Method (Survey, Question, Read, Record, Recite, Review)"
+      ],
+      "activities": [
+        "Group learners to demonstrate the use of card catalog to find materials in the library",
+        "Divide learners into groups to set up a library in the class with a librarian and prepare card catalog with poster sheet and have learners role play to find materials",
+        "Assign learners to organize a class visit to the nearest library as a follow-up",
+        "Learners read passages and answer comprehension questions",
+        "Learners discuss and explain reading methods listed in the content"
+      ],
+      "primary_text": "Gateway to English for Senior High Schools, N. Grant & A B K Dadzie (Eds.), Students' Book 2 (Longman & Sedco, 2008)",
+      "secondary_texts": [
+        "Senior Secondary Guide English - Pearson",
+        "Living English Structure for Schools (Longman, 2008) W. Stannard Allen",
+        "Common Mistakes in English (Longman, 2000) T.J. Fitikides",
+        "Writing and Grammar — Communication in Action, Prentice Hall",
+        "Longman Dictionary of Contemporary English (5th Edition)"
+      ],
+      "web_resources": [
+        "www.eslbuzz.com",
+        "www.englishhints.com",
+        "www.languagelearningbase.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills",
+        "Organizational ability",
+        "Creativity and Innovation skills"
+      ],
+      "assessment_strategies": [
+        "Quizzes",
+        "Classwork",
+        "Homework",
+        "Assignments",
+        "Role Play"
+      ]
+    },
+    {
+      "id": "eng_g11_s2_p6",
+      "grade": "11",
+      "semester": 2,
+      "period": "VI",
+      "topic": "Grammar: Letter Writing, Speech Writing, and Report Writing",
+      "learning_outcomes": [
+        "Learners are able to use the parts of formal letter writing to appropriately write business letter, letter of application, excuse, request, and thank you.",
+        "Learners will write speeches as well as reports based on prior knowledge gained."
+      ],
+      "objectives": [
+        "Distinguish the five parts of formal and informal letters",
+        "Pinpoint acceptable forms of letter writing"
+      ],
+      "content": [
+        "Letter Writing: Informal Letter, Formal/Business Letter, Letter of Application, Letter of Excuse/Request/Thanks",
+        "Speech Writing",
+        "Report Writing",
+        "Oral Reading/Speaking",
+        "Listening to Speeches and Oral Presentations for Critical Evaluation"
+      ],
+      "activities": [
+        "Learners explain parts of formal and informal letters",
+        "Divide learners in groups to construct different kinds of writings: Business, Application, Excuse, Request, Speech, and Report",
+        "Learners listen to colleagues as they present for critical evaluation"
+      ],
+      "primary_text": "Gateway to English for Senior High Schools, N. Grant & A B K Dadzie (Eds.), Students' Book 2 (Longman & Sedco, 2008)",
+      "secondary_texts": [
+        "Senior Secondary Guide English - Pearson",
+        "Living English Structure for Schools (Longman, 2008) W. Stannard Allen",
+        "Writing and Grammar — Communication in Action, Prentice Hall",
+        "Longman Dictionary of Contemporary English (5th Edition)"
+      ],
+      "web_resources": [
+        "www.eslbuzz.com",
+        "www.englishhints.com",
+        "www.languagelearningbase.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills",
+        "Organizational ability",
+        "Creativity and Innovation skills"
+      ],
+      "assessment_strategies": [
+        "Quizzes",
+        "Classwork",
+        "Homework",
+        "Assignments",
+        "Oral Presentations"
+      ]
+    },
+    {
+      "id": "eng_g12_s1_p1",
+      "grade": "12",
+      "semester": 1,
+      "period": "I",
+      "topic": "Grammar: The Three Cases of Pronouns and Verb Usage",
+      "learning_outcomes": [
+        "Learners are able to write incorporating the cases of pronouns and perfect tenses of verbs."
+      ],
+      "objectives": [
+        "Construct speeches effectively using the perfect tenses",
+        "Differentiate the three cases of pronouns",
+        "Recognize different kinds of speeches",
+        "Prepare and present speeches",
+        "Summarize passages"
+      ],
+      "content": [
+        "The three Pronoun cases: Nominative, Objective and Possessive",
+        "Verb Usage: Perfect tenses, Present Perfect, Present Perfect Progressive, Past Perfect, Past Perfect Progressive, Future Perfect, Future Perfect Progressive",
+        "Speech Writing",
+        "Summary Writing"
+      ],
+      "activities": [
+        "Divide learners in groups to review and discuss the three cases: Nominative, Objective, and Possessive — provide examples",
+        "In a contrived scenario, learners are asked to use the appropriate tense",
+        "Group learners to read and summarize given texts",
+        "Assign learners to read different kinds of speeches (informative, persuasive, entertaining and extemporaneous), and distinguish identifying characteristics",
+        "Divide learners into groups to develop and present speeches regularly on: Socio-economic issues, Risky behaviors, Teenage pregnancies, Drug and Alcohol Abuse, Gender Based Violence"
+      ],
+      "primary_text": "Gateway to English for Senior High Schools, N. Grant & A B K Dadzie (Eds.), Students' Book 3 (Longman & Sedco, 2008)",
+      "secondary_texts": [
+        "Senior Secondary Guide English - Pearson",
+        "Living English Structure for Schools (Longman, 2008) W. Stannard Allen",
+        "Writing and Grammar — Communication in Action, Prentice Hall",
+        "Longman Dictionary of Contemporary English (5th Edition)"
+      ],
+      "web_resources": [
+        "www.eslbuzz.com",
+        "www.englishhints.com",
+        "www.languagelearningbase.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills",
+        "Organizational ability",
+        "Creativity and Innovation skills"
+      ],
+      "assessment_strategies": [
+        "Quizzes",
+        "Classwork",
+        "Homework",
+        "Assignment",
+        "Oral Presentation"
+      ]
+    },
+    {
+      "id": "eng_g12_s1_p2",
+      "grade": "12",
+      "semester": 1,
+      "period": "II",
+      "topic": "Grammar: Poem, Prose, Drama, Speech Writing and Review of Verb Usage",
+      "learning_outcomes": [
+        "Learners are able to prepare and present original work of art such as poems, short stories, and different kinds of speeches."
+      ],
+      "objectives": [
+        "Create an original work of art such as a poem, a story, or a drama",
+        "Demonstrate effective speech writing skills",
+        "Recognize different kinds of speeches",
+        "Compose and present speeches"
+      ],
+      "content": [
+        "Review Essay Writing",
+        "Creative Writing",
+        "Review Verb Usage",
+        "Five forms/principal parts of a verb",
+        "Tenses: Present simple, Past Simple, Future simple, Present perfect, Past Perfect, Future Perfect"
+      ],
+      "activities": [
+        "Divide learners into groups to write poems, plays or short stories using their imaginations and creativity",
+        "Group learners to have more practice in using the tenses"
+      ],
+      "primary_text": "Gateway to English for Senior High Schools, N. Grant & A B K Dadzie (Eds.), Students' Book 3 (Longman & Sedco, 2008)",
+      "secondary_texts": [
+        "Senior Secondary Guide English - Pearson",
+        "Living English Structure for Schools (Longman, 2008) W. Stannard Allen",
+        "Writing and Grammar — Communication in Action, Prentice Hall",
+        "Longman Dictionary of Contemporary English (5th Edition)"
+      ],
+      "web_resources": [
+        "www.eslbuzz.com",
+        "www.englishhints.com",
+        "www.languagelearningbase.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills",
+        "Organizational ability",
+        "Creativity and Innovation skills"
+      ],
+      "assessment_strategies": [
+        "Quizzes",
+        "Classwork",
+        "Homework",
+        "Assignments",
+        "Oral Presentations"
+      ]
+    },
+    {
+      "id": "eng_g12_s1_p3",
+      "grade": "12",
+      "semester": 1,
+      "period": "III",
+      "topic": "Grammar: Phrasal Verbs, Common Mistakes and Past WASSCE Papers",
+      "learning_outcomes": [
+        "Learners are able to use phrasal verbs and improve their spelling ability and the skills to write and deliver speeches."
+      ],
+      "objectives": [
+        "Construct compositions using proper phrasal verbs",
+        "Demonstrate correct use of words to avoid common mistakes",
+        "Review past WASSCE Papers"
+      ],
+      "content": [
+        "Review Phrasal Verbs",
+        "Review common mistakes and troublesome words",
+        "Review Past WASSCE Papers",
+        "Speech Development/oral practice",
+        "Tips for taking public tests"
+      ],
+      "activities": [
+        "Learners demonstrate use of Phrasal Verbs",
+        "Learners discuss and review troublesome words and common mistakes",
+        "Assign learners to practice writing speeches and present in the classroom for critical evaluation",
+        "Assign learners to review past WASSCE Papers in preparation to be successful in public test taking"
+      ],
+      "primary_text": "Gateway to English for Senior High Schools, N. Grant & A B K Dadzie (Eds.), Students' Book 3 (Longman & Sedco, 2008)",
+      "secondary_texts": [
+        "Senior Secondary Guide English - Pearson",
+        "Living English Structure for Schools (Longman, 2008) W. Stannard Allen",
+        "Common Mistakes in English (Longman, 2000) T.J. Fitikides",
+        "Writing and Grammar — Communication in Action, Prentice Hall",
+        "Longman Dictionary of Contemporary English (5th Edition)"
+      ],
+      "web_resources": [
+        "www.eslbuzz.com",
+        "www.englishhints.com",
+        "www.languagelearningbase.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills",
+        "Organizational ability",
+        "Creativity and Innovation skills"
+      ],
+      "assessment_strategies": [
+        "Quizzes",
+        "Classwork",
+        "Homework",
+        "Assignments",
+        "Oral Presentations"
+      ]
+    },
+    {
+      "id": "eng_g12_s2_p4",
+      "grade": "12",
+      "semester": 2,
+      "period": "IV",
+      "topic": "Grammar: Essay Writing, Creative Writing, and Verb Usage Review",
+      "learning_outcomes": [
+        "Learners are able to write and deliver different kinds of speeches."
+      ],
+      "objectives": [
+        "Compose different kinds of speeches",
+        "Develop and deliver public speeches"
+      ],
+      "content": [
+        "Reviewing Essay Writing",
+        "Creative Writing",
+        "Review Verb Usage: Five forms/principal parts of a verb",
+        "Tenses: Present Simple, Past Simple, Future Simple, Present Perfect, Past Perfect, Future Perfect",
+        "Speech Development/oral practice"
+      ],
+      "activities": [
+        "Divide learners into groups of five in writing expositions: essay, narrative, descriptive, persuasive",
+        "Assign learners to be able to use the principal parts of a verb properly in given texts",
+        "Group learners to evaluate different kinds of writings in the classroom"
+      ],
+      "primary_text": "Gateway to English for Senior High Schools, N. Grant & A B K Dadzie (Eds.), Students' Book 3 (Longman & Sedco, 2008)",
+      "secondary_texts": [
+        "Senior Secondary Guide English - Pearson",
+        "Living English Structure for Schools (Longman, 2008) W. Stannard Allen",
+        "Writing and Grammar — Communication in Action, Prentice Hall",
+        "Longman Dictionary of Contemporary English (5th Edition)"
+      ],
+      "web_resources": [
+        "www.eslbuzz.com",
+        "www.englishhints.com",
+        "www.languagelearningbase.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills",
+        "Organizational ability",
+        "Creativity and Innovation skills"
+      ],
+      "assessment_strategies": [
+        "Quizzes",
+        "Classwork",
+        "Homework",
+        "Assignments",
+        "Oral Presentations"
+      ]
+    },
+    {
+      "id": "eng_g12_s2_p5",
+      "grade": "12",
+      "semester": 2,
+      "period": "V",
+      "topic": "Grammar: Review Vocabulary, Phrases and Clauses",
+      "learning_outcomes": [
+        "Learners are able to apply improved context clues, review of spelling rules, and the discussion and revision of phrases and clauses to construct stories, speeches and other documents."
+      ],
+      "objectives": [
+        "Demonstrate the improved use of context clues in learning vocabulary",
+        "Improved application of spelling rules"
+      ],
+      "content": [
+        "Review vocabulary development and spelling rules",
+        "Review Phrases and Clauses"
+      ],
+      "activities": [
+        "Assign learners to review and discuss vocabulary development through rehearsal exercises",
+        "Group learners to solicit feedback and provide corrective measures",
+        "Divide learners to review and discuss context clues and spelling rules",
+        "Assign learners in groups of five to review and discuss Phrases and Clauses"
+      ],
+      "primary_text": "Gateway to English for Senior High Schools, N. Grant & A B K Dadzie (Eds.), Students' Book 3 (Longman & Sedco, 2008)",
+      "secondary_texts": [
+        "Senior Secondary Guide English - Pearson",
+        "Living English Structure for Schools (Longman, 2008) W. Stannard Allen",
+        "Writing and Grammar — Communication in Action, Prentice Hall",
+        "Longman Dictionary of Contemporary English (5th Edition)"
+      ],
+      "web_resources": [
+        "www.eslbuzz.com",
+        "www.englishhints.com",
+        "www.languagelearningbase.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills",
+        "Organizational ability",
+        "Creativity and Innovation skills"
+      ],
+      "assessment_strategies": [
+        "Revision Exercises",
+        "Quizzes",
+        "Classwork",
+        "Homework",
+        "Assignments",
+        "Oral Presentations"
+      ]
+    },
+    {
+      "id": "eng_g12_s2_p6",
+      "grade": "12",
+      "semester": 2,
+      "period": "VI",
+      "topic": "Grammar: More Review with WASSCE Papers",
+      "learning_outcomes": [
+        "Learners are able to respond positively to questions in past WASSCE Papers and make successful pass in future examinations."
+      ],
+      "objectives": [
+        "Provide correct responses using past WASSCE papers"
+      ],
+      "content": [
+        "More Review with WASSCE papers"
+      ],
+      "activities": [
+        "Divide learners in groups to review and discuss past WASSCE Papers",
+        "Assign learners for continuous rehearsal of past WASSCE Papers to be successful in taking public examinations"
+      ],
+      "primary_text": "Gateway to English for Senior High Schools, N. Grant & A B K Dadzie (Eds.), Students' Book 3 (Longman & Sedco, 2008)",
+      "secondary_texts": [
+        "Senior Secondary Guide English - Pearson",
+        "Living English Structure for Schools (Longman, 2008) W. Stannard Allen",
+        "Writing and Grammar — Communication in Action, Prentice Hall",
+        "Longman Dictionary of Contemporary English (5th Edition)"
+      ],
+      "web_resources": [
+        "www.eslbuzz.com",
+        "www.englishhints.com",
+        "www.languagelearningbase.com"
+      ],
+      "competencies": [
+        "Effective Communication",
+        "Analytical Skills",
+        "Digital Skills",
+        "Research and Problem Solving skills",
+        "Organizational ability",
+        "Creativity and Innovation skills"
+      ],
+      "assessment_strategies": [
+        "Quizzes",
+        "Classwork",
+        "Homework",
+        "Assignments",
+        "Oral Presentations"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1289 @@
+{
+  "subject": "Biology",
+  "grade_range": "10-12",
+  "source": "Liberia Ministry of Education National Curriculum",
+  "total_topics": 18,
+  "topics": [
+    {
+      "id": "BIO-G10-S1-P1",
+      "grade": 10,
+      "semester": 1,
+      "period": 1,
+      "topic": "Introduction to Biology and Its Branches; The Study of Cell as the Basic Unit of Life; Movement of Substances Across Cell Membrane",
+      "objectives": [
+        "Define biology and discuss some of its branches",
+        "Discover major contributors to the development of biology",
+        "Compare the characteristics of living things and non-living things",
+        "Relate the structures and composition of the cell in relation to their functions",
+        "Compare the basic functions of tissues, organs and systems",
+        "Demonstrate the use of the microscope in studying Biology",
+        "Determine the difference amongst Prokaryotic, Eukaryotic, and Akaryotic cells",
+        "Discover the difference between the plant and animal cells",
+        "Examine the movement of substances into and out of the cell",
+        "Appreciate that all living organisms are made up of cells and that the cell is the building block of life"
+      ],
+      "content": [
+        "Definition of Biology and Major Branches: Zoology and Botany",
+        "Contributors to biology: Aristotle, Linnaeus, Pasteur, Koch, Mendel",
+        "Characteristics of Living vs Non-living things: nutrition, respiration, excretion, irritability, movement, growth, reproduction",
+        "Euglena: an organism bordering between animals and plants",
+        "Biological tool: Light microscopes",
+        "Cell and Cell Theory: Basic structures and functions of parts of a cell",
+        "Movement of substances into and out of the cell: osmosis, diffusion, facilitated diffusion, active transport, endocytosis (pinocytosis, phagocytosis), and exocytosis"
+      ],
+      "activities": [
+        "Using concept map, illustrate the branches of biology",
+        "Stating the contributions of some scientists to the field of biology",
+        "Describing branches of biology related to STIs (Microbiology, Parasitology, Virology, Bacteriology)",
+        "Distinguish the basic characteristics of living things including reproduction",
+        "Homework: Drawing cells (animal & plant) and labeling their parts",
+        "LAB: Draw and label the light Microscope and outline functions of each part",
+        "LAB: Identify laboratory materials and apparatus and discuss their uses",
+        "LAB: Use microscope to observe onion epidermal cell and cheek cells"
+      ],
+      "primary_texts": [
+        "Baffour Asante-Owusu, et al. Senior High Biology (Longman, 2009)"
+      ],
+      "supplementary_resources": [
+        "Sue Hocking, et al. OCR Biology (OCR/Heinemann, 2008)",
+        "Doris Koto, et al., Senior Secondary Guide – Biology (Pearson, 2000)",
+        "Senior Secondary Guide Biology (Star Study Guide Series) Martin Barker & David Darch 2nd edition, 2016",
+        "Bob McDuell, Senior High Integrated Science (Pearson, 2009)"
+      ],
+      "lab_materials": [
+        "Compound light microscopes",
+        "Onion bulbs",
+        "Tooth picks",
+        "Prepared slides",
+        "Droppers",
+        "Razor blade",
+        "Iodine solution"
+      ],
+      "competencies": [
+        "Effective Communication Skills",
+        "Analytical and Research Skills",
+        "Research and Problem Solving Skills"
+      ],
+      "assessment": ["Quizzes", "Class works", "Assignments", "Class participation", "Individual presentations", "Lab works", "Test"]
+    },
+    {
+      "id": "BIO-G10-S1-P2",
+      "grade": 10,
+      "semester": 1,
+      "period": 2,
+      "topic": "The Hierarchy and Diversity of Living Things; Unicellular Organisms",
+      "objectives": [
+        "Outline the diversity of living things",
+        "Discuss the basis of taxonomy (classification)",
+        "Discuss the relationship of viruses bordering between living and non-living things",
+        "List the major characteristics of the kingdoms Monera, Protista, Fungi, Plantae and Animalia",
+        "Classify organisms into kingdom, phylum, class, order, family, genus and species",
+        "Explain the basic characteristics of unicellular organisms",
+        "Name unicellular organisms that are causative agents of diseases and the diseases they cause"
+      ],
+      "content": [
+        "Classification and the importance of living things",
+        "Classification of organisms into Kingdom, Phylum, Class, Order, Family, Genus and Species",
+        "Unicellular organisms and STI-causing agents: Fungus, Bacteria (gonorrhea, syphilis), Virus (HIV/AIDS), Protozoa (Trichomonas Vaginalis)",
+        "Sporozoa (plasmodium): causes, effects & preventive methods",
+        "Parasitic protozoa and diseases: Entamoeba histolytica (Amebic dysentery), Giardia lamblia (giardiasis), Plasmodium falciparum (malaria)"
+      ],
+      "activities": [
+        "List the general characteristics of each kingdom",
+        "LAB: Draw and label one organism from each of the five kingdoms",
+        "Draw and label structures of unicellular organisms: Amoeba, Paramecium, Euglena",
+        "Observing unicellular organisms under a microscope from brackish/pond water",
+        "Draw the life cycle of the plasmodium",
+        "List and discuss causative agents of STIs and diseases they cause",
+        "Discussion of effects and preventions of malaria and dysentery"
+      ],
+      "primary_texts": [
+        "Baffour Asante-Owusu, et al. Senior High Biology (Longman, 2009)"
+      ],
+      "supplementary_resources": [
+        "Sue Hocking, et al. OCR Biology (OCR/Heinemann, 2008)",
+        "Doris Koto, et al., Senior Secondary Guide – Biology (Pearson, 2000)",
+        "Senior Secondary Guide Biology (Star Study Guide Series) Martin Barker & David Darch 2nd edition, 2016",
+        "Bob McDuell, Senior High Integrated Science (Pearson, 2009)"
+      ],
+      "lab_materials": [
+        "Charts on kinds of Protozoans",
+        "Compound light microscopes",
+        "Empty slides",
+        "Prepared slides",
+        "Cover slips"
+      ],
+      "competencies": [
+        "Effective Communication Skills",
+        "Analytical and Research Skills",
+        "Research and Problem Solving Skills",
+        "Digital Skills",
+        "Creativity and Innovation Skills"
+      ],
+      "assessment": ["Quizzes", "Class works", "Assignments", "Class participation", "Individual presentations", "Lab works", "Test"]
+    },
+    {
+      "id": "BIO-G10-S1-P3",
+      "grade": 10,
+      "semester": 1,
+      "period": 3,
+      "topic": "Multicellular Organisms and Reproductive Structures",
+      "objectives": [
+        "Discuss the functions of the four types of tissues",
+        "Explain the concept of organ as a combination of tissues and systems as a combination of organs",
+        "Describe the general characteristics of multicellular organisms",
+        "Describe the general characteristics and morphological features of sponges and hydra",
+        "Classify and structurally differentiate worms",
+        "Explain parasitism among worms and the alternative hosts considering their life cycles",
+        "Outline measures for preventing parasitic worm infections",
+        "Differentiate between the leech and earth worm based on morphology",
+        "Compare the structures and functions of the human reproductive systems",
+        "Identify the various stages of the menstrual cycle and explain essence of contraceptive",
+        "Recognize that substance abuse (alcohol and drugs) is harmful to life"
+      ],
+      "content": [
+        "Tissues, Organs, and Systems",
+        "General characteristics of Sponges and Hydra",
+        "Worms: flat worms (Planarian, blood & liver flukes, tape worms), parasitic round worms (ascaris, hook worm, filarial worm, trichina worm), segmented worms (earth worm and leeches)",
+        "Human reproductive structures: male and female reproductive organs and functions",
+        "Human Life cycle: infancy, juvenile, adolescence, adult, senescence",
+        "Menstruation, menstrual hygiene, pregnancy and STIs prevention",
+        "Abstinence, use of condoms, contraceptives",
+        "Substance abuse and sexual desires: definition, names, classification, effects, prevention"
+      ],
+      "activities": [
+        "Explanation of tissues in relation to organs and systems",
+        "Draw and label the body structure of a sponge with functions",
+        "Draw and label the parts of a hydra with functions",
+        "Explanation of conditions for oral transmission of intestinal parasites",
+        "Outlining effects, symptoms and methods of prevention of intestinal parasites",
+        "Dissecting an earth worm and identifying external and internal features",
+        "Observe and draw external structures of filarial worm, tape worm, hook worm, round worm",
+        "Use visual aids to demonstrate natural family planning method",
+        "Drama: A female refusing to have sex because of unsafe period",
+        "Case study on influences of sexual desires",
+        "Role play on resisting things that influence sexual desires"
+      ],
+      "primary_texts": [
+        "Baffour Asante-Owusu, et al. Senior High Biology (Longman, 2009)"
+      ],
+      "supplementary_resources": [
+        "Sue Hocking, et al. OCR Biology (OCR/Heinemann, 2008)",
+        "Doris Koto, et al., Senior Secondary Guide – Biology (Pearson, 2000)",
+        "Senior Secondary Guide Biology (Star Study Guide Series) Martin Barker & David Darch 2nd edition, 2016",
+        "Bob McDuell, Senior High Integrated Science (Pearson, 2009)"
+      ],
+      "lab_materials": [
+        "Charts on various types of tissues, organs, and systems",
+        "Charts/specimens of various kinds of worms",
+        "Dissecting tray",
+        "Dissecting set",
+        "Gloves",
+        "Beakers",
+        "Water",
+        "Petri dish"
+      ],
+      "competencies": [
+        "Effective Communication Skills",
+        "Analytical and Research Skills",
+        "Research and Problem Solving Skills",
+        "Organizational Ability",
+        "Digital Skills",
+        "Creativity and Innovation Skills"
+      ],
+      "assessment": ["Quizzes", "Class works", "Assignments", "Class participation", "Individual presentations", "Lab works", "Test"]
+    },
+    {
+      "id": "BIO-G10-S2-P4",
+      "grade": 10,
+      "semester": 2,
+      "period": 4,
+      "topic": "Arthropods and Biological Control of Pests",
+      "objectives": [
+        "Describe and classify arthropods according to their morphology",
+        "Explain the process of metamorphosis (complete & incomplete) and Ecdysis (molting) in arthropods",
+        "Discuss the role of vectors (cockroach, mosquito, house-fly, and tsetse fly)",
+        "Explain the general characteristics of butterfly",
+        "Elaborate on the economic importance of honey bees and termites",
+        "Discuss pests, their economic importance and control measures",
+        "Describe the features and economic importance of grasshoppers"
+      ],
+      "content": [
+        "Arthropod: General characteristics & classification",
+        "Morphology and life processes: respiration, feeding, mouth parts and body segments",
+        "Life cycle: metamorphosis and molting (complete and incomplete)",
+        "Vectors: Mosquitoes, tsetse fly, house fly, cockroach — mouth parts, feeding, life cycle, disease transmission",
+        "Caste System in Social Insects",
+        "Economic importance of social insects: honey bees and termites",
+        "Pests: economic importance, chemical control, biological control"
+      ],
+      "activities": [
+        "Field trip: collection of different species of insects outdoor",
+        "Study specimen: grasshopper/locust or cockroach, weevils and cotton stainers",
+        "Discussing the economic importance of arthropods",
+        "Diagramming the life cycle of mosquitoes (anopheles) in relationship to the plasmodium (malaria)",
+        "Assignment: Collecting mosquito larvae/wigglers for lab observation",
+        "Listing methods of controlling the spread of malaria",
+        "Draw and label parts of each class of arthropods",
+        "Stating the economic importance of honey bees and termites",
+        "Discussing honey bees and termites as social insects"
+      ],
+      "primary_texts": [
+        "Baffour Asante-Owusu, et al. Senior High Biology (Longman, 2009)"
+      ],
+      "supplementary_resources": [
+        "Sue Hocking, et al. OCR Biology (OCR/Heinemann, 2008)",
+        "Doris Koto, et al., Senior Secondary Guide – Biology (Pearson, 2000)",
+        "Senior Secondary Guide Biology (Star Study Guide Series) Martin Barker & David Darch 2nd edition, 2016",
+        "Bob McDuell, Senior High Integrated Science (Pearson, 2009)"
+      ],
+      "lab_materials": [
+        "Charts on various kinds of arthropods and malaria cycle",
+        "Specimens: crab, crayfish, spiders, centipede, millipede, grasshoppers, butterflies, cockroaches, weevils and cotton stainers",
+        "Insect collecting net",
+        "Dissecting set",
+        "Dissecting tray and gloves",
+        "Hand lenses",
+        "Compound microscope"
+      ],
+      "competencies": [
+        "Effective Communication Skills",
+        "Analytical and Research Skills",
+        "Research and Problem Solving Skills",
+        "Organizational Ability",
+        "Digital Skills",
+        "Creativity and Innovation Skills"
+      ],
+      "assessment": ["Quizzes", "Class works", "Assignments", "Class participation", "Individual presentations", "Lab works", "Test"]
+    },
+    {
+      "id": "BIO-G10-S2-P5",
+      "grade": 10,
+      "semester": 2,
+      "period": 5,
+      "topic": "Plant-Like Organisms (Algae, Mosses, Ferns), Photosynthesis, and Fungi",
+      "objectives": [
+        "Describe the general characteristics, structures and life cycles of algae, mosses, ferns, and Fungi",
+        "Explain the economic importance of algae and fungi to humans",
+        "Describe the process of reproduction in algae",
+        "Explain types of nutrition of fungi",
+        "Describe symbiotic relationship of Fungi in relation to parasitism and saprophytism",
+        "List common fungal diseases of plants and animals",
+        "Explain the process of photosynthesis"
+      ],
+      "content": [
+        "Algae: general characteristics, classification, phytoplankton, green algae, Spirogyra reproduction (sexual and asexual), economic importance",
+        "Mosses (Brachymerium and Funaria): general characteristics, reproduction (alternation of generations), economic importance",
+        "Ferns (Nephrolepis, Platycerium): general characteristics, reproduction, economic importance",
+        "Fungi: general characteristics, classification, nutrition, parasitic and saprophytic modes of life",
+        "Fungal diseases: blight, smuts, rust, athlete's foot, yeast infection, ringworm, eczema",
+        "Fungi reproduction (sexual & asexual) and economic importance",
+        "Photosynthesis: definition, conditions, leaf adaptation, light dependent and independent reactions, products, macronutrients and micronutrients"
+      ],
+      "activities": [
+        "Drawing and labeling parts of a spirogyra",
+        "Drawing and labeling stages of sexual reproduction in spirogyra",
+        "Observing and identifying molded bread under microscope, drawing parts of rhizopus hyphae",
+        "Illustrating the life cycle of rhizopus",
+        "Explaining life cycle of a club fungus",
+        "Collecting and studying a bracket fungus",
+        "Stating ways of preventing fungal infections",
+        "Drawing and labeling life cycles of mosses and ferns",
+        "Experimenting: growing plants in sunlight vs shade",
+        "Wrapping leaves with aluminum foil to compare photosynthesis effects",
+        "Testing a leaf for starch",
+        "Testing to extract chlorophyll",
+        "Experimenting to demonstrate need for chlorophyll in photosynthesis"
+      ],
+      "primary_texts": [
+        "Baffour Asante-Owusu, et al. Senior High Biology (Longman, 2009)"
+      ],
+      "supplementary_resources": [
+        "Sue Hocking, et al. OCR Biology (OCR/Heinemann, 2008)",
+        "Doris Koto, et al., Senior Secondary Guide – Biology (Pearson, 2000)",
+        "Senior Secondary Guide Biology (Star Study Guide Series) Martin Barker & David Darch 2nd edition, 2016",
+        "Bob McDuell, Senior High Integrated Science (Pearson, 2009)"
+      ],
+      "lab_materials": [
+        "Charts on algae, mosses, ferns & fungi",
+        "Specimens (yeast, molded bread, club fungi, bracket fungi)",
+        "Microscope",
+        "Plain slides & prepared slides, cover slips",
+        "Aluminum foil",
+        "Iodine solution",
+        "Ethanol",
+        "Variegated leaf",
+        "Test tubes and rack",
+        "Aquatic plant"
+      ],
+      "competencies": [
+        "Effective Communication Skills",
+        "Analytical and Research Skills",
+        "Research and Problem Solving Skills",
+        "Organizational Ability",
+        "Digital Skills",
+        "Creativity and Innovation Skills"
+      ],
+      "assessment": ["Quizzes", "Class works", "Assignments", "Class participation", "Individual presentations", "Lab works", "Test"]
+    },
+    {
+      "id": "BIO-G10-S2-P6",
+      "grade": 10,
+      "semester": 2,
+      "period": 6,
+      "topic": "Flowering Plants",
+      "objectives": [
+        "Identify the characteristics of flowering plants and distinguish them",
+        "Classify flowering plants into monocotyledonae (monocots) and dicotyledonae (dicots)",
+        "Distinguish the structural characteristics of monocots and dicots",
+        "Describe the structures and functions of roots, stems, leaves, and flowers",
+        "Explain sexual and asexual reproduction in flowering plants",
+        "Determine floral formulae of flowers",
+        "Discuss types of pollination and list agents of pollination",
+        "Explain the process of zygote and embryo formation",
+        "Describe conditions necessary for seed germination",
+        "List the types of fruits and explain fruit and seed dispersal",
+        "Describe plant hormones and their functions",
+        "Explain transport system in plants",
+        "Discuss excretion in plants",
+        "Describe plant growth and development",
+        "Explain gaseous exchange in plants"
+      ],
+      "content": [
+        "Flowering plants classification: monocots & dicots",
+        "Functions of roots, stems, leaves and flowers",
+        "Floral formulae: Flamboyant (Delonix), Pride of Barbados (Caesalpinia), Rattle Box (Crotalaria)",
+        "Types of plant tissues",
+        "Root system: types, regions of root tip, functions and structures of root hairs",
+        "Modified roots, stems and leaves: tubers, bulbs, tendrils, runners",
+        "Leaf classification and arrangement on stem",
+        "Germination: epigeal and hypogeal types, conditions for germination",
+        "Reproduction in flowering plants",
+        "Kinds of fruits and dispersal agents",
+        "Plant Hormones: primary and secondary growth, Nastic and Tactic movements",
+        "Transport system in vascular plants: water and minerals, organic materials",
+        "Excretion in plants: water, CO2, oxygen, alkaloids, tannins, resins, acids, gums",
+        "Pressure flow hypothesis and cytoplasmic streaming",
+        "Transpiration: advantages and disadvantages",
+        "Gaseous exchange: concentration gradient, stomata, lenticels",
+        "Metabolic equations for respiration",
+        "Types of respiration: facultative aerobic and anaerobic"
+      ],
+      "activities": [
+        "Drawing and labeling parts of a complete flower with functions",
+        "Illustration of types of vegetative propagation (cutting, grafting)",
+        "LAB: Setting up experiment to demonstrate germination types using corn and bean seeds",
+        "Examine internal structure of leaf using microscope",
+        "Collecting and classifying various fruits and seeds",
+        "Drawing and labeling cross section of monocot and dicot stems and roots",
+        "Explaining types of pollination and listing agents",
+        "Observing transpiration through experiments",
+        "Field Trip: Collecting and classifying different kinds of leaves",
+        "Examining sections of stems and roots showing growth stages"
+      ],
+      "primary_texts": [
+        "Baffour Asante-Owusu, et al. Senior High Biology (Longman, 2009)"
+      ],
+      "supplementary_resources": [
+        "Sue Hocking, et al. OCR Biology (OCR/Heinemann, 2008)",
+        "Doris Koto, et al., Senior Secondary Guide – Biology (Pearson, 2000)",
+        "Senior Secondary Guide Biology (Star Study Guide Series) Martin Barker & David Darch 2nd edition, 2016",
+        "Bob McDuell, Senior High Integrated Science (Pearson, 2009)"
+      ],
+      "lab_materials": [
+        "Charts on plant tissues",
+        "Microscope and slides",
+        "Specimens of whole plant with roots, stem, leaves & flowers",
+        "Plastic jars/cans",
+        "Soil",
+        "Dried seeds",
+        "Variety of fruits"
+      ],
+      "competencies": [
+        "Effective Communication Skills",
+        "Analytical and Research Skills",
+        "Research and Problem Solving Skills",
+        "Organizational Ability",
+        "Digital Skills",
+        "Creativity and Innovation Skills"
+      ],
+      "assessment": ["Quizzes", "Class works", "Assignments", "Class participation", "Individual presentations", "Lab works", "Test"]
+    },
+    {
+      "id": "BIO-G11-S1-P1",
+      "grade": 11,
+      "semester": 1,
+      "period": 1,
+      "topic": "Viruses and Bacteria",
+      "objectives": [
+        "List the characteristics of viruses",
+        "Classify viruses based on nucleic acid (DNA & RNA)",
+        "Explain the life cycle of a virus",
+        "List some viral diseases and organisms they attack, modes of transmission and methods of prevention",
+        "Describe bacteria of various kinds",
+        "Classify bacteria",
+        "List and describe some common bacterial diseases and symptoms",
+        "Outline preventive measures of bacterial diseases",
+        "Distinguish between autotrophic and heterotrophic nutrition; aerobic, anaerobic and facultative respiration",
+        "Explain the economic importance of bacteria"
+      ],
+      "content": [
+        "Virus: definition, general characteristics, composition of viral structure",
+        "Classification: DNA viruses and RNA viruses",
+        "Common viral diseases: cold, flu, mumps, chicken pox, rabies, polio, HIV/AIDS",
+        "Life cycle of a virus: Lytic Cycle and Lysogenic Cycle",
+        "STIs: modes of transmission and prevention",
+        "Structure of bacteriophage",
+        "Bacteria: definition, general characteristics, classification and shape, composition structure",
+        "Common bacterial diseases: tuberculosis, tetanus, streptococcus",
+        "STIs caused by bacteria: modes of transmission and prevention"
+      ],
+      "activities": [
+        "Listing and discussing viruses and bacteria that cause diseases",
+        "Identifying and listing common viral and bacterial diseases",
+        "Discussing STIs caused by viruses and bacteria",
+        "Mode of transmission and prevention",
+        "Discussing the importance of HIV testing and support",
+        "Diagramming the life cycle of bacteriophage",
+        "Group discussion on causes and preventive measures in controlling STIs"
+      ],
+      "primary_texts": [
+        "Baffour Asante-Owusu, et al. Senior High Biology (Longman, 2009)"
+      ],
+      "supplementary_resources": [
+        "Sue Hocking, et al. OCR Biology (OCR/Heinemann, 2008)",
+        "Doris Koto, et al., Senior Secondary Guide – Biology (Pearson, 2000)",
+        "Senior Secondary Guide Biology (Star Study Guide Series) Martin Barker & David Darch 2nd edition, 2016",
+        "Bob McDuell, Senior High Integrated Science (Pearson, 2009)"
+      ],
+      "lab_materials": [
+        "Biological charts of various types of viruses",
+        "Chart of HIV trend in Liberia",
+        "Prepared slides of bacteria",
+        "Charts for shape and types of bacteria",
+        "Microscope"
+      ],
+      "competencies": [
+        "Effective Communication Skills",
+        "Analytical and Research Skills",
+        "Research and Problem Solving Skills",
+        "Organizational Ability",
+        "Digital Skills",
+        "Creativity and Innovation Skills"
+      ],
+      "assessment": ["Quizzes", "Class works", "Assignments", "Class participation", "Individual presentations", "Lab works", "Test"]
+    },
+    {
+      "id": "BIO-G11-S1-P2",
+      "grade": 11,
+      "semester": 1,
+      "period": 2,
+      "topic": "Nutrition and Food Preservation",
+      "objectives": [
+        "Explain the process of nutrition and state why living things need nutrients",
+        "Outline and classify the types of nutrients found in food",
+        "Classify food into groups",
+        "Demonstrate the presence of various nutrients found in food",
+        "Explain the concept of a balanced diet",
+        "Explain the concept of malnutrition",
+        "Determine the dental formula of a mammal",
+        "Explain the importance of dental care in humans",
+        "Name and discuss various methods of preserving and storing food",
+        "Explain methods of preserving food using local resources",
+        "Explain other methods of food preservation in West Africa",
+        "Explain the biological basis for preserving and storing food"
+      ],
+      "content": [
+        "Nutrition: definition and types (autotrophic, heterotrophic, holozoic)",
+        "Food and nutrients: carbohydrates, lipids, proteins, vitamins, mineral salts and water",
+        "Balanced diet",
+        "Malnutrition",
+        "Teeth and dental formulae",
+        "Dental care",
+        "Food Poisoning and its Prevention",
+        "Methods of food preservation: drying, salting, smoking, parboiling, dehydration, refrigeration, frying, use of oil, heating"
+      ],
+      "activities": [
+        "Classifying the nutrients found in different types of food",
+        "LAB: Testing for carbohydrate — reducing and non-reducing sugar (Benedict's test), starch (iodine test)",
+        "LAB: Testing for lipid (emulsion test)",
+        "LAB: Testing for proteins (biuret test)",
+        "LAB: Testing for vitamin C",
+        "Using preservative methods on food samples and comparing with unpreserved food"
+      ],
+      "primary_texts": [
+        "Baffour Asante-Owusu, et al. Senior High Biology (Longman, 2009)"
+      ],
+      "supplementary_resources": [
+        "Sue Hocking, et al. OCR Biology (OCR/Heinemann, 2008)",
+        "Doris Koto, et al., Senior Secondary Guide – Biology (Pearson, 2000)",
+        "Senior Secondary Guide Biology (Star Study Guide Series) Martin Barker & David Darch 2nd edition, 2016",
+        "Bob McDuell, Senior High Integrated Science (Pearson, 2009)"
+      ],
+      "lab_materials": [
+        "Glucose solution",
+        "Benedict's solution",
+        "Fehling's solution",
+        "Test tubes and rack",
+        "Cassava, Potato",
+        "Iodine, Potassium",
+        "Filter paper",
+        "Ethyl alcohol",
+        "Egg albumin, Milk",
+        "Copper (II) sulphate",
+        "DCPIP dye, Ascorbic acid",
+        "Sodium hydroxide solution",
+        "Groundnuts, fish, milk and pawpaw",
+        "Salt, Incubator, Fire wood, Charcoal, Coal pot, Palm oil"
+      ],
+      "competencies": [
+        "Effective Communication Skills",
+        "Analytical and Research Skills",
+        "Research and Problem Solving Skills",
+        "Organizational Ability",
+        "Digital Skills",
+        "Creativity and Innovation Skills"
+      ],
+      "assessment": ["Quizzes", "Class works", "Assignments", "Class participation", "Individual presentations", "Lab works", "Test"]
+    },
+    {
+      "id": "BIO-G11-S1-P3",
+      "grade": 11,
+      "semester": 1,
+      "period": 3,
+      "topic": "Soil, Energy and Ecology — Patterns in Nature",
+      "objectives": [
+        "Define soil and state the composition of soil",
+        "State the effects of erosion and overuse of soil on soil fertility",
+        "Explain the processes of soil conservation, maintenance, and renewal of soil fertility",
+        "Explain advantages and disadvantages of slash and burn methods in farming",
+        "Distinguish between habitat and niche",
+        "Describe the concept of ecological succession",
+        "Define and calculate population growth, doubling time, percentage growth rate, death & birth rates",
+        "Describe inter-specific and intra-specific interactions among organisms",
+        "Discuss the ecosystem (food chains, food webs, pyramids of numbers, pyramid of energy)",
+        "Define productivity of an ecosystem and distinguish gross primary and net primary productivity",
+        "Discuss energy flow through trophic levels and biogeochemical cycles",
+        "Distinguish between immigration and emigration"
+      ],
+      "content": [
+        "Soil: formation, composition, types, fertility, erosion (causes and prevention), conservation, maintenance, renewal",
+        "Weathering: physical and chemical",
+        "Liberia food and cash crops production",
+        "Effects of non-biodegradable substances on soil fertility",
+        "Isolation mechanisms of species",
+        "Inter-specific interactions: mutualism, commensalism, predation, parasitism, competition",
+        "Trophic levels: producers, consumers, decomposers",
+        "Food chains and webs",
+        "Conservation of nature: soil, forest, wildlife, oil, mineral conservation",
+        "Biocycles: water cycle, carbon cycle, nitrogen cycle, phosphorus cycle, sulfur cycle",
+        "Organisms habitat and niche",
+        "Population: density, growth rate, doubling time, birth rate, death rate, immigration, emigration",
+        "Ecological succession: primary and secondary, pioneer and climax communities"
+      ],
+      "activities": [
+        "Explaining soil formation",
+        "LAB: Collecting, observing and classifying soil types",
+        "Listing and discussing the composition of soil",
+        "Demonstrating the presence of air in the soil (moisture content)",
+        "Diagramming food chains and food webs",
+        "Diagramming and discussing water, carbon, nitrogen, phosphorus and sulfur cycles",
+        "Field Trip: Observing effects of erosion on soil fertility",
+        "Digging in school yard/dump sites to observe non-biodegradable substances",
+        "Listing food and cash crops in Liberia",
+        "Discussing various inter-specific interactions between species",
+        "Taking field trips to visit ecosystems such as ponds and forest regions"
+      ],
+      "primary_texts": [
+        "Baffour Asante-Owusu, et al. Senior High Biology (Longman, 2009)"
+      ],
+      "supplementary_resources": [
+        "Sue Hocking, et al. OCR Biology (OCR/Heinemann, 2008)",
+        "Doris Koto, et al., Senior Secondary Guide – Biology (Pearson, 2000)",
+        "Senior Secondary Guide Biology (Star Study Guide Series) Martin Barker & David Darch 2nd edition, 2016",
+        "Bob McDuell, Senior High Integrated Science (Pearson, 2009)"
+      ],
+      "lab_materials": [
+        "Samples of different types of soil",
+        "Empty cups and jars",
+        "Plastic materials",
+        "Shovel",
+        "Charts of inter-specific interactions",
+        "Diagrams of trophic levels",
+        "Charts of biocycles"
+      ],
+      "competencies": [
+        "Effective Communication Skills",
+        "Analytical and Research Skills",
+        "Research and Problem Solving Skills",
+        "Organizational Ability",
+        "Digital Skills",
+        "Creativity and Innovation Skills"
+      ],
+      "assessment": ["Quizzes", "Class works", "Assignments", "Class participation", "Individual presentations", "Lab works", "Test"]
+    },
+    {
+      "id": "BIO-G11-S2-P4",
+      "grade": 11,
+      "semester": 2,
+      "period": 4,
+      "topic": "Cell Growth and Division (Mitosis and Meiosis); Reproduction",
+      "objectives": [
+        "Describe the stages of the cell cycle",
+        "List and diagram the phases of mitosis and meiosis",
+        "Distinguish mitosis and meiosis and explain the importance of meiosis in sexual reproduction",
+        "Distinguish between asexual and sexual reproduction",
+        "List and explain some forms of asexual reproduction in plants and animals",
+        "Discuss reproduction and parenting in humans (sexuality)",
+        "Recognize sexual decisions that have impact on the family",
+        "Initiate advocacy on substance abuse and SBV"
+      ],
+      "content": [
+        "Cell growth & Division: Cell cycle, Phases of Mitosis, Meiosis",
+        "Reproduction types: Asexual (fission, budding, vegetative propagation, cloning) and Sexual (conjugation, gamete formation, fertilization)",
+        "Responsibilities of parenting: roles of each parent in child rearing",
+        "Risk of teenage parenting",
+        "Sexual Decisions and Impact on the Family",
+        "Reproductive health and rights",
+        "Infertility and cycles of sexuality",
+        "Consequences of sexual decision making",
+        "Advocacy: role of youth in stopping substance abuse and SBV"
+      ],
+      "activities": [
+        "Drawing and labeling stages of mitosis and meiosis",
+        "Distinguishing mitosis and meiosis",
+        "Explaining gametes formation and terms (gametes, diploid, haploid)",
+        "LAB: Examining thin slices of onion root tip to study stages of mitosis under microscope",
+        "Individual writing: What kind of family you intend to have in the next ten years",
+        "Personal Experience sharing: Invite a respected father to talk about parenting",
+        "Role plays: refusing to have sex, discouraging peers from risky behavior",
+        "Steps in the correct use of condoms",
+        "Discussion on sexual decisions and impact on individual and family",
+        "Skit on negative and positive decision making about sex",
+        "Draw on posters, write poems, compose songs against drug abuse and School Based Violence"
+      ],
+      "primary_texts": [
+        "Baffour Asante-Owusu, et al. Senior High Biology (Longman, 2009)"
+      ],
+      "supplementary_resources": [
+        "Sue Hocking, et al. OCR Biology (OCR/Heinemann, 2008)",
+        "Doris Koto, et al., Senior Secondary Guide – Biology (Pearson, 2000)",
+        "Bob McDuell, Senior High Integrated Science (Pearson, 2009)"
+      ],
+      "lab_materials": [
+        "Microscopes",
+        "Slides",
+        "Onion bulbs",
+        "Scalpels",
+        "Charts of mitosis and meiosis",
+        "Methylene blue",
+        "Razor blades",
+        "Dropper",
+        "Beakers",
+        "Posters and charts"
+      ],
+      "competencies": [
+        "Effective Communication Skills",
+        "Analytical and Research Skills",
+        "Research and Problem Solving Skills",
+        "Organizational Ability",
+        "Digital Skills",
+        "Creativity and Innovation Skills"
+      ],
+      "assessment": ["Quizzes", "Class works", "Assignments", "Class participation", "Individual presentations", "Lab works", "Test"]
+    },
+    {
+      "id": "BIO-G11-S2-P5",
+      "grade": 11,
+      "semester": 2,
+      "period": 5,
+      "topic": "Genetics (Nucleic Acids, Protein Synthesis, and Heredity), Sexuality and Evolution",
+      "objectives": [
+        "Explain the term nucleic acids and name the types",
+        "Describe the double helix model of DNA structure",
+        "Outline the process of DNA replication and RNA transcription",
+        "Explain the process of protein synthesis",
+        "Explain the meaning of genetics, heredity, and sexuality",
+        "Describe how traits are passed from parents to offspring",
+        "Explain Mendel's contributions to the principles of heredity",
+        "Demonstrate genetic principles on Mendel's experiment with garden peas",
+        "Discuss linkage and sex-linked characters",
+        "Discuss Darwin's and Lamarck's theories of evolution",
+        "List the various types of blood groups and state the type of blood needed for transfusion"
+      ],
+      "content": [
+        "Nucleic acids: DNA and RNA structures, types of RNA",
+        "Structures of nucleotides and complementary base pairing",
+        "DNA replication and RNA transcription",
+        "Stages of protein synthesis and its importance",
+        "Genetics and Heredity: Mendel's experiment with garden peas",
+        "Genetic terms: phenotype, genotype, alleles, hybrid, homozygous, heterozygous, monohybrid, dihybrid",
+        "Hereditary traits: hemophilia, mental disorder, sickle cell, color blindness, baldness, ear lobes",
+        "Influence of environment on heredity",
+        "ABO blood grouping and rhesus factor",
+        "Evolution and natural selection (Darwin's Theory)",
+        "Sexuality: sex determination (X and Y chromosomes)",
+        "Variation: continuous and discontinuous",
+        "Sources of variation: crossing over, independent assortment, random fusion of gametes",
+        "Population genetics",
+        "Convergent and Divergent evolution",
+        "Evidence of evolution: fossil records",
+        "Theories of evolution: Lamarck's theory and Darwin's theory"
+      ],
+      "activities": [
+        "Using DNA model to demonstrate DNA replication",
+        "Using charts to explain RNA transcription",
+        "Using charts to demonstrate protein synthesis",
+        "Describing Mendel's contributions to principles of heredity",
+        "Describing Mendel's experiments and results",
+        "Solving monohybrid and dihybrid problems using Punnett square",
+        "Discussing some genetic disorders and diseases",
+        "Outlining similarity and differences among different species of vertebrates"
+      ],
+      "primary_texts": [
+        "Baffour Asante-Owusu, et al. Senior High Biology (Longman, 2009)"
+      ],
+      "supplementary_resources": [
+        "Sue Hocking, et al. OCR Biology (OCR/Heinemann, 2008)",
+        "Doris Koto, et al., Senior Secondary Guide – Biology (Pearson, 2000)",
+        "Bob McDuell, Senior High Integrated Science (Pearson, 2009)",
+        "Integrated Science for SHS (Pearson)"
+      ],
+      "lab_materials": [
+        "DNA model",
+        "RNA model",
+        "Charts of DNA structure and replication",
+        "Charts of RNA structure and transcription",
+        "Charts of protein synthesis process",
+        "Garden peas",
+        "Biological charts showing genetically disordered individuals",
+        "Charts of evolution and comparative anatomy of vertebrates"
+      ],
+      "competencies": [
+        "Effective Communication Skills",
+        "Analytical and Research Skills",
+        "Research and Problem Solving Skills",
+        "Organizational Ability",
+        "Digital Skills",
+        "Creativity and Innovation Skills"
+      ],
+      "assessment": ["Quizzes", "Class works", "Assignments", "Class participation", "Individual presentations", "Lab works", "Test"]
+    },
+    {
+      "id": "BIO-G11-S2-P6",
+      "grade": 11,
+      "semester": 2,
+      "period": 6,
+      "topic": "Vertebrates: Fishes, Amphibians and Reptiles",
+      "objectives": [
+        "Explain the general characteristics of the phylum Chordata (Vertebrates)",
+        "Describe the differences between vertebrates and invertebrates",
+        "List general characteristics of fish and explain differences among three groups (jawless, cartilaginous, bony)",
+        "Discuss the economic importance of fishes",
+        "List the general characteristics of amphibians",
+        "Describe the external & internal features of amphibians using a frog",
+        "Differentiate the structural differences between frog and toad",
+        "List the general characteristics of reptiles",
+        "Describe the external and internal features of reptiles using a lizard",
+        "Explain the success of reptiles on land as opposed to amphibians"
+      ],
+      "content": [
+        "Vertebrates: general characteristics",
+        "Fishes: general characteristics, jawless fish, cartilaginous fish, bony fish",
+        "Differences among the three groups of fishes",
+        "Adaptation, locomotion, respiration and economic importance of fish",
+        "Amphibians: general characteristics, external & internal features of a frog, life cycle",
+        "Reptiles: general characteristics, external & internal features of lizard",
+        "Internal fertilization and the amniotic egg"
+      ],
+      "activities": [
+        "LAB: Identifying and describing internal and external structures of a fish",
+        "Collecting and dissecting fish and frog to study structures",
+        "Collecting and dissecting a lizard and studying structures",
+        "Drawing and labeling the amniotic egg and highlighting extraembryonic membranes"
+      ],
+      "primary_texts": [
+        "Baffour Asante-Owusu, et al. Senior High Biology (Longman, 2009)"
+      ],
+      "supplementary_resources": [
+        "Sue Hocking, et al. OCR Biology (OCR/Heinemann, 2008)",
+        "Doris Koto, et al., Senior Secondary Guide – Biology (Pearson, 2000)",
+        "Bob McDuell, Senior High Integrated Science (Pearson, 2009)",
+        "Integrated Science for SHS (Pearson)"
+      ],
+      "lab_materials": [
+        "Live frog, fish and lizard",
+        "Dissecting sets",
+        "Dissecting tray",
+        "Biological charts of shark, fish, various amphibians and reptiles",
+        "Gloves",
+        "Pins",
+        "Scissors",
+        "Razor blades",
+        "Water"
+      ],
+      "competencies": [
+        "Effective Communication Skills",
+        "Analytical and Research Skills",
+        "Research and Problem Solving Skills",
+        "Organizational Ability",
+        "Digital Skills",
+        "Creativity and Innovation Skills"
+      ],
+      "assessment": ["Quizzes", "Class works", "Assignments", "Class participation", "Individual presentations", "Lab works", "Test"]
+    },
+    {
+      "id": "BIO-G12-S1-P1",
+      "grade": 12,
+      "semester": 1,
+      "period": 1,
+      "topic": "Chordata: Aves (Birds) and Mammals",
+      "objectives": [
+        "Discuss the general characteristics of birds and mammals",
+        "Relate the adaptations of birds to flight",
+        "Describe the external and internal features of birds",
+        "Classify mammals on the basis of class, structure, and types of reproduction",
+        "Explain the control mechanisms of body temperature in mammals"
+      ],
+      "content": [
+        "Birds: general characteristics, external and internal features (structural adaptation)",
+        "Types of birds: flight and flightless",
+        "Adaptation to flight",
+        "Types of feathers",
+        "Mammals: general characteristics, classes of mammals, features of each class",
+        "Structure of a typical mammalian molar tooth",
+        "Dentition and dental formulae",
+        "Control mechanisms of body temperature in mammals"
+      ],
+      "activities": [
+        "Listing and describing general characteristics of birds",
+        "Listing general characteristics of mammals",
+        "Describing control mechanisms of body temperature in mammals",
+        "Assignment: Describing features of each class of mammals",
+        "Drawing and labeling a typical mammalian molar tooth",
+        "Writing dental formulae of rabbit, dog and man",
+        "LAB: Dissecting a bird to observe internal and external features",
+        "Drawing and labeling the three types of feathers",
+        "Examining and drawing the contents of a chicken egg"
+      ],
+      "primary_texts": [
+        "Baffour Asante-Owusu, et al. Senior High Biology (Longman, 2009)"
+      ],
+      "supplementary_resources": [
+        "Sue Hocking, et al. OCR Biology (OCR/Heinemann, 2008)",
+        "Doris Koto, et al., Senior Secondary Guide – Biology (Pearson, 2000)",
+        "Bob McDuell, Senior High Integrated Science (Pearson, 2009)",
+        "Integrated Science for SHS (Pearson)"
+      ],
+      "lab_materials": [
+        "Charts of birds and mammals",
+        "Live bird (chicken)",
+        "Live mammal (rat, cat, dog)",
+        "Chicken eggs",
+        "Preserved specimens of birds and mammals"
+      ],
+      "competencies": [
+        "Effective Communication Skills",
+        "Analytical and Research Skills",
+        "Research and Problem Solving Skills",
+        "Organizational Ability",
+        "Digital Skills",
+        "Creativity and Innovation Skills"
+      ],
+      "assessment": ["Quizzes", "Class works", "Assignments", "Class participation", "Individual presentations", "Lab works", "Test"]
+    },
+    {
+      "id": "BIO-G12-S1-P2",
+      "grade": 12,
+      "semester": 1,
+      "period": 2,
+      "topic": "Skeletal, Muscular and Reproductive Systems",
+      "objectives": [
+        "State the functions of the human skeletal system",
+        "List the regions of the human skeletal system",
+        "Name and describe the locations of the various types of joints",
+        "List and describe the functions of the three types of muscle tissues",
+        "Describe the effects of STIs and substance abuse on the muscular systems",
+        "Describe the body changes during adolescence development",
+        "Explain the functions of the male and female reproductive organs",
+        "Draw the male and female reproductive organs",
+        "Explain the process of gamete formation",
+        "Describe the structures and functions of a sperm cell",
+        "Explain the menstrual cycle",
+        "Explain the reproductive health consequences of Gender Based Violence",
+        "Discuss the benefits of family planning and various methods used"
+      ],
+      "content": [
+        "Division of the human body: head, neck, trunk, appendages; body cavities",
+        "Skeletal system: bones, cartilage, ligaments, tendons; axial and appendicular skeleton",
+        "Functions of the skeleton/bones",
+        "Types of joints, functions and locations",
+        "Muscular system: types and functions of muscles",
+        "Reproductive System: adolescence development, gamete formation (oogenesis, spermatogenesis)",
+        "Male and female reproductive organs",
+        "Sperm and egg",
+        "Menstrual cycle",
+        "Fertilization and conception: sex determination, infertility",
+        "Cycles of sexuality",
+        "STIs: modes of transmission and methods of prevention",
+        "HIV/AIDS: immune system, risky behaviors, care and support, stigma and discrimination",
+        "Gender Based Violence",
+        "Family Planning"
+      ],
+      "activities": [
+        "Discussion of cells, tissues, and organs of the skeletal and muscular systems",
+        "Drawing and labeling the skeletal and muscular systems",
+        "Examining and studying bone cells under the microscope",
+        "Listing the bones of the skeletal system",
+        "Explaining types and functions of muscle",
+        "Listing effects of STIs and substance abuse on the human system",
+        "Describing the stages of adolescence",
+        "Demonstrating oogenesis and spermatogenesis using models and diagrams",
+        "Drawing and labeling structure of sperm cell",
+        "Describing stages of menstrual cycle",
+        "Explaining fertilization and development of the fetus",
+        "Group presentation on STDs with emphasis on HIV/AIDS",
+        "Explaining reproductive health consequences of gender based violence",
+        "Describing benefits of family planning"
+      ],
+      "primary_texts": [
+        "Baffour Asante-Owusu, et al. Senior High Biology (Longman, 2009)"
+      ],
+      "supplementary_resources": [
+        "Sue Hocking, et al. OCR Biology (OCR/Heinemann, 2008)",
+        "Doris Koto, et al., Senior Secondary Guide – Biology (Pearson, 2000)",
+        "Bob McDuell, Senior High Integrated Science (Pearson, 2009)"
+      ],
+      "lab_materials": [
+        "Charts of human skeletal, muscular and reproductive systems",
+        "Prepared slides of bone cells and cartilage cells",
+        "Chart of human body regions and cavities",
+        "Models and charts of oogenesis and spermatogenesis",
+        "Charts of male and female reproductive organs",
+        "Chart of menstrual cycle",
+        "Chart of fetal development",
+        "Chart of family planning methods"
+      ],
+      "competencies": [
+        "Effective Communication Skills",
+        "Analytical and Research Skills",
+        "Research and Problem Solving Skills",
+        "Organizational Ability",
+        "Digital Skills",
+        "Creativity and Innovation Skills"
+      ],
+      "assessment": ["Quizzes", "Class works", "Assignments", "Class participation", "Individual presentations", "Lab works", "Test"]
+    },
+    {
+      "id": "BIO-G12-S1-P3",
+      "grade": 12,
+      "semester": 1,
+      "period": 3,
+      "topic": "Digestive, Circulatory and Lymphatic Systems",
+      "objectives": [
+        "Define digestion, state the processes and list organs involved",
+        "State the functions of enzymes in digestion",
+        "Explain nutrition, classes of food and their importance to the body",
+        "List components of blood and describe their functions and blood clotting",
+        "Discuss the heart, blood and blood vessels",
+        "Discuss the lymphatic system and its functions",
+        "Describe the structure and functions of lymph nodes",
+        "Outline and give function of other lymphoid organs (tonsils, spleen, thymus)"
+      ],
+      "content": [
+        "Digestive system: nutrition, classes of food and specific uses",
+        "Alimentary canal: mouth, esophagus, stomach, intestines",
+        "Accessory organs: salivary and pancreatic glands, teeth, tongue",
+        "Liver & functions",
+        "Circulatory system: heart, blood vessels, blood cells and plasma",
+        "Types of circulation: systematic and pulmonary",
+        "Blood types and Rh Factor",
+        "Effects of substance abuse on circulatory system",
+        "Lymphatic system: lymph, lymphatic vessels, lymph nodes, lymphocytes (T-cells and B-cells)"
+      ],
+      "activities": [
+        "Stating functions of digestive enzymes",
+        "Describing absorption through the villi and hepatic portal veins",
+        "Listing and describing classes of food and their importance",
+        "Discussing effects of malnutrition on growth, development, and immune system",
+        "Describing steps of nutrition: digestion, absorption, assimilation",
+        "LAB: Drawing and labeling the alimentary canal and human heart",
+        "LAB: Testing for carbohydrates, proteins and oils",
+        "Stating functions of the liver in digestion",
+        "Discussing effects of alcohol & drugs on organs",
+        "Describing blood composition and functions",
+        "Explaining blood clotting process",
+        "Listing blood groups and discussing Rh factor",
+        "Drawing and labeling the lymphatic system"
+      ],
+      "primary_texts": [
+        "Baffour Asante-Owusu, et al. Senior High Biology (Longman, 2009)"
+      ],
+      "supplementary_resources": [
+        "Sue Hocking, et al. OCR Biology (OCR/Heinemann, 2008)",
+        "Doris Koto, et al., Senior Secondary Guide – Biology (Pearson, 2000)",
+        "Bob McDuell, Senior High Integrated Science (Pearson, 2009)",
+        "Integrated Science for SHS (Pearson)"
+      ],
+      "lab_materials": [
+        "Charts of Circulatory, Lymphatic, and Digestive systems",
+        "Charts of Heart and Blood vessels",
+        "Microscope",
+        "Slides and prepared slides",
+        "Peeling needle",
+        "Model and charts of the lymphatic system"
+      ],
+      "competencies": [
+        "Effective Communication Skills",
+        "Analytical and Research Skills",
+        "Research and Problem Solving Skills",
+        "Organizational Ability",
+        "Digital Skills",
+        "Creativity and Innovation Skills"
+      ],
+      "assessment": ["Quizzes", "Class works", "Assignments", "Class participation", "Individual presentations", "Lab works", "Test"]
+    },
+    {
+      "id": "BIO-G12-S2-P4",
+      "grade": 12,
+      "semester": 2,
+      "period": 4,
+      "topic": "Excretory and Respiratory Systems; Cellular Respiration (Glycolysis and Krebs Cycle)",
+      "objectives": [
+        "Describe the excretory system and state the functions of all associated organs",
+        "List the tissues and organs involved in the mechanism of breathing",
+        "Explain homeostasis in relation to the excretory system",
+        "Explain the effects of substance abuse and STIs on excretory and respiratory systems",
+        "State the characteristics of types of respiration",
+        "Distinguish between aerobic and anaerobic respiration",
+        "Discuss cellular respiration: Glycolysis, Krebs cycle, and electron transport chain",
+        "Discuss anaerobic respiration in muscle and fermentation using yeast/fruits",
+        "Discuss the significance of phosphorylation in glycolysis",
+        "Identify final products of glycolysis and fate of pyruvate",
+        "Distinguish oxidation and reduction with regards to oxygen, hydrogen and electrons",
+        "Distinguish decarboxylation and dehydrogenation reactions",
+        "Interpret the balanced chemical equation for respiration",
+        "Identify electron carriers in the inner membrane of mitochondria"
+      ],
+      "content": [
+        "Excretory system organs: kidneys, urinary bladder, urethra, skin, liver, lungs, large intestine",
+        "Respiratory system organs: lungs, pharynx, larynx, alveoli, bronchi, bronchioles",
+        "Effects of substance abuse and STIs on both systems",
+        "Respiration (Gaseous Exchange): internal & external, phases (inspiration and expiration)",
+        "Cellular Respiration: aerobic and anaerobic, energy release",
+        "ATP formation as a phosphorylated nucleotide",
+        "Overview of respiration: glycolysis, link reaction, Krebs cycle, electron transport chain",
+        "Coenzymes and respiration: NAD and dehydrogenase enzymes",
+        "Pyruvate and its fate",
+        "Alcoholic fermentation (yeast and fruits)",
+        "Anaerobic respiration in muscles and Oxygen debt",
+        "Reactions of Krebs cycle: decarboxylation, dehydrogenation, oxidative phosphorylation",
+        "Electron transport chain: flavoproteins, quinones, cytochromes"
+      ],
+      "activities": [
+        "Explaining the process of excretion and urination",
+        "Describing functions of tissues and organs in external & internal respiration",
+        "Describing the lungs and air passageways",
+        "LAB: Drawing and labeling longitudinal section of the kidney",
+        "Class Discussion: role of diaphragm, intercostal muscles and ribs in respiration",
+        "Video/pictures showing organs affected by substance abuse and STIs",
+        "Vigorous exercise exemplifying respiration",
+        "LAB: Obtaining palm wine and placing in plastic gallon to observe alcoholic fermentation",
+        "Demonstrate artificial resuscitation"
+      ],
+      "primary_texts": [
+        "Baffour Asante-Owusu, et al. Senior High Biology (Longman, 2009)"
+      ],
+      "supplementary_resources": [
+        "Sue Hocking, et al. OCR Biology (OCR/Heinemann, 2008)",
+        "Doris Koto, et al., Senior Secondary Guide – Biology (Pearson, 2000)",
+        "Senior Secondary Guide Biology (Star Study Guide Series) Martin Barker & David Darch 2nd edition, 2016",
+        "Bob McDuell, Senior High Integrated Science (Pearson, 2009)"
+      ],
+      "lab_materials": [
+        "Charts/posters on kidneys, lungs, skin, and urinary organs",
+        "Palm wine",
+        "Grape fruits",
+        "Plastic gallons",
+        "Knife",
+        "Strainer",
+        "Large container (pan)",
+        "Internet, YouTube/video, Projector"
+      ],
+      "competencies": [
+        "Effective Communication Skills",
+        "Analytical and Research Skills",
+        "Research and Problem Solving Skills",
+        "Organizational Ability",
+        "Digital Skills",
+        "Creativity and Innovation Skills"
+      ],
+      "assessment": ["Quizzes", "Class works", "Assignments", "Class participation", "Individual presentations", "Lab works", "Test"]
+    },
+    {
+      "id": "BIO-G12-S2-P5",
+      "grade": 12,
+      "semester": 2,
+      "period": 5,
+      "topic": "Nervous and Endocrine Systems (Control and Co-ordination of Body Activities)",
+      "objectives": [
+        "Distinguish the functions of the nervous and endocrine systems",
+        "Describe the structure and functions of a nerve cell (neuron) and the brain",
+        "Classify the neurons of the nervous system",
+        "Draw the nervous system and list the major parts",
+        "Describe the structure and functions of the spinal cord",
+        "Differentiate the various regions of the spinal cord",
+        "Compare central and peripheral nervous systems",
+        "Differentiate between voluntary and involuntary actions",
+        "Discuss causes and effects of substance abuse on the nervous system",
+        "Advocate for prevention of GBV, rape, sexual harassment, and intergenerational sex",
+        "Explain the effects of some STIs on the nervous system",
+        "Describe the structures and functions of the eye and ear",
+        "Distinguish and state functions of exocrine and endocrine glands",
+        "Explain the regulation of hormone secretion through negative feedback",
+        "Describe the two basic mechanisms of hormone action"
+      ],
+      "content": [
+        "Nervous system: central nervous system and peripheral nervous system",
+        "Spinal cord: neurons structure and types, sensory and motor functions",
+        "Brain: structure and function of parts",
+        "Generation and transmission of nerve impulses: resting potential, action potential, refractory period, myelin sheath, synapses",
+        "Types of Nervous actions: voluntary, involuntary, reflex and reflex arc",
+        "Autonomic nervous system: functions and importance",
+        "Structure & function of eye and ear",
+        "GBV, rape, sexual harassment and intergenerational sex",
+        "Effects of STIs on organs of the nervous system",
+        "Substance abuse: causes, effects and prevention",
+        "Endocrine system: glands and hormones",
+        "Role of other organs as endocrine glands: testes, ovaries, liver, kidneys, stomach",
+        "Hormone deficiency diseases"
+      ],
+      "activities": [
+        "Listing and describing parts of the nervous system",
+        "Examining and explaining models of the brain and spinal cord",
+        "Identifying various parts of the brain and spinal cord by drawing and labeling",
+        "Describing the peripheral nervous system",
+        "Describing structures and functions of the eye and ear",
+        "Explaining nervous actions",
+        "Listing organs affected by STIs and substance abuse",
+        "CONTINUUM: Drawing posters, writing poems, composing songs against drug abuse, GBV and intergenerational sex",
+        "Organizing a hot line for victims",
+        "Explaining causes and corrections of eye defects",
+        "Drawing and labeling the skin as a sense organ",
+        "Drawing and labeling a typical motor neuron",
+        "Examining model and chart of mammalian eye and ear"
+      ],
+      "primary_texts": [
+        "Baffour Asante-Owusu, et al. Senior High Biology (Longman, 2009)"
+      ],
+      "supplementary_resources": [
+        "Sue Hocking, et al. OCR Biology (OCR/Heinemann, 2008)",
+        "Doris Koto, et al., Senior Secondary Guide – Biology (Pearson, 2000)",
+        "Senior Secondary Guide Biology (Star Study Guide Series) Martin Barker & David Darch 2nd edition, 2016",
+        "Bob McDuell, Senior High Integrated Science (Pearson, 2009)"
+      ],
+      "lab_materials": [
+        "Charts of nervous system, endocrine system, eye & ear",
+        "Dissecting set and tray",
+        "Microscope",
+        "Prepared slides",
+        "Model of brain, spinal cord, eye and ear",
+        "Internet, Cell Phone",
+        "Poster Sheet, Marker",
+        "Video, Projectors, Recorder/radio"
+      ],
+      "competencies": [
+        "Effective Communication Skills",
+        "Analytical and Research Skills",
+        "Research and Problem Solving Skills",
+        "Organizational Ability",
+        "Digital Skills",
+        "Creativity and Innovation Skills"
+      ],
+      "assessment": ["Quizzes", "Class works", "Assignments", "Class participation", "Individual presentations", "Lab works", "Test"]
+    },
+    {
+      "id": "BIO-G12-S2-P6",
+      "grade": 12,
+      "semester": 2,
+      "period": 6,
+      "topic": "Ecology (Natural Resources and Pollution) and Health",
+      "objectives": [
+        "Explain the concept of natural resources",
+        "Discuss the importance of natural resources",
+        "Distinguish between renewable and non-renewable natural resources",
+        "Explain methods of conserving natural resources",
+        "Explain preserving the ecosystem as an approach to natural resource management",
+        "Explain the term pollution and discuss causes, effects and control methods",
+        "Explain the importance of immunization",
+        "Explain the importance of personal health and community health",
+        "State the dangers posed by drugs, alcoholic beverages and smoking",
+        "Define sewage disposal and discuss methods",
+        "Identify economic uses of sewage",
+        "Discuss sources of water, modes of contamination and methods of purification",
+        "Discuss methods of refuse collection and disposal",
+        "State the importance of first aid"
+      ],
+      "content": [
+        "Natural resources: renewable and non-renewable",
+        "Flow of renewable resources",
+        "Conservation of natural resources",
+        "Pollution: air, water, land, thermal, noise — causes, effects, and control",
+        "Vaccination and immunization",
+        "Personal hygiene",
+        "Drug abuse",
+        "Community hygiene",
+        "Sewage and sewage disposal: definitions, methods, economic uses",
+        "Water: sources, contamination/pollution, purification methods",
+        "Refuse collection and disposal"
+      ],
+      "activities": [
+        "Group work on the importance of conservation of natural resources",
+        "Field trips: viewing sites of natural resources (rain forests, mines, rivers, ocean, rubber factory, petroleum refinery)",
+        "Field trips: observing solar radiation, tides, winds",
+        "Field trips to water sewage treatment plant",
+        "Discussing different methods of sewage disposal and uses of sewage",
+        "LAB: Purifying water by boiling, chlorination and sand filtration",
+        "Testing water for contaminants",
+        "Filtering contaminated water using clean cloth",
+        "Practicing first aid exercises on partners",
+        "Observing nitrogen-fixing bacteria under microscope",
+        "Estimating the alcohol content of various drinks"
+      ],
+      "primary_texts": [
+        "Baffour Asante-Owusu, et al. Senior High Biology (Longman, 2009)"
+      ],
+      "supplementary_resources": [
+        "Sue Hocking, et al. OCR Biology (OCR/Heinemann, 2008)",
+        "Doris Koto, et al., Senior Secondary Guide – Biology (Pearson, 2000)",
+        "Senior Secondary Guide Biology (Star Study Guide Series) Martin Barker & David Darch 2nd edition, 2016",
+        "Bob McDuell, Senior High Integrated Science (Pearson, 2009)"
+      ],
+      "lab_materials": [
+        "Charts of various kinds of natural resources",
+        "Samples of natural resources",
+        "Beaker",
+        "Contaminated water",
+        "Microscope",
+        "Slides and cover slips",
+        "Filter paper, Pipette",
+        "Methylene blue, Thermometer",
+        "Chlorine",
+        "Charts on water purification system",
+        "Charts on sewage disposal",
+        "Sand, Rocks, Coal",
+        "Fertilizers"
+      ],
+      "competencies": [
+        "Effective Communication Skills",
+        "Analytical and Research Skills",
+        "Research and Problem Solving Skills",
+        "Organizational Ability",
+        "Digital Skills",
+        "Patriotism",
+        "Creativity and Innovation Skills"
+      ],
+      "assessment": ["Quizzes", "Class works", "Assignments", "Class participation", "Individual presentations", "Lab works", "Test"]
+    }
+  ]
+}

@@ -1,0 +1,1230 @@
+{
+  "subject": "Mathematics",
+  "grade_range": "10-12",
+  "source": "Republic of Liberia Ministry of Education - National Curriculum for Grades 10-12",
+  "topics": [
+    {
+      "id": "math_g10_t01",
+      "grade": 10,
+      "semester": 1,
+      "period": "I",
+      "topic": "Sets and Operations on Sets",
+      "objectives": [
+        "Define and identify set using set notation",
+        "Define and discuss types of sets (infinite set, finite set, Universal set, equal sets, equivalent sets)",
+        "Define, discuss and illustrate subsets",
+        "Discuss Venn Diagrams",
+        "Use Venn diagram to illustrate intersection of sets",
+        "Use Venn diagrams to illustrate Union of sets",
+        "Use Venn diagram to show disjoint sets and complement of a set",
+        "State and discuss properties of sets",
+        "Use Venn diagrams to solve two-set and three-set problems"
+      ],
+      "content": [
+        "Definition of set using set notation",
+        "Types of sets (infinite, finite, Universal, equal, equivalent)",
+        "Subsets",
+        "Venn Diagrams",
+        "Intersection of sets",
+        "Union of sets",
+        "Disjoint sets and complement of a set",
+        "Properties of sets",
+        "Two-set and three-set problems"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High School (Book 1) by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g10_t02",
+      "grade": 10,
+      "semester": 1,
+      "period": "I",
+      "topic": "Rational Numbers",
+      "objectives": [
+        "Identify and discuss rational numbers",
+        "Solve addition and subtraction of rational numbers",
+        "Solve multiplication of rational numbers",
+        "State and use properties of multiplication of rational numbers",
+        "Solve decimal representation",
+        "Define real numbers and illustrate on the real number line",
+        "Identify properties of real numbers",
+        "Discuss approximation",
+        "Demonstrate standard form",
+        "State binary operation"
+      ],
+      "content": [
+        "Rational numbers",
+        "Addition and subtraction of rational numbers",
+        "Multiplication of rational numbers",
+        "Properties of multiplication of rational numbers",
+        "Division of rational numbers",
+        "Decimal representation",
+        "Real numbers",
+        "The real number line",
+        "Properties of real numbers",
+        "Approximation",
+        "Standard form",
+        "Binary operation"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High School (Book 1, 3) by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g10_t03",
+      "grade": 10,
+      "semester": 1,
+      "period": "II",
+      "topic": "Algebraic Expressions",
+      "objectives": [
+        "Express statements in algebraic expression",
+        "Discuss numerical statements",
+        "Form algebraic expressions",
+        "Evaluate algebraic expressions",
+        "Show relations between two algebraic expressions",
+        "Demonstrate expansion of algebraic expressions",
+        "Add and subtract algebraic fractions",
+        "Discuss and solve problems on factorization",
+        "Find product of two binomials",
+        "Express perfect squares",
+        "Show difference of two squares",
+        "Factorize quadratic expressions"
+      ],
+      "content": [
+        "Algebraic statements",
+        "Numerical statements",
+        "Forming algebraic expressions",
+        "Evaluating algebraic expressions",
+        "Relations between two algebraic expressions",
+        "Expansion",
+        "Algebraic fractions",
+        "Factorization",
+        "Product of two binomials",
+        "Perfect squares",
+        "Difference of two squares",
+        "Factorizing quadratic expressions"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High School (Book 1) by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g10_t04",
+      "grade": 10,
+      "semester": 1,
+      "period": "II",
+      "topic": "Number Base",
+      "objectives": [
+        "Discuss the base ten system",
+        "Convert base ten to other bases",
+        "Add and subtract in bases five and eight",
+        "Multiply in bases",
+        "Operate in other bases",
+        "Convert from other bases to base ten",
+        "Solve simple equations on bases"
+      ],
+      "content": [
+        "The base ten system",
+        "Converting to other bases",
+        "Addition and subtraction in bases five and eight",
+        "Multiplication in bases",
+        "Operating in other bases",
+        "Converting from other bases to base ten",
+        "Simple base equations"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High School (Book 1) by Pearson",
+        "secondary_text": "AKI-OLA series, Core Mathematics for Senior Secondary Schools",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g10_t05",
+      "grade": 10,
+      "semester": 1,
+      "period": "III",
+      "topic": "Plane Geometry",
+      "objectives": [
+        "Draw and measure angles",
+        "Calculate angles",
+        "Discuss angle properties of parallel lines",
+        "Draw and name triangles",
+        "Discuss angle properties of triangles",
+        "Discuss right-angled triangles",
+        "Define and apply the Pythagoras theorem",
+        "Apply Pythagorean triples",
+        "Determine square and square root",
+        "Discuss properties of polygons",
+        "Describe and calculate angles of parallelograms, trapezium, kites, rhombuses, rectangles and squares"
+      ],
+      "content": [
+        "Measuring and drawing angles",
+        "Calculating angles",
+        "Angle properties of parallel lines",
+        "Triangles",
+        "Angle properties of triangles",
+        "Right-angled triangles",
+        "Pythagoras theorem",
+        "Pythagorean triples",
+        "Square and square root",
+        "Polygons",
+        "Parallelograms and trapezium",
+        "Kites",
+        "Rhombuses",
+        "Rectangles and squares"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High School (Book 1) by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g10_t06",
+      "grade": 10,
+      "semester": 2,
+      "period": "IV",
+      "topic": "Linear Equations and Inequalities",
+      "objectives": [
+        "Use equality and equivalence concepts",
+        "Find the solution set of a linear equation",
+        "Solve word problems and equations",
+        "Solve linear inequalities in one variable",
+        "Graph linear inequalities in one graph",
+        "Solve word problems on inequalities"
+      ],
+      "content": [
+        "Equality and equivalence",
+        "Finding the solution set of a linear equation",
+        "Word problems and equations",
+        "Solving linear inequalities in one variable",
+        "Graph of linear inequalities",
+        "Word problems on inequalities"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High School (Book 1) by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g10_t07",
+      "grade": 10,
+      "semester": 2,
+      "period": "IV",
+      "topic": "Relations and Functions",
+      "objectives": [
+        "Discuss relations",
+        "Distinguish between various types of relations",
+        "Identify functions",
+        "Change the subject of the relation",
+        "Graph linear functions",
+        "Find the gradient of a straight line",
+        "Calculate the distance between two points",
+        "Graph quadratic functions"
+      ],
+      "content": [
+        "Relations",
+        "Types of relations",
+        "Functions",
+        "Change of subject",
+        "Graph of linear functions",
+        "Gradient of a straight line",
+        "Distance between two points",
+        "Graphs of quadratic functions"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High School (Book 1) by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g10_t08",
+      "grade": 10,
+      "semester": 2,
+      "period": "V",
+      "topic": "Simultaneous Linear Equations",
+      "objectives": [
+        "Solve simultaneous linear equations",
+        "Define and discuss truth sets for simultaneous linear relations",
+        "Solve simultaneous equations using graphs",
+        "Solve simultaneous equations using elimination",
+        "Solve simultaneous equations using substitution",
+        "Solve word problems in simultaneous linear equations"
+      ],
+      "content": [
+        "Simultaneous linear equations",
+        "Truth sets for simultaneous linear relations",
+        "Use of graph",
+        "Elimination method",
+        "Substitution method",
+        "Word problems in simultaneous linear equations"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High School (Book 1) by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g10_t09",
+      "grade": 10,
+      "semester": 2,
+      "period": "V",
+      "topic": "Vectors in a Plane",
+      "objectives": [
+        "Discuss types of vector quantities",
+        "Distinguish between scalar and vector quantities",
+        "Calculate magnitude and direction of vectors",
+        "Add and subtract vectors",
+        "Multiply a vector by a scalar"
+      ],
+      "content": [
+        "Types of vector quantities",
+        "Scalar and vector quantities",
+        "Magnitude and direction of vectors",
+        "Addition and subtraction of vectors",
+        "Scalar multiplication of vectors"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High School (Book 1) by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g10_t10",
+      "grade": 10,
+      "semester": 2,
+      "period": "VI",
+      "topic": "Rigid Motion",
+      "objectives": [
+        "Discuss and draw rigid motion",
+        "Draw and translate images to other positions",
+        "Identify and explain reflection of objects in the mirror line",
+        "Construct symmetry objects"
+      ],
+      "content": [
+        "Rigid motion",
+        "Translation",
+        "Reflection",
+        "Symmetry"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High School (Book 1) by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g10_t11",
+      "grade": 10,
+      "semester": 2,
+      "period": "VI",
+      "topic": "Statistics, Ratio, Rates and Percentages",
+      "objectives": [
+        "Define and discuss statistics",
+        "Construct frequency tables",
+        "Discuss graphical displays",
+        "Discuss and define averages (mean, median, mode)",
+        "Define and discuss ratio and rates",
+        "Define and analyze scales and scale drawing",
+        "Demonstrate the use of rates in problem solving",
+        "Define and discuss travel graphs and conversion graphs",
+        "Identify and discuss percentages",
+        "Solve problems using percentages"
+      ],
+      "content": [
+        "Statistics and statistical concepts",
+        "Frequency tables and histograms",
+        "Measures of central tendency (mode, median, mean)",
+        "Stem and leaf plot",
+        "Graphical displays",
+        "Box and whisker plot",
+        "Averages",
+        "Ratio",
+        "Scale drawing",
+        "Rates and using rates",
+        "Travel graphs and conversion graphs",
+        "Percentages and using percentages"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High School (Book 1) by Pearson",
+        "secondary_text": "Population data",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g11_t01",
+      "grade": 11,
+      "semester": 1,
+      "period": "I",
+      "topic": "Modular Arithmetic",
+      "objectives": [
+        "Define and discuss polygonal arithmetic",
+        "Define and discuss modular arithmetic",
+        "Define and discuss cyclic variables",
+        "Perform division using modular arithmetic"
+      ],
+      "content": [
+        "Polygonal arithmetic",
+        "Modular arithmetic",
+        "Cyclic variables",
+        "Using modular arithmetic"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High School (Book 2) by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g11_t02",
+      "grade": 11,
+      "semester": 1,
+      "period": "I",
+      "topic": "Indices and Logarithms",
+      "objectives": [
+        "Define and discuss indices (notation, laws)",
+        "Define and discuss properties of indices",
+        "Define and discuss exponential growth",
+        "Discuss and solve negative powers",
+        "Define and discuss rational powers",
+        "Define and discuss logarithms",
+        "Apply logarithmic functions to solve problems",
+        "Define and apply base ten logarithms",
+        "Solve logarithmic of numbers greater than 10",
+        "Solve logarithmic of numbers between 0 and 1",
+        "Define and discuss laws of logarithms"
+      ],
+      "content": [
+        "Indices",
+        "Exponential growth",
+        "Negative powers",
+        "Properties of indices",
+        "Rational powers",
+        "Logarithms",
+        "Logarithmic functions",
+        "Base ten logarithms",
+        "Logarithmic of numbers greater than 10",
+        "Logarithmic of numbers between 0 and 1",
+        "Laws of logarithms"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High School (Book 2) by Pearson",
+        "secondary_text": "Core Mathematics for West Africa by Asiedu, Aki-Ola Series",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g11_t03",
+      "grade": 11,
+      "semester": 1,
+      "period": "II",
+      "topic": "Surds and Percentages",
+      "objectives": [
+        "Define and discuss surds",
+        "Simplify surds",
+        "Find products and quotients of surds",
+        "Compute compound interest in relation to simple interest",
+        "Define and discuss interest formulae",
+        "Define and discuss depreciation and hire purchase"
+      ],
+      "content": [
+        "Surds",
+        "Simplifying surds",
+        "Products and quotients of surds",
+        "Compound interest in relation to simple interest",
+        "Interest formulae",
+        "Depreciation",
+        "Hire purchase"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High School (Book 2) by Pearson",
+        "secondary_text": "Core Mathematics for West Africa by Asiedu, Aki-Ola Series",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g11_t04",
+      "grade": 11,
+      "semester": 1,
+      "period": "III",
+      "topic": "Variation",
+      "objectives": [
+        "Define and solve direct variation",
+        "Define and solve inverse variation",
+        "Define and solve joint variation",
+        "Define and solve partial variation"
+      ],
+      "content": [
+        "Direct variation",
+        "Inverse variation",
+        "Joint variation",
+        "Partial variation"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High School (Book 2) by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g11_t05",
+      "grade": 11,
+      "semester": 1,
+      "period": "III",
+      "topic": "Quadratic Functions and Equations",
+      "objectives": [
+        "Define and discuss quadratic functions",
+        "Define and solve quadratic equations",
+        "Solve quadratic equations by factorization",
+        "Solve quadratic problems",
+        "Solve quadratic equations by completing the square (optional)",
+        "Draw quadratic graphs",
+        "Solve quadratic equations graphically"
+      ],
+      "content": [
+        "Quadratic functions",
+        "Quadratic equations",
+        "Solving quadratic equations by factorization",
+        "Quadratic problems",
+        "Solving quadratic equations by completing the square",
+        "Quadratic graphs",
+        "Solving quadratic equations graphically"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High School (Book 2) by Pearson",
+        "secondary_text": "Core Mathematics for West African Schools by Peter Asiedu, Aki-Ola Series",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g11_t06",
+      "grade": 11,
+      "semester": 2,
+      "period": "IV",
+      "topic": "Mensuration",
+      "objectives": [
+        "Discuss and construct the circle as a locus",
+        "State and use circle theorems",
+        "Identify and construct tangents to a circle",
+        "Identify and construct alternate segments",
+        "Calculate perimeter of plane shapes",
+        "Find the area of rectangles and squares",
+        "Find the area of parallelograms",
+        "Find the area of triangles",
+        "Discuss and construct circles",
+        "Calculate arcs and sectors"
+      ],
+      "content": [
+        "The circle as a locus",
+        "Circle theorems",
+        "Tangents to a circle",
+        "Alternate segments",
+        "Perimeter of plane shapes",
+        "Area of rectangles and squares",
+        "Area of parallelograms",
+        "Area of triangles",
+        "Circles",
+        "Arcs and sectors"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High School (Book 2) by Pearson",
+        "secondary_text": "Core Mathematics for West African Schools by Peter Asiedu, Aki-Ola Series",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g11_t07",
+      "grade": 11,
+      "semester": 2,
+      "period": "V",
+      "topic": "Trigonometry",
+      "objectives": [
+        "Define and compute angle of slope and gradient",
+        "Define and compute the tangent of an angle",
+        "Find heights and distances",
+        "Compute problems involving rotation",
+        "Define and compute cosine of an angle",
+        "Define and compute sine of an angle",
+        "Discuss uses of trigonometry",
+        "Calculate trigonometric ratios of 30°, 60° and 45°",
+        "Find the inverse of trigonometric ratios",
+        "Calculate angles of elevation and depression"
+      ],
+      "content": [
+        "Angle of slope and gradient",
+        "The tangent of an angle",
+        "Finding heights and distances",
+        "Problems involving rotation",
+        "Cosine of an angle",
+        "Sine of an angle",
+        "Uses of trigonometry",
+        "Trigonometric ratios of 30°, 60° and 45°",
+        "Angles of elevation and depression"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High School (Book 2) by Pearson",
+        "secondary_text": "Core Mathematics for West African Schools by Peter Asiedu, Aki-Ola Series",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g11_t08",
+      "grade": 11,
+      "semester": 2,
+      "period": "VI",
+      "topic": "Probability",
+      "objectives": [
+        "Define and discuss probability",
+        "Determine relative frequency",
+        "Calculate compound events",
+        "Compute union of events",
+        "Compute intersection of events",
+        "Compute independent events"
+      ],
+      "content": [
+        "Probability",
+        "Relative frequency",
+        "Compound events",
+        "Union of events",
+        "Intersection of events",
+        "Review of basic concepts (sets, Venn diagrams, tree diagrams, contingency tables)",
+        "Sample space and events of an experiment",
+        "Probability of an event",
+        "Odds of an event"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High School (Book 2) by Pearson",
+        "secondary_text": "Population Data",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t01",
+      "grade": 12,
+      "semester": 1,
+      "period": "I",
+      "topic": "Sequence and Series",
+      "objectives": [
+        "Define and identify sequences",
+        "Define and discuss arithmetic sequence (arithmetic progression)",
+        "State the formula for arithmetic sequence and use it to solve problems",
+        "Define and discuss geometric sequence (geometric progression)",
+        "State the formula for geometric sequence and use it to solve problems",
+        "State the formula for finding the sum of arithmetic series and use it to solve problems",
+        "State the formula for finding the sum of geometric series and use it to solve problems"
+      ],
+      "content": [
+        "Definition of arithmetic sequence (progression)",
+        "Formula for arithmetic sequence",
+        "Definition of geometric sequence (progression)",
+        "Formula for geometric sequence",
+        "Sum of arithmetic series",
+        "Sum of geometric series"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t02",
+      "grade": 12,
+      "semester": 1,
+      "period": "I",
+      "topic": "Bearings",
+      "objectives": [
+        "Interpret bearing as direction of one point from another",
+        "Write bearing of one point from another as (r, θ)",
+        "Find the bearing of a point A from another point given the bearing of B"
+      ],
+      "content": [
+        "Definition of bearings",
+        "Distance and bearing problems"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t03",
+      "grade": 12,
+      "semester": 1,
+      "period": "I",
+      "topic": "Constructions",
+      "objectives": [
+        "Perform construction without measurement",
+        "Construct angles",
+        "Construct triangles and quadrilaterals",
+        "Define and discuss locus",
+        "Identify some special loci"
+      ],
+      "content": [
+        "Construction without measurement",
+        "Construction of angles",
+        "Construction of triangles and quadrilaterals",
+        "Locus",
+        "Some special loci (mediator, angle bisector, parallel line)"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t04",
+      "grade": 12,
+      "semester": 1,
+      "period": "II",
+      "topic": "Statistics I",
+      "objectives": [
+        "Express data in graphical forms using bar chart and pie chart",
+        "Define grouped data and construct frequency table",
+        "Calculate the mean and mode of grouped data",
+        "Calculate the median",
+        "Construct the cumulative frequency curve",
+        "Calculate the quartiles and percentiles"
+      ],
+      "content": [
+        "Bar chart and pie chart",
+        "Grouped data",
+        "Mean and mode",
+        "Median",
+        "Cumulative frequency",
+        "Quartiles and percentiles"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t05",
+      "grade": 12,
+      "semester": 1,
+      "period": "II",
+      "topic": "Standard Deviation",
+      "objectives": [
+        "Define, discuss and identify dispersion",
+        "Define, discuss and calculate deviation",
+        "Define and calculate standard deviation"
+      ],
+      "content": [
+        "Dispersion",
+        "Deviation",
+        "Standard deviation"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t06",
+      "grade": 12,
+      "semester": 1,
+      "period": "II",
+      "topic": "Interpretation of Linear and Quadratic Graphs",
+      "objectives": [
+        "Solve simultaneous equations (one linear and one quadratic) using graphs",
+        "Use a quadratic graph to solve related equations",
+        "Find the range of values of x for which y is increasing or decreasing",
+        "Find the range of values of x for which y is positive or negative"
+      ],
+      "content": [
+        "Graphing simultaneous equations (one linear, one quadratic)",
+        "Using quadratic graph to solve problems",
+        "Finding range of values for increasing or decreasing y",
+        "Finding range of values for positive or negative y"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t07",
+      "grade": 12,
+      "semester": 1,
+      "period": "II",
+      "topic": "Mensuration 2",
+      "objectives": [
+        "Calculate the surface area and volume of prisms",
+        "Calculate the total surface area and volume of a cone",
+        "Calculate the total surface area and volume of pyramids",
+        "Calculate the surface area and volume of a sphere",
+        "Calculate the distance along a given latitude and longitude"
+      ],
+      "content": [
+        "Surface area and volume of prisms",
+        "Total surface area and volume of a cone",
+        "Total surface area and volume of pyramids",
+        "Surface area and volume of a sphere",
+        "Distance along a given latitude and longitude"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t08",
+      "grade": 12,
+      "semester": 1,
+      "period": "III",
+      "topic": "Logical Reasoning",
+      "objectives": [
+        "Identify and form true or false statements",
+        "Form the negation of simple statements",
+        "Draw conclusions using the implication sign",
+        "Deduce an equivalent implication from a given implication",
+        "Use Venn diagrams to determine the validity or otherwise of implications or conclusions"
+      ],
+      "content": [
+        "Statements",
+        "Implication",
+        "Converse",
+        "Equivalence",
+        "Negation",
+        "Valid argument"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t09",
+      "grade": 12,
+      "semester": 1,
+      "period": "III",
+      "topic": "Percentages (Business Applications)",
+      "objectives": [
+        "Identify business partnerships and how they function",
+        "Calculate share interest or profit in a given ratio",
+        "Calculate interest on savings and loans",
+        "Calculate payment using hire purchase",
+        "Calculate taxes paid on goods and services",
+        "Calculate and explain value added tax (VAT)",
+        "Calculate electricity, water and telephone bills"
+      ],
+      "content": [
+        "Taxation",
+        "Banking transactions",
+        "Hire purchase",
+        "Household bills",
+        "Partnership business"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t10",
+      "grade": 12,
+      "semester": 1,
+      "period": "III",
+      "topic": "Rigid Motion 2 and Enlargement",
+      "objectives": [
+        "Find the image of an object under rotation",
+        "Carry out an enlargement of a plane shape given a scale factor",
+        "Identify a scale drawing as an enlargement or reduction of a plane figure",
+        "Establish the relationship between the areas and volumes of plane figures and solids and their images"
+      ],
+      "content": [
+        "Rotation and its measurement",
+        "Enlargement",
+        "Magnification and reduction",
+        "Negative enlargement",
+        "Movements and enlargement",
+        "Perspective and similarity",
+        "Similar triangles",
+        "Similar areas and volumes"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t11",
+      "grade": 12,
+      "semester": 1,
+      "period": "III",
+      "topic": "Trigonometry 2",
+      "objectives": [
+        "Graph simple trigonometric functions",
+        "Determine maximum and minimum values of trigonometric graphs",
+        "Draw and interpret trigonometric functions"
+      ],
+      "content": [
+        "Graphs of simple trigonometric functions",
+        "Maximum and minimum values",
+        "Drawing and interpretation of trigonometric functions"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t12",
+      "grade": 12,
+      "semester": 2,
+      "period": "IV",
+      "topic": "Numbers and Numeration",
+      "objectives": [
+        "Review real numbers (whole numbers, factors, multiples, prime numbers, prime factorization, integers, rational numbers)",
+        "Convert from base ten to other bases and vice versa",
+        "Solve problems in modular arithmetic",
+        "Demonstrate identities in commutative, associative, and distributive properties",
+        "Work with binomial expressions and properties of negatives",
+        "Solve problems using powers and roots"
+      ],
+      "content": [
+        "Review of real numbers",
+        "Number bases",
+        "Modular arithmetic",
+        "Identities (commutative, associative, distributive properties)",
+        "Binomial expressions",
+        "Powers and roots"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t13",
+      "grade": 12,
+      "semester": 2,
+      "period": "IV",
+      "topic": "Sets and Logic",
+      "objectives": [
+        "Define sets and use set notation",
+        "Define and apply subsets",
+        "Discuss universal set, equal sets, equivalent sets and listing elements of a set",
+        "Discuss Venn diagram and illustrate operations on sets",
+        "Discuss properties of set operations",
+        "Solve two-set and three-set problems using Venn diagrams",
+        "Review open statements and implication and apply them using sets"
+      ],
+      "content": [
+        "Definition of sets",
+        "Subsets",
+        "Types of sets",
+        "Venn diagrams",
+        "Operations on sets (intersection, disjoint, union, complement)",
+        "Properties of set operations (commutative, associative, distributive)",
+        "Problem solving with sets",
+        "Open statements and implications"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t14",
+      "grade": 12,
+      "semester": 2,
+      "period": "IV",
+      "topic": "Relations, Functions, Mappings, Ratio, Proportion and Variation",
+      "objectives": [
+        "Define and discuss relations and functions",
+        "Discuss numerical mappings",
+        "Solve problems on relations, functions and mappings",
+        "Calculate ratio and proportion",
+        "Define variation and solve problems on variation (direct, inverse, joint, partial)"
+      ],
+      "content": [
+        "Relations and functions",
+        "Numerical mappings",
+        "Ratio and proportion",
+        "Variation (direct, inverse, joint, partial)"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t15",
+      "grade": 12,
+      "semester": 2,
+      "period": "IV",
+      "topic": "Algebraic Processes",
+      "objectives": [
+        "Simplify algebraic expressions",
+        "Factorize algebraic expressions",
+        "Solve algebraic fractions",
+        "Perform substitution",
+        "Solve equations and inequalities",
+        "Solve quadratic equations",
+        "Solve simultaneous linear equations",
+        "Solve simultaneous linear inequalities",
+        "Work with formulae",
+        "Solve word problems",
+        "Perform linear programming"
+      ],
+      "content": [
+        "Simplification of algebraic expressions",
+        "Factorization (common factors, grouping, quadratic trinomials, difference of two squares, sum/difference of two cubes)",
+        "Algebraic fractions",
+        "Substitution",
+        "Equations and inequalities",
+        "Quadratic equations (factorization, completing the square, quadratic formula)",
+        "Simultaneous linear equations (graphs, elimination, substitution, matrices)",
+        "Simultaneous linear inequalities",
+        "Linear programming",
+        "Formulae",
+        "Word problems"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t16",
+      "grade": 12,
+      "semester": 2,
+      "period": "V",
+      "topic": "Vectors and Trigonometry",
+      "objectives": [
+        "Describe vectors using ordered pair notation",
+        "Describe magnitude and direction of vectors",
+        "Solve problems involving vector addition and subtraction",
+        "Multiply vectors by a scalar (scalar product)",
+        "Define and use unit vectors and position vectors",
+        "Determine a vector from its direction and magnitude",
+        "Work with objects in static equilibrium",
+        "Determine whether two vectors are parallel or orthogonal",
+        "Determine latitudes and longitudes",
+        "Calculate lengths of objects and angles inscribed in a circle"
+      ],
+      "content": [
+        "Vector representation",
+        "Magnitude and direction of vectors",
+        "Vector addition and subtraction",
+        "Multiplication of vectors (scalar product)",
+        "Resolution of a vector",
+        "Unit and position vectors",
+        "Static equilibrium problems",
+        "Determination of latitudes and longitudes",
+        "Applications of trigonometry",
+        "Lengths of objects and angles inscribed in a circle"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t17",
+      "grade": 12,
+      "semester": 2,
+      "period": "V",
+      "topic": "Transformations",
+      "objectives": [
+        "Define and discuss transformation using concept of movement or congruency",
+        "Find the coordinates of transformations",
+        "Define, discuss and apply the concept of reflection",
+        "Define, discuss and apply the concept of similarities",
+        "Define, discuss and apply the concept of translation"
+      ],
+      "content": [
+        "Movement",
+        "Transformations and coordinates",
+        "Reflection",
+        "Similarities",
+        "Translation"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t18",
+      "grade": 12,
+      "semester": 2,
+      "period": "V",
+      "topic": "Plane Geometry (Advanced)",
+      "objectives": [
+        "Define and discuss polygons and regular polygons",
+        "Name and define polygons according to their sides",
+        "Determine interior and exterior angles of polygons",
+        "Find the sum of interior and exterior angles",
+        "Solve problems on polygons",
+        "Define and discuss isosceles, scalene and equilateral triangles",
+        "Solve problems on triangles",
+        "Define quadrilaterals and discuss their properties",
+        "Solve problems on quadrilaterals",
+        "Define circle and discuss inscribed angles, triangles and quadrilaterals",
+        "State and use circle theorems",
+        "Discuss tangent to a circle and state properties",
+        "Solve problems relating to tangent to a circle"
+      ],
+      "content": [
+        "Polygons and their properties",
+        "Regular polygons",
+        "Interior and exterior angles",
+        "Triangles (isosceles, scalene, equilateral)",
+        "Quadrilaterals and their properties",
+        "Circle theorems",
+        "Inscribed angles, triangles and quadrilaterals",
+        "Tangent to a circle"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t19",
+      "grade": 12,
+      "semester": 2,
+      "period": "V",
+      "topic": "Solid Geometry",
+      "objectives": [
+        "Identify and discuss common solids and faces of a solid",
+        "Define and discuss prisms, cuboids, cylinders, pyramids, tetrahedron, hexagonal pyramid, cone",
+        "Measure lengths and angles in solids",
+        "Calculate volumes and surface areas"
+      ],
+      "content": [
+        "Common solids",
+        "Prisms",
+        "Cuboids",
+        "Cylinders",
+        "Pyramids",
+        "Cone",
+        "Volumes and surface areas"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t20",
+      "grade": 12,
+      "semester": 2,
+      "period": "VI",
+      "topic": "Probability and Statistics (Advanced)",
+      "objectives": [
+        "Discuss the fundamental counting principle",
+        "Compute factorials",
+        "Define and discuss permutations",
+        "Define and discuss combinations",
+        "Differentiate between permutations and combinations",
+        "Review basic concepts of sets, Venn diagrams, tree diagrams, contingency tables",
+        "Define sample space and events of an experiment",
+        "Calculate probability of an event, complementary events, mutually exclusive events, independent events, conditional events",
+        "Calculate odds of an event",
+        "Calculate expected value"
+      ],
+      "content": [
+        "Fundamental counting principle",
+        "Factorials",
+        "Permutations",
+        "Combinations",
+        "Difference between permutations and combinations",
+        "Review of sets, Venn diagrams, tree diagrams, contingency tables",
+        "Sample space and events",
+        "Probability of an event",
+        "Complementary events",
+        "Mutually exclusive events",
+        "Independent events",
+        "Conditional events",
+        "Odds of an event",
+        "Expected value"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t21",
+      "grade": 12,
+      "semester": 2,
+      "period": "VI",
+      "topic": "Exponential and Logarithmic Functions",
+      "objectives": [
+        "Evaluate exponential functions",
+        "Graph exponential functions",
+        "Solve application problems involving exponential functions (doubling time, radioactive decay, compound interest)",
+        "Distinguish between algebraic and exponential functions",
+        "Define base e",
+        "Graph exponential functions with base e",
+        "Review growth and decay with base e",
+        "Solve problems involving interest compounding continuously",
+        "Change expressions to logarithmic expressions and conversely",
+        "Evaluate logarithmic functions",
+        "Evaluate common and natural logarithms using calculator",
+        "Graph logarithmic functions",
+        "Interpret logarithmic functions as inverse of exponential functions",
+        "Determine domain restrictions on logarithmic functions",
+        "Express a single logarithm as a sum or difference of logarithms",
+        "Express a logarithmic expression as a single logarithm",
+        "Evaluate logarithms of a general base",
+        "State the seven basic logarithmic properties",
+        "State the change-of-base formula",
+        "Solve exponential and logarithmic equations"
+      ],
+      "content": [
+        "Evaluation of exponential functions",
+        "Graphs of exponential functions",
+        "Applications (doubling time growth model, radioactive decay, compound interest)",
+        "Algebraic vs exponential functions",
+        "Base e",
+        "Growth and decay with base e",
+        "Interest compounding continuously",
+        "Change of exponential to logarithmic expressions",
+        "Evaluation of logarithmic functions",
+        "Common and natural logarithms",
+        "Graphs of logarithmic functions",
+        "Logarithmic functions as inverse of exponential functions",
+        "Domain restrictions",
+        "Logarithm properties and laws",
+        "Change-of-base formula",
+        "Exponential and logarithmic equations"
+      ],
+      "resources": {
+        "primary_text": "Mathematics for Senior High Schools Students' Book 3 & 4 by Pearson",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    },
+    {
+      "id": "math_g12_t22",
+      "grade": 12,
+      "semester": 2,
+      "period": "VI",
+      "topic": "Differentiation and Integration",
+      "objectives": [
+        "Define, discuss and apply the concept of difference quotient",
+        "Review slopes, tangent lines and derivatives",
+        "Define and discuss the concept of limits",
+        "Define and apply the concept of differentiation",
+        "Define and discuss the concept of integration",
+        "Find areas under a curve",
+        "Find indefinite integrals of simple polynomial and trigonometric functions"
+      ],
+      "content": [
+        "Review of analytic geometry",
+        "Difference quotient",
+        "Limits",
+        "Differentiation (first principle, rules of differentiation)",
+        "Areas under the curve",
+        "Integration (indefinite integrals of polynomial and trigonometric functions)"
+      ],
+      "resources": {
+        "primary_text": "Calculus and Analytic Geometry (8th Edition) by George B. Thomas and Ross L. Finney",
+        "links": ["khanacademy.com", "mathway.com", "quickmath.com", "chegg.com", "symbolab.com", "cymath.com"]
+      }
+    }
+  ]
+}
