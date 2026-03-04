@@ -15,7 +15,9 @@ import os
 from pathlib import Path
 
 # ── Location of curriculum JSON files ──────────────────────────────────
-CURRICULUM_DIR = Path(__file__).parent / "curriculum_data"
+# Check curriculum_data/ subfolder first; fall back to same directory as this file
+_BASE = Path(__file__).parent
+CURRICULUM_DIR = _BASE / "curriculum_data" if (_BASE / "curriculum_data").exists() else _BASE
 
 
 def load_all_curricula():
