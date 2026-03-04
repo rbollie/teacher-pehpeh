@@ -1636,10 +1636,16 @@ def main():
         _NEEDS_OPTIONS={"detailed lesson plan","homework with minimal resources","group activity","hands-on zero-cost activity","5-day scheme of work","term plan","catch-up material","zero-cost teaching game","lesson with AI-generated visual","reading passage with questions","revision guide"}
         _NEEDS_MOE={"detailed lesson plan","homework with minimal resources","group activity","hands-on zero-cost activity","5-day scheme of work","term plan","catch-up material","zero-cost teaching game","lesson with AI-generated visual","reading passage with questions","revision guide","10-question quiz with answer key","20-question quiz","50 WASSCE-style MCQs","WASSCE theory questions","BECE-style exam"}
         _NEEDS_IMG={"detailed lesson plan","homework with minimal resources","group activity","hands-on zero-cost activity","lesson with AI-generated visual","reading passage with questions"}
+        _WASSCE_TASKS={"50 WASSCE-style MCQs","WASSCE theory questions","BECE-style exam","10-question quiz with answer key","20-question quiz"}
         _show_time=_task_val in _NEEDS_TIME
         _show_options=_task_val in _NEEDS_OPTIONS
         _show_moe=_task_val in _NEEDS_MOE
         _show_img=_task_val in _NEEDS_IMG
+        _show_wassce_guide=_task_val in _WASSCE_TASKS
+        if _show_wassce_guide:
+            st.markdown(f'<div style="background:linear-gradient(135deg,rgba(139,26,26,.3),rgba(212,168,67,.1));border:1px solid {C_GOLD}66;border-radius:10px;padding:10px 16px;margin:6px 0;display:flex;align-items:center;gap:10px"><span style="font-size:1.1rem">📋</span><span style="color:{C_GOLD};font-weight:700;font-size:.88rem">WASSCE Prep</span><span style="color:#D0D8E8;font-size:.82rem"> — Review answer sheet shading technique before generating</span></div>', unsafe_allow_html=True)
+            if st.button("📋 Open Answer Sheet Guide", key="wassce_guide_btn", use_container_width=False):
+                wassce_shading_modal()
         with c2:
             if _show_time:
                 tm=st.selectbox(T("time"),_times(),label_visibility="collapsed",format_func=lambda x: f"\u23f1\ufe0f Time: {x}")
@@ -2645,5 +2651,120 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
             if st.button(T("wassce_tips"),key="wt"): st.markdown(f'<div style="background:{C_NAVY_L};border:1px solid {C_GOLD};border-radius:12px;padding:16px;color:#D0D8E8;white-space:pre-wrap;line-height:1.7">{WASSCE_TIPS}</div>',unsafe_allow_html=True)
 
     st.markdown(f'<div class="ft">{ico(16)} <strong>Teacher Pehpeh by IBT</strong><br>Built by <strong>Rodney L. Bollie, PhD</strong> · <a href="https://www.institutebasictechnology.org">Institute of Basic Technology</a><br><a href="https://www.institutebasictechnology.org/index.php" style="color:{C_BLUE}">Visit our website →</a></div>',unsafe_allow_html=True)
+
+
+@st.dialog("📋 WASSCE Answer Sheet Guide", width="large")
+def wassce_shading_modal():
+    _wtab = st.radio("", ["🎯 Shading Guide","❌ Common Errors","📋 Practice Sheet","💡 Exam Tips"],
+                     horizontal=True, key="wassce_modal_tab", label_visibility="collapsed")
+
+    if _wtab == "🎯 Shading Guide":
+        st.markdown('''
+<div style="background:rgba(212,168,67,.07);border:1px solid #D4A84344;border-radius:14px;padding:20px;margin:8px 0">
+  <div style="text-align:center;color:#D4A843;font-weight:700;font-size:1rem;margin-bottom:16px">✅ The 3 Rules of Correct Shading</div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px;background:rgba(212,168,67,.06);border-left:3px solid #D4A843;border-radius:8px;padding:10px 14px">
+      <div style="width:30px;height:30px;border-radius:50%;background:#8B1A1A;color:#D4A843;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;flex-shrink:0">1</div>
+      <div><strong style="color:#D4A843">Fill completely</strong><br><span style="color:#D0D8E8;font-size:.85rem">Shade the entire bubble — edge to edge. No white space showing inside the circle.</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;background:rgba(212,168,67,.06);border-left:3px solid #D4A843;border-radius:8px;padding:10px 14px">
+      <div style="width:30px;height:30px;border-radius:50%;background:#8B1A1A;color:#D4A843;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;flex-shrink:0">2</div>
+      <div><strong style="color:#D4A843">One bubble per question</strong><br><span style="color:#D0D8E8;font-size:.85rem">Shade exactly ONE option. Two shaded bubbles = zero marks automatically.</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;background:rgba(212,168,67,.06);border-left:3px solid #D4A843;border-radius:8px;padding:10px 14px">
+      <div style="width:30px;height:30px;border-radius:50%;background:#8B1A1A;color:#D4A843;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;flex-shrink:0">3</div>
+      <div><strong style="color:#D4A843">Erase cleanly if changing</strong><br><span style="color:#D0D8E8;font-size:.85rem">Use a proper eraser. Ghost marks from incomplete erasure trigger a scanning error.</span></div>
+    </div>
+  </div>
+</div>
+<div style="background:rgba(15,34,71,.8);border:1px solid #D4A84344;border-radius:14px;padding:20px;margin:8px 0">
+  <div style="text-align:center;color:#D4A843;font-weight:700;font-size:.95rem;margin-bottom:14px">✏️ The 3 Stages of Correct Shading</div>
+  <div style="display:flex;justify-content:space-around;align-items:center;flex-wrap:wrap;gap:16px">
+    <div style="text-align:center">
+      <div style="width:44px;height:44px;border-radius:50%;border:2.5px solid #555;margin:0 auto 8px"></div>
+      <div style="color:#EF9A9A;font-size:.75rem;font-weight:700">Empty — NO marks</div>
+    </div>
+    <div style="text-align:center">
+      <div style="width:44px;height:44px;border-radius:50%;border:2.5px solid #888;background:linear-gradient(180deg,transparent 50%,#888 50%);margin:0 auto 8px"></div>
+      <div style="color:#FFB74D;font-size:.75rem;font-weight:700">Half — Won't scan</div>
+    </div>
+    <div style="text-align:center">
+      <div style="width:44px;height:44px;border-radius:50%;border:2.5px solid #D4A843;background:#1a1a2e;margin:0 auto 8px"></div>
+      <div style="color:#81C784;font-size:.75rem;font-weight:700">Full — CORRECT ✅</div>
+    </div>
+  </div>
+</div>
+''', unsafe_allow_html=True)
+
+    elif _wtab == "❌ Common Errors":
+        mistakes = [
+            ("✓", "22px", "Tick / Checkmark", "❌", "#EF9A9A", "rgba(139,26,26,.2)", "#8B1A1A44",
+             "Most common mistake in Liberian schools — the scanner does not recognise a tick"),
+            ("✗", "22px", "X Mark", "❌", "#EF9A9A", "rgba(139,26,26,.2)", "#8B1A1A44",
+             "Same problem as a tick — not detected by optical scanner"),
+            ("·", "28px", "Dot only", "❌", "#EF9A9A", "rgba(139,26,26,.2)", "#8B1A1A44",
+             "Too small and too light — the scanner will read it as empty"),
+            ("◑", "22px", "Partial shading", "❌", "#EF9A9A", "rgba(139,26,26,.2)", "#8B1A1A44",
+             "Half-filled bubbles may or may not scan — too risky. Always complete the fill"),
+        ]
+        for icon, sz, label, badge, col, bg, bdr, desc in mistakes:
+            st.markdown(
+                f'<div style="display:flex;align-items:center;gap:14px;background:{bg};border:1px solid {bdr};border-radius:10px;padding:12px 16px;margin-bottom:6px">' +
+                f'<div style="width:42px;height:42px;border-radius:50%;border:2px solid #c0392b;display:flex;align-items:center;justify-content:center;font-size:{sz};color:#aaa;flex-shrink:0">{icon}</div>' +
+                f'<div><div style="color:{col};font-weight:700;font-size:.88rem">{badge} {label}</div><div style="color:#D0D8E8;font-size:.8rem;margin-top:2px">{desc}</div></div></div>',
+                unsafe_allow_html=True
+            )
+        st.markdown(
+            '<div style="display:flex;align-items:center;gap:14px;background:rgba(129,199,132,.1);border:1px solid #81C78444;border-radius:10px;padding:12px 16px;margin-bottom:6px">' +
+            '<div style="width:42px;height:42px;border-radius:50%;border:2px solid #D4A843;background:#1a1a2e;flex-shrink:0"></div>' +
+            '<div><div style="color:#81C784;font-weight:700;font-size:.88rem">✅ Fully shaded bubble</div><div style="color:#D0D8E8;font-size:.8rem;margin-top:2px">Complete fill from edge to edge using HB pencil — the only method the scanner accepts</div></div></div>',
+            unsafe_allow_html=True
+        )
+        st.error("🚨 **#1 mistake in Liberian schools:** Students shade a tick (✓) instead of filling the bubble. Drill this until it's automatic — *fill, don't tick.*")
+
+    elif _wtab == "📋 Practice Sheet":
+        st.info("💡 **For teachers:** Print this sheet. Have students shade a full mock set before exam day using HB pencil. Time them — 60 bubbles cleanly should take under 4 minutes.")
+        rows_html = ""
+        for q in range(1, 61):
+            bubbles = "".join([
+                f'<div style="width:17px;height:17px;border-radius:50%;border:1.5px solid #bbb;display:flex;align-items:center;justify-content:center;font-size:7px;color:#999">{o}</div>'
+                for o in "ABCDE"
+            ])
+            rows_html += (
+                f'<div style="display:flex;align-items:center;gap:5px;padding:2px 4px">' +
+                f'<span style="width:20px;text-align:right;font-size:10px;color:#555;font-weight:700">{q}.</span>' +
+                bubbles + '</div>'
+            )
+        st.markdown(
+            '<div style="background:white;border-radius:10px;padding:18px;font-family:Courier New,monospace">' +
+            '<div style="background:#1a1a2e;border-radius:6px;padding:8px;text-align:center;margin-bottom:14px">' +
+            '<div style="color:#D4A843;font-weight:700;font-size:13px;letter-spacing:2px">WASSCE PRACTICE ANSWER SHEET</div>' +
+            '<div style="color:#D0D8E8;font-size:11px;margin-top:2px">Use HB pencil · Shade ONE bubble · Erase cleanly</div></div>' +
+            '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:3px 20px">' +
+            rows_html + '</div>' +
+            '<div style="margin-top:10px;font-size:9px;color:#999;text-align:center">⚠️ Use HB pencil only · Do not fold · Erase completely when changing answers</div></div>',
+            unsafe_allow_html=True
+        )
+
+    elif _wtab == "💡 Exam Tips":
+        tips = [
+            ("✏️", "Use HB Pencil Only", "Never use pen or biro. The optical scanner reads HB pencil marks only. Ballpoint pen cannot be erased cleanly."),
+            ("⭕", "Fill the Entire Bubble", "Shade completely from edge to edge. Ticks, dots, X marks, and partial shading all score zero."),
+            ("🧹", "Erase Completely", "If you change an answer, erase the old bubble fully before shading the new one. Two shaded bubbles = zero marks."),
+            ("🔢", "Check Row Alignment Every 10 Questions", "A single misaligned row can cost 10+ marks instantly. Every 10 questions, verify your row number matches."),
+            ("⏱️", "The 5-Minute Rule", "With 5 minutes left, stop answering new questions. Use that time to check every row on your answer sheet."),
+            ("📏", "Keep the Sheet Clean and Flat", "No stray marks. Don't fold or bend the sheet. Creases can interfere with scanner reading."),
+        ]
+        for icon, title, body in tips:
+            st.markdown(
+                f'<div style="display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.04);' +
+                f'border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 14px;margin-bottom:8px">' +
+                f'<div style="font-size:22px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;' +
+                f'background:rgba(212,168,67,.1);border-radius:8px;flex-shrink:0">{icon}</div>' +
+                f'<div><div style="color:#D4A843;font-weight:700;font-size:.9rem">{title}</div>' +
+                f'<div style="color:#D0D8E8;font-size:.83rem;margin-top:3px;line-height:1.5">{body}</div></div></div>',
+                unsafe_allow_html=True
+            )
+
 
 if __name__=="__main__": main()
