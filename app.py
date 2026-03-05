@@ -899,23 +899,8 @@ def get_b64():
 def show_logo(country=None):
     b=get_b64()
     flag=FLAGS.get(country,"") if country else ""
-    # Use JS to detect if flag emoji renders (Edge/Windows shows "LR" text instead)
-    # Hide flag spans if they render as text (width too narrow = emoji didn't render)
-    flag_js = """<script>
-(function(){
-  var spans=document.querySelectorAll('.tp-flag');
-  spans.forEach(function(s){
-    var c=document.createElement('canvas');
-    var ctx=c.getContext('2d');
-    ctx.font='20px serif';
-    var w=ctx.measureText(s.textContent).width;
-    // If flag emoji renders properly it is wide; if fallback text ("LR") it is narrow
-    if(w<25){s.style.display='none';}
-  });
-})();
-</script>"""
-    if b: st.markdown(f'<div style="text-align:center;padding:.8rem 0 .2rem;display:flex;align-items:center;justify-content:center;gap:16px"><span class="tp-flag" style="font-size:3rem">{flag}</span><img src="data:image/png;base64,{b}" style="max-height:170px;filter:drop-shadow(0 4px 12px rgba(212,168,67,.3))"><span class="tp-flag" style="font-size:3rem">{flag}</span></div>'+flag_js,unsafe_allow_html=True)
-    else: st.markdown(f'<div style="text-align:center"><h1 style="color:{C_GOLD}">Teacher Pehpeh by IBT</h1></div>',unsafe_allow_html=True)
+    if b: st.markdown(f'<div style="text-align:center;padding:.8rem 0 .2rem;display:flex;align-items:center;justify-content:center;gap:16px"><span style="font-size:3rem">{flag}</span><img src="data:image/png;base64,{b}" style="max-height:170px;filter:drop-shadow(0 4px 12px rgba(212,168,67,.3))"><span style="font-size:3rem">{flag}</span></div>',unsafe_allow_html=True)
+    else: st.markdown(f'<div style="text-align:center"><h1 style="color:{C_GOLD}">{flag} Teacher Pehpeh by IBT {flag}</h1></div>',unsafe_allow_html=True)
 
 def ico(s=20):
     b=get_b64()
@@ -1758,32 +1743,6 @@ def main():
         'document.head.appendChild(l);})();</script>'
     )
     st.markdown(_fav_js, unsafe_allow_html=True)
-    # Sidebar peek animation — slides open then closed on first load to show users it exists
-    st.markdown('''<script>
-(function(){
-  // Only run once per browser session
-  if(sessionStorage.getItem("tp_peeked")) return;
-  sessionStorage.setItem("tp_peeked","1");
-  function tryPeek(attempts){
-    var btn = document.querySelector('[data-testid="collapsedControl"]');
-    if(!btn){
-      if(attempts>40) return;
-      setTimeout(function(){tryPeek(attempts+1);}, 150);
-      return;
-    }
-    // Open sidebar after 800ms
-    setTimeout(function(){
-      btn.click();
-      // Close sidebar after 1.8s (giving user time to see it)
-      setTimeout(function(){
-        var btn2 = document.querySelector('[data-testid="collapsedControl"]');
-        if(btn2) btn2.click();
-      }, 1800);
-    }, 800);
-  }
-  tryPeek(0);
-})();
-</script>''', unsafe_allow_html=True)
     for k in ["chat_messages","students","conn_checked","conn_info","gen_result","grade_history"]:
         if k not in st.session_state: st.session_state[k]=[] if k in ("chat_messages","students","grade_history") else (False if k=="conn_checked" else None)
     # Always sync quiz state for ALL subjects (catches new subjects added after first run)
@@ -1944,14 +1903,19 @@ def main():
         visibility:hidden !important;
     }}
     [data-testid="stSidebar"] .stExpander summary::before {{
-        content:"⚙️";
-        font-size:1.1rem;
-        margin-right:6px;
+        content:"";
         display:inline-block;
-        width:auto;
-        height:auto;
-        min-width:auto;
+        width:30px;
+        height:30px;
+        min-width:30px;
+        background-image:url("data:image/png;base64,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");
+        background-size:cover;
+        background-repeat:no-repeat;
+        background-position:center;
+        margin-right:8px;
         vertical-align:middle;
+        border-radius:50%;
+        flex-shrink:0;
     }}
     </style>""",unsafe_allow_html=True)
 
@@ -2136,7 +2100,7 @@ def main():
             _ms = get_mano_stats()
             mano_html=f'<span style="color:#FFB74D">🗣️ Mano: {_ms["total"]}+ words</span>' if _ms else ""
             if mano_html: bar_parts.append(mano_html)
-        # Unified status bar — Re-check is the last segment inside the bar itself
+        # Unified status bar with embedded device check
         import streamlit.components.v1 as _conn_comp
         _status_bar_html = div.join(bar_parts)
         _conn_comp.html(f"""
@@ -2147,7 +2111,7 @@ def main():
   display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
   padding: 6px 16px; border-radius: 20px;
   border: 1px dashed #2a3a5a; opacity: .85;
-  margin-bottom: .3rem;
+  margin-bottom: .5rem;
 }}
 .tp-bar span {{ white-space: nowrap; }}
 .tp-div {{ color: #3a4a6a; margin: 0 8px; font-size: 1.1rem; }}
@@ -2157,14 +2121,6 @@ def main():
   background:rgba(0,0,0,.2); border:1px solid #2a3a5a;
   transition: all .3s;
 }}
-#recheck-btn {{
-  display:inline-flex; align-items:center; gap:5px;
-  padding:3px 10px; border-radius:12px; cursor:pointer;
-  background:rgba(43,125,233,.15); border:1px solid rgba(43,125,233,.4);
-  color:#7BB8F5; font-size:.78rem; font-family:inherit;
-  transition:all .2s;
-}}
-#recheck-btn:hover {{ background:rgba(43,125,233,.3); border-color:rgba(43,125,233,.7); }}
 </style>
 <div class="tp-bar">
   <div id="dev-chip" title="Shows whether your device is connected to the internet">
@@ -2173,15 +2129,13 @@ def main():
   </div>
   <span class="tp-div">│</span>
   {_status_bar_html}
-  <span class="tp-div">│</span>
-  <button id="recheck-btn" title="Re-test connection to AI services" onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:true}},'*')">🔄 Re-check</button>
 </div>
 <script>
 (function(){{
   var icon=document.getElementById('dev-icon');
   var lbl=document.getElementById('dev-lbl');
   var chip=document.getElementById('dev-chip');
-  function setDev(ok){{
+  function setDev(ok,ms){{
     if(ok){{
       icon.textContent='💻';
       lbl.style.color='#81C784';
@@ -2199,20 +2153,28 @@ def main():
   if(!navigator.onLine){{setDev(false);return;}}
   var t=Date.now();
   fetch('https://www.google.com/favicon.ico',{{mode:'no-cors',cache:'no-store'}})
-    .then(function(){{setDev(true);}})
+    .then(function(){{setDev(true,Date.now()-t);}})
     .catch(function(){{setDev(false);}});
   window.addEventListener('offline',function(){{setDev(false);}});
   window.addEventListener('online',function(){{
+    var t2=Date.now();
     fetch('https://www.google.com/favicon.ico',{{mode:'no-cors',cache:'no-store'}})
-      .then(function(){{setDev(true);}})
+      .then(function(){{setDev(true,Date.now()-t2);}})
       .catch(function(){{setDev(false);}});
   }});
 }})();
 </script>
 """, height=46, scrolling=False)
-        if st.sidebar.button(T("recheck"), key="recheck_sidebar"):
+    # Recheck button — visible inline below status bar, not just sidebar
+    _rc1, _rc2 = st.columns([6,1])
+    with _rc2:
+        if st.button("🔄 Re-check", key="recheck_btn", use_container_width=True,
+                     help="Re-test whether Teacher Pehpeh can reach the AI services"):
             st.session_state.conn_checked = False
             st.rerun()
+    if st.sidebar.button(T("recheck"), key="recheck_sidebar"):
+        st.session_state.conn_checked = False
+        st.rerun()
 
     # Compute general MOE curriculum context for chat (available across tabs)
     _chat_curr_ctx = ""
