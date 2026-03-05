@@ -900,8 +900,9 @@ def show_logo(country=None):
     b=get_b64()
     flag=FLAGS.get(country,"") if country else ""
     # Wrap flags in a span with a class; JS hides them in Edge/Windows where they render as "LR" text
-    flag_span=f'<span class="tp-flag" style="font-size:3rem">{flag}</span>' if flag else ""
-    flag_js='<script>(function(){if(sessionStorage.getItem("tp_flag_checked"))return;sessionStorage.setItem("tp_flag_checked","1");document.querySelectorAll(".tp-flag").forEach(function(s){var cv=document.createElement("canvas"),ctx=cv.getContext("2d");ctx.font="20px serif";if(ctx.measureText(s.textContent).width<26)s.style.display="none";});})();</script>'
+    # Flags hidden by default; JS reveals only if emoji actually renders (fixes Edge/Windows "LR" fallback)
+    flag_span=f'<span class="tp-flag" style="font-size:3rem;visibility:hidden">{flag}</span>' if flag else ""
+    flag_js='<script>(function(){document.querySelectorAll(".tp-flag").forEach(function(s){var cv=document.createElement("canvas"),ctx=cv.getContext("2d");ctx.font="20px serif";if(ctx.measureText(s.textContent).width>26)s.style.visibility="visible";});})();</script>'
     if b: st.markdown(f'<div style="text-align:center;padding:.8rem 0 .2rem;display:flex;align-items:center;justify-content:center;gap:16px">{flag_span}<img src="data:image/png;base64,{b}" style="max-height:170px;filter:drop-shadow(0 4px 12px rgba(212,168,67,.3))">{flag_span}</div>'+flag_js,unsafe_allow_html=True)
     else: st.markdown(f'<div style="text-align:center"><h1 style="color:{C_GOLD}">{flag} Teacher Pehpeh by IBT {flag}</h1></div>',unsafe_allow_html=True)
 
