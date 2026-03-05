@@ -2436,7 +2436,7 @@ def main():
                 f'<span style="color:#D0D8E8"> — Options limited to exam-relevant choices.</span></div>',
                 unsafe_allow_html=True
             )
-            with st.expander(f"⚙️ Options for {task}", help="Add extras like differentiation strategies, WASSCE alignment, or an AI-generated image"):
+            with st.expander(f"⚙️ Options for {task} — add extras"):
                 _wassce_extras_en = list(_WASSCE_VALID_EXTRAS)
                 exs = [e for e in _wassce_extras_en if st.checkbox(e, key=f"wx_{e}")]
         elif _show_options:
@@ -2456,7 +2456,7 @@ def main():
             }
             _active_opt_keys = _TASK_OPTIONS_MAP.get(_task_val, ["differentiation","local_ex","wassce_align"])
             _ALL_EXTRAS_KEYS = ["differentiation","formative","takehome","wassce_align","local_ex","literacy","large_class","cross_curr","ai_visual"]
-            with st.expander(f"⚙️ Options for {task}", help="Add extras like differentiation strategies, WASSCE alignment, or an AI-generated image"):
+            with st.expander(f"⚙️ Options for {task} — add extras"):
                 _extras_labels = [T(k) for k in _active_opt_keys]
                 exs = [EXTRAS[_ALL_EXTRAS_KEYS.index(k)] for k, lbl in zip(_active_opt_keys, _extras_labels)
                        if st.checkbox(lbl, key=f"x_{k}")]
