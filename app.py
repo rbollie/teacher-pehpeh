@@ -916,7 +916,7 @@ def show_logo(country=None):
                f'data-flag="{flag}">{flag}</span>') if flag else ""
     if b: st.markdown(
         f'<div style="text-align:center;padding:.8rem 0 .2rem;display:flex;align-items:center;justify-content:center;gap:16px">'+
-        f'{flag_span}<img src="data:image/png;base64,{b}" style="max-height:170px;filter:drop-shadow(0 4px 12px rgba(212,168,67,.3))">{flag_span}</div>'+
+        f'{flag_span}<img src="data:image/png;base64,{b}" style="max-height:220px;filter:drop-shadow(0 4px 12px rgba(212,168,67,.3))">{flag_span}</div>'+
         detect_js,unsafe_allow_html=True)
     else: st.markdown(f'<div style="text-align:center"><h1 style="color:{C_GOLD}">Teacher Pehpeh by IBT</h1></div>',unsafe_allow_html=True)
 
