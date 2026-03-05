@@ -2016,9 +2016,9 @@ def main():
             if not st.session_state.profile_set:
                 st.markdown('<div style="font-size:.85rem;color:#F0D5D5;margin-bottom:8px">Select your school setting, grade, subject, and preferences below. Save your profile to reuse later!</div>',unsafe_allow_html=True)
             region=st.selectbox(T("setting"),list(_regions().keys()),label_visibility="collapsed",format_func=lambda x: f"📍 Setting: {x}", help="Urban, rural, or remote — shapes the type of content generated",key="cfg_region")
-            grade=st.selectbox(T("grade"),_grades(),index=1,label_visibility="collapsed",format_func=lambda x: f"🎓 Grade: {x}", help="The class level you are teaching",key="cfg_grade")
+            grade=st.selectbox(T("grade"),_grades(),label_visibility="collapsed",format_func=lambda x: f"🎓 Grade: {x}", help="The class level you are teaching",key="cfg_grade")
             subject=st.selectbox(T("subject"),_subjects(),label_visibility="collapsed",format_func=lambda x: f"📚 Subject: {x}", help="Choose the subject you want content for",key="cfg_subject")
-            clsz=st.selectbox(T("class_size"),list(_sizes().keys()),index=2,label_visibility="collapsed",format_func=lambda x: f"👥 Class Size: {x}", help="Helps Teacher Pehpeh suggest realistic group sizes and activities",key="cfg_clsz")
+            clsz=st.selectbox(T("class_size"),list(_sizes().keys()),label_visibility="collapsed",format_func=lambda x: f"👥 Class Size: {x}", help="Helps Teacher Pehpeh suggest realistic group sizes and activities",key="cfg_clsz")
             abl=st.selectbox(T("student_level"),list(_ability().keys()),label_visibility="collapsed",format_func=lambda x: f"📊 Student Level: {x}", help="Mixed, advanced, or struggling — adjusts difficulty and scaffolding",key="cfg_abl")
         # Map French display values back to English for AI
         _region_val=_regions()[region]
