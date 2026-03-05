@@ -1379,47 +1379,99 @@ function resetAll() {{
 </body></html>"""
 
 def parse_mcq_for_sheet(text):
-    """Parse AI-generated MCQ text into structured list of {q, o, a} dicts."""
+    """
+    Parse AI-generated MCQ text into list of {q, o, a} dicts.
+    Handles formats:
+      - Standard:  1. Question\nA) ...\nAnswer: B
+      - Titled:    1. Subtitle\nActual question text\nA) ...\nAnswer: B
+      - Sectioned: ALGEBRA (4 Questions)\n1. ...
+    """
     import re
     questions = []
-    blocks = re.split(r'\n(?=\d{1,2}[\.\.\)]\s)', text.strip())
+    lines = text.split('\n')
+    blocks = []
+    current = []
+    for line in lines:
+        stripped = line.strip()
+        # Skip dividers and blanks (but keep blank as block separator)
+        if stripped in ('---', '***', ''):
+            if current:
+                current.append('')
+            continue
+        # New block: line starts with a question number
+        if re.match(r'^\d{1,2}[\.\.\)]\s+\S', stripped):
+            if current:
+                blocks.append('\n'.join(current))
+            current = [stripped]
+        else:
+            current.append(stripped)
+    if current:
+        blocks.append('\n'.join(current))
+
     for block in blocks:
-        block = block.strip()
-        if not block: continue
-        lines = [l.strip() for l in block.split('\n') if l.strip()]
-        if not lines: continue
+        blines = [l.strip() for l in block.split('\n') if l.strip()]
+        if not blines:
+            continue
+        # Skip blocks that are section headers (ALL CAPS, no options follow pattern)
+        if blines[0].isupper() and len(blines) <= 2:
+            continue
+
         q_lines, opts, answer_idx = [], [], None
         i = 0
-        while i < len(lines) and not re.match(r'^[A-E][\)\.] |^\([A-E]\)', lines[i], re.IGNORECASE):
-            q_lines.append(re.sub(r'^\d{1,2}[\.\.\)]\s*', '', lines[i]))
-            i += 1
-        while i < len(lines):
-            line = lines[i]
-            # Answer line — look for letter AFTER the colon
-            if re.match(r'^[Aa]nswer\s*[:.]?', line):
-                m = re.search(r'[Aa]nswer\s*[:.]?\s*\(?([A-Ea-e])\)?', line)
+        # Strip leading question number from first line
+        first = re.sub(r'^\d{1,2}[\.\.\)]\s*', '', blines[0]).strip()
+        i = 1
+
+        # Decide if first line is a subtitle (short, no maths symbols, no '?')
+        next_is_option = (i < len(blines) and bool(re.match(r'^[A-Ea-e][\)\.]\s', blines[i])))
+        is_subtitle = (
+            not next_is_option
+            and len(first) < 70
+            and '?' not in first
+            and not re.search(r'[=\+\-\*\/÷×]', first)
+            and not re.search(r'\d', first)
+        )
+
+        if is_subtitle:
+            # Skip subtitle line, collect actual question from subsequent lines until options
+            while i < len(blines) and not re.match(r'^[A-Ea-e][\)\.]\s', blines[i]) and not re.match(r'^[Aa]nswer', blines[i]):
+                q_lines.append(blines[i])
+                i += 1
+        else:
+            q_lines.append(first)
+            while i < len(blines) and not re.match(r'^[A-Ea-e][\)\.]\s', blines[i]) and not re.match(r'^[Aa]nswer', blines[i]):
+                q_lines.append(blines[i])
+                i += 1
+
+        # Collect options and answer
+        while i < len(blines):
+            line = blines[i]
+            # Answer line
+            if re.match(r'^[Aa]nswer', line):
+                m = re.search(r'[Aa]nswer\s*[:\.]?\s*\(?([A-Ea-e])\)?', line)
                 if m:
                     answer_idx = ord(m.group(1).upper()) - ord('A')
-                i += 1; continue
-            # Standard option  A) or A.
-            m = re.match(r'^([A-E])[\)\.] \s*(.*)', line, re.IGNORECASE)
+                i += 1
+                continue
+            # Option line: A) or A. or (A)
+            m = re.match(r'^([A-Ea-e])[\)\.]\s*(.*)', line)
             if m:
                 opts.append(m.group(2).strip())
-                i += 1; continue
-            # Parenthesised (A)
-            m = re.match(r'^\(([A-E])\)\s*(.*)', line, re.IGNORECASE)
+                i += 1
+                continue
+            m = re.match(r'^\(([A-Ea-e])\)\s*(.*)', line)
             if m:
                 opts.append(m.group(2).strip())
-                i += 1; continue
-            # Inline: (A) x  (B) y  (C) z
-            if re.search(r'\([A-E]\)', line):
-                parts = re.findall(r'\([A-E]\)\s*([^(]+)', line)
-                opts.extend([p.strip() for p in parts if p.strip()])
-                i += 1; continue
+                i += 1
+                continue
             i += 1
-        if q_lines and len(opts) >= 2:
-            questions.append({"q": ' '.join(q_lines), "o": opts[:5], "a": answer_idx})
+
+        q_text = ' '.join(q_lines).strip()
+        if q_text and len(opts) >= 2:
+            questions.append({'q': q_text, 'o': opts[:5], 'a': answer_idx})
+
     return questions
+
 
 def generate_result_docx(text, task, topic, grade, subject, school="", teacher=""):
     """Generate a polished Word .docx for any AI result."""
@@ -2352,7 +2404,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     _has_answers = any(q.get("a") is not None for q in _parsed_qs)
                     _sheet_html = _make_mcq_sheet_html(_qs_data, title=gr.get("topic",""), n=_n_qs)
                     with st.expander(f"📋 Interactive Answer Sheet ({_n_qs} questions)", expanded=True):
-                        _comp.html(_sheet_html, height=max(700, 260 + _n_qs * 52), scrolling=True)
+                        _comp.html(_sheet_html, height=max(560, 220 + _n_qs * 48), scrolling=True)
 
             if len(valid_rs)>1:
                 _indiv={"en":"Individual Model Responses","fr":"Réponses individuelles des modèles","sw":"Majibu ya modeli binafsi"}.get(_lang_key(),"Individual Model Responses")
@@ -2862,7 +2914,12 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                     except: pass
             else:
                 allr=msg.get("all_responses",{})
-                st.markdown(f'<div class="cp"><div style="font-size:.75rem;font-weight:700;color:{C_GOLD};margin-bottom:4px">{ico(16)} Teacher Pehpeh</div>{highlight_result(msg["content"])}<div style="font-size:.65rem;color:#556;margin-top:4px">{_by_label} {msg.get("model","AI")}</div></div>',unsafe_allow_html=True)
+                if msg.get("is_mock_test"):
+                    # Show a collapsed version of the raw text (so answers aren't immediately visible)
+                    with st.expander("📄 View raw question text (answers visible)", expanded=False):
+                        st.markdown(f'<div class="cp">{highlight_result(msg["content"])}<div style="font-size:.65rem;color:#556;margin-top:4px">{_by_label} {msg.get("model","AI")}</div></div>',unsafe_allow_html=True)
+                else:
+                    st.markdown(f'<div class="cp"><div style="font-size:.75rem;font-weight:700;color:{C_GOLD};margin-bottom:4px">{ico(16)} Teacher Pehpeh</div>{highlight_result(msg["content"])}<div style="font-size:.65rem;color:#556;margin-top:4px">{_by_label} {msg.get("model","AI")}</div></div>',unsafe_allow_html=True)
                 # Auto-render interactive answer sheet for mock test responses
                 if msg.get("is_mock_test"):
                     _chat_parsed = parse_mcq_for_sheet(msg["content"])
@@ -2874,7 +2931,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                         _csubj = msg.get("mock_subject","")
                         _chat_sheet_html = _make_mcq_sheet_html(_cqs, title=_csubj, n=_cn)
                         with st.expander(f"📋 Interactive Answer Sheet — {_csubj} ({_cn} questions)", expanded=True):
-                            _comp2.html(_chat_sheet_html, height=max(700, 260 + _cn * 52), scrolling=True)
+                            _comp2.html(_chat_sheet_html, height=max(560, 220 + _cn * 48), scrolling=True)
                 if msg.get("image"):
                     st.image(msg["image"],caption=f"🎨 Generated by {msg.get('image_src','AI')}",use_container_width=True)
                 if msg.get("docx_bytes"):
