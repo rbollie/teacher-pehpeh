@@ -899,9 +899,13 @@ def get_b64():
 
 def show_logo(country=None):
     b=get_b64()
-    country_label=f'<p style="text-align:center;color:{C_GOLD};font-size:0.8rem;letter-spacing:2px;font-weight:600;margin:0 0 4px;opacity:0.8">{country.upper()}</p>' if country else ""
-    if b: st.markdown(country_label+f'<div style="text-align:center;padding:.2rem 0 .2rem"><img src="data:image/png;base64,{b}" style="max-height:170px;filter:drop-shadow(0 4px 12px rgba(212,168,67,.3))"></div>',unsafe_allow_html=True)
-    else: st.markdown(f'<div style="text-align:center"><h1 style="color:{C_GOLD}">Teacher Pehpeh by IBT</h1></div>',unsafe_allow_html=True)
+    flag=FLAGS.get(country,"") if country else ""
+    # Twemoji converts flag emoji to real images — works on Windows Chrome/Edge
+    twemoji_js='''<script src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/twemoji.min.js"></script>
+<script>document.addEventListener("DOMContentLoaded",function(){twemoji.parse(document.body,{folder:"svg",ext:".svg"});});</script>'''
+    flag_span=f'<span class="tp-flag" style="font-size:3rem;line-height:1">{flag}</span>' if flag else ""
+    if b: st.markdown(f'<div style="text-align:center;padding:.8rem 0 .2rem;display:flex;align-items:center;justify-content:center;gap:16px">{flag_span}<img src="data:image/png;base64,{b}" style="max-height:170px;filter:drop-shadow(0 4px 12px rgba(212,168,67,.3))">{flag_span}</div>'+twemoji_js,unsafe_allow_html=True)
+    else: st.markdown(f'<div style="text-align:center"><h1 style="color:{C_GOLD}">{flag} Teacher Pehpeh by IBT {flag}</h1></div>'+twemoji_js,unsafe_allow_html=True)
 
 def ico(s=20):
     b=get_b64()
