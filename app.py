@@ -186,19 +186,19 @@ Powered by Claude · ChatGPT · Gemini
             st.info("💡 Email body was truncated. Attach the downloaded file for the full version.")
 
 def check_conn():
-    import urllib.request
-    r = {"online":False,"quality":"none","latency_ms":None,"label":"No Internet","emoji":"🔴"}
+    import urllib.request, datetime
+    r = {"online":False,"quality":"none","latency_ms":None,"label":"No Internet","emoji":"🔴","checked_at":datetime.datetime.now().strftime("%H:%M:%S")}
     lats = []
     for u in ["https://api.anthropic.com","https://api.openai.com","https://www.google.com"]:
         try:
             t=time.time(); req=urllib.request.Request(u,method="HEAD"); req.add_header("User-Agent","TP/1.0")
-            urllib.request.urlopen(req,timeout=5); lats.append((time.time()-t)*1000)
+            urllib.request.urlopen(req,timeout=4); lats.append((time.time()-t)*1000)
         except: pass
     if not lats: return r
     a=sum(lats)/len(lats); r.update(online=True,latency_ms=round(a))
-    if a<300: r.update(quality="high",label="Strong (WiFi/5G)",emoji="🟢")
-    elif a<800: r.update(quality="medium",label="Moderate (4G/3G)",emoji="🟡")
-    elif a<2000: r.update(quality="low",label="Slow (2G/Edge)",emoji="🟠")
+    if a<300: r.update(quality="high",label="Strong (server→API)",emoji="🟢")
+    elif a<800: r.update(quality="medium",label="Moderate (server→API)",emoji="🟡")
+    elif a<2000: r.update(quality="low",label="Slow (server→API)",emoji="🟠")
     else: r.update(quality="very_low",label="Very Slow",emoji="🟠")
     return r
 
@@ -2070,8 +2070,69 @@ def main():
             _ms = get_mano_stats()
             mano_html=f'<span style="color:#FFB74D">🗣️ Mano: {_ms["total"]}+ words</span>' if _ms else ""
             if mano_html: bar_parts.append(mano_html)
-        st.markdown(f'<div class="status-bar">{div.join(bar_parts)}</div>',unsafe_allow_html=True)
-    if st.sidebar.button(T("recheck")): st.session_state.conn_checked=False; st.rerun()
+        # Client-side connectivity probe (runs in the user's browser — catches device offline)
+        import streamlit.components.v1 as _conn_comp
+        _conn_comp.html("""
+<div id="cs-bar" style="font-size:11px;padding:2px 8px;border-radius:4px;display:inline-flex;
+     align-items:center;gap:6px;background:rgba(0,0,0,.25);border:1px solid #2a3a5a">
+  <span id="cs-dot" style="font-size:14px">⏳</span>
+  <span id="cs-lbl" style="color:#8899aa">Checking your device...</span>
+</div>
+<script>
+(function(){
+  var dot=document.getElementById('cs-dot');
+  var lbl=document.getElementById('cs-lbl');
+  var bar=document.getElementById('cs-bar');
+  function setStatus(ok, latency){
+    if(ok){
+      dot.textContent='🟢';
+      lbl.style.color='#81C784';
+      lbl.textContent='Your device: Online' + (latency ? ' ('+latency+'ms)' : '');
+      bar.style.border='1px solid #81C78444';
+    } else {
+      dot.textContent='🔴';
+      lbl.style.color='#EF9A9A';
+      lbl.textContent='Your device: OFFLINE — AI features unavailable';
+      bar.style.border='1px solid #EF535044';
+      bar.style.background='rgba(139,26,26,.2)';
+    }
+  }
+  // navigator.onLine is instant but unreliable — use it as a first signal
+  if(!navigator.onLine){ setStatus(false); return; }
+  // Do a real fetch probe to a known endpoint
+  var t=Date.now();
+  fetch('https://www.google.com/favicon.ico', {mode:'no-cors', cache:'no-store'})
+    .then(function(){ setStatus(true, Date.now()-t); })
+    .catch(function(){ setStatus(false); });
+  // Also listen for online/offline events for live updates
+  window.addEventListener('offline', function(){ setStatus(false); });
+  window.addEventListener('online',  function(){ 
+    var t2=Date.now();
+    fetch('https://www.google.com/favicon.ico', {mode:'no-cors', cache:'no-store'})
+      .then(function(){ setStatus(true, Date.now()-t2); })
+      .catch(function(){ setStatus(false); });
+  });
+})();
+</script>
+""", height=34, scrolling=False)
+
+        _chk_time = conn.get("checked_at","") if conn else ""
+        st.markdown(
+            f'<div class="status-bar">{div.join(bar_parts)}' +
+            (f' {div} <span style="color:#445566;font-size:.72rem">server checked {_chk_time}</span>' if _chk_time else "") +
+            '</div>',
+            unsafe_allow_html=True
+        )
+    # Recheck button — visible inline below status bar, not just sidebar
+    _rc1, _rc2 = st.columns([6,1])
+    with _rc2:
+        if st.button("🔄 Re-check", key="recheck_btn", use_container_width=True,
+                     help="Re-test server connection to AI APIs"):
+            st.session_state.conn_checked = False
+            st.rerun()
+    if st.sidebar.button(T("recheck"), key="recheck_sidebar"):
+        st.session_state.conn_checked = False
+        st.rerun()
 
     # Compute general MOE curriculum context for chat (available across tabs)
     _chat_curr_ctx = ""
