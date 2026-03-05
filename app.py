@@ -1946,11 +1946,11 @@ def main():
         with st.expander("🌶️ Configure Your Classroom", expanded=False):
             if not st.session_state.profile_set:
                 st.markdown('<div style="font-size:.85rem;color:#F0D5D5;margin-bottom:8px">Select your school setting, grade, subject, and preferences below. Save your profile to reuse later!</div>',unsafe_allow_html=True)
-            region=st.selectbox(T("setting"),list(_regions().keys()),label_visibility="collapsed",format_func=lambda x: f"📍 Setting: {x}")
-            grade=st.selectbox(T("grade"),_grades(),index=1,label_visibility="collapsed",format_func=lambda x: f"🎓 Grade: {x}")
-            subject=st.selectbox(T("subject"),_subjects(),label_visibility="collapsed",format_func=lambda x: f"📚 Subject: {x}")
-            clsz=st.selectbox(T("class_size"),list(_sizes().keys()),index=2,label_visibility="collapsed",format_func=lambda x: f"👥 Class Size: {x}")
-            abl=st.selectbox(T("student_level"),list(_ability().keys()),label_visibility="collapsed",format_func=lambda x: f"📊 Student Level: {x}")
+            region=st.selectbox(T("setting"),list(_regions().keys()),label_visibility="collapsed",format_func=lambda x: f"📍 Setting: {x}", help="Urban, rural, or remote — shapes the type of content generated")
+            grade=st.selectbox(T("grade"),_grades(),index=1,label_visibility="collapsed",format_func=lambda x: f"🎓 Grade: {x}", help="The class level you are teaching")
+            subject=st.selectbox(T("subject"),_subjects(),label_visibility="collapsed",format_func=lambda x: f"📚 Subject: {x}", help="Choose the subject you want content for")
+            clsz=st.selectbox(T("class_size"),list(_sizes().keys()),index=2,label_visibility="collapsed",format_func=lambda x: f"👥 Class Size: {x}", help="Helps Teacher Pehpeh suggest realistic group sizes and activities")
+            abl=st.selectbox(T("student_level"),list(_ability().keys()),label_visibility="collapsed",format_func=lambda x: f"📊 Student Level: {x}", help="Mixed, advanced, or struggling — adjusts difficulty and scaffolding")
         # Map French display values back to English for AI
         _region_val=_regions()[region]
         _grade_en=_to_en_grade(grade)
@@ -2059,58 +2059,76 @@ def main():
             _ms = get_mano_stats()
             mano_html=f'<span style="color:#FFB74D">🗣️ Mano: {_ms["total"]}+ words</span>' if _ms else ""
             if mano_html: bar_parts.append(mano_html)
-        # Client-side connectivity probe (runs in the user's browser — catches device offline)
+        # Unified status bar with embedded device check
         import streamlit.components.v1 as _conn_comp
-        _conn_comp.html("""
-<div id="cs-bar" style="font-size:11px;padding:2px 8px;border-radius:4px;display:inline-flex;
-     align-items:center;gap:6px;background:rgba(0,0,0,.25);border:1px solid #2a3a5a">
-  <span id="cs-dot" style="font-size:14px">⏳</span>
-  <span id="cs-lbl" style="color:#8899aa">Checking your device...</span>
+        _status_bar_html = div.join(bar_parts)
+        _conn_comp.html(f"""
+<style>
+.tp-bar {{
+  font-family: "Source Sans Pro", sans-serif;
+  font-size: .78rem;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
+  padding: 6px 16px; border-radius: 20px;
+  border: 1px dashed #2a3a5a; opacity: .85;
+  margin-bottom: .5rem;
+}}
+.tp-bar span {{ white-space: nowrap; }}
+.tp-div {{ color: #3a4a6a; margin: 0 8px; font-size: 1.1rem; }}
+#dev-chip {{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:2px 8px; border-radius:12px;
+  background:rgba(0,0,0,.2); border:1px solid #2a3a5a;
+  transition: all .3s;
+}}
+</style>
+<div class="tp-bar">
+  <div id="dev-chip" title="Whether your phone or computer can reach the internet">
+    <span id="dev-icon">📱</span>
+    <span id="dev-lbl" style="color:#8899aa">Checking device…</span>
+  </div>
+  <span class="tp-div">│</span>
+  {_status_bar_html}
 </div>
 <script>
-(function(){
-  var dot=document.getElementById('cs-dot');
-  var lbl=document.getElementById('cs-lbl');
-  var bar=document.getElementById('cs-bar');
-  function setStatus(ok, latency){
-    if(ok){
-      dot.textContent='🟢';
+(function(){{
+  var icon=document.getElementById('dev-icon');
+  var lbl=document.getElementById('dev-lbl');
+  var chip=document.getElementById('dev-chip');
+  function setDev(ok,ms){{
+    if(ok){{
+      icon.textContent='💻';
       lbl.style.color='#81C784';
-      lbl.textContent='Your device: Online' + (latency ? ' ('+latency+'ms)' : '');
-      bar.style.border='1px solid #81C78444';
-    } else {
-      dot.textContent='🔴';
+      lbl.textContent='Device connected';
+      chip.style.border='1px solid #81C78444';
+      chip.style.background='rgba(46,125,50,.15)';
+    }}else{{
+      icon.textContent='📵';
       lbl.style.color='#EF9A9A';
-      lbl.textContent='Your device: OFFLINE — AI features unavailable';
-      bar.style.border='1px solid #EF535044';
-      bar.style.background='rgba(139,26,26,.2)';
-    }
-  }
-  // navigator.onLine is instant but unreliable — use it as a first signal
-  if(!navigator.onLine){ setStatus(false); return; }
-  // Do a real fetch probe to a known endpoint
+      lbl.textContent='Device offline';
+      chip.style.border='1px solid #EF535044';
+      chip.style.background='rgba(139,26,26,.2)';
+    }}
+  }}
+  if(!navigator.onLine){{setDev(false);return;}}
   var t=Date.now();
-  fetch('https://www.google.com/favicon.ico', {mode:'no-cors', cache:'no-store'})
-    .then(function(){ setStatus(true, Date.now()-t); })
-    .catch(function(){ setStatus(false); });
-  // Also listen for online/offline events for live updates
-  window.addEventListener('offline', function(){ setStatus(false); });
-  window.addEventListener('online',  function(){ 
+  fetch('https://www.google.com/favicon.ico',{{mode:'no-cors',cache:'no-store'}})
+    .then(function(){{setDev(true,Date.now()-t);}})
+    .catch(function(){{setDev(false);}});
+  window.addEventListener('offline',function(){{setDev(false);}});
+  window.addEventListener('online',function(){{
     var t2=Date.now();
-    fetch('https://www.google.com/favicon.ico', {mode:'no-cors', cache:'no-store'})
-      .then(function(){ setStatus(true, Date.now()-t2); })
-      .catch(function(){ setStatus(false); });
-  });
-})();
+    fetch('https://www.google.com/favicon.ico',{{mode:'no-cors',cache:'no-store'}})
+      .then(function(){{setDev(true,Date.now()-t2);}})
+      .catch(function(){{setDev(false);}});
+  }});
+}})();
 </script>
-""", height=34, scrolling=False)
-
-        st.markdown(f'<div class="status-bar">{div.join(bar_parts)}</div>', unsafe_allow_html=True)
+""", height=46, scrolling=False)
     # Recheck button — visible inline below status bar, not just sidebar
     _rc1, _rc2 = st.columns([6,1])
     with _rc2:
         if st.button("🔄 Re-check", key="recheck_btn", use_container_width=True,
-                     help="Re-test server connection to AI APIs"):
+                     help="Re-test whether Teacher Pehpeh can reach the AI services"):
             st.session_state.conn_checked = False
             st.rerun()
     if st.sidebar.button(T("recheck"), key="recheck_sidebar"):
@@ -2161,14 +2179,21 @@ def main():
 
         # ── Category pill buttons ──
         if "task_cat" not in st.session_state: st.session_state.task_cat="📋 Planning"
+        _CAT_TIPS = {
+            "📋 Planning":     "Lesson plans, weekly & term schemes, teaching strategies",
+            "📝 Assessment":   "Quizzes, WASSCE/BECE exam prep, grading rubrics",
+            "🎯 Activities":   "Homework, group work, reading comprehension, educational games",
+            "📚 Study Support":"Revision notes and remedial catch-up material",
+        }
         _cat_cols = st.columns(len(_TASK_CATEGORIES))
         for _ci, _cname in enumerate(_TASK_CATEGORIES):
             with _cat_cols[_ci]:
                 _is_cat = st.session_state.task_cat == _cname
                 if st.button(_cname, key=f"cat_{_ci}", use_container_width=True,
-                             type="primary" if _is_cat else "secondary"):
+                             type="primary" if _is_cat else "secondary",
+                             help=_CAT_TIPS.get(_cname,"")):
                     st.session_state.task_cat = _cname
-                    st.session_state.pop("task_sel", None)   # reset task when category changes
+                    st.session_state.pop("task_sel", None)
                     st.rerun()
 
         # Build filtered task list by matching English TASKS values to current language
@@ -2181,7 +2206,7 @@ def main():
         with c1:
             task = st.selectbox(T("task"), _cat_display_keys, key="task_sel",
                                 label_visibility="collapsed",
-                                format_func=lambda x: f"\U0001f4dd Task: {x}")
+                                format_func=lambda x: f"\U0001f4dd Task: {x}", help="What you want Teacher Pehpeh to create for you")
         _task_val = _all_tasks.get(task, "detailed lesson plan")
         _IS_PARENT_LETTER = False   # Parent Letter moved to Students tab
         _show_time    = _task_val in _NEEDS_TIME
@@ -2198,7 +2223,7 @@ def main():
         with c2:
             if _show_time:
                 tm = st.selectbox(T("time"), _times(), label_visibility="collapsed",
-                                  format_func=lambda x: f"\u23f1\ufe0f Time: {x}")
+                                  format_func=lambda x: f"\u23f1\ufe0f Time: {x}", help="How long your lesson or activity will run")
             else:
                 tm = "N/A"
                 st.markdown(f'<div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:10px 14px;color:var(--text-muted);font-size:.85rem;opacity:.5">\u23f1\ufe0f Time: not needed for this task</div>', unsafe_allow_html=True)
@@ -2311,7 +2336,7 @@ def main():
 
         else:
             if _show_topic:
-                topic=st.selectbox(T("topic"),_get_topics(_subj_en),label_visibility="collapsed",format_func=lambda x: f"\U0001f4d6 Topic: {x}")
+                topic=st.selectbox(T("topic"),_get_topics(_subj_en),label_visibility="collapsed",format_func=lambda x: f"\U0001f4d6 Topic: {x}", help="The specific topic inside this subject")
                 _topic_en=_to_en_topic(topic)
             else:
                 topic=_subj_en; _topic_en=_subj_en
@@ -2411,7 +2436,7 @@ def main():
                 f'<span style="color:#D0D8E8"> — Options limited to exam-relevant choices.</span></div>',
                 unsafe_allow_html=True
             )
-            with st.expander(f"⚙️ Options for {task}"):
+            with st.expander(f"⚙️ Options for {task}", help="Add extras like differentiation strategies, WASSCE alignment, or an AI-generated image"):
                 _wassce_extras_en = list(_WASSCE_VALID_EXTRAS)
                 exs = [e for e in _wassce_extras_en if st.checkbox(e, key=f"wx_{e}")]
         elif _show_options:
@@ -2431,7 +2456,7 @@ def main():
             }
             _active_opt_keys = _TASK_OPTIONS_MAP.get(_task_val, ["differentiation","local_ex","wassce_align"])
             _ALL_EXTRAS_KEYS = ["differentiation","formative","takehome","wassce_align","local_ex","literacy","large_class","cross_curr","ai_visual"]
-            with st.expander(f"⚙️ Options for {task}"):
+            with st.expander(f"⚙️ Options for {task}", help="Add extras like differentiation strategies, WASSCE alignment, or an AI-generated image"):
                 _extras_labels = [T(k) for k in _active_opt_keys]
                 exs = [EXTRAS[_ALL_EXTRAS_KEYS.index(k)] for k, lbl in zip(_active_opt_keys, _extras_labels)
                        if st.checkbox(lbl, key=f"x_{k}")]
@@ -2443,13 +2468,15 @@ def main():
         if ANTHROPIC_API_KEY: _avail_agents.append("Claude")
         if GOOGLE_API_KEY: _avail_agents.append("Gemini")
         if _avail_agents:
-            _agent_opts=[f"🤖 Best answer (use all)"]+_avail_agents
+            _n=len(_avail_agents)
+            _all_label=f"⭐ Best answer — ask all {_n} AI agents & pick best" if _n>1 else f"🤖 Use {_avail_agents[0]}"
+            _agent_opts=[_all_label]+[f"🤖 {a} only" for a in _avail_agents]
             _agent_sel=st.selectbox("AI:",_agent_opts,key="agent_pick",label_visibility="collapsed",
-                                    format_func=lambda x: f"🤖 AI: {x}" if not x.startswith("🤖") else x)
-            if _agent_sel.startswith("🤖 Best"):
+                                    help="'Best answer' sends your request to all AI agents and picks the strongest response. Or choose one AI to use on its own.")
+            if _agent_sel.startswith("⭐"):
                 _agent_pick=_avail_agents
             else:
-                _agent_pick=[_agent_sel]
+                _agent_pick=[_agent_sel.replace("🤖 ","").replace(" only","")]
         else: _agent_pick=[]
         gen_col, clr_col = st.columns([3,1])
         with gen_col:
