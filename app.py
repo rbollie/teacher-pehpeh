@@ -1845,8 +1845,21 @@ def main():
             if lit_book and lit_book!="Teacher's Own Selection":
                 st.markdown(f'<div style="font-size:.85rem;color:var(--text-secondary);margin:4px 0">✍️ <strong>{lit_info.get("author","")}</strong> ({lit_info.get("origin","")}) · {lit_info.get("genre","")} · {lit_info.get("wassce","")}<br>Themes: {lit_info.get("themes","")}</div>',unsafe_allow_html=True)
             rc_mode=st.selectbox(T("comp_type"),[T("pass_short"),T("pass_fill"),T("pass_essay"),T("pass_mcq"),T("pass_vocab"),T("full_comp")],key="rc_mode")
+        # WASSCE mode — lock out irrelevant options
+        _IS_WASSCE = _task_val in {"50 WASSCE-style MCQs","WASSCE theory questions","BECE-style exam","10-question quiz with answer key","20-question quiz"}
+        _WASSCE_VALID_EXTRAS = {"WASSCE alignment","Local examples"}  # only these make sense for WASSCE
         exs=[]; add_img=False
-        if _show_options and not _IS_PARENT_LETTER:
+        if _IS_WASSCE:
+            st.markdown(
+                f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD}66;border-radius:8px;padding:8px 14px;margin:4px 0;font-size:.82rem">' +
+                f'<strong style="color:{C_GOLD}">🎯 WASSCE Mode</strong> ' +
+                f'<span style="color:#D0D8E8"> — Irrelevant options hidden. Focus: exam alignment, answer technique, shading practice.</span></div>',
+                unsafe_allow_html=True
+            )
+            with st.expander("Options (WASSCE)"):
+                _wassce_extras_en = list(_WASSCE_VALID_EXTRAS)
+                exs = [e for e in _wassce_extras_en if st.checkbox(e, key=f"wx_{e}")]
+        elif _show_options and not _IS_PARENT_LETTER:
           with st.expander(T("options")):
             _extras_keys=["differentiation","formative","takehome","wassce_align","local_ex","literacy","large_class","cross_curr","ai_visual"]
             _extras_labels=[T(k) for k in _extras_keys]
@@ -2607,48 +2620,307 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
 
     # TAB 4: QUIZ (works offline)
     with t4:
-        if not online or not keys:
-            st.markdown(f'<div style="background:rgba(239,83,80,.12);border:2px solid {C_RED_L};border-radius:12px;padding:16px;margin-bottom:12px"><h3 style="color:#EF9A9A;margin:0 0 6px">{T("offline_title")}</h3><p style="color:#FFCDD2;font-size:.9rem;margin:0">{T("offline_msg")}</p></div>',unsafe_allow_html=True)
+        # Mode toggle: adaptive quiz OR full WASSCE practice test
+        _quiz_mode = st.radio("", ["📝 Adaptive Quiz", "🎯 WASSCE Practice Test"],
+                              horizontal=True, key="quiz_mode_sel", label_visibility="collapsed")
+
+        if _quiz_mode == "🎯 WASSCE Practice Test":
+            # ── FULL WASSCE PRACTICE TEST (100% offline, no API needed) ──
+            st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD}66;border-radius:10px;padding:10px 16px;margin-bottom:10px">' +
+                        f'<strong style="color:{C_GOLD}">🎯 WASSCE Practice Test</strong> ' +
+                        f'<span style="color:#D0D8E8;font-size:.85rem"> — Full exam simulation with answer sheet shading. Works offline. ✅</span></div>',
+                        unsafe_allow_html=True)
+            _pt_subj_display = st.selectbox("Subject:", _quiz_subjects(), key="pt_subj")
+            _pt_subj = _quiz_subj_en(_pt_subj_display)
+            _pt_bank_all = QUIZ.get(_pt_subj, {})
+            # Gather all questions across levels
+            _pt_all_qs = []
+            for _lv in ["easy","medium","hard"]:
+                _pt_all_qs.extend(_pt_bank_all.get(_lv, []))
+            # Pick up to 20 questions for the practice test
+            _pt_qs = _pt_all_qs[:20]
+            _pt_n = len(_pt_qs)
+            if _pt_n == 0:
+                st.warning("No questions available for this subject yet.")
+            else:
+                import streamlit.components.v1 as _c1
+                # Build question+options JSON for JS
+                import json as _json
+                _qs_json = _json.dumps([
+                    {"q": q["q"], "o": q["o"], "a": q["a"],
+                     "e": q.get("e",""), "t": q.get("t","")}
+                    for q in _pt_qs
+                ])
+                _practice_html = f"""<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{background:#0a0e1a;font-family:Georgia,serif;padding:10px;color:#D0D8E8}}
+.container{{display:grid;grid-template-columns:1fr 260px;gap:12px;align-items:start}}
+@media(max-width:600px){{.container{{grid-template-columns:1fr}}}}
+/* Questions panel */
+.q-panel{{background:#0F2247;border-radius:10px;padding:14px;border:1px solid #D4A84333}}
+.q-header{{color:#D4A843;font-weight:700;font-size:13px;margin-bottom:12px;letter-spacing:1px}}
+.question{{margin-bottom:14px;padding:10px;background:rgba(255,255,255,.03);border-radius:8px;border-left:3px solid #333;transition:border-color .2s}}
+.question.answered{{border-left-color:#D4A843}}
+.question.correct{{border-left-color:#81C784;background:rgba(129,199,132,.07)}}
+.question.wrong{{border-left-color:#EF5350;background:rgba(239,83,80,.07)}}
+.qnum{{color:#D4A843;font-size:11px;font-weight:700;margin-bottom:4px}}
+.qtext{{color:#E8EEF8;font-size:12px;line-height:1.5;margin-bottom:8px}}
+.options{{display:flex;flex-direction:column;gap:4px}}
+.opt{{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;
+  cursor:pointer;border:1px solid #2a3a5a;transition:all .15s;font-size:11px;color:#B0BEC5}}
+.opt:hover{{border-color:#D4A843;color:#D4A843;background:rgba(212,168,67,.06)}}
+.opt.selected{{border-color:#D4A843;background:rgba(212,168,67,.12);color:#D4A843;font-weight:700}}
+.opt.correct-ans{{border-color:#81C784;background:rgba(129,199,132,.15);color:#81C784;font-weight:700}}
+.opt.wrong-ans{{border-color:#EF5350;background:rgba(239,83,80,.12);color:#EF9A9A}}
+.opt-bubble{{width:16px;height:16px;border-radius:50%;border:1.5px solid currentColor;
+  display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;flex-shrink:0}}
+.opt.selected .opt-bubble,.opt.correct-ans .opt-bubble{{background:currentColor}}
+.explanation{{display:none;margin-top:8px;padding:7px 10px;background:rgba(212,168,67,.07);
+  border-radius:6px;font-size:10.5px;color:#B0C8E8;line-height:1.5;border-left:2px solid #D4A843}}
+.explanation.show{{display:block}}
+.tip{{display:none;margin-top:4px;padding:6px 10px;background:rgba(43,125,233,.08);
+  border-radius:6px;font-size:10px;color:#90CAF9;line-height:1.5}}
+.tip.show{{display:block}}
+/* Answer sheet panel */
+.sheet-panel{{background:#0F2247;border-radius:10px;padding:12px;border:1px solid #D4A84333;position:sticky;top:10px}}
+.sheet-header{{color:#D4A843;font-weight:700;font-size:12px;margin-bottom:10px;text-align:center;letter-spacing:1px}}
+.sheet-grid{{display:grid;grid-template-columns:repeat(2,1fr);gap:2px 8px}}
+.sheet-row{{display:flex;align-items:center;gap:3px;padding:1px 2px}}
+.sq{{font-size:9px;color:#666;font-weight:700;width:16px;text-align:right;flex-shrink:0}}
+.sb{{width:16px;height:16px;border-radius:50%;border:1.5px solid #555;
+  display:flex;align-items:center;justify-content:center;font-size:6px;color:#777;
+  cursor:pointer;transition:all .15s;flex-shrink:0}}
+.sb:hover{{border-color:#D4A843;color:#D4A843}}
+.sb.shaded{{background:#1a1a2e;border-color:#D4A843;color:transparent}}
+.sb.correct-shade{{background:#81C784;border-color:#81C784}}
+.sb.wrong-shade{{background:#EF5350;border-color:#EF5350}}
+.score-bar{{margin-top:10px;padding:8px;background:rgba(212,168,67,.07);border-radius:6px;text-align:center}}
+.score-num{{color:#81C784;font-size:16px;font-weight:700}}
+.score-label{{color:#D4A843;font-size:10px;margin-top:2px}}
+.submit-btn{{width:100%;margin-top:8px;padding:8px;background:#8B1A1A;color:#F5D98E;
+  border:1px solid #D4A843;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}}
+.submit-btn:hover{{background:#B22234}}
+.submit-btn:disabled{{opacity:.4;cursor:not-allowed}}
+.reset-btn{{width:100%;margin-top:6px;padding:6px;background:transparent;color:#D0D8E8;
+  border:1px solid #3a4a6a;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit}}
+.progress-bar{{height:4px;background:#1a2a3a;border-radius:2px;margin-bottom:10px;overflow:hidden}}
+.progress-fill{{height:100%;background:linear-gradient(90deg,#8B1A1A,#D4A843);border-radius:2px;transition:width .3s}}
+.result-banner{{display:none;padding:12px;border-radius:8px;text-align:center;margin-bottom:10px}}
+.result-banner.show{{display:block}}
+</style>
+</head>
+<body>
+<div id="result-banner" class="result-banner"></div>
+<div class="container">
+  <!-- Questions -->
+  <div class="q-panel">
+    <div class="q-header">📝 {_pt_subj_display} — {_pt_n} Questions</div>
+    <div class="progress-bar"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+    <div id="questions"></div>
+  </div>
+  <!-- Answer Sheet -->
+  <div class="sheet-panel">
+    <div class="sheet-header">📋 ANSWER SHEET</div>
+    <div class="sheet-grid" id="sheet-grid"></div>
+    <div class="score-bar">
+      <div class="score-num" id="score-display">—</div>
+      <div class="score-label">Score (after submit)</div>
+    </div>
+    <button class="submit-btn" id="submit-btn" onclick="submitTest()">✅ Submit & Mark</button>
+    <button class="reset-btn" onclick="resetTest()">🔄 Reset</button>
+  </div>
+</div>
+
+<script>
+const QS = {_qs_json};
+const N = QS.length;
+const OPTS = ['A','B','C','D','E'];
+const selected = new Array(N).fill(null); // selected option index per question
+let submitted = false;
+
+// Build question panel
+const qContainer = document.getElementById('questions');
+QS.forEach((q,i) => {{
+  const div = document.createElement('div');
+  div.className = 'question'; div.id = 'q_'+i;
+  const opts = q.o.map((opt,j) => {{
+    const letter = OPTS[j] || String.fromCharCode(65+j);
+    return `<div class="opt" id="opt_${{i}}_${{j}}" onclick="pick(${{i}},${{j}})">
+      <div class="opt-bubble">${{letter}}</div>
+      <span>${{opt}}</span>
+    </div>`;
+  }}).join('');
+  div.innerHTML = `
+    <div class="qnum">Q${{i+1}}</div>
+    <div class="qtext">${{q.q}}</div>
+    <div class="options">${{opts}}</div>
+    <div class="explanation" id="exp_${{i}}">📖 ${{q.e}}</div>
+    <div class="tip" id="tip_${{i}}">🧑‍🏫 ${{q.t}}</div>
+  `;
+  qContainer.appendChild(div);
+}});
+
+// Build answer sheet
+const sheetGrid = document.getElementById('sheet-grid');
+QS.forEach((q,i) => {{
+  const row = document.createElement('div');
+  row.className = 'sheet-row';
+  const bubbles = q.o.map((_,j) => {{
+    const letter = OPTS[j] || String.fromCharCode(65+j);
+    return `<div class="sb" id="sb_${{i}}_${{j}}" onclick="sheetPick(${{i}},${{j}})">${{letter}}</div>`;
+  }}).join('');
+  row.innerHTML = `<span class="sq">${{i+1}}.</span>${{bubbles}}`;
+  sheetGrid.appendChild(row);
+}});
+
+function pick(qi, oi) {{
+  if (submitted) return;
+  // Deselect previous
+  if (selected[qi] !== null) {{
+    document.getElementById('opt_'+qi+'_'+selected[qi]).classList.remove('selected');
+    document.getElementById('sb_'+qi+'_'+selected[qi]).classList.remove('shaded');
+    document.getElementById('sb_'+qi+'_'+selected[qi]).textContent = OPTS[selected[qi]] || String.fromCharCode(65+selected[qi]);
+  }}
+  selected[qi] = oi;
+  document.getElementById('opt_'+qi+'_'+oi).classList.add('selected');
+  // Shade answer sheet bubble
+  const sb = document.getElementById('sb_'+qi+'_'+oi);
+  sb.classList.add('shaded'); sb.textContent = '';
+  document.getElementById('q_'+qi).classList.add('answered');
+  // Update progress
+  const answered = selected.filter(s => s !== null).length;
+  document.getElementById('prog').style.width = (answered/N*100)+'%';
+  document.getElementById('submit-btn').disabled = answered < N;
+}}
+
+function sheetPick(qi, oi) {{
+  if (submitted) return;
+  pick(qi, oi);
+  // Scroll question into view
+  document.getElementById('q_'+qi).scrollIntoView({{behavior:'smooth',block:'nearest'}});
+}}
+
+function submitTest() {{
+  if (submitted) return;
+  submitted = true;
+  let score = 0;
+  QS.forEach((q,i) => {{
+    const correct = q.a;
+    const userPick = selected[i];
+    const qDiv = document.getElementById('q_'+i);
+    // Colour answer sheet bubbles
+    if (userPick !== null) {{
+      const sb = document.getElementById('sb_'+i+'_'+userPick);
+      sb.classList.remove('shaded');
+      if (userPick === correct) {{ sb.classList.add('correct-shade'); score++; }}
+      else {{ sb.classList.add('wrong-shade'); }}
+    }}
+    // Colour correct answer sheet bubble green
+    document.getElementById('sb_'+i+'_'+correct).classList.add('correct-shade');
+    // Colour options
+    if (userPick === correct) {{
+      document.getElementById('opt_'+i+'_'+userPick).classList.add('correct-ans');
+      qDiv.classList.remove('answered'); qDiv.classList.add('correct');
+    }} else {{
+      if (userPick !== null) document.getElementById('opt_'+i+'_'+userPick).classList.add('wrong-ans');
+      document.getElementById('opt_'+i+'_'+correct).classList.add('correct-ans');
+      qDiv.classList.remove('answered'); qDiv.classList.add('wrong');
+    }}
+    // Show explanation
+    document.getElementById('exp_'+i).classList.add('show');
+    document.getElementById('tip_'+i).classList.add('show');
+  }});
+  const pct = Math.round(score/N*100);
+  document.getElementById('score-display').textContent = score+'/'+N+' ('+pct+'%)';
+  const banner = document.getElementById('result-banner');
+  if (pct >= 75) {{
+    banner.style.background='rgba(129,199,132,.15)'; banner.style.border='1px solid #81C784';
+    banner.innerHTML = '<strong style="color:#81C784">🎉 '+pct+'% — Excellent!</strong><br><span style="font-size:11px;color:#B0C8E8">Great performance. Review explanations below.</span>';
+  }} else if (pct >= 50) {{
+    banner.style.background='rgba(212,168,67,.12)'; banner.style.border='1px solid #D4A843';
+    banner.innerHTML = '<strong style="color:#D4A843">📚 '+pct+'% — Keep Studying</strong><br><span style="font-size:11px;color:#B0C8E8">Review the explanations and teacher tips.</span>';
+  }} else {{
+    banner.style.background='rgba(139,26,26,.2)'; banner.style.border='1px solid #EF5350';
+    banner.innerHTML = '<strong style="color:#EF9A9A">💪 '+pct+'% — More Practice Needed</strong><br><span style="font-size:11px;color:#B0C8E8">Focus on the teacher tips — they show exam technique.</span>';
+  }}
+  banner.classList.add('show');
+}}
+
+function resetTest() {{
+  submitted = false;
+  selected.fill(null);
+  document.getElementById('prog').style.width = '0%';
+  document.getElementById('score-display').textContent = '—';
+  document.getElementById('result-banner').className = 'result-banner';
+  document.getElementById('submit-btn').disabled = true;
+  QS.forEach((q,i) => {{
+    document.getElementById('q_'+i).className = 'question';
+    document.getElementById('exp_'+i).className = 'explanation';
+    document.getElementById('tip_'+i).className = 'tip';
+    q.o.forEach((_,j) => {{
+      const opt = document.getElementById('opt_'+i+'_'+j);
+      opt.className = 'opt';
+      const sb = document.getElementById('sb_'+i+'_'+j);
+      sb.className = 'sb';
+      sb.textContent = OPTS[j] || String.fromCharCode(65+j);
+    }});
+  }});
+}}
+
+// Disable submit until all answered
+document.getElementById('submit-btn').disabled = true;
+</script>
+</body>
+</html>"""
+                _c1.html(_practice_html, height=700, scrolling=True)
+
         else:
-            st.markdown(f'<div style="background:rgba(43,125,233,.08);border:1px solid {C_BLUE};border-radius:12px;padding:12px 18px;margin-bottom:10px">{ico(16)} <strong style="color:{C_BLUE}">{T("practice_quiz")}</strong> <span style="color:#7BB8F5;font-size:.85rem">— {T("adaptive")}</span></div>',unsafe_allow_html=True)
+            # ── ADAPTIVE QUIZ (existing) ──
+            if not online or not keys:
+                st.markdown(f'<div style="background:rgba(239,83,80,.12);border:2px solid {C_RED_L};border-radius:12px;padding:16px;margin-bottom:12px"><h3 style="color:#EF9A9A;margin:0 0 6px">{T("offline_title")}</h3><p style="color:#FFCDD2;font-size:.9rem;margin:0">{T("offline_msg")}</p></div>',unsafe_allow_html=True)
+            else:
+                st.markdown(f'<div style="background:rgba(43,125,233,.08);border:1px solid {C_BLUE};border-radius:12px;padding:12px 18px;margin-bottom:10px">{ico(16)} <strong style="color:{C_BLUE}">{T("practice_quiz")}</strong> <span style="color:#7BB8F5;font-size:.85rem">— {T("adaptive")}</span></div>',unsafe_allow_html=True)
 
-        qsub_display=st.selectbox(f"{T('subject')}:",_quiz_subjects(),key="qs")
-        qsub=_quiz_subj_en(qsub_display)  # English key for QUIZ dict
-        qs=st.session_state[f"qz_{qsub}"]
-        bank=QUIZ[qsub]; lv=qs["lv"]; questions=bank.get(lv,bank["easy"]); qi=qs["qi"]%len(questions); cur=questions[qi]
-        pct=f"{round(qs['sc']/qs['tot']*100)}%" if qs["tot"] else "—"
-        stk=f"🔥 {qs['stk']} {T('streak')}!" if qs["stk"]>=3 else ""
-        st.markdown(f'<div class="qsc">{ico(16)} {T("score")}: <strong>{qs["sc"]}/{qs["tot"]}</strong> ({pct}) · {T("level")}: <strong>{lv.upper()}</strong> {stk}</div>',unsafe_allow_html=True)
-        st.markdown(f'<div class="qbox"><strong style="color:white">Q{qs["tot"]+1}:</strong><br><span style="color:#D0D8E8;line-height:1.6">{cur["q"]}</span></div>',unsafe_allow_html=True)
+            qsub_display=st.selectbox(f"{T('subject')}:",_quiz_subjects(),key="qs")
+            qsub=_quiz_subj_en(qsub_display)  # English key for QUIZ dict
+            qs=st.session_state[f"qz_{qsub}"]
+            bank=QUIZ[qsub]; lv=qs["lv"]; questions=bank.get(lv,bank["easy"]); qi=qs["qi"]%len(questions); cur=questions[qi]
+            pct=f"{round(qs['sc']/qs['tot']*100)}%" if qs["tot"] else "—"
+            stk=f"🔥 {qs['stk']} {T('streak')}!" if qs["stk"]>=3 else ""
+            st.markdown(f'<div class="qsc">{ico(16)} {T("score")}: <strong>{qs["sc"]}/{qs["tot"]}</strong> ({pct}) · {T("level")}: <strong>{lv.upper()}</strong> {stk}</div>',unsafe_allow_html=True)
+            st.markdown(f'<div class="qbox"><strong style="color:white">Q{qs["tot"]+1}:</strong><br><span style="color:#D0D8E8;line-height:1.6">{cur["q"]}</span></div>',unsafe_allow_html=True)
 
-        if not qs["done"]:
-            cols=st.columns(2)
-            for j,opt in enumerate(cur["o"]):
-                with cols[j%2]:
-                    if st.button(f"{'ABCD'[j]}) {opt}",key=f"qo_{qsub}_{qs['tot']}_{j}",use_container_width=True):
-                        qs["sel"]=j; qs["done"]=True; qs["tot"]+=1
-                        if j==cur["a"]: qs["sc"]+=1; qs["stk"]+=1
-                        else: qs["stk"]=0
-                        qs["hist"].append({"c":j==cur["a"],"lv":lv}); st.rerun()
-        else:
-            ok=qs["sel"]==cur["a"]
-            if ok: st.markdown(f'<div class="qok"><strong>{random.choice(PRAISE)}</strong><br>✅ {cur["o"][cur["a"]]} is correct!</div>',unsafe_allow_html=True)
-            else: st.markdown(f'<div class="qno"><strong>{random.choice(ENCOURAGE)}</strong><br>Answer: <strong>{cur["o"][cur["a"]]}</strong></div>',unsafe_allow_html=True)
-            st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:10px;padding:12px 16px;margin:8px 0"><strong style="color:{C_GOLD}">📖 Explanation:</strong><br><span style="color:#D0D8E8">{cur["e"]}</span></div>',unsafe_allow_html=True)
-            st.markdown(f'<div class="qtip"><strong>🧑‍🏫 Teacher Tip:</strong> {cur["t"]}</div>',unsafe_allow_html=True)
-            recent=[h for h in qs["hist"][-5:]]; rc=sum(1 for h in recent if h["c"])
-            if st.button(T("next"),type="primary",key=f"nx_{qsub}_{qs['tot']}",use_container_width=True):
-                if len(recent)>=3:
-                    if rc>=4 and lv!="hard": qs["lv"]="medium" if lv=="easy" else "hard"; st.toast(f"🌶️ Level UP → {qs['lv'].upper()}")
-                    elif rc<=1 and lv!="easy": qs["lv"]="easy" if lv=="medium" else "medium"; st.toast(f"Adjusting → {qs['lv'].upper()}")
-                qs["qi"]=(qi+1)%len(bank.get(qs["lv"],bank["easy"])); qs["done"]=False; qs["sel"]=None; st.rerun()
+            if not qs["done"]:
+                cols=st.columns(2)
+                for j,opt in enumerate(cur["o"]):
+                    with cols[j%2]:
+                        if st.button(f"{'ABCD'[j]}) {opt}",key=f"qo_{qsub}_{qs['tot']}_{j}",use_container_width=True):
+                            qs["sel"]=j; qs["done"]=True; qs["tot"]+=1
+                            if j==cur["a"]: qs["sc"]+=1; qs["stk"]+=1
+                            else: qs["stk"]=0
+                            qs["hist"].append({"c":j==cur["a"],"lv":lv}); st.rerun()
+            else:
+                ok=qs["sel"]==cur["a"]
+                if ok: st.markdown(f'<div class="qok"><strong>{random.choice(PRAISE)}</strong><br>✅ {cur["o"][cur["a"]]} is correct!</div>',unsafe_allow_html=True)
+                else: st.markdown(f'<div class="qno"><strong>{random.choice(ENCOURAGE)}</strong><br>Answer: <strong>{cur["o"][cur["a"]]}</strong></div>',unsafe_allow_html=True)
+                st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:10px;padding:12px 16px;margin:8px 0"><strong style="color:{C_GOLD}">📖 Explanation:</strong><br><span style="color:#D0D8E8">{cur["e"]}</span></div>',unsafe_allow_html=True)
+                st.markdown(f'<div class="qtip"><strong>🧑‍🏫 Teacher Tip:</strong> {cur["t"]}</div>',unsafe_allow_html=True)
+                recent=[h for h in qs["hist"][-5:]]; rc=sum(1 for h in recent if h["c"])
+                if st.button(T("next"),type="primary",key=f"nx_{qsub}_{qs['tot']}",use_container_width=True):
+                    if len(recent)>=3:
+                        if rc>=4 and lv!="hard": qs["lv"]="medium" if lv=="easy" else "hard"; st.toast(f"🌶️ Level UP → {qs['lv'].upper()}")
+                        elif rc<=1 and lv!="easy": qs["lv"]="easy" if lv=="medium" else "medium"; st.toast(f"Adjusting → {qs['lv'].upper()}")
+                    qs["qi"]=(qi+1)%len(bank.get(qs["lv"],bank["easy"])); qs["done"]=False; qs["sel"]=None; st.rerun()
 
-        st.markdown("---")
-        r1,r2=st.columns(2)
-        with r1:
-            if st.button(T("reset"),key=f"rst_{qsub}"): st.session_state[f"qz_{qsub}"]={"lv":"easy","qi":0,"sc":0,"tot":0,"stk":0,"done":False,"sel":None,"hist":[]}; st.rerun()
-        with r2:
-            if st.button(T("wassce_tips"),key="wt"): st.markdown(f'<div style="background:{C_NAVY_L};border:1px solid {C_GOLD};border-radius:12px;padding:16px;color:#D0D8E8;white-space:pre-wrap;line-height:1.7">{WASSCE_TIPS}</div>',unsafe_allow_html=True)
+            st.markdown("---")
+            r1,r2=st.columns(2)
+            with r1:
+                if st.button(T("reset"),key=f"rst_{qsub}"): st.session_state[f"qz_{qsub}"]={"lv":"easy","qi":0,"sc":0,"tot":0,"stk":0,"done":False,"sel":None,"hist":[]}; st.rerun()
+            with r2:
+                if st.button(T("wassce_tips"),key="wt"): st.markdown(f'<div style="background:{C_NAVY_L};border:1px solid {C_GOLD};border-radius:12px;padding:16px;color:#D0D8E8;white-space:pre-wrap;line-height:1.7">{WASSCE_TIPS}</div>',unsafe_allow_html=True)
 
     st.markdown(f'<div class="ft">{ico(16)} <strong>Teacher Pehpeh by IBT</strong><br>Built by <strong>Rodney L. Bollie, PhD</strong> · <a href="https://www.institutebasictechnology.org">Institute of Basic Technology</a><br><a href="https://www.institutebasictechnology.org/index.php" style="color:{C_BLUE}">Visit our website →</a></div>',unsafe_allow_html=True)
 
