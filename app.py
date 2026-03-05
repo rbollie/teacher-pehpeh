@@ -676,7 +676,7 @@ def _quiz_subj_en(s): return _QUIZ_SUBJ_TO_EN.get(s,s)
 FRANCOPHONE={"Côte d'Ivoire","Senegal","Cameroon","Mali","Burkina Faso","Niger","Chad","Guinea","Togo","Benin","Central African Republic","Republic of Congo","Gabon","Equatorial Guinea","DRC","Djibouti","Comoros","Madagascar","Burundi","Guinea-Bissau","São Tomé and Príncipe"}
 # Swahili-speaking countries
 SWAHILI_COUNTRIES={"Kenya","Tanzania","Uganda","DRC","Rwanda","Burundi"}
-TASKS={"Lesson Plan":"detailed lesson plan","Quiz (10 Q)":"10-question quiz with answer key","Quiz (20 Q)":"20-question quiz","WASSCE MCQ (50)":"50 WASSCE-style MCQs","WASSCE Theory":"WASSCE theory questions","BECE Exam":"BECE-style exam","Homework":"homework with minimal resources","Group Activity":"group activity","Reading Comprehension":"reading passage with questions","No-Lab Practical":"hands-on zero-cost activity","Rubric":"grading rubric","Strategy Guide":"teaching strategies","Parent Letter":"parent communication","Weekly Scheme":"5-day scheme of work","Term Scheme":"term plan","Remedial Material":"catch-up material","Study Notes":"revision guide","Educational Game":"zero-cost teaching game","Illustrated Lesson (AI image)":"lesson with AI-generated visual"}
+TASKS={"Lesson Plan":"detailed lesson plan","Quiz (10 Q)":"10-question quiz with answer key","Quiz (20 Q)":"20-question quiz","WASSCE MCQ (50)":"50 WASSCE-style MCQs","WASSCE Theory":"WASSCE theory questions","BECE Exam":"BECE-style exam","Homework":"homework with minimal resources","Group Activity":"group activity","Reading Comprehension":"reading passage with questions","No-Lab Practical":"hands-on zero-cost activity","Rubric":"grading rubric","Strategy Guide":"teaching strategies","Weekly Scheme":"5-day scheme of work","Term Scheme":"term plan","Remedial Material":"catch-up material","Study Notes":"revision guide","Educational Game":"zero-cost teaching game","Illustrated Lesson (AI image)":"lesson with AI-generated visual"}
 SIZES={"Small (<25)":"<25 students","Medium (25-40)":"25-40","Large (40-60)":"40-60","Very Large (60+)":"60+"}
 RESOURCES={"Chalkboard only":"chalkboard/chalk only","+ shared textbooks":"chalkboard + shared textbooks","+ handouts":"+ printable handouts","Computer/projector":"occasional tech","Phones/tablets":"student devices","Well-equipped":"regular tech"}
 LANGS={"English":"English","Français":"French","Kiswahili":"Swahili"}
@@ -836,7 +836,7 @@ TIMES=["Single period (30-40 min)","Double (60-80 min)","Half day","Full day","W
 EXTRAS=["Differentiation","Formative assessment","Take-home activity","WASSCE alignment","Local examples","Literacy integration","Large-class strategies","Cross-curricular","AI visual aid"]
 
 # French dropdown translations (display→English value for AI)
-FR_TASKS={"Plan de cours":"detailed lesson plan","Quiz (10 Q)":"10-question quiz with answer key","Quiz (20 Q)":"20-question quiz","QCM WASSCE (50)":"50 WASSCE-style MCQs","Théorie WASSCE":"WASSCE theory questions","Examen BECE":"BECE-style exam","Devoirs":"homework with minimal resources","Activité de groupe":"group activity","Compréhension écrite":"reading passage with questions","Pratique sans labo":"hands-on zero-cost activity","Grille d'évaluation":"grading rubric","Guide stratégique":"teaching strategies","Lettre aux parents":"parent communication","Plan hebdomadaire":"5-day scheme of work","Plan trimestriel":"term plan","Rattrapage":"catch-up material","Notes de révision":"revision guide","Jeu éducatif":"zero-cost teaching game","Leçon illustrée (image IA)":"lesson with AI-generated visual"}
+FR_TASKS={"Plan de cours":"detailed lesson plan","Quiz (10 Q)":"10-question quiz with answer key","Quiz (20 Q)":"20-question quiz","QCM WASSCE (50)":"50 WASSCE-style MCQs","Théorie WASSCE":"WASSCE theory questions","Examen BECE":"BECE-style exam","Devoirs":"homework with minimal resources","Activité de groupe":"group activity","Compréhension écrite":"reading passage with questions","Pratique sans labo":"hands-on zero-cost activity","Grille d'évaluation":"grading rubric","Guide stratégique":"teaching strategies","Plan hebdomadaire":"5-day scheme of work","Plan trimestriel":"term plan","Rattrapage":"catch-up material","Notes de révision":"revision guide","Jeu éducatif":"zero-cost teaching game","Leçon illustrée (image IA)":"lesson with AI-generated visual"}
 FR_GRADES=["9e année","10e année","11e année","12e année","12e année (WASSCE Prép)"]
 FR_SUBJECTS=["Mathématiques","Langue anglaise","Sciences intégrées","Études sociales","Physique","Chimie","Biologie","Économie","Gouvernement / Éducation civique","Littérature anglaise","Histoire","Géographie","Agriculture","Français","Études religieuses","Gestion des affaires","Comptabilité","Informatique / TIC","Éducation physique","Art / Arts créatifs","Musique"]
 FR_SIZES={"Petit (<25)":"<25 students","Moyen (25-40)":"25-40","Grand (40-60)":"40-60","Très grand (60+)":"60+"}
@@ -846,7 +846,7 @@ FR_TIMES=["Période simple (30-40 min)","Double (60-80 min)","Demi-journée","Jo
 FR_EXTRAS=["Différenciation","Évaluation formative","Activité à emporter","Alignement WASSCE","Exemples locaux","Intégration lecture","Stratégies grande classe","Interdisciplinaire","Aide visuelle IA"]
 FR_REGIONS={"Urbain":"urban","Banlieue":"suburban","Rural":"rural"}
 # Swahili dropdown translations
-SW_TASKS={"Mpango wa Somo":"detailed lesson plan","Maswali (10)":"10-question quiz with answer key","Maswali (20)":"20-question quiz","QCM WASSCE (50)":"50 WASSCE-style MCQs","Nadharia WASSCE":"WASSCE theory questions","Mtihani BECE":"BECE-style exam","Kazi ya Nyumbani":"homework with minimal resources","Shughuli ya Kikundi":"group activity","Ufahamu wa Kusoma":"reading passage with questions","Mazoezi bila Maabara":"hands-on zero-cost activity","Rubriiki":"grading rubric","Mwongozo wa Mkakati":"teaching strategies","Barua kwa Mzazi":"parent communication","Mpango wa Wiki":"5-day scheme of work","Mpango wa Muhula":"term plan","Nyenzo za Kufidia":"catch-up material","Muhtasari wa Masomo":"revision guide","Mchezo wa Kielimu":"zero-cost teaching game","Somo Lenye Mchoro (picha AI)":"lesson with AI-generated visual"}
+SW_TASKS={"Mpango wa Somo":"detailed lesson plan","Maswali (10)":"10-question quiz with answer key","Maswali (20)":"20-question quiz","QCM WASSCE (50)":"50 WASSCE-style MCQs","Nadharia WASSCE":"WASSCE theory questions","Mtihani BECE":"BECE-style exam","Kazi ya Nyumbani":"homework with minimal resources","Shughuli ya Kikundi":"group activity","Ufahamu wa Kusoma":"reading passage with questions","Mazoezi bila Maabara":"hands-on zero-cost activity","Rubriiki":"grading rubric","Mwongozo wa Mkakati":"teaching strategies","Mpango wa Wiki":"5-day scheme of work","Mpango wa Muhula":"term plan","Nyenzo za Kufidia":"catch-up material","Muhtasari wa Masomo":"revision guide","Mchezo wa Kielimu":"zero-cost teaching game","Somo Lenye Mchoro (picha AI)":"lesson with AI-generated visual"}
 SW_GRADES=["Darasa la 9","Darasa la 10","Darasa la 11","Darasa la 12","Darasa la 12 (WASSCE)"]
 SW_SUBJECTS=["Hisabati","Lugha ya Kiingereza","Sayansi Jumuishi","Maarifa ya Jamii","Fizikia","Kemia","Biolojia","Uchumi","Serikali / Uraia","Fasihi ya Kiingereza","Historia","Jiografia","Kilimo","Kifaransa","Masomo ya Dini","Usimamizi wa Biashara","Uhasibu","Kompyuta / TEHAMA","Uchora Ufundi","Elimu ya Mwili","Sanaa / Sanaa Bunifu","Muziki"]
 SW_SIZES={"Ndogo (<25)":"<25 students","Wastani (25-40)":"25-40","Kubwa (40-60)":"40-60","Kubwa sana (60+)":"60+"}
@@ -2158,34 +2158,79 @@ def main():
     # TAB 1: GENERATE
     if t1:
      with t1:
-        c1,c2=st.columns(2)
-        with c1: task=st.selectbox(T("task"),list(_tasks().keys()),label_visibility="collapsed",format_func=lambda x: f"\U0001f4dd Task: {x}")
-        _task_val=_tasks()[task]
-        _IS_PARENT_LETTER=(_task_val=="parent communication")
+        # ── Task category selector → filters task list ──
+        _TASK_CATEGORIES = {
+            "📋 Planning":     ["Lesson Plan","Weekly Scheme","Term Scheme","Strategy Guide"],
+            "📝 Assessment":   ["Quiz (10 Q)","Quiz (20 Q)","WASSCE MCQ (50)","WASSCE Theory","BECE Exam","Rubric"],
+            "🎯 Activities":   ["Homework","Group Activity","Reading Comprehension","No-Lab Practical","Educational Game","Illustrated Lesson (AI image)"],
+            "📚 Study Support":["Study Notes","Remedial Material"],
+        }
+        # Tasks that need topic selector
+        _NO_TOPIC_TASKS={"teaching strategies","term plan"}
+        # Tasks that need time selector
         _NEEDS_TIME={"detailed lesson plan","homework with minimal resources","group activity","reading passage with questions","hands-on zero-cost activity","zero-cost teaching game","5-day scheme of work","lesson with AI-generated visual","catch-up material"}
+        # Tasks that show options/extras checkboxes
         _NEEDS_OPTIONS={"detailed lesson plan","homework with minimal resources","group activity","hands-on zero-cost activity","5-day scheme of work","term plan","catch-up material","zero-cost teaching game","lesson with AI-generated visual","reading passage with questions","revision guide"}
         _NEEDS_MOE={"detailed lesson plan","homework with minimal resources","group activity","hands-on zero-cost activity","5-day scheme of work","term plan","catch-up material","zero-cost teaching game","lesson with AI-generated visual","reading passage with questions","revision guide","10-question quiz with answer key","20-question quiz","50 WASSCE-style MCQs","WASSCE theory questions","BECE-style exam"}
         _NEEDS_IMG={"detailed lesson plan","homework with minimal resources","group activity","hands-on zero-cost activity","lesson with AI-generated visual","reading passage with questions"}
         _WASSCE_TASKS={"50 WASSCE-style MCQs","WASSCE theory questions","BECE-style exam","10-question quiz with answer key","20-question quiz"}
-        _show_time=_task_val in _NEEDS_TIME
-        _show_options=_task_val in _NEEDS_OPTIONS
-        _show_moe=_task_val in _NEEDS_MOE
-        _show_img=_task_val in _NEEDS_IMG
-        _show_wassce_guide=_task_val in _WASSCE_TASKS
+
+        # Category pill buttons
+        if "task_cat" not in st.session_state: st.session_state.task_cat="📋 Planning"
+        _cat_cols = st.columns(len(_TASK_CATEGORIES))
+        for _ci, _cname in enumerate(_TASK_CATEGORIES):
+            with _cat_cols[_ci]:
+                _is_cat = st.session_state.task_cat == _cname
+                if st.button(_cname, key=f"cat_{_ci}", use_container_width=True,
+                             type="primary" if _is_cat else "secondary"):
+                    st.session_state.task_cat = _cname; st.rerun()
+
+        _cat_tasks = _TASK_CATEGORIES[st.session_state.task_cat]
+        # Build filtered display list from _tasks() to respect language
+        _all_tasks = _tasks()
+        _filtered_display = [k for k in _all_tasks if k in _cat_tasks or _all_tasks[k] in
+                             [_tasks().get(t, t) for t in _cat_tasks]]
+        # If translation means display keys differ, fall back to value matching
+        _en_to_display = {v: k for k, v in _all_tasks.items()}
+        _cat_display_keys = [_en_to_display.get(
+            next((t_val for t_name, t_val in TASKS.items() if t_name in _cat_tasks), None), k)
+            for k in _all_tasks if any(
+                TASKS.get(ct) == _all_tasks[k] for ct in _cat_tasks
+            )]
+        # Fallback to English task names if translation lookup is empty
+        if not _cat_display_keys:
+            _cat_display_keys = list(_all_tasks.keys())
+
+        c1, c2 = st.columns(2)
+        with c1:
+            task = st.selectbox(T("task"), _cat_display_keys, key="task_sel",
+                                label_visibility="collapsed",
+                                format_func=lambda x: f"\U0001f4dd Task: {x}")
+        _task_val = _tasks().get(task, "detailed lesson plan")
+        _IS_PARENT_LETTER = False   # Parent Letter moved to Students tab
+        _show_time    = _task_val in _NEEDS_TIME
+        _show_options = _task_val in _NEEDS_OPTIONS
+        _show_moe     = _task_val in _NEEDS_MOE
+        _show_img     = _task_val in _NEEDS_IMG
+        _show_topic   = _task_val not in _NO_TOPIC_TASKS
+        _show_wassce_guide = _task_val in _WASSCE_TASKS
+
         if _show_wassce_guide:
             st.markdown(f'<div style="background:linear-gradient(135deg,rgba(139,26,26,.3),rgba(212,168,67,.1));border:1px solid {C_GOLD}66;border-radius:10px;padding:10px 16px;margin:6px 0;display:flex;align-items:center;gap:10px"><span style="font-size:1.1rem">📋</span><span style="color:{C_GOLD};font-weight:700;font-size:.88rem">WASSCE Prep</span><span style="color:#D0D8E8;font-size:.82rem"> — Review answer sheet shading technique before generating</span></div>', unsafe_allow_html=True)
             if st.button("📋 Open Answer Sheet Guide", key="wassce_guide_btn", use_container_width=False):
                 wassce_shading_modal()
         with c2:
             if _show_time:
-                tm=st.selectbox(T("time"),_times(),label_visibility="collapsed",format_func=lambda x: f"\u23f1\ufe0f Time: {x}")
+                tm = st.selectbox(T("time"), _times(), label_visibility="collapsed",
+                                  format_func=lambda x: f"\u23f1\ufe0f Time: {x}")
             else:
-                tm="N/A"
-                st.markdown(f'<div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:10px 14px;color:var(--text-muted);font-size:.85rem;opacity:.5">\u23f1\ufe0f Time: not needed for this task</div>',unsafe_allow_html=True)
+                tm = "N/A"
+                st.markdown(f'<div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:10px 14px;color:var(--text-muted);font-size:.85rem;opacity:.5">\u23f1\ufe0f Time: not needed for this task</div>', unsafe_allow_html=True)
+
         _parent_letter_override=None
         _pl_delivery=None
         _pl_mom_edu=None
-        if _IS_PARENT_LETTER:
+        if False:  # Parent Letter block retained here as dead code — actual UI is in Students tab
             st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:10px;padding:12px 16px;margin:8px 0"><strong style="color:{C_GOLD}">\u2709\ufe0f Parent Letter</strong><br><span style="font-size:.85rem;color:var(--text-secondary)">Adapts to each parent \u2014 audio for those who find reading difficult, text or email for others</span></div>',unsafe_allow_html=True)
             _pl1,_pl2=st.columns(2)
             with _pl1:
@@ -2289,14 +2334,18 @@ def main():
                     "OUTPUT: Only the letter. Nothing before it, nothing after it.")
 
         else:
-            topic=st.selectbox(T("topic"),_get_topics(_subj_en),label_visibility="collapsed",format_func=lambda x: f"\U0001f4d6 Topic: {x}")
-            _topic_en=_to_en_topic(topic)
+            if _show_topic:
+                topic=st.selectbox(T("topic"),_get_topics(_subj_en),label_visibility="collapsed",format_func=lambda x: f"\U0001f4d6 Topic: {x}")
+                _topic_en=_to_en_topic(topic)
+            else:
+                topic=_subj_en; _topic_en=_subj_en
+                st.markdown(f'<div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:10px 14px;color:var(--text-muted);font-size:.85rem;opacity:.5">\U0001f4d6 Topic: not needed for this task</div>', unsafe_allow_html=True)
 
         # === MOE Curriculum: override topics + show badge when aligned ===
         is_curriculum_aligned = False
         curriculum_details = None
         curriculum_context = ""
-        if not _IS_PARENT_LETTER and _show_moe and moe_on and CURRICULA:
+        if not _IS_PARENT_LETTER and _show_moe and _show_topic and moe_on and CURRICULA:
             _grade_num = int(''.join(c for c in _grade_en if c.isdigit()) or "10")
             curr_topics = get_grade_topics(CURRICULA, _subj_en, _grade_num)
             if curr_topics:
@@ -2631,6 +2680,70 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
         _stu_word={"en":"Students","fr":"Élèves","sw":"Wanafunzi"}.get(_lang_key(),"Students")
         stu_label=f"{school_name} {_stu_word}" if school_name.strip() else T("my_students")
         st.markdown(f'<div style="background:var(--bg-card);border:1px solid {C_BLUE};border-radius:12px;padding:14px 18px;margin-bottom:10px">{ico(20)} <strong style="color:{C_BLUE}">{stu_label}</strong></div>',unsafe_allow_html=True)
+
+        # ── Parent Letter (moved here from Generate tab) ──
+        with st.expander("✉️ Parent Letter / Communication", expanded=False):
+            st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:10px;padding:10px 14px;margin-bottom:10px"><strong style="color:{C_GOLD}">✉️ Parent Communication</strong> <span style="font-size:.83rem;color:var(--text-secondary)"> — Adapts to each parent: audio for low-literacy, SMS or email for others</span></div>',unsafe_allow_html=True)
+            _plx1,_plx2=st.columns(2)
+            with _plx1:
+                if st.session_state.students:
+                    _plx_student=st.selectbox("Student:",["--Select--"]+[s["name"] for s in st.session_state.students],key="plx_stu")
+                else:
+                    _plx_student=st.text_input("Student Name:",key="plx_stu_txt",placeholder="e.g., Janjay Kollie")
+            with _plx2:
+                _plx_concern=st.selectbox("Concern:",["Struggling academically","Frequent absences","Behavior issues","Needs extra support","Outstanding progress","Parent meeting request"],key="plx_concern")
+            _plx_details=st.text_area("Specific details (optional):",key="plx_details",height=60,placeholder="e.g., Failing math quizzes...")
+            _plx_name=_plx_student if (st.session_state.students and _plx_student!="--Select--") else (st.session_state.get("plx_stu_txt","") or "the student")
+            _plx_info=""; _plx_mom_edu="Unknown"
+            if st.session_state.students and _plx_student!="--Select--":
+                _plxsel=next((s for s in st.session_state.students if s["name"]==_plx_student),None)
+                if _plxsel:
+                    _plx_info=f'Profile: {_plxsel["sib"]}sib, Mom:{_plxsel["mom"]}, SM:{_plxsel["sm"]}, Works:{_plxsel["wk"]}'
+                    _plx_mom_edu=_plxsel.get("mom","Unknown")
+            _plx_auto_idx=0 if _plx_mom_edu=="No HS" else 1
+            _plx_sensitivity=""
+            if st.session_state.students and _plx_student!="--Select--":
+                _plxsel2=next((s for s in st.session_state.students if s["name"]==_plx_student),None)
+                if _plxsel2:
+                    _plxfactors=[]
+                    if _plxsel2.get("sib","0-4") in ["5-8","8+"]: _plxfactors.append(f'This child has {_plxsel2["sib"]} siblings — they likely help care for younger ones, cook, fetch water.')
+                    if _plxsel2.get("sm","No")=="Yes": _plxfactors.append("This is a single-mother household. The mother is carrying the full burden alone. Be extra respectful of her effort.")
+                    if _plxsel2.get("wk","No")=="Yes": _plxfactors.append("This child works after school. They may have very little free time to study.")
+                    if _plxsel2.get("mom","Unknown")=="No HS": _plxfactors.append("The mother has no high school education. Never make her feel blamed.")
+                    if _plxfactors:
+                        _plx_sensitivity=("CRITICAL SENSITIVITY CONTEXT:\n"+
+                            "\n".join(f"• {f}" for f in _plxfactors)+
+                            "\n\nBecause of this home situation: Do NOT assume the child is lazy. Frame as partnership not authority. Suggest realistic actions.")
+            _plx_delivery_opts=["🔊 Voice Message (audio for phone)","📱 Text Message (short SMS)","📧 Email (detailed letter)"]
+            _plx_delivery=st.radio("How to reach this parent:",_plx_delivery_opts,index=_plx_auto_idx,key="plx_delivery",horizontal=True)
+            if _plx_mom_edu=="No HS" and "🔊" in _plx_delivery:
+                st.markdown(f'<div style="background:rgba(46,125,50,.1);border-left:4px solid #4CAF50;padding:8px 12px;border-radius:6px;font-size:.82rem;margin:4px 0">💡 <strong>Voice message recommended</strong> — this parent may find reading difficult.</div>',unsafe_allow_html=True)
+            _plx_t_name=teacher_name.strip() if teacher_name.strip() else "the teacher"
+            _plx_t_phone=teacher_phone.strip() if teacher_phone.strip() else ""
+            _plx_t_sig=_plx_t_name+( f" ({_plx_t_phone})" if _plx_t_phone else "")
+            _plx_close_loop=("CRITICAL: End with a specific simple way for the parent to confirm they received this.")
+            if "🔊" in _plx_delivery:
+                _plx_prompt=(f"Create a SHORT VOICE MESSAGE (under 45 seconds spoken) from {_plx_t_name} to parent of {_plx_name}.\n"
+                    f"CONCERN: {_plx_concern}\nDETAILS: {_plx_details or 'General concern'}\nSTUDENT: {_plx_info or 'N/A'}\n{_plx_sensitivity}"
+                    f"SCHOOL: {school_name or 'Our school'} | {_subj_en} | {_grade_en}\n"
+                    f"Sign as {_plx_t_sig}. Warm, caring Liberian English tone. OUTPUT: Only the spoken message text.")
+            elif "📱" in _plx_delivery:
+                _plx_prompt=(f"Create a SHORT TEXT MESSAGE (max 300 chars) from {_plx_t_name} to parent of {_plx_name}.\n"
+                    f"CONCERN: {_plx_concern}\nDETAILS: {_plx_details or 'General concern'}\nSTUDENT: {_plx_info or 'N/A'}\n{_plx_sensitivity}"
+                    f"SCHOOL: {school_name or 'Our school'} | {_subj_en} | {_grade_en}\n"
+                    f"Sign as {_plx_t_sig}. Max 300 chars. OUTPUT: Only the SMS text.")
+            else:
+                _plx_prompt=(f"Write a letter from {_plx_t_name} to parent/guardian of {_plx_name}.\n"
+                    f"CONCERN: {_plx_concern}\nDETAILS: {_plx_details or 'General concern'}\nSTUDENT: {_plx_info or 'N/A'}\n{_plx_sensitivity}"
+                    f"SCHOOL: {school_name or 'Our school'} | {_subj_en} | {_grade_en}\n"
+                    f"Simple reading level. Warm, respectful Liberian English. Sign as {_plx_t_sig}. OUTPUT: Only the letter.")
+            if st.button("✉️ Generate Parent Communication", key="plx_gen", type="primary", use_container_width=True):
+                with st.status("Drafting parent communication...", expanded=True) as _plx_status:
+                    st.write("Preparing sensitive, culturally appropriate message...")
+                    _plx_r,_plx_m,_plx_allr=best_all(build_free_chat(),_plx_prompt,[])
+                    _plx_status.update(label="✉️ Communication ready!",state="complete",expanded=False)
+                st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:10px;padding:14px 18px;margin:8px 0;white-space:pre-wrap;color:#D0D8E8;line-height:1.7">{_plx_r}</div>',unsafe_allow_html=True)
+
         with st.expander({"en":"➕ Add Profile","fr":"➕ Ajouter un profil","sw":"➕ Ongeza Wasifu"}.get(_lang_key(),"➕ Add Profile"),expanded=not st.session_state.students):
             c1,c2=st.columns(2)
             with c1: sn=st.text_input(T("name"),key="sn"); sib=st.selectbox({"en":"Siblings","fr":"Frères et sœurs","sw":"Ndugu"}.get(_lang_key(),"Siblings"),["0-4","5-8","8+"],key="sb"); me=st.selectbox({"en":"Mom Edu","fr":"Éducation mère","sw":"Elimu ya mama"}.get(_lang_key(),"Mom Edu"),["HS Grad","No HS","Unknown"],key="me")
