@@ -1758,30 +1758,43 @@ def main():
         'document.head.appendChild(l);})();</script>'
     )
     st.markdown(_fav_js, unsafe_allow_html=True)
-    # Sidebar peek animation — slides open then closed on first load to show users it exists
-    st.markdown('''<script>
+    # Sidebar peek — CSS animation slides sidebar in then out, works in all browsers
+    st.markdown('''<style>
+@keyframes tp-sidebar-peek {
+  0%   { transform: translateX(-100%); }
+  15%  { transform: translateX(0%);    }
+  75%  { transform: translateX(0%);    }
+  100% { transform: translateX(-100%); }
+}
+.tp-sidebar-peeking section[data-testid="stSidebar"] {
+  animation: tp-sidebar-peek 3s cubic-bezier(.4,0,.2,1) forwards !important;
+  animation-delay: 0.6s !important;
+}
+</style>
+<script>
 (function(){
-  // Only run once per browser session
   if(sessionStorage.getItem("tp_peeked")) return;
   sessionStorage.setItem("tp_peeked","1");
-  function tryPeek(attempts){
-    var btn = document.querySelector('[data-testid="collapsedControl"]');
-    if(!btn){
-      if(attempts>40) return;
-      setTimeout(function(){tryPeek(attempts+1);}, 150);
+  function apply(attempts){
+    var app = document.querySelector('[data-testid="stAppViewContainer"]') || document.body;
+    var sidebar = document.querySelector('section[data-testid="stSidebar"]');
+    if(!sidebar){
+      if(attempts>50) return;
+      setTimeout(function(){apply(attempts+1);},120);
       return;
     }
-    // Open sidebar after 800ms
+    // Force sidebar visible for the peek duration
+    sidebar.style.transform = "translateX(-100%)";
+    sidebar.style.transition = "none";
+    app.classList.add("tp-sidebar-peeking");
+    // After animation ends (0.6s delay + 3s anim = 3.6s), ensure sidebar is hidden again
     setTimeout(function(){
-      btn.click();
-      // Close sidebar after 1.8s (giving user time to see it)
-      setTimeout(function(){
-        var btn2 = document.querySelector('[data-testid="collapsedControl"]');
-        if(btn2) btn2.click();
-      }, 1800);
-    }, 800);
+      app.classList.remove("tp-sidebar-peeking");
+      sidebar.style.transform = "";
+      sidebar.style.transition = "";
+    }, 4200);
   }
-  tryPeek(0);
+  apply(0);
 })();
 </script>''', unsafe_allow_html=True)
     for k in ["chat_messages","students","conn_checked","conn_info","gen_result","grade_history"]:
