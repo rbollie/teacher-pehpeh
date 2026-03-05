@@ -2945,15 +2945,23 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
             ),
         ]
         # Rotate buttons based on day of month so they feel fresh
-        import datetime as _dt
-        _day_offset = _dt.date.today().day % len(_AFRICA_SPARKS)
-        _todays_sparks = (_AFRICA_SPARKS[_day_offset:] + _AFRICA_SPARKS[:_day_offset])[:6]
+        import random as _rnd
+        if "spark_order" not in st.session_state:
+            st.session_state.spark_order = _rnd.sample(range(len(_AFRICA_SPARKS)), min(6, len(_AFRICA_SPARKS)))
+        _todays_sparks = [_AFRICA_SPARKS[i] for i in st.session_state.spark_order]
 
-        st.markdown(
-            f'<div style="color:{C_GOLD};font-size:.82rem;font-weight:700;margin-bottom:4px">' +
-            f'🌍 Did You Know? &nbsp;<span style="color:#8899aa;font-size:.76rem;font-weight:400">— Click to discover something amazing about Africa</span></div>',
-            unsafe_allow_html=True
-        )
+        _hdr_col, _shuf_col = st.columns([5, 1])
+        with _hdr_col:
+            st.markdown(
+                f'<div style="color:{C_GOLD};font-size:.82rem;font-weight:700;margin-bottom:4px">' +
+                f'🌍 Did You Know? &nbsp;<span style="color:#8899aa;font-size:.76rem;font-weight:400">— Click to discover something amazing about Africa</span></div>',
+                unsafe_allow_html=True
+            )
+        with _shuf_col:
+            if st.button("🔀", key="spark_shuffle", help="Shuffle topics", use_container_width=True):
+                import random as _rnd2
+                st.session_state.spark_order = _rnd2.sample(range(len(_AFRICA_SPARKS)), min(6, len(_AFRICA_SPARKS)))
+                st.rerun()
         _spark_cols = st.columns(6)
         for _sbi, (_slabel, _shook, _sprompt) in enumerate(_todays_sparks):
             with _spark_cols[_sbi]:
