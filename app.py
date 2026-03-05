@@ -2025,30 +2025,30 @@ def main():
     if conn:
         keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
         act=[n for k,n in [(OPENAI_API_KEY,"ChatGPT"),(ANTHROPIC_API_KEY,"Claude"),(GOOGLE_API_KEY,"Gemini")] if k]
-        # Network: plain language, no tech jargon
+        # Network: only show when there's a problem — device chip handles the "all good" state
         if conn["quality"]=="none":
-            net_html=f'<span style="color:#EF5350">🔴 <strong>No Internet</strong></span>'
-        elif conn["quality"] in ("high","medium"):
-            net_html=f'<span style="color:#81C784">🟢 <strong>Connected</strong></span>'
+            net_html=f'<span style="color:#EF5350" title="Teacher Pehpeh cannot reach the AI services right now">🔴 <strong>No Internet</strong></span>'
+        elif conn["quality"] not in ("high","medium"):
+            net_html=f'<span style="color:#FFB74D" title="Connection is slow — AI may take longer to respond">🟠 <strong>Slow Connection</strong></span>'
         else:
-            net_html=f'<span style="color:#FFB74D">🟠 <strong>Slow Connection</strong></span>'
+            net_html=""   # device chip already shows connected — no need to repeat
         # AI Agents section — friendly count + names
         if act:
-            models_html=f'<span style="color:#7BB8F5">🤖 <strong>{len(act)} AI Agent{"s" if len(act)!=1 else ""}</strong>: {" · ".join(act)}</span>'
+            models_html=f'<span style="color:#7BB8F5" title="The AI assistants that will answer your requests">🤖 <strong>{len(act)} AI Agent{"s" if len(act)!=1 else ""}</strong>: {" · ".join(act)}</span>'
         else:
-            models_html=f'<span style="color:#EF9A9A">⚠️ No AI connected</span>'
+            models_html=f'<span style="color:#EF9A9A" title="No AI keys configured — check your settings">⚠️ No AI connected</span>'
         # Image section — simplified
         _has_img = bool(OPENAI_API_KEY or GOOGLE_API_KEY)
-        img_html=f'<span style="color:#C9A0DC">🎨 Image generation on</span>' if _has_img else ""
+        img_html=f'<span style="color:#C9A0DC" title="Can generate diagrams and visual aids for your lessons">🎨 Image generation on</span>' if _has_img else ""
         # Divider
         div='<span style="color:#3a4a6a;margin:0 10px;font-size:1.1rem">│</span>'
-        bar_parts=[net_html, models_html]
+        bar_parts=[m for m in [net_html, models_html] if m]
         if img_html: bar_parts.append(img_html)
         # Voice section — no key details
         if ELEVENLABS_API_KEY:
-            bar_parts.append(f'<span style="color:#81D4A8">🔊 Voice on</span>')
+            bar_parts.append(f'<span style="color:#81D4A8" title="Text-to-speech — Teacher Pehpeh can read responses aloud">🔊 Voice on</span>')
         else:
-            bar_parts.append('<span style="color:#EF9A9A">🔇 Voice off</span>')
+            bar_parts.append('<span style="color:#EF9A9A" title="No voice key — audio playback unavailable">🔇 Voice off</span>')
         # MOE Curriculum section
         if moe_on and CURRICULA:
             curr_subjects = get_available_subjects(CURRICULA)
@@ -2082,7 +2082,7 @@ def main():
 }}
 </style>
 <div class="tp-bar">
-  <div id="dev-chip" title="Whether your phone or computer can reach the internet">
+  <div id="dev-chip" title="Shows whether your device is connected to the internet">
     <span id="dev-icon">📱</span>
     <span id="dev-lbl" style="color:#8899aa">Checking device…</span>
   </div>
@@ -2154,6 +2154,54 @@ def main():
 
     # Tabs
     if online and keys:
+        # CSS tooltip layer for tabs (st.tabs has no native help= param)
+        st.markdown("""
+<style>
+/* Tab tooltip system */
+.stTabs [data-baseweb="tab-list"] { position: relative; }
+.stTabs [data-baseweb="tab"] { position: relative; }
+
+/* Generate tab */
+.stTabs [data-baseweb="tab"]:nth-child(1)::after {
+  content: "Create lesson plans, quizzes, activities & more";
+  position:absolute; bottom:-32px; left:50%; transform:translateX(-50%);
+  background:#1a2a4a; color:#D0D8E8; font-size:.72rem; white-space:nowrap;
+  padding:3px 8px; border-radius:6px; border:1px solid #2a3a5a;
+  pointer-events:none; opacity:0; transition:opacity .2s; z-index:999;
+}
+.stTabs [data-baseweb="tab"]:nth-child(1):hover::after { opacity:1; }
+
+/* Chat tab */
+.stTabs [data-baseweb="tab"]:nth-child(2)::after {
+  content: "Ask Teacher Pehpeh anything about your subject";
+  position:absolute; bottom:-32px; left:50%; transform:translateX(-50%);
+  background:#1a2a4a; color:#D0D8E8; font-size:.72rem; white-space:nowrap;
+  padding:3px 8px; border-radius:6px; border:1px solid #2a3a5a;
+  pointer-events:none; opacity:0; transition:opacity .2s; z-index:999;
+}
+.stTabs [data-baseweb="tab"]:nth-child(2):hover::after { opacity:1; }
+
+/* Quiz tab */
+.stTabs [data-baseweb="tab"]:nth-child(3)::after {
+  content: "Practice quizzes & WASSCE exam simulation — works offline";
+  position:absolute; bottom:-32px; left:50%; transform:translateX(-50%);
+  background:#1a2a4a; color:#D0D8E8; font-size:.72rem; white-space:nowrap;
+  padding:3px 8px; border-radius:6px; border:1px solid #2a3a5a;
+  pointer-events:none; opacity:0; transition:opacity .2s; z-index:999;
+}
+.stTabs [data-baseweb="tab"]:nth-child(3):hover::after { opacity:1; }
+
+/* Students tab */
+.stTabs [data-baseweb="tab"]:nth-child(4)::after {
+  content: "Manage student profiles, risk analysis & parent letters";
+  position:absolute; bottom:-32px; left:50%; transform:translateX(-50%);
+  background:#1a2a4a; color:#D0D8E8; font-size:.72rem; white-space:nowrap;
+  padding:3px 8px; border-radius:6px; border:1px solid #2a3a5a;
+  pointer-events:none; opacity:0; transition:opacity .2s; z-index:999;
+}
+.stTabs [data-baseweb="tab"]:nth-child(4):hover::after { opacity:1; }
+</style>
+""", unsafe_allow_html=True)
         t1,t3,t4,t2=st.tabs([T("generate"),T("chat"),T("quiz"),T("students")])
     else: t1=t2=t3=None; t4=st.container()
 
@@ -2469,14 +2517,23 @@ def main():
         if GOOGLE_API_KEY: _avail_agents.append("Gemini")
         if _avail_agents:
             _n=len(_avail_agents)
-            _all_label=f"⭐ Best answer — ask all {_n} AI agents & pick best" if _n>1 else f"🤖 Use {_avail_agents[0]}"
-            _agent_opts=[_all_label]+[f"🤖 {a} only" for a in _avail_agents]
+            _all_label=f"🌶️ Best answer — all {_n} agents" if _n>1 else f"🌶️ {_avail_agents[0]}"
+            _agent_opts=[_all_label]+[f"🌶️ {a} only" for a in _avail_agents]
             _agent_sel=st.selectbox("AI:",_agent_opts,key="agent_pick",label_visibility="collapsed",
-                                    help="'Best answer' sends your request to all AI agents and picks the strongest response. Or choose one AI to use on its own.")
-            if _agent_sel.startswith("⭐"):
+                                    help="All agents gives the best result but may take a little longer and use more data. If you're on a slow connection, picking one agent can be faster.")
+            if "all" in _agent_sel or _agent_sel==_all_label and _n>1:
                 _agent_pick=_avail_agents
             else:
-                _agent_pick=[_agent_sel.replace("🤖 ","").replace(" only","")]
+                _agent_pick=[_agent_sel.replace("🌶️ ","").replace(" only","")]
+            # Soft advisory when all agents selected and more than one available
+            if len(_agent_pick)>1:
+                st.markdown(
+                    f'<div style="background:rgba(212,168,67,.07);border-left:3px solid {C_GOLD}88;' +
+                    f'border-radius:0 6px 6px 0;padding:6px 12px;margin:4px 0 2px;font-size:.78rem;color:#C8B06A">' +
+                    f'🌶️ <strong>Heads up:</strong> Using all {len(_agent_pick)} agents gives richer results — though it may take a little longer ' +
+                    f'and could use more mobile data on slower connections. Just something to keep in mind!</div>',
+                    unsafe_allow_html=True
+                )
         else: _agent_pick=[]
         gen_col, clr_col = st.columns([3,1])
         with gen_col:
