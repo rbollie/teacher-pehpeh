@@ -1729,6 +1729,11 @@ def main():
     st.set_page_config(page_title="Teacher Pehpeh by IBT",page_icon="🌶️",layout="wide",initial_sidebar_state="collapsed")
     for k in ["chat_messages","students","conn_checked","conn_info","gen_result","grade_history"]:
         if k not in st.session_state: st.session_state[k]=[] if k in ("chat_messages","students","grade_history") else (False if k=="conn_checked" else None)
+    # Always sync quiz state for ALL subjects (catches new subjects added after first run)
+    for _qsk in QUIZ:
+        _qk = f"qz_{_qsk}"
+        if _qk not in st.session_state:
+            st.session_state[_qk] = {"lv":"easy","qi":0,"sc":0,"tot":0,"stk":0,"done":False,"sel":None,"hist":[],"manual_lv":False}
     # === PENDING PROFILE LOAD — must run BEFORE any widgets render ===
     if st.session_state.get("_pending_load"):
         _lp=st.session_state.pop("_pending_load")
@@ -1740,7 +1745,7 @@ def main():
         st.session_state.profile_set=True
     for sk in QUIZ: 
         k=f"qz_{sk}"
-        if k not in st.session_state: st.session_state[k]={"lv":"easy","qi":0,"sc":0,"tot":0,"stk":0,"done":False,"sel":None,"hist":[]}
+        if k not in st.session_state: st.session_state[k]={"lv":"easy","qi":0,"sc":0,"tot":0,"stk":0,"done":False,"sel":None,"hist":[],"manual_lv":False}
 
     if not st.session_state.conn_checked:
         _checking={"en":"🌶️ Checking connection...","fr":"🌶️ Vérification de la connexion...","sw":"🌶️ Kuangalia muunganisho..."}.get(_lang_key(),"🌶️ Checking connection...")
