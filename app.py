@@ -623,6 +623,7 @@ REGIONS={"Urban":"urban","Suburban":"suburban","Rural":"rural"}
 # Sub-Saharan African countries only
 COUNTRIES=["Liberia","Sierra Leone","Ghana","Nigeria","Kenya","Uganda","Tanzania","Ethiopia","Senegal","Cameroon","Gambia","Guinea","Côte d'Ivoire","Mali","Burkina Faso","Rwanda","Malawi","Zambia","Zimbabwe","Mozambique","South Africa","Botswana","Namibia","DRC","Angola","Togo","Benin","Niger","Chad","Somalia","Eritrea","Djibouti","South Sudan","Sudan","Central African Republic","Republic of Congo","Gabon","Equatorial Guinea","São Tomé and Príncipe","Cape Verde","Comoros","Madagascar","Mauritius","Seychelles","Eswatini","Lesotho","Burundi","Guinea-Bissau"]
 FLAGS={"Liberia":"🇱🇷","Sierra Leone":"🇸🇱","Ghana":"🇬🇭","Nigeria":"🇳🇬","Kenya":"🇰🇪","Uganda":"🇺🇬","Tanzania":"🇹🇿","Ethiopia":"🇪🇹","Senegal":"🇸🇳","Cameroon":"🇨🇲","Gambia":"🇬🇲","Guinea":"🇬🇳","Côte d'Ivoire":"🇨🇮","Mali":"🇲🇱","Burkina Faso":"🇧🇫","Rwanda":"🇷🇼","Malawi":"🇲🇼","Zambia":"🇿🇲","Zimbabwe":"🇿🇼","Mozambique":"🇲🇿","South Africa":"🇿🇦","Botswana":"🇧🇼","Namibia":"🇳🇦","DRC":"🇨🇩","Angola":"🇦🇴","Togo":"🇹🇬","Benin":"🇧🇯","Niger":"🇳🇪","Chad":"🇹🇩","Somalia":"🇸🇴","Eritrea":"🇪🇷","Djibouti":"🇩🇯","South Sudan":"🇸🇸","Sudan":"🇸🇩","Central African Republic":"🇨🇫","Republic of Congo":"🇨🇬","Gabon":"🇬🇦","Equatorial Guinea":"🇬🇶","São Tomé and Príncipe":"🇸🇹","Cape Verde":"🇨🇻","Comoros":"🇰🇲","Madagascar":"🇲🇬","Mauritius":"🇲🇺","Seychelles":"🇸🇨","Eswatini":"🇸🇿","Lesotho":"🇱🇸","Burundi":"🇧🇮","Guinea-Bissau":"🇬🇼"}
+FLAG_CODES={"Liberia":"lr","Sierra Leone":"sl","Ghana":"gh","Nigeria":"ng","Kenya":"ke","Uganda":"ug","Tanzania":"tz","Ethiopia":"et","Senegal":"sn","Cameroon":"cm","Gambia":"gm","Guinea":"gn","Côte d'Ivoire":"ci","Mali":"ml","Burkina Faso":"bf","Rwanda":"rw","Malawi":"mw","Zambia":"zm","Zimbabwe":"zw","Mozambique":"mz","South Africa":"za","Botswana":"bw","Namibia":"na","DRC":"cd","Angola":"ao","Togo":"tg","Benin":"bj","Niger":"ne","Chad":"td","Somalia":"so","Eritrea":"er","Djibouti":"dj","South Sudan":"ss","Sudan":"sd","Central African Republic":"cf","Republic of Congo":"cg","Gabon":"ga","Equatorial Guinea":"gq","São Tomé and Príncipe":"st","Cape Verde":"cv","Comoros":"km","Madagascar":"mg","Mauritius":"mu","Seychelles":"sc","Eswatini":"sz","Lesotho":"ls","Burundi":"bi","Guinea-Bissau":"gw"}
 GRADES=["9th Grade","10th Grade","11th Grade","12th Grade","12th Grade (WASSCE Prep)"]
 SUBJECTS=["Mathematics","English Language","Social Studies","Physics","Chemistry","Biology","Economics","Government / Civics","Literature in English","History","Geography","Agriculture","French","Religious Studies","Business Management","Accounting","Computer Studies / ICT","Physical Education"]
 TOPICS={"Mathematics":["Number and Numeration","Fractions and Decimals","Percentages","Ratio and Proportion","Algebraic Expressions","Linear Equations","Quadratic Equations","Simultaneous Equations","Sets and Venn Diagrams","Trigonometry","Mensuration","Geometry","Statistics","Probability","Vectors","Logarithms","Indices and Surds"],
@@ -898,9 +899,15 @@ def get_b64():
 
 def show_logo(country=None):
     b=get_b64()
-    flag=FLAGS.get(country,"") if country else ""
-    if b: st.markdown(f'<div style="text-align:center;padding:.8rem 0 .2rem;display:flex;align-items:center;justify-content:center;gap:16px"><span style="font-size:3rem">{flag}</span><img src="data:image/png;base64,{b}" style="max-height:170px;filter:drop-shadow(0 4px 12px rgba(212,168,67,.3))"><span style="font-size:3rem">{flag}</span></div>',unsafe_allow_html=True)
-    else: st.markdown(f'<div style="text-align:center"><h1 style="color:{C_GOLD}">{flag} Teacher Pehpeh by IBT {flag}</h1></div>',unsafe_allow_html=True)
+    iso=FLAG_CODES.get(country,"").upper() if country else ""
+    # Styled country-code badge — no external dependencies, works in all browsers
+    flag_badge=(f'<div style="display:flex;flex-direction:column;align-items:center;gap:2px">'
+                f'<span style="font-size:0.6rem;letter-spacing:2px;color:#aaa;font-weight:600">{iso}</span>'
+                f'<div style="width:36px;height:24px;border-radius:4px;background:linear-gradient(135deg,{C_NAVY},{C_GOLD});display:flex;align-items:center;justify-content:center">'
+                f'<span style="font-size:0.55rem;font-weight:900;color:white;letter-spacing:1px">{iso}</span>'
+                f'</div></div>') if iso else ""
+    if b: st.markdown(f'<div style="text-align:center;padding:.8rem 0 .2rem;display:flex;align-items:center;justify-content:center;gap:20px">{flag_badge}<img src="data:image/png;base64,{b}" style="max-height:170px;filter:drop-shadow(0 4px 12px rgba(212,168,67,.3))">{flag_badge}</div>',unsafe_allow_html=True)
+    else: st.markdown(f'<div style="text-align:center"><h1 style="color:{C_GOLD}">Teacher Pehpeh by IBT</h1></div>',unsafe_allow_html=True)
 
 def ico(s=20):
     b=get_b64()
