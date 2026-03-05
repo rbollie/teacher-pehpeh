@@ -899,8 +899,7 @@ def get_b64():
 def show_logo(country=None):
     b=get_b64()
     flag=FLAGS.get(country,"") if country else ""
-    # Wrap flags in a span with a class; JS hides them in Edge/Windows where they render as "LR" text
-    if b: st.markdown(f'<div style="text-align:center;padding:.8rem 0 .2rem"><img src="data:image/png;base64,{b}" style="max-height:170px;filter:drop-shadow(0 4px 12px rgba(212,168,67,.3))"></div>',unsafe_allow_html=True)
+    if b: st.markdown(f'<div style="text-align:center;padding:.8rem 0 .2rem;display:flex;align-items:center;justify-content:center;gap:16px"><span style="font-size:3rem">{flag}</span><img src="data:image/png;base64,{b}" style="max-height:170px;filter:drop-shadow(0 4px 12px rgba(212,168,67,.3))"><span style="font-size:3rem">{flag}</span></div>',unsafe_allow_html=True)
     else: st.markdown(f'<div style="text-align:center"><h1 style="color:{C_GOLD}">{flag} Teacher Pehpeh by IBT {flag}</h1></div>',unsafe_allow_html=True)
 
 def ico(s=20):
