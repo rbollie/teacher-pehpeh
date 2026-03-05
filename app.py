@@ -1880,8 +1880,8 @@ def main():
     [data-testid="stSidebar"] .stExpander summary {{ color:white !important;font-weight:700 !important }}
     [data-testid="stSidebar"] .stExpander [data-testid="stExpanderDetails"] {{ background:rgba(0,0,0,.15) !important;border-radius:0 0 10px 10px !important }}
     /* Hide default Streamlit chevron — use Teacher Pehpeh logo image instead */
-    [data-testid="stSidebar"] .stExpander summary svg { display:none !important }
-    [data-testid="stSidebar"] .stExpander summary::before {
+    [data-testid="stSidebar"] .stExpander summary svg {{ display:none !important }}
+    [data-testid="stSidebar"] .stExpander summary::before {{
         content:"";
         display:inline-block;
         width:28px;
@@ -1894,7 +1894,7 @@ def main():
         vertical-align:middle;
         border-radius:50%;
         flex-shrink:0;
-    }
+    }}
     </style>""",unsafe_allow_html=True)
 
     # Sidebar (defined first so country is available for logo flag)
