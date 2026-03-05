@@ -897,20 +897,27 @@ def get_b64():
             with open(p,"rb") as f: return base64.b64encode(f.read()).decode()
     return None
 
-def _flag_img(iso2):
-    """Return a Twemoji SVG <img> tag for the given ISO-2 code. No JS, no external script — just an img src."""
-    if not iso2: return ""
-    a,b=iso2.upper()
-    cp1=hex(0x1F1E6+ord(a)-ord("A"))[2:]
-    cp2=hex(0x1F1E6+ord(b)-ord("A"))[2:]
-    url=f"https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/2/svg/{cp1}-{cp2}.svg"
-    return '<img src="'+url+'" style="height:44px;width:auto;vertical-align:middle" onerror="this.style.display=&quot;none&quot;">'  
-
 def show_logo(country=None):
     b=get_b64()
-    iso=FLAG_CODES.get(country,"") if country else ""
-    flag_img=_flag_img(iso)
-    if b: st.markdown(f'<div style="text-align:center;padding:.8rem 0 .2rem;display:flex;align-items:center;justify-content:center;gap:16px">{flag_img}<img src="data:image/png;base64,{b}" style="max-height:170px;filter:drop-shadow(0 4px 12px rgba(212,168,67,.3))">{flag_img}</div>',unsafe_allow_html=True)
+    flag=FLAGS.get(country,"") if country else ""
+    # Flags hidden by default via opacity:0. Canvas test reveals them only if they
+    # render as actual graphics (wide) — not as fallback text like "LR" on Windows.
+    detect_js=('<script>(function(){'+
+        'var spans=document.querySelectorAll(".tp-flag");'+
+        'spans.forEach(function(s){'+
+            'var cv=document.createElement("canvas"),ctx=cv.getContext("2d");'+
+            'ctx.font="32px serif";'+
+            'var fw=ctx.measureText(s.dataset.flag).width;'+
+            'var lw=ctx.measureText("LR").width;'+
+            'if(fw>lw*1.5){s.style.opacity="1";}'+  # real flag renders much wider than two Latin letters
+        '});'+
+    '})();</script>') if flag else ""
+    flag_span=(f'<span class="tp-flag" style="font-size:3rem;opacity:0;transition:opacity .3s" '+
+               f'data-flag="{flag}">{flag}</span>') if flag else ""
+    if b: st.markdown(
+        f'<div style="text-align:center;padding:.8rem 0 .2rem;display:flex;align-items:center;justify-content:center;gap:16px">'+
+        f'{flag_span}<img src="data:image/png;base64,{b}" style="max-height:170px;filter:drop-shadow(0 4px 12px rgba(212,168,67,.3))">{flag_span}</div>'+
+        detect_js,unsafe_allow_html=True)
     else: st.markdown(f'<div style="text-align:center"><h1 style="color:{C_GOLD}">Teacher Pehpeh by IBT</h1></div>',unsafe_allow_html=True)
 
 def ico(s=20):
