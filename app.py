@@ -116,7 +116,7 @@ def email_result(content, subject, key_suffix, container=None):
         clean = content.replace("\n\n", "\n").strip()
         # IBT branded plain text template
         branded_text = f"""═══════════════════════════════════════════
-   🌶️ TEACHER PEHPEH by IBT
+   TEACHER PEHPEH by IBT
    Institute of Basic Technology
 ═══════════════════════════════════════════
 
@@ -154,14 +154,14 @@ body{{font-family:Arial,sans-serif;margin:0;padding:0;background:#f4f4f4}}
 </style></head><body>
 <div class="container">
 <div class="header">
-<h1>🌶️ TEACHER PEHPEH</h1>
+<h1>TEACHER PEHPEH</h1>
 <p>Institute of Basic Technology (IBT)</p>
 </div>
 <div class="subj">{subject}</div>
 <div class="body">{clean}</div>
 <div class="footer">
 <span class="brand">Teacher Pehpeh by IBT</span>
-<a href="https://teacher-pehpeh.streamlit.app">🌶️ Open Teacher Pehpeh</a> &nbsp;·&nbsp;
+<a href="https://teacher-pehpeh.streamlit.app">Open Teacher Pehpeh</a> &nbsp;·&nbsp;
 <a href="https://www.institutebasictechnology.org">🌐 IBT Website</a><br><br>
 <em>"Curating Personalized Content to Support Underresourced Teachers"</em><br>
 Powered by Claude · ChatGPT · Gemini
@@ -171,7 +171,7 @@ Powered by Claude · ChatGPT · Gemini
         # Mailto uses truncated plain text
         max_body = 1800
         mail_body = branded_text if len(branded_text) <= max_body else branded_text[:max_body] + "\n\n[Content truncated — see attached file for full version]"
-        encoded_subject = urlquote(f"🌶️ {subject}")
+        encoded_subject = urlquote(f"{subject}")
         encoded_body = urlquote(mail_body)
         cc_param = f"&cc={urlquote(cc_addr)}" if cc_addr.strip() else ""
         mailto_url = f"mailto:{urlquote(to_addr)}?subject={encoded_subject}{cc_param}&body={encoded_body}"
@@ -613,8 +613,8 @@ QUIZ = {
 
 }
 
-PRAISE = ["🌶️ Excellent! Teacher Pehpeh is proud!","🌶️ You're on FIRE!","🌶️ That's the pepper spirit!","🌶️ Outstanding! Getting stronger!","🌶️ Sharp like pepper!","🌶️ Brilliant! Hard work pays off!","🌶️ You nailed it!","🌶️ The village would be proud!"]
-ENCOURAGE = ["🌶️ Not quite — every mistake teaches!","🌶️ Close! Read explanation, try next one!","🌶️ Even the tallest palm started as seed. Keep growing!","🌶️ No worry! Let's learn together."]
+PRAISE = ["✨ Excellent! Teacher Pehpeh is proud!","🔥 You're on FIRE!","⭐ That's the pepper spirit!","💪 Outstanding! Getting stronger!","🎯 Sharp like pepper!","✨ Brilliant! Hard work pays off!","🏆 You nailed it!","🌍 The village would be proud!"]
+ENCOURAGE = ["📖 Not quite — every mistake teaches!","💡 Close! Read explanation, try next one!","🌱 Even the tallest palm started as seed. Keep growing!","🤝 No worry! Let's learn together."]
 
 WASSCE_TIPS = """📝 WASSCE EXAM STRATEGY:\n\n1. ANSWER SHEET: HB pencil only. Shade completely. Erase cleanly. Check numbers match.\n2. ELIMINATION: Read ALL options. Cross out wrong ones. 'Always'/'never' usually wrong.\n3. TIME: Paper 1: ~1 min/question. Paper 2: start easiest. Leave 10 min to check.\n4. NIGHT BEFORE: Review only. Eat well, sleep early. Rested brain > tired cramming."""
 
@@ -682,13 +682,13 @@ LANGS={"English":"English","Français":"French","Kiswahili":"Swahili"}
 # UI Translations
 UI_TEXT={
  "en":{
-  "generate":"📋 Generate","chat":"💬 Chat","quiz":"🌶️ Quiz","students":"🧑‍🎓 Students",
+  "generate":"📋 Generate","chat":"💬 Chat","quiz":"Quiz","students":"🧑‍🎓 Students",
   "task":"Task","time":"Time","topic":"Topic","options":"Options","subject":"Subject","grade":"Grade",
   "country":"Country","setting":"Setting","class_size":"Class Size",
   "language":"Language","student_level":"Student Level","school_name":"🏫 School Name",
   "school_placeholder":"e.g., Bahn, St. Martin's","my_classroom":"My Classroom","my_students":"My Students",
-  "gen_btn":"🌶️ Generate","clear":"🗑️ Clear","hear":"🔊 Hear Results","grade_work":"Grade Work",
-  "grade_btn":"🌶️ Grade","students_work":"Student's work:","offline_title":"📴 Offline — Practice Quiz",
+  "gen_btn":"Generate","clear":"🗑️ Clear","hear":"🔊 Hear Results","grade_work":"Grade Work",
+  "grade_btn":"Grade","students_work":"Student's work:","offline_title":"📴 Offline — Practice Quiz",
   "offline_msg":"No internet? These quizzes work offline!","practice_quiz":"Practice Quiz",
   "adaptive":"Adaptive. Works offline too!","score":"Score","level":"Level","next":"➡️ Next",
   "reset":"🔄 Reset","wassce_tips":"📝 WASSCE Tips","add_student":"Add Student","name":"Name",
@@ -713,8 +713,8 @@ UI_TEXT={
   "pass_vocab":"Passage + Vocabulary Exercise","full_comp":"Full Comprehension (All Types)",
   "assignment":"📝 Assignment","risk":"⚠️ Risk Analysis","creating":"Creating...",
   "see_all":"📋 See all","model_responses":"model responses","streak":"streak",
-  "generating_content":"🌶️ Teacher Pehpeh is cooking...","done":"✅ Done! Content is ready!",
-  "ask_tp":"Ask Teacher Pehpeh","thinking":"🌶️ Teacher Pehpeh is thinking...","response_ready":"✅ Response ready!",
+  "generating_content":"⏳ Teacher Pehpeh is cooking...","done":"✅ Done! Content is ready!",
+  "ask_tp":"Ask Teacher Pehpeh","thinking":"⏳ Teacher Pehpeh is thinking...","response_ready":"✅ Response ready!",
   "asking_claude":"🟣 Asking Claude...","asking_chatgpt":"🟢 Asking ChatGPT...","asking_gemini":"🔵 Asking Gemini...",
   "chat_ex1":"How to teach fractions with no textbooks?","chat_ex2":"My students keep failing WASSCE.","chat_ex3":"Managing 60+ students?",
   "combining":"🔀 Combining the best...","creating_img":"🎨 Creating illustration...",
@@ -728,13 +728,13 @@ UI_TEXT={
   "download_docx":"📥 Download Word Document (.docx)",
  },
  "fr":{
-  "generate":"📋 Générer","chat":"💬 Discussion","quiz":"🌶️ Quiz","students":"🧑‍🎓 Élèves",
+  "generate":"📋 Générer","chat":"💬 Discussion","quiz":"Quiz","students":"🧑‍🎓 Élèves",
   "task":"Tâche","time":"Durée","topic":"Sujet","options":"Options","subject":"Matière","grade":"Classe",
   "country":"Pays","setting":"Contexte","class_size":"Taille de classe",
   "language":"Langue","student_level":"Niveau des élèves","school_name":"🏫 Nom de l'école",
   "school_placeholder":"ex: Bahn, St. Martin's","my_classroom":"Ma Classe","my_students":"Mes Élèves",
-  "gen_btn":"🌶️ Générer","clear":"🗑️ Effacer","hear":"🔊 Écouter","grade_work":"Noter le travail",
-  "grade_btn":"🌶️ Noter","students_work":"Travail de l'élève :","offline_title":"📴 Hors ligne — Quiz pratique",
+  "gen_btn":"Générer","clear":"🗑️ Effacer","hear":"🔊 Écouter","grade_work":"Noter le travail",
+  "grade_btn":"Noter","students_work":"Travail de l'élève :","offline_title":"📴 Hors ligne — Quiz pratique",
   "offline_msg":"Pas d'internet ? Ces quiz fonctionnent hors ligne !","practice_quiz":"Quiz pratique",
   "adaptive":"Adaptatif. Fonctionne hors ligne aussi !","score":"Score","level":"Niveau","next":"➡️ Suivant",
   "reset":"🔄 Réinitialiser","wassce_tips":"📝 Conseils WASSCE","add_student":"Ajouter un élève","name":"Nom",
@@ -759,8 +759,8 @@ UI_TEXT={
   "pass_vocab":"Passage + Exercice de vocabulaire","full_comp":"Compréhension complète (Tous types)",
   "assignment":"📝 Devoir","risk":"⚠️ Analyse de risque","creating":"Création en cours...",
   "see_all":"📋 Voir tous les","model_responses":"réponses des modèles","streak":"série",
-  "generating_content":"🌶️ Teacher Pehpeh prépare...","done":"✅ Terminé ! Le contenu est prêt !",
-  "ask_tp":"Demandez à Teacher Pehpeh","thinking":"🌶️ Teacher Pehpeh réfléchit...","response_ready":"✅ Réponse prête !",
+  "generating_content":"⏳ Teacher Pehpeh prépare...","done":"✅ Terminé ! Le contenu est prêt !",
+  "ask_tp":"Demandez à Teacher Pehpeh","thinking":"⏳ Teacher Pehpeh réfléchit...","response_ready":"✅ Réponse prête !",
   "asking_claude":"🟣 Consultation de Claude...","asking_chatgpt":"🟢 Consultation de ChatGPT...","asking_gemini":"🔵 Consultation de Gemini...",
   "chat_ex1":"Comment enseigner les fractions sans manuels ?","chat_ex2":"Mes élèves échouent au WASSCE.","chat_ex3":"Gérer plus de 60 élèves ?",
   "combining":"🔀 Combinaison des meilleurs...","creating_img":"🎨 Création d'illustration...",
@@ -774,13 +774,13 @@ UI_TEXT={
   "download_docx":"📥 Télécharger le document Word (.docx)",
  },
  "sw":{
-  "generate":"📋 Tengeneza","chat":"💬 Mazungumzo","quiz":"🌶️ Maswali","students":"🧑‍🎓 Wanafunzi",
+  "generate":"📋 Tengeneza","chat":"💬 Mazungumzo","quiz":"Maswali","students":"🧑‍🎓 Wanafunzi",
   "task":"Kazi","time":"Muda","topic":"Mada","options":"Chaguzi","subject":"Somo","grade":"Darasa",
   "country":"Nchi","setting":"Mazingira","class_size":"Ukubwa wa darasa",
   "language":"Lugha","student_level":"Kiwango cha wanafunzi","school_name":"🏫 Jina la shule",
   "school_placeholder":"k.m., Bahn, St. Martin's","my_classroom":"Darasa Langu","my_students":"Wanafunzi Wangu",
-  "gen_btn":"🌶️ Tengeneza","clear":"🗑️ Futa","hear":"🔊 Sikiliza","grade_work":"Sahihisha Kazi",
-  "grade_btn":"🌶️ Sahihisha","students_work":"Kazi ya mwanafunzi:","offline_title":"📴 Nje ya mtandao — Maswali ya mazoezi",
+  "gen_btn":"Tengeneza","clear":"🗑️ Futa","hear":"🔊 Sikiliza","grade_work":"Sahihisha Kazi",
+  "grade_btn":"Sahihisha","students_work":"Kazi ya mwanafunzi:","offline_title":"📴 Nje ya mtandao — Maswali ya mazoezi",
   "offline_msg":"Hakuna mtandao? Maswali haya yanafanya kazi nje ya mtandao!","practice_quiz":"Maswali ya Mazoezi",
   "adaptive":"Yanabadilika. Yanafanya kazi nje ya mtandao pia!","score":"Alama","level":"Kiwango","next":"➡️ Ifuatayo",
   "reset":"🔄 Weka upya","wassce_tips":"📝 Vidokezo vya WASSCE","add_student":"Ongeza mwanafunzi","name":"Jina",
@@ -805,8 +805,8 @@ UI_TEXT={
   "pass_vocab":"Kifungu + Zoezi la msamiati","full_comp":"Ufahamu kamili (Aina zote)",
   "assignment":"📝 Kazi","risk":"⚠️ Uchambuzi wa hatari","creating":"Inatengeneza...",
   "see_all":"📋 Tazama zote","model_responses":"majibu ya modeli","streak":"mfululizo",
-  "generating_content":"🌶️ Teacher Pehpeh anapika...","done":"✅ Imekamilika! Maudhui yako tayari!",
-  "ask_tp":"Muulize Teacher Pehpeh","thinking":"🌶️ Teacher Pehpeh anafikiria...","response_ready":"✅ Jibu liko tayari!",
+  "generating_content":"⏳ Teacher Pehpeh anapika...","done":"✅ Imekamilika! Maudhui yako tayari!",
+  "ask_tp":"Muulize Teacher Pehpeh","thinking":"⏳ Teacher Pehpeh anafikiria...","response_ready":"✅ Jibu liko tayari!",
   "asking_claude":"🟣 Kuuliza Claude...","asking_chatgpt":"🟢 Kuuliza ChatGPT...","asking_gemini":"🔵 Kuuliza Gemini...",
   "chat_ex1":"Jinsi ya kufundisha sehemu bila vitabu?","chat_ex2":"Wanafunzi wangu wanashindwa WASSCE.","chat_ex3":"Kusimamia wanafunzi 60+?",
   "combining":"🔀 Kuchanganya bora zaidi...","creating_img":"🎨 Kuunda mchoro...",
@@ -900,20 +900,20 @@ def show_logo(country=None):
     b=get_b64()
     flag=FLAGS.get(country,"") if country else ""
     if b: st.markdown(f'<div style="text-align:center;padding:.8rem 0 .2rem;display:flex;align-items:center;justify-content:center;gap:16px"><span style="font-size:3rem">{flag}</span><img src="data:image/png;base64,{b}" style="max-height:170px;filter:drop-shadow(0 4px 12px rgba(212,168,67,.3))"><span style="font-size:3rem">{flag}</span></div>',unsafe_allow_html=True)
-    else: st.markdown(f'<div style="text-align:center"><h1 style="color:{C_GOLD}">{flag} 🌶️ Teacher Pehpeh by IBT {flag}</h1></div>',unsafe_allow_html=True)
+    else: st.markdown(f'<div style="text-align:center"><h1 style="color:{C_GOLD}">{flag} Teacher Pehpeh by IBT {flag}</h1></div>',unsafe_allow_html=True)
 
 def ico(s=20):
     b=get_b64()
-    return f'<img src="data:image/png;base64,{b}" style="height:{s}px;width:{s}px;vertical-align:middle;border-radius:50%">' if b else "🌶️"
+    return f'<img src="data:image/png;base64,{b}" style="height:{s}px;width:{s}px;vertical-align:middle;border-radius:50%">' if b else ""
 
 def pprog(stg,tot,msg):
     b=get_b64(); lit=min(stg,tot); pct=int(lit/tot*100)
     # Animated pepper icons filling up with pulsing "Generating" text
     pepfill="".join(f'<img src="data:image/png;base64,{b}" style="height:40px;width:40px;margin:0 4px;opacity:{"1" if i<lit else ".15"};{"animation:peppop .4s ease;" if i==lit-1 else ""}{"filter:grayscale(100%);" if i>=lit else ""}border-radius:50%;transition:all .3s">' for i in range(tot)) if b else ""
-    pepfill_fallback="".join(f'<span style="font-size:28px;margin:0 3px;opacity:{"1" if i<lit else ".2"};{"animation:peppop .4s ease;" if i==lit-1 else ""}transition:all .3s">🌶️</span>' for i in range(tot))
+    pepfill_fallback="".join(f'<img src="data:image/png;base64,{b}" style="height:36px;width:36px;margin:0 4px;opacity:{"1" if i<lit else ".15"};{"animation:peppop .4s ease;" if i==lit-1 else ""}border-radius:50%;transition:all .3s">' for i in range(tot)) if b else ""
     icons=pepfill if b else pepfill_fallback
     # Status messages with model icons
-    status_icon={"🌶️ Teacher Pehpeh is cooking...":"🌶️","Asking ChatGPT...":"🟢","Asking Claude...":"🟣","Asking Gemini...":"🔵","Combining the best...":"🔀","🎨 Creating illustration...":"🎨","✅ Done! Content is ready!":"✅"}.get(msg,"🌶️")
+    status_icon={"⏳ Teacher Pehpeh is cooking...":ico(22),"Asking ChatGPT...":"🟢","Asking Claude...":"🟣","Asking Gemini...":"🔵","Combining the best...":"🔀","🎨 Creating illustration...":"🎨","✅ Done! Content is ready!":"✅"}.get(msg,ico(22))
     done_class="animation:none;color:#10B981" if "Done" in msg else "animation:genpulse 1.2s ease-in-out infinite"
     return f'''<style>
 @keyframes genpulse {{ 0%,100%{{opacity:.7;transform:scale(1)}} 50%{{opacity:1;transform:scale(1.03)}} }}
@@ -1709,7 +1709,7 @@ def generate_result_pptx(text, task, topic, grade, subject):
         sl_end.background.fill.solid(); sl_end.background.fill.fore_color.rgb = C_NAVY
         etb = sl_end.shapes.add_textbox(Inches(2),Inches(3),Inches(9),Inches(1.5))
         ef = etb.text_frame; ep = ef.paragraphs[0]; ep.alignment = PP_ALIGN.CENTER
-        er = ep.add_run(); er.text = "🌶️ Teacher Pehpeh by IBT"; er.font.size=Pt(24); er.font.bold=True; er.font.color.rgb=C_GOLD
+        er = ep.add_run(); er.text = "Teacher Pehpeh by IBT"; er.font.size=Pt(24); er.font.bold=True; er.font.color.rgb=C_GOLD
         buf = io.BytesIO(); prs.save(buf); buf.seek(0); return buf.getvalue()
     except Exception: return None
 
@@ -1756,7 +1756,7 @@ def main():
         if k not in st.session_state: st.session_state[k]={"lv":"easy","qi":0,"sc":0,"tot":0,"stk":0,"done":False,"sel":None,"hist":[],"manual_lv":False}
 
     if not st.session_state.conn_checked:
-        _checking={"en":"🌶️ Checking connection...","fr":"🌶️ Vérification de la connexion...","sw":"🌶️ Kuangalia muunganisho..."}.get(_lang_key(),"🌶️ Checking connection...")
+        _checking={"en":"⏳ Checking connection...","fr":"⏳ Vérification de la connexion...","sw":"⏳ Kuangalia muunganisho..."}.get(_lang_key(),"⏳ Checking connection...")
         with st.spinner(_checking):
             st.session_state.conn_info=check_conn(); st.session_state.conn_checked=True
     conn=st.session_state.conn_info; online=conn["online"] if conn else False
@@ -1935,7 +1935,7 @@ def main():
         if _logo_b64:
             _logo_html=f'<img src="data:image/png;base64,{_logo_b64}" style="height:36px;width:36px;vertical-align:middle;border-radius:50%;margin-right:8px;filter:drop-shadow(0 2px 6px rgba(212,168,67,.4))">'
         else:
-            _logo_html="🌶️ "
+            _logo_html=""
         st.markdown(f'<div style="display:flex;align-items:center;margin:8px 0 4px">{_logo_html}<span style="font-family:Playfair Display,serif;font-size:1.3rem;font-weight:700;color:#F5D998">{classroom_label}</span></div>',unsafe_allow_html=True)
         # School name — key changes each submit so widget resets blank
         _sv=st.session_state["_school_v"]
@@ -2548,20 +2548,20 @@ def main():
         if GOOGLE_API_KEY: _avail_agents.append("Gemini")
         if _avail_agents:
             _n=len(_avail_agents)
-            _all_label=f"🌶️ Best answer — all {_n} agents" if _n>1 else f"🌶️ {_avail_agents[0]}"
-            _agent_opts=[_all_label]+[f"🌶️ {a} only" for a in _avail_agents]
+            _all_label=f"Best answer — all {_n} agents" if _n>1 else f"{_avail_agents[0]}"
+            _agent_opts=[_all_label]+[f"{a} only" for a in _avail_agents]
             _agent_sel=st.selectbox("AI:",_agent_opts,key="agent_pick",label_visibility="collapsed",
                                     help="All agents gives the best result but may take a little longer and use more data. If you're on a slow connection, picking one agent can be faster.")
             if "all" in _agent_sel or _agent_sel==_all_label and _n>1:
                 _agent_pick=_avail_agents
             else:
-                _agent_pick=[_agent_sel.replace("🌶️ ","").replace(" only","")]
+                _agent_pick=[_agent_sel.replace(" only","")]
             # Soft advisory when all agents selected and more than one available
             if len(_agent_pick)>1:
                 st.markdown(
                     f'<div style="background:rgba(212,168,67,.07);border-left:3px solid {C_GOLD}88;' +
                     f'border-radius:0 6px 6px 0;padding:6px 12px;margin:4px 0 2px;font-size:.78rem;color:#C8B06A">' +
-                    f'🌶️ <strong>Heads up:</strong> Using all {len(_agent_pick)} agents gives richer results — though it may take a little longer ' +
+                    f'<strong>Heads up:</strong> Using all {len(_agent_pick)} agents gives richer results — though it may take a little longer ' +
                     f'and could use more mobile data on slower connections. Just something to keep in mind!</div>',
                     unsafe_allow_html=True
                 )
@@ -3048,7 +3048,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     pg_uploads.append(photo)
 
             _has_any = any(pg_uploads)
-            if st.button("🌶️ Grade All Photos", type="primary", use_container_width=True, key="pg_go", disabled=not _has_any):
+            if st.button("Grade All Photos", type="primary", use_container_width=True, key="pg_go", disabled=not _has_any):
                 _graded = 0
                 for slot in range(int(pg_count)):
                     photo = pg_uploads[slot]
@@ -3221,7 +3221,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                 "Use bold for 2-3 key phrases. No bullet points — flowing prose only. Emotive and proud tone."
             ),
             (
-                "🌶️ Liberia: Pepper Coast",
+                "🌍 Liberia: Pepper Coast",
                 "Before it was Liberia, Europeans had a spicier name for it",
                 "A student just discovered that Liberia was once called the Pepper Coast by European traders. "
                 "Answer in 4-6 sentences. Be vivid: explain that the Grain of Selim (Grains of Paradise) — a peppery spice — grew wild along this coast "
@@ -3862,7 +3862,7 @@ document.getElementById('submit-btn').disabled = true;
                         if rc>=4 and lv!="hard":
                             qs["lv"]="medium" if lv=="easy" else "hard"
                             qs["manual_lv"]=False   # adaptive took over
-                            st.toast(f"🌶️ Level UP → {qs['lv'].upper()}")
+                            st.toast(f"🏆 Level UP → {qs['lv'].upper()}")
                         elif rc<=1 and lv!="easy":
                             qs["lv"]="easy" if lv=="medium" else "medium"
                             qs["manual_lv"]=False
@@ -4002,7 +4002,7 @@ def wassce_shading_modal():
 </head>
 <body>
 <div class="header">
-  <div class="header-title">🌶️ WASSCE INTERACTIVE ANSWER SHEET</div>
+  <div class="header-title">WASSCE INTERACTIVE ANSWER SHEET</div>
   <div class="header-sub">Click a bubble to shade it &nbsp;·&nbsp; Click again to erase &nbsp;·&nbsp; Shade ONE per question</div>
 </div>
 <div id="warning" class="warning">⚠️ Two shaded bubbles detected! That question scores ZERO marks — erase one.</div>
