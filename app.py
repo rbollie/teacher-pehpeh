@@ -1078,6 +1078,306 @@ def generate_docx_from_text(text, title="Transcribed Notes", school="", teacher=
     except Exception as e:
         return None
 
+
+def _make_mcq_sheet_html(qs_json, title="", n=None):
+    """
+    Render MCQs with a sticky answer-sheet column.
+    Questions left · Answer sheet right (sticky) · Answer key + explanations at bottom after submit.
+    """
+    n = n or "?"
+    return f"""<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{background:#0a0e1a;font-family:Georgia,serif;padding:10px 12px;color:#D0D8E8;font-size:12.5px;min-height:100vh}}
+
+/* ── top bar ── */
+.topbar{{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px}}
+.topbar-title{{color:#D4A843;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase}}
+.prog-wrap{{flex:1;min-width:120px;max-width:260px;height:4px;background:#1a2a3a;border-radius:2px;overflow:hidden}}
+.prog-fill{{height:100%;background:linear-gradient(90deg,#8B1A1A,#D4A843);border-radius:2px;transition:width .3s;width:0%}}
+
+/* ── main grid ── */
+.main{{display:grid;grid-template-columns:1fr 190px;gap:10px;align-items:start}}
+@media(max-width:520px){{.main{{grid-template-columns:1fr}}}}
+
+/* ── questions ── */
+.qlist{{display:flex;flex-direction:column;gap:7px}}
+.qcard{{background:#0d1e3a;border:1px solid #1c3060;border-radius:8px;padding:10px 12px;
+  border-left:3px solid #2a4070;transition:border-color .2s,background .2s}}
+.qcard.active{{border-left-color:#D4A843;background:#0f2347}}
+.qcard.correct{{border-left-color:#81C784!important;background:rgba(129,199,132,.06)!important}}
+.qcard.wrong{{border-left-color:#EF5350!important;background:rgba(239,83,80,.06)!important}}
+.qnum{{color:#D4A843;font-size:9.5px;font-weight:700;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}}
+.qtext{{color:#D8E8F8;font-size:11.5px;line-height:1.5;margin-bottom:7px}}
+.opts{{display:grid;grid-template-columns:1fr 1fr;gap:3px}}
+.opt{{display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:5px;
+  border:1px solid #1c3060;cursor:pointer;transition:all .14s;font-size:11px;color:#9aaecc;user-select:none}}
+.opt:hover:not(.locked){{border-color:#D4A843;color:#D4A843;background:rgba(212,168,67,.05)}}
+.opt.sel{{border-color:#D4A843;background:rgba(212,168,67,.13);color:#F5D98E;font-weight:700}}
+.opt.correct-ans{{border-color:#81C784!important;background:rgba(129,199,132,.16)!important;color:#81C784!important;font-weight:700}}
+.opt.wrong-ans{{border-color:#EF5350!important;background:rgba(239,83,80,.12)!important;color:#EF9A9A!important}}
+.opt.locked{{cursor:default}}
+.ob{{width:14px;height:14px;border-radius:50%;border:1.5px solid currentColor;
+  display:flex;align-items:center;justify-content:center;font-size:6.5px;font-weight:700;flex-shrink:0}}
+.opt.sel .ob,.opt.correct-ans .ob{{background:currentColor}}
+
+/* ── answer sheet panel ── */
+.sheet-panel{{background:#0d1e3a;border:1px solid rgba(212,168,67,.25);border-radius:10px;
+  padding:10px;position:sticky;top:8px}}
+.sh-head{{color:#D4A843;font-size:9.5px;font-weight:700;text-align:center;
+  letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}}
+.sh-note{{color:#8899aa;font-size:8px;text-align:center;margin-bottom:8px;line-height:1.4}}
+.sh-grid{{display:grid;grid-template-columns:repeat(2,1fr);gap:2px 4px}}
+.sh-row{{display:flex;align-items:center;gap:2px;padding:1.5px 2px;border-radius:3px;
+  transition:background .15s;cursor:default}}
+.sh-row.current{{background:rgba(212,168,67,.08)}}
+.sn{{font-size:8px;color:#445566;font-weight:700;width:15px;text-align:right;flex-shrink:0}}
+.sb{{width:14px;height:14px;border-radius:50%;border:1.5px solid #2a3a5a;
+  display:flex;align-items:center;justify-content:center;font-size:5.5px;color:#334455;
+  cursor:pointer;transition:all .14s;flex-shrink:0;user-select:none}}
+.sb:hover:not(.locked){{border-color:#D4A843;color:#D4A843;transform:scale(1.18)}}
+.sb.shaded{{background:#1a1a2e;border-color:#D4A843;color:transparent!important}}
+.sb.correct-b{{background:#81C784!important;border-color:#81C784!important;color:transparent!important}}
+.sb.wrong-b{{background:#EF5350!important;border-color:#EF5350!important;color:transparent!important}}
+.sb.key-b{{box-shadow:0 0 0 2px #81C784}}
+.sb.locked{{cursor:default}}
+
+/* score + buttons */
+.sh-score{{margin-top:8px;background:rgba(212,168,67,.07);border-radius:6px;padding:6px;text-align:center}}
+.sh-score-num{{color:#81C784;font-size:18px;font-weight:700;min-height:22px}}
+.sh-score-lbl{{color:#D4A843;font-size:8px;text-transform:uppercase;letter-spacing:.5px;margin-top:1px}}
+.sh-btns{{display:flex;flex-direction:column;gap:3px;margin-top:7px}}
+.btn{{width:100%;padding:6px;border-radius:5px;font-size:10px;font-weight:700;
+  cursor:pointer;font-family:inherit;border:1px solid;transition:all .15s}}
+.btn-submit{{background:#8B1A1A;color:#F5D98E;border-color:#D4A843}}
+.btn-submit:hover:not(:disabled){{background:#b02020}}
+.btn-submit:disabled{{opacity:.3;cursor:not-allowed}}
+.btn-reset{{background:transparent;color:#8899aa;border-color:#2a3a5a}}
+.btn-reset:hover{{border-color:#D4A843;color:#D4A843}}
+
+/* ── answer key section (hidden until submit) ── */
+.answer-key{{display:none;margin-top:14px;border-top:1px solid #1e3060;padding-top:12px}}
+.answer-key.show{{display:block}}
+.ak-title{{color:#D4A843;font-size:11px;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}}
+.ak-card{{background:#0d1e3a;border:1px solid #1c3060;border-radius:7px;padding:9px 12px;
+  margin-bottom:6px;border-left:3px solid #2a4070}}
+.ak-card.ak-correct{{border-left-color:#81C784}}
+.ak-card.ak-wrong{{border-left-color:#EF5350}}
+.ak-q{{color:#D8E8F8;font-size:11px;line-height:1.4;margin-bottom:5px}}
+.ak-row{{display:flex;align-items:center;gap:8px;font-size:10.5px;margin-top:3px}}
+.ak-badge{{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:9.5px;font-weight:700}}
+.ak-badge.user-right{{background:rgba(129,199,132,.15);color:#81C784;border:1px solid #81C78444}}
+.ak-badge.user-wrong{{background:rgba(239,83,80,.12);color:#EF9A9A;border:1px solid #EF535044}}
+.ak-badge.correct-lbl{{background:rgba(212,168,67,.12);color:#D4A843;border:1px solid #D4A84344}}
+.ak-expl{{margin-top:5px;padding:5px 8px;background:rgba(212,168,67,.06);border-radius:4px;
+  font-size:10px;color:#9abecc;line-height:1.5;border-left:2px solid #D4A84366}}
+
+/* result banner */
+.result-banner{{display:none;padding:8px 12px;border-radius:7px;text-align:center;
+  margin-bottom:10px;font-size:11px;font-weight:700}}
+.result-banner.show{{display:block}}
+</style></head>
+<body>
+<div class="topbar">
+  <span class="topbar-title">📝 {title} &nbsp;·&nbsp; {n} Questions</span>
+  <div class="prog-wrap"><div class="prog-fill" id="pf"></div></div>
+  <span id="prog-txt" style="color:#8899aa;font-size:9.5px;white-space:nowrap">0 / {n}</span>
+</div>
+
+<div id="result-banner" class="result-banner"></div>
+
+<div class="main">
+  <!-- Questions -->
+  <div class="qlist" id="ql"></div>
+
+  <!-- Answer sheet -->
+  <div class="sheet-panel">
+    <div class="sh-head">📋 Answer Sheet</div>
+    <div class="sh-note">Shade one bubble per question.<br>All bubbles must be filled to submit.</div>
+    <div class="sh-grid" id="sg"></div>
+    <div class="sh-score">
+      <div class="sh-score-num" id="score-num">—</div>
+      <div class="sh-score-lbl">Score</div>
+    </div>
+    <div class="sh-btns">
+      <button class="btn btn-submit" id="sub-btn" onclick="submitAll()" disabled>✅ Submit & Mark</button>
+      <button class="btn btn-reset" onclick="resetAll()">🔄 Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- Answer key — rendered after submit -->
+<div class="answer-key" id="ak">
+  <div class="ak-title">📖 Answer Key &amp; Explanations</div>
+  <div id="ak-list"></div>
+</div>
+
+<script>
+const QS = {qs_json};
+const N  = QS.length;
+const OP = ['A','B','C','D','E'];
+const sel = new Array(N).fill(null);
+let submitted = false;
+
+// ── build question cards ──────────────────────────────────────────────────
+const ql = document.getElementById('ql');
+QS.forEach((q, i) => {{
+  const card = document.createElement('div');
+  card.className = 'qcard'; card.id = 'qc' + i;
+  const opts = q.o.map((o, j) => {{
+    const L = OP[j] || String.fromCharCode(65+j);
+    return `<div class="opt" id="op${{i}}_${{j}}" onclick="pick(${{i}},${{j}})">
+              <div class="ob">${{L}}</div><span>${{o}}</span></div>`;
+  }}).join('');
+  card.innerHTML = `<div class="qnum">Question ${{i+1}}</div>
+                    <div class="qtext">${{q.q}}</div>
+                    <div class="opts">${{opts}}</div>`;
+  ql.appendChild(card);
+}});
+
+// ── build answer sheet ────────────────────────────────────────────────────
+const sg = document.getElementById('sg');
+QS.forEach((q, i) => {{
+  const row = document.createElement('div');
+  row.className = 'sh-row'; row.id = 'sr' + i;
+  const bubbles = q.o.map((_, j) => {{
+    const L = OP[j] || String.fromCharCode(65+j);
+    return `<div class="sb" id="sb${{i}}_${{j}}" onclick="pick(${{i}},${{j}})">${{L}}</div>`;
+  }}).join('');
+  row.innerHTML = `<span class="sn">${{i+1}}.</span>${{bubbles}}`;
+  sg.appendChild(row);
+}});
+
+// ── pick ──────────────────────────────────────────────────────────────────
+function pick(qi, oi) {{
+  if (submitted) return;
+  // Clear previous selection for this question
+  if (sel[qi] !== null) {{
+    document.getElementById('op' + qi + '_' + sel[qi]).classList.remove('sel');
+    const old = document.getElementById('sb' + qi + '_' + sel[qi]);
+    old.classList.remove('shaded');
+    old.textContent = OP[sel[qi]] || String.fromCharCode(65 + sel[qi]);
+  }}
+  sel[qi] = oi;
+  // Mark option
+  document.getElementById('op' + qi + '_' + oi).classList.add('sel');
+  // Shade bubble
+  const b = document.getElementById('sb' + qi + '_' + oi);
+  b.classList.add('shaded'); b.textContent = '';
+  // Mark card as active
+  document.getElementById('qc' + qi).classList.add('active');
+  // Highlight sheet row
+  document.querySelectorAll('.sh-row').forEach(r => r.classList.remove('current'));
+  document.getElementById('sr' + qi).classList.add('current');
+  // Scroll question into view if triggered from sheet
+  document.getElementById('qc' + qi).scrollIntoView({{behavior:'smooth', block:'nearest'}});
+  // Update progress
+  const done = sel.filter(x => x !== null).length;
+  document.getElementById('pf').style.width = (done / N * 100) + '%';
+  document.getElementById('prog-txt').textContent = done + ' / ' + N;
+  document.getElementById('sub-btn').disabled = (done < N);
+}}
+
+// ── submit ────────────────────────────────────────────────────────────────
+function submitAll() {{
+  if (submitted) return;
+  submitted = true;
+  let score = 0;
+  // Lock all options and bubbles
+  document.querySelectorAll('.opt').forEach(el => el.classList.add('locked'));
+  document.querySelectorAll('.sb').forEach(el => el.classList.add('locked'));
+
+  QS.forEach((q, i) => {{
+    const correct = q.a;
+    const user    = sel[i];
+    const card    = document.getElementById('qc' + i);
+
+    // Colour answer sheet
+    if (user !== null) {{
+      const ub = document.getElementById('sb' + i + '_' + user);
+      ub.classList.remove('shaded');
+      if (user === correct) {{ ub.classList.add('correct-b'); score++; card.className='qcard correct'; }}
+      else                  {{ ub.classList.add('wrong-b');   card.className='qcard wrong'; }}
+    }}
+    // Always mark the correct bubble with a green ring
+    if (correct !== null && correct !== undefined) {{
+      document.getElementById('sb' + i + '_' + correct).classList.add('key-b');
+      // Colour options
+      document.getElementById('op' + i + '_' + correct).classList.add('correct-ans');
+      if (user !== null && user !== correct)
+        document.getElementById('op' + i + '_' + user).classList.add('wrong-ans');
+    }}
+  }});
+
+  // Score display
+  const pct = Math.round(score / N * 100);
+  document.getElementById('score-num').textContent = score + '/' + N + ' (' + pct + '%)';
+
+  // Result banner
+  const rb = document.getElementById('result-banner');
+  if      (pct >= 75) {{ rb.style.cssText='display:block;background:rgba(129,199,132,.14);border:1px solid #81C784'; rb.innerHTML='<span style="color:#81C784">🎉 ' + pct + '% — Excellent work!</span>'; }}
+  else if (pct >= 50) {{ rb.style.cssText='display:block;background:rgba(212,168,67,.11);border:1px solid #D4A843'; rb.innerHTML='<span style="color:#D4A843">📚 ' + pct + '% — Good effort — review the key below</span>'; }}
+  else                {{ rb.style.cssText='display:block;background:rgba(139,26,26,.18);border:1px solid #EF5350';  rb.innerHTML='<span style="color:#EF9A9A">💪 ' + pct + '% — Keep practising — answers and tips are below</span>'; }}
+  rb.classList.add('show');
+
+  // ── build answer key section at bottom ───────────────────────────────
+  const akList = document.getElementById('ak-list');
+  QS.forEach((q, i) => {{
+    const correct = q.a;
+    const user    = sel[i];
+    const isRight = (user === correct);
+    const correctLetter = correct !== null ? (OP[correct] || String.fromCharCode(65+correct)) : '?';
+    const userLetter    = user   !== null  ? (OP[user]    || String.fromCharCode(65+user))    : '—';
+    const userOpt  = user    !== null ? q.o[user]    : '(not answered)';
+    const corrOpt  = correct !== null ? q.o[correct] : '?';
+
+    const card = document.createElement('div');
+    card.className = 'ak-card ' + (isRight ? 'ak-correct' : 'ak-wrong');
+
+    let html = `<div class="ak-q"><strong style="color:#D4A843">Q${{i+1}}.</strong> ${{q.q}}</div>
+      <div class="ak-row">
+        <span class="ak-badge ${{isRight ? 'user-right' : 'user-wrong'}}">${{isRight ? '✅' : '❌'}} Your answer: ${{userLetter}}) ${{userOpt}}</span>`;
+    if (!isRight && correct !== null)
+      html += `<span class="ak-badge correct-lbl">✓ Correct: ${{correctLetter}}) ${{corrOpt}}</span>`;
+    html += `</div>`;
+    if (q.e) html += `<div class="ak-expl">📖 ${{q.e}}</div>`;
+    card.innerHTML = html;
+    akList.appendChild(card);
+  }});
+
+  document.getElementById('ak').classList.add('show');
+  document.getElementById('ak').scrollIntoView({{behavior:'smooth', block:'start'}});
+}}
+
+// ── reset ─────────────────────────────────────────────────────────────────
+function resetAll() {{
+  submitted = false;
+  sel.fill(null);
+  document.getElementById('pf').style.width = '0%';
+  document.getElementById('prog-txt').textContent = '0 / ' + N;
+  document.getElementById('sub-btn').disabled = true;
+  document.getElementById('score-num').textContent = '—';
+  document.getElementById('result-banner').className = 'result-banner';
+  document.getElementById('result-banner').style.cssText = '';
+  document.getElementById('ak').className = 'answer-key';
+  document.getElementById('ak-list').innerHTML = '';
+
+  QS.forEach((q, i) => {{
+    document.getElementById('qc' + i).className = 'qcard';
+    q.o.forEach((_, j) => {{
+      document.getElementById('op' + i + '_' + j).className = 'opt';
+      const sb = document.getElementById('sb' + i + '_' + j);
+      sb.className = 'sb';
+      sb.textContent = OP[j] || String.fromCharCode(65+j);
+    }});
+    document.getElementById('sr' + i).classList.remove('current');
+  }});
+}}
+</script>
+</body></html>"""
+
 def parse_mcq_for_sheet(text):
     """Parse AI-generated MCQ text into structured list of {q, o, a} dicts."""
     import re
@@ -2050,158 +2350,9 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     _qs_data = _json.dumps(_parsed_qs)
                     _n_qs = len(_parsed_qs)
                     _has_answers = any(q.get("a") is not None for q in _parsed_qs)
-                    _sheet_component = f"""<!DOCTYPE html>
-<html><head><style>
-*{{box-sizing:border-box;margin:0;padding:0}}
-body{{background:#0a0e1a;font-family:Georgia,serif;padding:10px;color:#D0D8E8;font-size:13px}}
-h2{{color:#D4A843;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}}
-.layout{{display:grid;grid-template-columns:1fr 220px;gap:12px;align-items:start}}
-@media(max-width:550px){{.layout{{grid-template-columns:1fr}}}}
-/* Question list */
-.qlist{{display:flex;flex-direction:column;gap:6px}}
-.qcard{{background:#0F2247;border:1px solid #1e3060;border-radius:8px;padding:10px 12px;border-left:3px solid #2a4070;transition:border-color .2s,background .2s;cursor:default}}
-.qcard.answered{{border-left-color:#D4A843;background:rgba(212,168,67,.04)}}
-.qcard.correct{{border-left-color:#81C784;background:rgba(129,199,132,.06)}}
-.qcard.wrong{{border-left-color:#EF5350;background:rgba(239,83,80,.06)}}
-.qnum{{color:#D4A843;font-size:10px;font-weight:700;margin-bottom:3px}}
-.qtext{{color:#D0D8E8;font-size:11.5px;line-height:1.5;margin-bottom:7px}}
-.opts{{display:flex;flex-direction:column;gap:3px}}
-.opt{{display:flex;align-items:center;gap:7px;padding:4px 8px;border-radius:5px;border:1px solid #1e3060;cursor:pointer;transition:all .15s;font-size:11px;color:#A0B0C8}}
-.opt:hover{{border-color:#D4A843;color:#D4A843;background:rgba(212,168,67,.05)}}
-.opt.sel{{border-color:#D4A843;background:rgba(212,168,67,.12);color:#F5D98E;font-weight:700}}
-.opt.correct-opt{{border-color:#81C784 !important;background:rgba(129,199,132,.15) !important;color:#81C784 !important;font-weight:700}}
-.opt.wrong-opt{{border-color:#EF5350 !important;background:rgba(239,83,80,.1) !important;color:#EF9A9A !important}}
-.obubble{{width:15px;height:15px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;flex-shrink:0}}
-.opt.sel .obubble,.opt.correct-opt .obubble{{background:currentColor}}
-.expl{{display:none;margin-top:6px;padding:6px 8px;background:rgba(212,168,67,.07);border-radius:5px;font-size:10px;color:#B0C8E8;line-height:1.5;border-left:2px solid #D4A843}}
-.expl.show{{display:block}}
-/* Answer sheet */
-.sheet{{background:#0F2247;border-radius:10px;padding:12px;border:1px solid #D4A84333;position:sticky;top:8px}}
-.sh-title{{color:#D4A843;font-weight:700;font-size:11px;text-align:center;letter-spacing:1.5px;margin-bottom:8px;text-transform:uppercase}}
-.sh-grid{{display:grid;grid-template-columns:repeat(2,1fr);gap:2px 6px}}
-.sh-row{{display:flex;align-items:center;gap:2px;padding:1px 2px}}
-.sn{{font-size:9px;color:#556;font-weight:700;width:16px;text-align:right;flex-shrink:0}}
-.sb{{width:15px;height:15px;border-radius:50%;border:1.5px solid #3a4a6a;display:flex;align-items:center;justify-content:center;font-size:6px;color:#556;cursor:pointer;transition:all .15s;flex-shrink:0}}
-.sb:hover{{border-color:#D4A843;color:#D4A843;transform:scale(1.15)}}
-.sb.shaded{{background:#1a1a2e;border-color:#D4A843;color:transparent}}
-.sb.correct-sh{{background:#81C784 !important;border-color:#81C784 !important}}
-.sb.wrong-sh{{background:#EF5350 !important;border-color:#EF5350 !important}}
-.sb.answer-sh{{box-shadow:0 0 0 2px #81C784}}
-.score-box{{margin-top:8px;background:rgba(212,168,67,.07);border-radius:6px;padding:7px;text-align:center}}
-.score-big{{color:#81C784;font-size:18px;font-weight:700}}
-.score-lbl{{color:#D4A843;font-size:9px;margin-top:1px;text-transform:uppercase;letter-spacing:1px}}
-.action-btns{{display:flex;flex-direction:column;gap:4px;margin-top:8px}}
-.btn{{width:100%;padding:6px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;border:1px solid}}
-.btn-submit{{background:#8B1A1A;color:#F5D98E;border-color:#D4A843}}
-.btn-submit:hover{{background:#B22234}}
-.btn-submit:disabled{{opacity:.35;cursor:not-allowed}}
-.btn-reset{{background:transparent;color:#A0B0C8;border-color:#2a3a5a}}
-.btn-reset:hover{{border-color:#D4A843;color:#D4A843}}
-.progress{{height:3px;background:#1a2a3a;border-radius:2px;margin-bottom:8px;overflow:hidden}}
-.progress-fill{{height:100%;background:linear-gradient(90deg,#8B1A1A,#D4A843);border-radius:2px;transition:width .3s}}
-.result-banner{{display:none;padding:8px;border-radius:7px;text-align:center;margin-bottom:8px;font-size:11px}}
-.result-banner.show{{display:block}}
-</style></head><body>
-<div id="result-banner" class="result-banner"></div>
-<div class="layout">
-  <div>
-    <h2>📝 {_n_qs} Questions — {gr['topic']}</h2>
-    <div class="progress"><div class="progress-fill" id="prog" style="width:0%"></div></div>
-    <div class="qlist" id="qlist"></div>
-  </div>
-  <div class="sheet">
-    <div class="sh-title">📋 Answer Sheet</div>
-    <div class="sh-grid" id="sh-grid"></div>
-    <div class="score-box"><div class="score-big" id="score-disp">—</div><div class="score-lbl">Score</div></div>
-    <div class="action-btns">
-      <button class="btn btn-submit" id="sub-btn" onclick="submitAll()" disabled>✅ Submit & Mark</button>
-      <button class="btn btn-reset" onclick="resetAll()">🔄 Reset</button>
-    </div>
-  </div>
-</div>
-<script>
-const QS={_qs_data};
-const N=QS.length;
-const OPTS=['A','B','C','D','E'];
-const sel=new Array(N).fill(null);
-let done=false;
-const ql=document.getElementById('qlist');
-const sg=document.getElementById('sh-grid');
-// Build questions
-QS.forEach((q,i)=>{{
-  const card=document.createElement('div');
-  card.className='qcard';card.id='qc'+i;
-  const opts=q.o.map((o,j)=>`<div class="opt" id="op${{i}}_${{j}}" onclick="pick(${{i}},${{j}})"><div class="obubble">${{OPTS[j]||String.fromCharCode(65+j)}}</div><span>${{o}}</span></div>`).join('');
-  card.innerHTML=`<div class="qnum">Q${{i+1}}</div><div class="qtext">${{q.q}}</div><div class="opts">${{opts}}</div><div class="expl" id="ex${{i}}"></div>`;
-  ql.appendChild(card);
-  // Sheet row
-  const row=document.createElement('div');row.className='sh-row';
-  const bubbles=q.o.map((_,j)=>`<div class="sb" id="sb${{i}}_${{j}}" onclick="pick(${{i}},${{j}})">${{OPTS[j]||String.fromCharCode(65+j)}}</div>`).join('');
-  row.innerHTML=`<span class="sn">${{i+1}}.</span>${{bubbles}}`;
-  sg.appendChild(row);
-}});
-function pick(qi,oi){{
-  if(done)return;
-  if(sel[qi]!==null){{
-    document.getElementById('op'+qi+'_'+sel[qi]).classList.remove('sel');
-    const psb=document.getElementById('sb'+qi+'_'+sel[qi]);
-    psb.classList.remove('shaded');psb.textContent=OPTS[sel[qi]]||String.fromCharCode(65+sel[qi]);
-  }}
-  sel[qi]=oi;
-  document.getElementById('op'+qi+'_'+oi).classList.add('sel');
-  const sb=document.getElementById('sb'+qi+'_'+oi);
-  sb.classList.add('shaded');sb.textContent='';
-  document.getElementById('qc'+qi).classList.add('answered');
-  const ans=sel.filter(s=>s!==null).length;
-  document.getElementById('prog').style.width=(ans/N*100)+'%';
-  document.getElementById('sub-btn').disabled=(ans<N);
-  // Scroll question card into view from sheet click
-  document.getElementById('qc'+qi).scrollIntoView({{behavior:'smooth',block:'nearest'}});
-}}
-function submitAll(){{
-  if(done)return;done=true;
-  let sc=0;
-  QS.forEach((q,i)=>{{
-    const correct=q.a;const userPick=sel[i];
-    const card=document.getElementById('qc'+i);
-    if(userPick!==null){{
-      document.getElementById('sb'+i+'_'+userPick).classList.remove('shaded');
-      if(userPick===correct){{document.getElementById('sb'+i+'_'+userPick).classList.add('correct-sh');sc++;card.className='qcard correct';}}
-      else{{document.getElementById('sb'+i+'_'+userPick).classList.add('wrong-sh');card.className='qcard wrong';}}
-    }}
-    if(correct!==null&&correct!==undefined){{
-      document.getElementById('sb'+i+'_'+correct).classList.add('answer-sh');
-      document.getElementById('op'+i+'_'+correct).classList.add('correct-opt');
-      if(userPick!==null&&userPick!==correct)document.getElementById('op'+i+'_'+userPick).classList.add('wrong-opt');
-    }}
-  }});
-  const pct=Math.round(sc/N*100);
-  document.getElementById('score-disp').textContent=sc+'/'+N+' ('+pct+'%)';
-  const rb=document.getElementById('result-banner');
-  if(pct>=75){{rb.style.cssText='display:block;background:rgba(129,199,132,.15);border:1px solid #81C784';rb.innerHTML='<strong style="color:#81C784">🎉 '+pct+'% — Excellent!</strong>';}}
-  else if(pct>=50){{rb.style.cssText='display:block;background:rgba(212,168,67,.12);border:1px solid #D4A843';rb.innerHTML='<strong style="color:#D4A843">📚 '+pct+'% — Keep Studying</strong>';}}
-  else{{rb.style.cssText='display:block;background:rgba(139,26,26,.2);border:1px solid #EF5350';rb.innerHTML='<strong style="color:#EF9A9A">💪 '+pct+'% — More Practice Needed</strong>';}}
-  rb.classList.add('show');
-}}
-function resetAll(){{
-  done=false;sel.fill(null);
-  document.getElementById('prog').style.width='0%';
-  document.getElementById('score-disp').textContent='—';
-  document.getElementById('sub-btn').disabled=true;
-  document.getElementById('result-banner').style.cssText='display:none';
-  QS.forEach((q,i)=>{{
-    document.getElementById('qc'+i).className='qcard';
-    const ex=document.getElementById('ex'+i);if(ex)ex.className='expl';
-    q.o.forEach((_,j)=>{{
-      document.getElementById('op'+i+'_'+j).className='opt';
-      const sb=document.getElementById('sb'+i+'_'+j);
-      sb.className='sb';sb.textContent=OPTS[j]||String.fromCharCode(65+j);
-    }});
-  }});
-}}
-</script></body></html>"""
+                    _sheet_html = _make_mcq_sheet_html(_qs_data, title=gr.get("topic",""), n=_n_qs)
                     with st.expander(f"📋 Interactive Answer Sheet ({_n_qs} questions)", expanded=True):
-                        _comp.html(_sheet_component, height=min(600, 200 + _n_qs * 28), scrolling=True)
+                        _comp.html(_sheet_html, height=max(700, 260 + _n_qs * 52), scrolling=True)
 
             if len(valid_rs)>1:
                 _indiv={"en":"Individual Model Responses","fr":"Réponses individuelles des modèles","sw":"Majibu ya modeli binafsi"}.get(_lang_key(),"Individual Model Responses")
@@ -2721,115 +2872,9 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                         _cqs = _json2.dumps(_chat_parsed)
                         _cn = len(_chat_parsed)
                         _csubj = msg.get("mock_subject","")
-                        _chat_sheet = f"""<!DOCTYPE html><html><head><style>
-*{{box-sizing:border-box;margin:0;padding:0}}
-body{{background:#0a0e1a;font-family:Georgia,serif;padding:8px;color:#D0D8E8;font-size:12px}}
-.layout{{display:grid;grid-template-columns:1fr 200px;gap:10px;align-items:start}}
-@media(max-width:480px){{.layout{{grid-template-columns:1fr}}}}
-.qlist{{display:flex;flex-direction:column;gap:5px}}
-.qcard{{background:#0F2247;border:1px solid #1e3060;border-radius:7px;padding:9px 11px;border-left:3px solid #2a4070;transition:all .2s}}
-.qcard.answered{{border-left-color:#D4A843}}
-.qcard.correct{{border-left-color:#81C784;background:rgba(129,199,132,.05)}}
-.qcard.wrong{{border-left-color:#EF5350;background:rgba(239,83,80,.05)}}
-.qnum{{color:#D4A843;font-size:10px;font-weight:700;margin-bottom:2px}}
-.qtext{{color:#D0D8E8;font-size:11px;line-height:1.45;margin-bottom:6px}}
-.opts{{display:grid;grid-template-columns:1fr 1fr;gap:3px}}
-.opt{{display:flex;align-items:center;gap:5px;padding:3px 7px;border-radius:5px;border:1px solid #1e3060;cursor:pointer;transition:all .13s;font-size:10.5px;color:#A0B0C8}}
-.opt:hover{{border-color:#D4A843;color:#D4A843}}
-.opt.sel{{border-color:#D4A843;background:rgba(212,168,67,.12);color:#F5D98E;font-weight:700}}
-.opt.correct-opt{{border-color:#81C784!important;background:rgba(129,199,132,.15)!important;color:#81C784!important;font-weight:700}}
-.opt.wrong-opt{{border-color:#EF5350!important;background:rgba(239,83,80,.1)!important;color:#EF9A9A!important}}
-.ob{{width:13px;height:13px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:6px;font-weight:700;flex-shrink:0}}
-.opt.sel .ob,.opt.correct-opt .ob{{background:currentColor}}
-.sheet{{background:#0F2247;border-radius:9px;padding:10px;border:1px solid #D4A84333;position:sticky;top:6px}}
-.sh-t{{color:#D4A843;font-weight:700;font-size:10px;text-align:center;letter-spacing:1px;margin-bottom:7px;text-transform:uppercase}}
-.sh-grid{{display:grid;grid-template-columns:repeat(2,1fr);gap:1px 4px}}
-.sh-row{{display:flex;align-items:center;gap:2px;padding:1px}}
-.sn{{font-size:8px;color:#445;font-weight:700;width:14px;text-align:right;flex-shrink:0}}
-.sb{{width:13px;height:13px;border-radius:50%;border:1.5px solid #2a3a5a;display:flex;align-items:center;justify-content:center;font-size:5px;color:#445;cursor:pointer;transition:all .13s;flex-shrink:0}}
-.sb:hover{{border-color:#D4A843;transform:scale(1.2)}}
-.sb.shaded{{background:#1a1a2e;border-color:#D4A843;color:transparent}}
-.sb.correct-sh{{background:#81C784!important;border-color:#81C784!important}}
-.sb.wrong-sh{{background:#EF5350!important;border-color:#EF5350!important}}
-.sb.ans-sh{{box-shadow:0 0 0 2px #81C784}}
-.score-box{{margin-top:7px;background:rgba(212,168,67,.07);border-radius:5px;padding:6px;text-align:center}}
-.score-big{{color:#81C784;font-size:16px;font-weight:700}}
-.score-lbl{{color:#D4A843;font-size:8px;margin-top:1px;text-transform:uppercase}}
-.prog{{height:3px;background:#1a2a3a;border-radius:2px;margin-bottom:7px;overflow:hidden}}
-.prog-fill{{height:100%;background:linear-gradient(90deg,#8B1A1A,#D4A843);border-radius:2px;transition:width .3s}}
-.btns{{display:flex;flex-direction:column;gap:3px;margin-top:7px}}
-.btn{{width:100%;padding:5px;border-radius:5px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;border:1px solid}}
-.btn-sub{{background:#8B1A1A;color:#F5D98E;border-color:#D4A843}}
-.btn-sub:disabled{{opacity:.3;cursor:not-allowed}}
-.btn-rst{{background:transparent;color:#889;border-color:#2a3a5a}}
-.banner{{display:none;padding:6px;border-radius:6px;text-align:center;margin-bottom:7px;font-size:10px}}
-.banner.show{{display:block}}
-</style></head><body>
-<div id="banner" class="banner"></div>
-<div class="layout">
-  <div>
-    <div style="color:#D4A843;font-size:10px;font-weight:700;letter-spacing:1px;margin-bottom:6px">📝 {_csubj} · {_cn} Questions</div>
-    <div class="prog"><div class="prog-fill" id="prog" style="width:0%"></div></div>
-    <div class="qlist" id="ql"></div>
-  </div>
-  <div class="sheet">
-    <div class="sh-t">📋 Answer Sheet</div>
-    <div class="sh-grid" id="sg"></div>
-    <div class="score-box"><div class="score-big" id="sd">—</div><div class="score-lbl">Score</div></div>
-    <div class="btns">
-      <button class="btn btn-sub" id="sb2" onclick="sub()" disabled>✅ Submit</button>
-      <button class="btn btn-rst" onclick="rst()">🔄 Reset</button>
-    </div>
-  </div>
-</div>
-<script>
-const Q={_cqs},N=Q.length,OP=["A","B","C","D","E"],s=new Array(N).fill(null);let done=false;
-const ql=document.getElementById("ql"),sg=document.getElementById("sg");
-Q.forEach((q,i)=>{{
-  const c=document.createElement("div");c.className="qcard";c.id="qc"+i;
-  c.innerHTML=`<div class="qnum">Q${{i+1}}</div><div class="qtext">${{q.q}}</div><div class="opts">${{q.o.map((o,j)=>`<div class="opt" id="op${{i}}_${{j}}" onclick="pk(${{i}},${{j}})"><div class="ob">${{OP[j]||String.fromCharCode(65+j)}}</div><span>${{o}}</span></div>`).join("")}}</div>`;
-  ql.appendChild(c);
-  const r=document.createElement("div");r.className="sh-row";
-  r.innerHTML=`<span class="sn">${{i+1}}.</span>${{q.o.map((_,j)=>`<div class="sb" id="sb${{i}}_${{j}}" onclick="pk(${{i}},${{j}})">${{OP[j]||String.fromCharCode(65+j)}}</div>`).join("")}}`;
-  sg.appendChild(r);
-}});
-function pk(qi,oi){{
-  if(done)return;
-  if(s[qi]!==null){{document.getElementById("op"+qi+"_"+s[qi]).classList.remove("sel");const b=document.getElementById("sb"+qi+"_"+s[qi]);b.classList.remove("shaded");b.textContent=OP[s[qi]]||String.fromCharCode(65+s[qi]);}}
-  s[qi]=oi;
-  document.getElementById("op"+qi+"_"+oi).classList.add("sel");
-  const b=document.getElementById("sb"+qi+"_"+oi);b.classList.add("shaded");b.textContent="";
-  document.getElementById("qc"+qi).classList.add("answered");
-  const a=s.filter(x=>x!==null).length;
-  document.getElementById("prog").style.width=(a/N*100)+"%";
-  document.getElementById("sb2").disabled=(a<N);
-  document.getElementById("qc"+qi).scrollIntoView({{behavior:"smooth",block:"nearest"}});
-}}
-function sub(){{
-  if(done)return;done=true;let sc=0;
-  Q.forEach((q,i)=>{{
-    const c=q.a,u=s[i],card=document.getElementById("qc"+i);
-    if(u!==null){{document.getElementById("sb"+i+"_"+u).classList.remove("shaded");if(u===c){{document.getElementById("sb"+i+"_"+u).classList.add("correct-sh");sc++;card.className="qcard correct";}}else{{document.getElementById("sb"+i+"_"+u).classList.add("wrong-sh");card.className="qcard wrong";}}}}
-    if(c!=null){{document.getElementById("sb"+i+"_"+c).classList.add("ans-sh");document.getElementById("op"+i+"_"+c).classList.add("correct-opt");if(u!==null&&u!==c)document.getElementById("op"+i+"_"+u).classList.add("wrong-opt");}}
-  }});
-  const p=Math.round(sc/N*100);document.getElementById("sd").textContent=sc+"/"+N+" ("+p+"%)";
-  const b=document.getElementById("banner");
-  if(p>=75){{b.style.cssText="display:block;background:rgba(129,199,132,.15);border:1px solid #81C784";b.innerHTML="<strong style='color:#81C784'>🎉 "+p+"% — Excellent!</strong>";}}
-  else if(p>=50){{b.style.cssText="display:block;background:rgba(212,168,67,.12);border:1px solid #D4A843";b.innerHTML="<strong style='color:#D4A843'>📚 "+p+"% — Keep Studying</strong>";}}
-  else{{b.style.cssText="display:block;background:rgba(139,26,26,.2);border:1px solid #EF5350";b.innerHTML="<strong style='color:#EF9A9A'>💪 "+p+"% — More Practice Needed</strong>";}}
-  b.classList.add("show");
-}}
-function rst(){{
-  done=false;s.fill(null);
-  document.getElementById("prog").style.width="0%";document.getElementById("sd").textContent="—";document.getElementById("sb2").disabled=true;document.getElementById("banner").style.cssText="display:none";
-  Q.forEach((q,i)=>{{
-    document.getElementById("qc"+i).className="qcard";
-    q.o.forEach((_,j)=>{{document.getElementById("op"+i+"_"+j).className="opt";const b=document.getElementById("sb"+i+"_"+j);b.className="sb";b.textContent=OP[j]||String.fromCharCode(65+j);}});
-  }});
-}}
-</script></body></html>"""
+                        _chat_sheet_html = _make_mcq_sheet_html(_cqs, title=_csubj, n=_cn)
                         with st.expander(f"📋 Interactive Answer Sheet — {_csubj} ({_cn} questions)", expanded=True):
-                            _comp2.html(_chat_sheet, height=min(620, 180 + _cn * 32), scrolling=True)
+                            _comp2.html(_chat_sheet_html, height=max(700, 260 + _cn * 52), scrolling=True)
                 if msg.get("image"):
                     st.image(msg["image"],caption=f"🎨 Generated by {msg.get('image_src','AI')}",use_container_width=True)
                 if msg.get("docx_bytes"):
