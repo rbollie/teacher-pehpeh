@@ -1726,6 +1726,8 @@ def synth(sp,q,resps):
 # === MAIN ===
 def main():
     st.set_page_config(page_title="Teacher Pehpeh by IBT",page_icon="🌶️",layout="wide",initial_sidebar_state="collapsed")
+    # Force browser favicon to pepper emoji (overrides cached Streamlit icon)
+    st.markdown('''<link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌶️</text></svg>">''', unsafe_allow_html=True)
     for k in ["chat_messages","students","conn_checked","conn_info","gen_result","grade_history"]:
         if k not in st.session_state: st.session_state[k]=[] if k in ("chat_messages","students","grade_history") else (False if k=="conn_checked" else None)
     # Always sync quiz state for ALL subjects (catches new subjects added after first run)
@@ -1876,6 +1878,14 @@ def main():
     [data-testid="stSidebar"] .stExpander {{ background:linear-gradient(135deg,#2B7DE9,#1D5CBF) !important;border-radius:10px !important;border:none !important }}
     [data-testid="stSidebar"] .stExpander summary {{ color:white !important;font-weight:700 !important }}
     [data-testid="stSidebar"] .stExpander [data-testid="stExpanderDetails"] {{ background:rgba(0,0,0,.15) !important;border-radius:0 0 10px 10px !important }}
+    /* Hide default Streamlit chevron on the Configure expander — pepper emoji is the logo */
+    [data-testid="stSidebar"] .stExpander summary svg {{ display:none !important }}
+    [data-testid="stSidebar"] .stExpander summary::before {{
+        content:"🌶️";
+        font-size:1.15rem;
+        margin-right:6px;
+        line-height:1;
+    }}
     </style>""",unsafe_allow_html=True)
 
     # Sidebar (defined first so country is available for logo flag)
