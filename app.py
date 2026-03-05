@@ -1769,11 +1769,21 @@ def main():
     # === PENDING PROFILE LOAD — must run BEFORE any widgets render ===
     if st.session_state.get("_pending_load"):
         _lp=st.session_state.pop("_pending_load")
+        # Restore text fields
         st.session_state["_school_confirmed"]=_lp.get("school","")
         st.session_state["_teacher_confirmed"]=_lp.get("teacher","")
         st.session_state["_phone_confirmed"]=_lp.get("phone","")
-        for _k,_v in [("country_sel",_lp.get("country","Liberia")),("lang_sel",_lp.get("lang","English"))]:
-            st.session_state[_k]=_v
+        # Restore dropdowns
+        st.session_state["country_sel"]=_lp.get("country","Liberia")
+        st.session_state["lang_sel"]=_lp.get("lang","English")
+        if _lp.get("region"): st.session_state["cfg_region"]=_lp.get("region")
+        if _lp.get("grade"): st.session_state["cfg_grade"]=_lp.get("grade")
+        if _lp.get("subject"): st.session_state["cfg_subject"]=_lp.get("subject")
+        if _lp.get("class_size"): st.session_state["cfg_clsz"]=_lp.get("class_size")
+        if _lp.get("ability"): st.session_state["cfg_abl"]=_lp.get("ability")
+        # Restore toggles
+        st.session_state["moe_toggle"]=bool(_lp.get("moe_on",False))
+        st.session_state["mano_toggle"]=bool(_lp.get("mano_on",False))
         st.session_state.profile_set=True
     for sk in QUIZ: 
         k=f"qz_{sk}"
@@ -2005,11 +2015,11 @@ def main():
         with st.expander("Configure Your Classroom", expanded=False):
             if not st.session_state.profile_set:
                 st.markdown('<div style="font-size:.85rem;color:#F0D5D5;margin-bottom:8px">Select your school setting, grade, subject, and preferences below. Save your profile to reuse later!</div>',unsafe_allow_html=True)
-            region=st.selectbox(T("setting"),list(_regions().keys()),label_visibility="collapsed",format_func=lambda x: f"📍 Setting: {x}", help="Urban, rural, or remote — shapes the type of content generated")
-            grade=st.selectbox(T("grade"),_grades(),index=1,label_visibility="collapsed",format_func=lambda x: f"🎓 Grade: {x}", help="The class level you are teaching")
-            subject=st.selectbox(T("subject"),_subjects(),label_visibility="collapsed",format_func=lambda x: f"📚 Subject: {x}", help="Choose the subject you want content for")
-            clsz=st.selectbox(T("class_size"),list(_sizes().keys()),index=2,label_visibility="collapsed",format_func=lambda x: f"👥 Class Size: {x}", help="Helps Teacher Pehpeh suggest realistic group sizes and activities")
-            abl=st.selectbox(T("student_level"),list(_ability().keys()),label_visibility="collapsed",format_func=lambda x: f"📊 Student Level: {x}", help="Mixed, advanced, or struggling — adjusts difficulty and scaffolding")
+            region=st.selectbox(T("setting"),list(_regions().keys()),label_visibility="collapsed",format_func=lambda x: f"📍 Setting: {x}", help="Urban, rural, or remote — shapes the type of content generated",key="cfg_region")
+            grade=st.selectbox(T("grade"),_grades(),index=1,label_visibility="collapsed",format_func=lambda x: f"🎓 Grade: {x}", help="The class level you are teaching",key="cfg_grade")
+            subject=st.selectbox(T("subject"),_subjects(),label_visibility="collapsed",format_func=lambda x: f"📚 Subject: {x}", help="Choose the subject you want content for",key="cfg_subject")
+            clsz=st.selectbox(T("class_size"),list(_sizes().keys()),index=2,label_visibility="collapsed",format_func=lambda x: f"👥 Class Size: {x}", help="Helps Teacher Pehpeh suggest realistic group sizes and activities",key="cfg_clsz")
+            abl=st.selectbox(T("student_level"),list(_ability().keys()),label_visibility="collapsed",format_func=lambda x: f"📊 Student Level: {x}", help="Mixed, advanced, or struggling — adjusts difficulty and scaffolding",key="cfg_abl")
         # Map French display values back to English for AI
         _region_val=_regions()[region]
         _grade_en=_to_en_grade(grade)
