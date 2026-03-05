@@ -1146,52 +1146,52 @@ def _make_mcq_sheet_html(qs_json, title="", n=None):
 <html><head><meta charset="utf-8">
 <style>
 *{{box-sizing:border-box;margin:0;padding:0}}
-body{{background:#0a0e1a;font-family:Georgia,serif;padding:10px 12px;color:#D0D8E8;font-size:12.5px;min-height:100vh}}
+body{{background:#0a0e1a;font-family:Georgia,serif;padding:14px 16px;color:#D0D8E8;font-size:15px;min-height:100vh}}
 
 /* ── top bar ── */
 .topbar{{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px}}
-.topbar-title{{color:#D4A843;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase}}
+.topbar-title{{color:#D4A843;font-weight:700;font-size:14.5px;letter-spacing:1px;text-transform:uppercase}}
 .prog-wrap{{flex:1;min-width:120px;max-width:260px;height:4px;background:#1a2a3a;border-radius:2px;overflow:hidden}}
 .prog-fill{{height:100%;background:linear-gradient(90deg,#8B1A1A,#D4A843);border-radius:2px;transition:width .3s;width:0%}}
 
 /* ── main grid ── */
-.main{{display:grid;grid-template-columns:1fr 190px;gap:10px;align-items:start}}
+.main{{display:grid;grid-template-columns:1fr 220px;gap:10px;align-items:start}}
 @media(max-width:520px){{.main{{grid-template-columns:1fr}}}}
 
 /* ── questions ── */
 .qlist{{display:flex;flex-direction:column;gap:7px}}
-.qcard{{background:#0d1e3a;border:1px solid #1c3060;border-radius:8px;padding:10px 12px;
+.qcard{{background:#0d1e3a;border:1px solid #1c3060;border-radius:8px;padding:14px 16px;
   border-left:3px solid #2a4070;transition:border-color .2s,background .2s}}
 .qcard.active{{border-left-color:#D4A843;background:#0f2347}}
 .qcard.correct{{border-left-color:#81C784!important;background:rgba(129,199,132,.06)!important}}
 .qcard.wrong{{border-left-color:#EF5350!important;background:rgba(239,83,80,.06)!important}}
-.qnum{{color:#D4A843;font-size:9.5px;font-weight:700;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}}
-.qtext{{color:#D8E8F8;font-size:11.5px;line-height:1.5;margin-bottom:7px}}
+.qnum{{color:#D4A843;font-size:12px;font-weight:700;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}}
+.qtext{{color:#D8E8F8;font-size:14px;line-height:1.5;margin-bottom:7px}}
 .opts{{display:grid;grid-template-columns:1fr 1fr;gap:3px}}
 .opt{{display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:5px;
-  border:1px solid #1c3060;cursor:pointer;transition:all .14s;font-size:11px;color:#9aaecc;user-select:none}}
+  border:1px solid #1c3060;cursor:pointer;transition:all .14s;font-size:13.5px;color:#9aaecc;user-select:none}}
 .opt:hover:not(.locked){{border-color:#D4A843;color:#D4A843;background:rgba(212,168,67,.05)}}
 .opt.sel{{border-color:#D4A843;background:rgba(212,168,67,.13);color:#F5D98E;font-weight:700}}
 .opt.correct-ans{{border-color:#81C784!important;background:rgba(129,199,132,.16)!important;color:#81C784!important;font-weight:700}}
 .opt.wrong-ans{{border-color:#EF5350!important;background:rgba(239,83,80,.12)!important;color:#EF9A9A!important}}
 .opt.locked{{cursor:default}}
-.ob{{width:14px;height:14px;border-radius:50%;border:1.5px solid currentColor;
-  display:flex;align-items:center;justify-content:center;font-size:6.5px;font-weight:700;flex-shrink:0}}
+.ob{{width:17px;height:17px;border-radius:50%;border:1.5px solid currentColor;
+  display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;flex-shrink:0}}
 .opt.sel .ob,.opt.correct-ans .ob{{background:currentColor}}
 
 /* ── answer sheet panel ── */
 .sheet-panel{{background:#0d1e3a;border:1px solid rgba(212,168,67,.25);border-radius:10px;
   padding:10px;position:sticky;top:8px}}
-.sh-head{{color:#D4A843;font-size:9.5px;font-weight:700;text-align:center;
+.sh-head{{color:#D4A843;font-size:12px;font-weight:700;text-align:center;
   letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}}
-.sh-note{{color:#8899aa;font-size:8px;text-align:center;margin-bottom:8px;line-height:1.4}}
+.sh-note{{color:#8899aa;font-size:12.5px;text-align:center;margin-bottom:8px;line-height:1.4}}
 .sh-grid{{display:grid;grid-template-columns:repeat(2,1fr);gap:2px 4px}}
 .sh-row{{display:flex;align-items:center;gap:2px;padding:1.5px 2px;border-radius:3px;
   transition:background .15s;cursor:default}}
 .sh-row.current{{background:rgba(212,168,67,.08)}}
-.sn{{font-size:8px;color:#445566;font-weight:700;width:15px;text-align:right;flex-shrink:0}}
-.sb{{width:14px;height:14px;border-radius:50%;border:1.5px solid #2a3a5a;
-  display:flex;align-items:center;justify-content:center;font-size:5.5px;color:#334455;
+.sn{{font-size:12.5px;color:#445566;font-weight:700;width:15px;text-align:right;flex-shrink:0}}
+.sb{{width:17px;height:17px;border-radius:50%;border:1.5px solid #2a3a5a;
+  display:flex;align-items:center;justify-content:center;font-size:9px;color:#334455;
   cursor:pointer;transition:all .14s;flex-shrink:0;user-select:none}}
 .sb:hover:not(.locked){{border-color:#D4A843;color:#D4A843;transform:scale(1.18)}}
 .sb.shaded{{background:#1a1a2e;border-color:#D4A843;color:transparent!important}}
@@ -1202,10 +1202,10 @@ body{{background:#0a0e1a;font-family:Georgia,serif;padding:10px 12px;color:#D0D8
 
 /* score + buttons */
 .sh-score{{margin-top:8px;background:rgba(212,168,67,.07);border-radius:6px;padding:6px;text-align:center}}
-.sh-score-num{{color:#81C784;font-size:18px;font-weight:700;min-height:22px}}
-.sh-score-lbl{{color:#D4A843;font-size:8px;text-transform:uppercase;letter-spacing:.5px;margin-top:1px}}
+.sh-score-num{{color:#81C784;font-size:21px;font-weight:700;min-height:22px}}
+.sh-score-lbl{{color:#D4A843;font-size:12.5px;text-transform:uppercase;letter-spacing:.5px;margin-top:1px}}
 .sh-btns{{display:flex;flex-direction:column;gap:3px;margin-top:7px}}
-.btn{{width:100%;padding:6px;border-radius:5px;font-size:10px;font-weight:700;
+.btn{{width:100%;padding:6px;border-radius:5px;font-size:12.5px;font-weight:700;
   cursor:pointer;font-family:inherit;border:1px solid;transition:all .15s}}
 .btn-submit{{background:#8B1A1A;color:#F5D98E;border-color:#D4A843}}
 .btn-submit:hover:not(:disabled){{background:#b02020}}
@@ -1216,31 +1216,31 @@ body{{background:#0a0e1a;font-family:Georgia,serif;padding:10px 12px;color:#D0D8
 /* ── answer key section (hidden until submit) ── */
 .answer-key{{display:none;margin-top:14px;border-top:1px solid #1e3060;padding-top:12px}}
 .answer-key.show{{display:block}}
-.ak-title{{color:#D4A843;font-size:11px;font-weight:700;letter-spacing:1px;
+.ak-title{{color:#D4A843;font-size:13.5px;font-weight:700;letter-spacing:1px;
   text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}}
 .ak-card{{background:#0d1e3a;border:1px solid #1c3060;border-radius:7px;padding:9px 12px;
   margin-bottom:6px;border-left:3px solid #2a4070}}
 .ak-card.ak-correct{{border-left-color:#81C784}}
 .ak-card.ak-wrong{{border-left-color:#EF5350}}
-.ak-q{{color:#D8E8F8;font-size:11px;line-height:1.4;margin-bottom:5px}}
-.ak-row{{display:flex;align-items:center;gap:8px;font-size:10.5px;margin-top:3px}}
-.ak-badge{{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:9.5px;font-weight:700}}
+.ak-q{{color:#D8E8F8;font-size:13.5px;line-height:1.4;margin-bottom:5px}}
+.ak-row{{display:flex;align-items:center;gap:8px;font-size:13px;margin-top:4px}}
+.ak-badge{{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:700}}
 .ak-badge.user-right{{background:rgba(129,199,132,.15);color:#81C784;border:1px solid #81C78444}}
 .ak-badge.user-wrong{{background:rgba(239,83,80,.12);color:#EF9A9A;border:1px solid #EF535044}}
 .ak-badge.correct-lbl{{background:rgba(212,168,67,.12);color:#D4A843;border:1px solid #D4A84344}}
 .ak-expl{{margin-top:5px;padding:5px 8px;background:rgba(212,168,67,.06);border-radius:4px;
-  font-size:10px;color:#9abecc;line-height:1.5;border-left:2px solid #D4A84366}}
+  font-size:12.5px;color:#9abecc;line-height:1.5;border-left:2px solid #D4A84366}}
 
 /* result banner */
 .result-banner{{display:none;padding:8px 12px;border-radius:7px;text-align:center;
-  margin-bottom:10px;font-size:11px;font-weight:700}}
+  margin-bottom:10px;font-size:13.5px;font-weight:700}}
 .result-banner.show{{display:block}}
 </style></head>
 <body>
 <div class="topbar">
   <span class="topbar-title">📝 {title} &nbsp;·&nbsp; {n} Questions</span>
   <div class="prog-wrap"><div class="prog-fill" id="pf"></div></div>
-  <span id="prog-txt" style="color:#8899aa;font-size:9.5px;white-space:nowrap">0 / {n}</span>
+  <span id="prog-txt" style="color:#8899aa;font-size:12px;white-space:nowrap">0 / {n}</span>
 </div>
 
 <div id="result-banner" class="result-banner"></div>
