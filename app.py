@@ -624,13 +624,12 @@ REGIONS={"Urban":"urban","Suburban":"suburban","Rural":"rural"}
 COUNTRIES=["Liberia","Sierra Leone","Ghana","Nigeria","Kenya","Uganda","Tanzania","Ethiopia","Senegal","Cameroon","Gambia","Guinea","Côte d'Ivoire","Mali","Burkina Faso","Rwanda","Malawi","Zambia","Zimbabwe","Mozambique","South Africa","Botswana","Namibia","DRC","Angola","Togo","Benin","Niger","Chad","Somalia","Eritrea","Djibouti","South Sudan","Sudan","Central African Republic","Republic of Congo","Gabon","Equatorial Guinea","São Tomé and Príncipe","Cape Verde","Comoros","Madagascar","Mauritius","Seychelles","Eswatini","Lesotho","Burundi","Guinea-Bissau"]
 FLAGS={"Liberia":"🇱🇷","Sierra Leone":"🇸🇱","Ghana":"🇬🇭","Nigeria":"🇳🇬","Kenya":"🇰🇪","Uganda":"🇺🇬","Tanzania":"🇹🇿","Ethiopia":"🇪🇹","Senegal":"🇸🇳","Cameroon":"🇨🇲","Gambia":"🇬🇲","Guinea":"🇬🇳","Côte d'Ivoire":"🇨🇮","Mali":"🇲🇱","Burkina Faso":"🇧🇫","Rwanda":"🇷🇼","Malawi":"🇲🇼","Zambia":"🇿🇲","Zimbabwe":"🇿🇼","Mozambique":"🇲🇿","South Africa":"🇿🇦","Botswana":"🇧🇼","Namibia":"🇳🇦","DRC":"🇨🇩","Angola":"🇦🇴","Togo":"🇹🇬","Benin":"🇧🇯","Niger":"🇳🇪","Chad":"🇹🇩","Somalia":"🇸🇴","Eritrea":"🇪🇷","Djibouti":"🇩🇯","South Sudan":"🇸🇸","Sudan":"🇸🇩","Central African Republic":"🇨🇫","Republic of Congo":"🇨🇬","Gabon":"🇬🇦","Equatorial Guinea":"🇬🇶","São Tomé and Príncipe":"🇸🇹","Cape Verde":"🇨🇻","Comoros":"🇰🇲","Madagascar":"🇲🇬","Mauritius":"🇲🇺","Seychelles":"🇸🇨","Eswatini":"🇸🇿","Lesotho":"🇱🇸","Burundi":"🇧🇮","Guinea-Bissau":"🇬🇼"}
 GRADES=["9th Grade","10th Grade","11th Grade","12th Grade","12th Grade (WASSCE Prep)"]
-SUBJECTS=["Mathematics","English Language","Integrated Science","Social Studies","Physics","Chemistry","Biology","Economics","Government / Civics","Literature in English","History","Geography","Agriculture","French","Religious Studies","Business Management","Accounting","Computer Studies / ICT","Physical Education"]
+SUBJECTS=["Mathematics","English Language","Social Studies","Physics","Chemistry","Biology","Economics","Government / Civics","Literature in English","History","Geography","Agriculture","French","Religious Studies","Business Management","Accounting","Computer Studies / ICT","Physical Education"]
 TOPICS={"Mathematics":["Number and Numeration","Fractions and Decimals","Percentages","Ratio and Proportion","Algebraic Expressions","Linear Equations","Quadratic Equations","Simultaneous Equations","Sets and Venn Diagrams","Trigonometry","Mensuration","Geometry","Statistics","Probability","Vectors","Logarithms","Indices and Surds"],
 "English Language":["Comprehension","Summary Writing","Essay (Narrative)","Essay (Argumentative)","Letter Writing (Formal)","Parts of Speech","Tenses","Active/Passive Voice","Punctuation","Vocabulary","Idioms"],
 "Physics":["Measurement","Motion","Newton's Laws","Work Energy Power","Simple Machines","Pressure","Heat Transfer","Gas Laws","Waves","Sound","Light","Electricity","Ohm's Law"],
 "Chemistry":["States of Matter","Atomic Structure","Periodic Table","Chemical Bonding","Reactions","Acids Bases Salts","Electrolysis","Organic Chemistry","Mole Concept"],
 "Biology":["Cell Structure","Cell Division","Photosynthesis","Human Body Systems","Reproduction","Genetics","Evolution","Ecology","Diseases and Immunity"],
-"Integrated Science":["Scientific Method","Cells","Photosynthesis","Respiration","Human Body","Ecology","Matter","Energy","Electricity"],
 }
 DEF_TOPICS=["Core Concepts","Key Terms","Applications","Review","Exam Practice"]
 FR_DEF_TOPICS=["Concepts fondamentaux","Termes clés","Applications","Révision","Préparation examen"]
@@ -641,13 +640,13 @@ FR_TOPICS={"Mathematics":["Nombres et numération","Fractions et décimales","Po
 "Physics":["Mesure","Mouvement","Lois de Newton","Travail Énergie Puissance","Machines simples","Pression","Transfert thermique","Lois des gaz","Ondes","Son","Lumière","Électricité","Loi d'Ohm"],
 "Chemistry":["États de la matière","Structure atomique","Tableau périodique","Liaisons chimiques","Réactions","Acides Bases Sels","Électrolyse","Chimie organique","Concept de mole"],
 "Biology":["Structure cellulaire","Division cellulaire","Photosynthèse","Systèmes du corps humain","Reproduction","Génétique","Évolution","Écologie","Maladies et immunité"],
-"Integrated Science":["Méthode scientifique","Cellules","Photosynthèse","Respiration","Corps humain","Écologie","Matière","Énergie","Électricité"]}
+}
 SW_TOPICS={"Mathematics":["Nambari na Uhesabuji","Sehemu na Desimali","Asilimia","Uwiano","Misemo ya Aljebra","Mlingano wa Mstari","Mlingano wa Pili","Mlingano Sawia","Seti na Michoro ya Venn","Trigonometria","Vipimo","Jiometri","Takwimu","Uwezekano","Vekta","Logarithimu","Indeksi na Mizizi"],
 "English Language":["Ufahamu","Muhtasari","Insha (Masimulizi)","Insha (Hoja)","Uandishi Barua Rasmi","Sehemu za Hotuba","Nyakati","Sauti Tendaji/Tendewa","Alama za Uandishi","Msamiati","Nahau"],
 "Physics":["Vipimo","Mwendo","Sheria za Newton","Kazi Nishati Nguvu","Mashine Rahisi","Shinikizo","Uhamishaji Joto","Sheria za Gesi","Mawimbi","Sauti","Mwanga","Umeme","Sheria ya Ohm"],
 "Chemistry":["Hali za Maada","Muundo wa Atomu","Jedwali la Vipindi","Vifungo vya Kemikali","Athari","Asidi Besi Chumvi","Elektrolisisi","Kemia Hai","Dhana ya Moli"],
 "Biology":["Muundo wa Seli","Mgawanyiko wa Seli","Usanisinuru","Mifumo ya Mwili","Uzazi","Jenetiki","Mageuzi","Ikolojia","Magonjwa na Kinga"],
-"Integrated Science":["Njia ya Kisayansi","Seli","Usanisinuru","Upumuaji","Mwili wa Binadamu","Ikolojia","Maada","Nishati","Umeme"]}
+}
 # Build topic display→English maps
 _TOPIC_TO_EN={}
 for subj_en,en_topics in TOPICS.items():
@@ -2026,39 +2025,30 @@ def main():
     if conn:
         keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
         act=[n for k,n in [(OPENAI_API_KEY,"ChatGPT"),(ANTHROPIC_API_KEY,"Claude"),(GOOGLE_API_KEY,"Gemini")] if k]
-        img_models=[]
-        if OPENAI_API_KEY: img_models.append("DALL-E")
-        if GOOGLE_API_KEY: img_models.append("Imagen")
-        # Network section
+        # Network: plain language, no tech jargon
         if conn["quality"]=="none":
-            net_html=f'<span style="color:#EF5350">🔴 <strong>{T("offline")}</strong></span>'
+            net_html=f'<span style="color:#EF5350">🔴 <strong>No Internet</strong></span>'
         elif conn["quality"] in ("high","medium"):
-            net_html=f'<span style="color:#81C784">{conn["emoji"]} <strong>{conn["label"]}</strong> ({conn["latency_ms"]}ms)</span>'
+            net_html=f'<span style="color:#81C784">🟢 <strong>Connected</strong></span>'
         else:
-            net_html=f'<span style="color:#FFB74D">{conn["emoji"]} <strong>{conn["label"]}</strong> ({conn["latency_ms"]}ms)</span>'
-        # Models section
+            net_html=f'<span style="color:#FFB74D">🟠 <strong>Slow Connection</strong></span>'
+        # AI Agents section — friendly count + names
         if act:
-            models_html=f'<span style="color:#7BB8F5">🤖 <strong>{len(act)}</strong>: {" · ".join(act)}</span>'
+            models_html=f'<span style="color:#7BB8F5">🤖 <strong>{len(act)} AI Agent{"s" if len(act)!=1 else ""}</strong>: {" · ".join(act)}</span>'
         else:
-            models_html=f'<span style="color:#EF9A9A">{T("no_models")}</span>'
-        # Image models section
-        if img_models:
-            img_html=f'<span style="color:#C9A0DC">🎨 {" · ".join(img_models)}</span>'
-        else:
-            img_html=""
+            models_html=f'<span style="color:#EF9A9A">⚠️ No AI connected</span>'
+        # Image section — simplified
+        _has_img = bool(OPENAI_API_KEY or GOOGLE_API_KEY)
+        img_html=f'<span style="color:#C9A0DC">🎨 Image generation on</span>' if _has_img else ""
         # Divider
         div='<span style="color:#3a4a6a;margin:0 10px;font-size:1.1rem">│</span>'
         bar_parts=[net_html, models_html]
         if img_html: bar_parts.append(img_html)
-        # Voice section
+        # Voice section — no key details
         if ELEVENLABS_API_KEY:
-            _klen=len(ELEVENLABS_API_KEY)
-            _kpre=ELEVENLABS_API_KEY[:3]+"…" if _klen>3 else "?"
-            voice_html=f'<span style="color:#81D4A8">{T("voice_ready")} <span style="font-size:.7rem;color:#6a8a6a">(key:{_kpre} len:{_klen})</span></span>'
-            bar_parts.append(voice_html)
+            bar_parts.append(f'<span style="color:#81D4A8">🔊 Voice on</span>')
         else:
-            voice_html='<span style="color:#EF9A9A">🔇 No voice key found</span>'
-            bar_parts.append(voice_html)
+            bar_parts.append('<span style="color:#EF9A9A">🔇 Voice off</span>')
         # MOE Curriculum section
         if moe_on and CURRICULA:
             curr_subjects = get_available_subjects(CURRICULA)
@@ -2115,13 +2105,7 @@ def main():
 </script>
 """, height=34, scrolling=False)
 
-        _chk_time = conn.get("checked_at","") if conn else ""
-        st.markdown(
-            f'<div class="status-bar">{div.join(bar_parts)}' +
-            (f' {div} <span style="color:#445566;font-size:.72rem">server checked {_chk_time}</span>' if _chk_time else "") +
-            '</div>',
-            unsafe_allow_html=True
-        )
+        st.markdown(f'<div class="status-bar">{div.join(bar_parts)}</div>', unsafe_allow_html=True)
     # Recheck button — visible inline below status bar, not just sidebar
     _rc1, _rc2 = st.columns([6,1])
     with _rc2:
@@ -2459,12 +2443,13 @@ def main():
         if ANTHROPIC_API_KEY: _avail_agents.append("Claude")
         if GOOGLE_API_KEY: _avail_agents.append("Gemini")
         if _avail_agents:
-            _agent_opts=[f"🌶️ All {len(_avail_agents)} Agents"]+[f"🌶️ {a}" for a in _avail_agents]
-            _agent_sel=st.selectbox("Select AI Agent:",_agent_opts,key="agent_pick",label_visibility="collapsed",format_func=lambda x:x)
-            if _agent_sel.startswith("🌶️ All"):
+            _agent_opts=[f"🤖 Best answer (use all)"]+_avail_agents
+            _agent_sel=st.selectbox("AI:",_agent_opts,key="agent_pick",label_visibility="collapsed",
+                                    format_func=lambda x: f"🤖 AI: {x}" if not x.startswith("🤖") else x)
+            if _agent_sel.startswith("🤖 Best"):
                 _agent_pick=_avail_agents
             else:
-                _agent_pick=[_agent_sel.replace("🌶️ ","")]
+                _agent_pick=[_agent_sel]
         else: _agent_pick=[]
         gen_col, clr_col = st.columns([3,1])
         with gen_col:
