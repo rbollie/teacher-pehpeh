@@ -2175,7 +2175,7 @@ def main():
         _NEEDS_IMG={"detailed lesson plan","homework with minimal resources","group activity","hands-on zero-cost activity","lesson with AI-generated visual","reading passage with questions"}
         _WASSCE_TASKS={"50 WASSCE-style MCQs","WASSCE theory questions","BECE-style exam","10-question quiz with answer key","20-question quiz"}
 
-        # Category pill buttons
+        # ── Category pill buttons ──
         if "task_cat" not in st.session_state: st.session_state.task_cat="📋 Planning"
         _cat_cols = st.columns(len(_TASK_CATEGORIES))
         for _ci, _cname in enumerate(_TASK_CATEGORIES):
@@ -2183,30 +2183,22 @@ def main():
                 _is_cat = st.session_state.task_cat == _cname
                 if st.button(_cname, key=f"cat_{_ci}", use_container_width=True,
                              type="primary" if _is_cat else "secondary"):
-                    st.session_state.task_cat = _cname; st.rerun()
+                    st.session_state.task_cat = _cname
+                    st.session_state.pop("task_sel", None)   # reset task when category changes
+                    st.rerun()
 
-        _cat_tasks = _TASK_CATEGORIES[st.session_state.task_cat]
-        # Build filtered display list from _tasks() to respect language
-        _all_tasks = _tasks()
-        _filtered_display = [k for k in _all_tasks if k in _cat_tasks or _all_tasks[k] in
-                             [_tasks().get(t, t) for t in _cat_tasks]]
-        # If translation means display keys differ, fall back to value matching
-        _en_to_display = {v: k for k, v in _all_tasks.items()}
-        _cat_display_keys = [_en_to_display.get(
-            next((t_val for t_name, t_val in TASKS.items() if t_name in _cat_tasks), None), k)
-            for k in _all_tasks if any(
-                TASKS.get(ct) == _all_tasks[k] for ct in _cat_tasks
-            )]
-        # Fallback to English task names if translation lookup is empty
-        if not _cat_display_keys:
-            _cat_display_keys = list(_all_tasks.keys())
+        # Build filtered task list by matching English TASKS values to current language
+        _cat_en_keys = _TASK_CATEGORIES[st.session_state.task_cat]   # English task names
+        _cat_en_vals = {TASKS[k] for k in _cat_en_keys if k in TASKS}  # English task values
+        _all_tasks = _tasks()   # display-language dict
+        _cat_display_keys = [k for k, v in _all_tasks.items() if v in _cat_en_vals]
 
         c1, c2 = st.columns(2)
         with c1:
             task = st.selectbox(T("task"), _cat_display_keys, key="task_sel",
                                 label_visibility="collapsed",
                                 format_func=lambda x: f"\U0001f4dd Task: {x}")
-        _task_val = _tasks().get(task, "detailed lesson plan")
+        _task_val = _all_tasks.get(task, "detailed lesson plan")
         _IS_PARENT_LETTER = False   # Parent Letter moved to Students tab
         _show_time    = _task_val in _NEEDS_TIME
         _show_options = _task_val in _NEEDS_OPTIONS
@@ -2432,19 +2424,35 @@ def main():
             st.markdown(
                 f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD}66;border-radius:8px;padding:8px 14px;margin:4px 0;font-size:.82rem">' +
                 f'<strong style="color:{C_GOLD}">🎯 WASSCE Mode</strong> ' +
-                f'<span style="color:#D0D8E8"> — Irrelevant options hidden. Focus: exam alignment, answer technique, shading practice.</span></div>',
+                f'<span style="color:#D0D8E8"> — Options limited to exam-relevant choices.</span></div>',
                 unsafe_allow_html=True
             )
-            with st.expander("Options (WASSCE)"):
+            with st.expander(f"⚙️ Options for {task}"):
                 _wassce_extras_en = list(_WASSCE_VALID_EXTRAS)
                 exs = [e for e in _wassce_extras_en if st.checkbox(e, key=f"wx_{e}")]
-        elif _show_options and not _IS_PARENT_LETTER:
-          with st.expander(T("options")):
-            _extras_keys=["differentiation","formative","takehome","wassce_align","local_ex","literacy","large_class","cross_curr","ai_visual"]
-            _extras_labels=[T(k) for k in _extras_keys]
-            exs=[EXTRAS[i] for i,lbl in enumerate(_extras_labels) if st.checkbox(lbl,key=f"x{i}")]
-            if _show_img:
-                add_img=st.checkbox(T("include_img"),key="add_img",help=T("img_help"))
+        elif _show_options:
+            # Options label and available checkboxes adapt to the selected task
+            _TASK_OPTIONS_MAP = {
+                "detailed lesson plan":         ["differentiation","formative","takehome","wassce_align","local_ex","literacy","large_class","cross_curr","ai_visual"],
+                "homework with minimal resources": ["differentiation","local_ex","literacy","large_class"],
+                "group activity":               ["differentiation","formative","local_ex","large_class","cross_curr","ai_visual"],
+                "hands-on zero-cost activity":  ["differentiation","local_ex","large_class"],
+                "5-day scheme of work":         ["differentiation","formative","wassce_align","local_ex","literacy","cross_curr"],
+                "term plan":                    ["wassce_align","local_ex","cross_curr"],
+                "catch-up material":            ["differentiation","formative","local_ex","literacy"],
+                "zero-cost teaching game":      ["differentiation","local_ex","large_class"],
+                "lesson with AI-generated visual": ["differentiation","local_ex","ai_visual"],
+                "reading passage with questions":  ["differentiation","formative","wassce_align","local_ex","literacy"],
+                "revision guide":               ["differentiation","wassce_align","local_ex","literacy"],
+            }
+            _active_opt_keys = _TASK_OPTIONS_MAP.get(_task_val, ["differentiation","local_ex","wassce_align"])
+            _ALL_EXTRAS_KEYS = ["differentiation","formative","takehome","wassce_align","local_ex","literacy","large_class","cross_curr","ai_visual"]
+            with st.expander(f"⚙️ Options for {task}"):
+                _extras_labels = [T(k) for k in _active_opt_keys]
+                exs = [EXTRAS[_ALL_EXTRAS_KEYS.index(k)] for k, lbl in zip(_active_opt_keys, _extras_labels)
+                       if st.checkbox(lbl, key=f"x_{k}")]
+                if _show_img:
+                    add_img = st.checkbox(T("include_img"), key="add_img", help=T("img_help"))
         # === AI Agent Selection ===
         _avail_agents=[]
         if OPENAI_API_KEY: _avail_agents.append("ChatGPT")
