@@ -624,7 +624,7 @@ REGIONS={"Urban":"urban","Suburban":"suburban","Rural":"rural"}
 COUNTRIES=["Liberia","Sierra Leone","Ghana","Nigeria","Kenya","Uganda","Tanzania","Ethiopia","Senegal","Cameroon","Gambia","Guinea","Côte d'Ivoire","Mali","Burkina Faso","Rwanda","Malawi","Zambia","Zimbabwe","Mozambique","South Africa","Botswana","Namibia","DRC","Angola","Togo","Benin","Niger","Chad","Somalia","Eritrea","Djibouti","South Sudan","Sudan","Central African Republic","Republic of Congo","Gabon","Equatorial Guinea","São Tomé and Príncipe","Cape Verde","Comoros","Madagascar","Mauritius","Seychelles","Eswatini","Lesotho","Burundi","Guinea-Bissau"]
 FLAGS={"Liberia":"🇱🇷","Sierra Leone":"🇸🇱","Ghana":"🇬🇭","Nigeria":"🇳🇬","Kenya":"🇰🇪","Uganda":"🇺🇬","Tanzania":"🇹🇿","Ethiopia":"🇪🇹","Senegal":"🇸🇳","Cameroon":"🇨🇲","Gambia":"🇬🇲","Guinea":"🇬🇳","Côte d'Ivoire":"🇨🇮","Mali":"🇲🇱","Burkina Faso":"🇧🇫","Rwanda":"🇷🇼","Malawi":"🇲🇼","Zambia":"🇿🇲","Zimbabwe":"🇿🇼","Mozambique":"🇲🇿","South Africa":"🇿🇦","Botswana":"🇧🇼","Namibia":"🇳🇦","DRC":"🇨🇩","Angola":"🇦🇴","Togo":"🇹🇬","Benin":"🇧🇯","Niger":"🇳🇪","Chad":"🇹🇩","Somalia":"🇸🇴","Eritrea":"🇪🇷","Djibouti":"🇩🇯","South Sudan":"🇸🇸","Sudan":"🇸🇩","Central African Republic":"🇨🇫","Republic of Congo":"🇨🇬","Gabon":"🇬🇦","Equatorial Guinea":"🇬🇶","São Tomé and Príncipe":"🇸🇹","Cape Verde":"🇨🇻","Comoros":"🇰🇲","Madagascar":"🇲🇬","Mauritius":"🇲🇺","Seychelles":"🇸🇨","Eswatini":"🇸🇿","Lesotho":"🇱🇸","Burundi":"🇧🇮","Guinea-Bissau":"🇬🇼"}
 GRADES=["9th Grade","10th Grade","11th Grade","12th Grade","12th Grade (WASSCE Prep)"]
-SUBJECTS=["Mathematics","English Language","Integrated Science","Social Studies","Physics","Chemistry","Biology","Economics","Government / Civics","Literature in English","History","Geography","Agriculture","French","Religious Studies","Business Management","Accounting","Computer Studies / ICT","Technical Drawing","Home Economics","Physical Education","Art / Creative Arts","Music"]
+SUBJECTS=["Mathematics","English Language","Integrated Science","Social Studies","Physics","Chemistry","Biology","Economics","Government / Civics","Literature in English","History","Geography","Agriculture","French","Religious Studies","Business Management","Accounting","Computer Studies / ICT","Physical Education"]
 TOPICS={"Mathematics":["Number and Numeration","Fractions and Decimals","Percentages","Ratio and Proportion","Algebraic Expressions","Linear Equations","Quadratic Equations","Simultaneous Equations","Sets and Venn Diagrams","Trigonometry","Mensuration","Geometry","Statistics","Probability","Vectors","Logarithms","Indices and Surds"],
 "English Language":["Comprehension","Summary Writing","Essay (Narrative)","Essay (Argumentative)","Letter Writing (Formal)","Parts of Speech","Tenses","Active/Passive Voice","Punctuation","Vocabulary","Idioms"],
 "Physics":["Measurement","Motion","Newton's Laws","Work Energy Power","Simple Machines","Pressure","Heat Transfer","Gas Laws","Waves","Sound","Light","Electricity","Ohm's Law"],
@@ -685,7 +685,7 @@ UI_TEXT={
  "en":{
   "generate":"📋 Generate","chat":"💬 Chat","quiz":"🌶️ Quiz","students":"🧑‍🎓 Students",
   "task":"Task","time":"Time","topic":"Topic","options":"Options","subject":"Subject","grade":"Grade",
-  "country":"Country","setting":"Setting","class_size":"Class Size","resources":"Resources",
+  "country":"Country","setting":"Setting","class_size":"Class Size",
   "language":"Language","student_level":"Student Level","school_name":"🏫 School Name",
   "school_placeholder":"e.g., Bahn, St. Martin's","my_classroom":"My Classroom","my_students":"My Students",
   "gen_btn":"🌶️ Generate","clear":"🗑️ Clear","hear":"🔊 Hear Results","grade_work":"Grade Work",
@@ -731,7 +731,7 @@ UI_TEXT={
  "fr":{
   "generate":"📋 Générer","chat":"💬 Discussion","quiz":"🌶️ Quiz","students":"🧑‍🎓 Élèves",
   "task":"Tâche","time":"Durée","topic":"Sujet","options":"Options","subject":"Matière","grade":"Classe",
-  "country":"Pays","setting":"Contexte","class_size":"Taille de classe","resources":"Ressources",
+  "country":"Pays","setting":"Contexte","class_size":"Taille de classe",
   "language":"Langue","student_level":"Niveau des élèves","school_name":"🏫 Nom de l'école",
   "school_placeholder":"ex: Bahn, St. Martin's","my_classroom":"Ma Classe","my_students":"Mes Élèves",
   "gen_btn":"🌶️ Générer","clear":"🗑️ Effacer","hear":"🔊 Écouter","grade_work":"Noter le travail",
@@ -777,7 +777,7 @@ UI_TEXT={
  "sw":{
   "generate":"📋 Tengeneza","chat":"💬 Mazungumzo","quiz":"🌶️ Maswali","students":"🧑‍🎓 Wanafunzi",
   "task":"Kazi","time":"Muda","topic":"Mada","options":"Chaguzi","subject":"Somo","grade":"Darasa",
-  "country":"Nchi","setting":"Mazingira","class_size":"Ukubwa wa darasa","resources":"Rasilimali",
+  "country":"Nchi","setting":"Mazingira","class_size":"Ukubwa wa darasa",
   "language":"Lugha","student_level":"Kiwango cha wanafunzi","school_name":"🏫 Jina la shule",
   "school_placeholder":"k.m., Bahn, St. Martin's","my_classroom":"Darasa Langu","my_students":"Wanafunzi Wangu",
   "gen_btn":"🌶️ Tengeneza","clear":"🗑️ Futa","hear":"🔊 Sikiliza","grade_work":"Sahihisha Kazi",
@@ -838,7 +838,7 @@ EXTRAS=["Differentiation","Formative assessment","Take-home activity","WASSCE al
 # French dropdown translations (display→English value for AI)
 FR_TASKS={"Plan de cours":"detailed lesson plan","Quiz (10 Q)":"10-question quiz with answer key","Quiz (20 Q)":"20-question quiz","QCM WASSCE (50)":"50 WASSCE-style MCQs","Théorie WASSCE":"WASSCE theory questions","Examen BECE":"BECE-style exam","Devoirs":"homework with minimal resources","Activité de groupe":"group activity","Compréhension écrite":"reading passage with questions","Pratique sans labo":"hands-on zero-cost activity","Grille d'évaluation":"grading rubric","Guide stratégique":"teaching strategies","Lettre aux parents":"parent communication","Plan hebdomadaire":"5-day scheme of work","Plan trimestriel":"term plan","Rattrapage":"catch-up material","Notes de révision":"revision guide","Jeu éducatif":"zero-cost teaching game","Leçon illustrée (image IA)":"lesson with AI-generated visual"}
 FR_GRADES=["9e année","10e année","11e année","12e année","12e année (WASSCE Prép)"]
-FR_SUBJECTS=["Mathématiques","Langue anglaise","Sciences intégrées","Études sociales","Physique","Chimie","Biologie","Économie","Gouvernement / Éducation civique","Littérature anglaise","Histoire","Géographie","Agriculture","Français","Études religieuses","Gestion des affaires","Comptabilité","Informatique / TIC","Dessin technique","Économie domestique","Éducation physique","Art / Arts créatifs","Musique"]
+FR_SUBJECTS=["Mathématiques","Langue anglaise","Sciences intégrées","Études sociales","Physique","Chimie","Biologie","Économie","Gouvernement / Éducation civique","Littérature anglaise","Histoire","Géographie","Agriculture","Français","Études religieuses","Gestion des affaires","Comptabilité","Informatique / TIC","Éducation physique","Art / Arts créatifs","Musique"]
 FR_SIZES={"Petit (<25)":"<25 students","Moyen (25-40)":"25-40","Grand (40-60)":"40-60","Très grand (60+)":"60+"}
 FR_RESOURCES={"Tableau noir seul":"chalkboard/chalk only","+ manuels partagés":"chalkboard + shared textbooks","+ polycopiés":"+ printable handouts","Ordinateur/projecteur":"occasional tech","Téléphones/tablettes":"student devices","Bien équipé":"regular tech"}
 FR_ABILITY={"Mixte":"mixed-ability","En difficulté":"below grade level","Au niveau":"at expected level","Avancé":"needs challenge","Inclusif":"includes learning differences"}
@@ -848,7 +848,7 @@ FR_REGIONS={"Urbain":"urban","Banlieue":"suburban","Rural":"rural"}
 # Swahili dropdown translations
 SW_TASKS={"Mpango wa Somo":"detailed lesson plan","Maswali (10)":"10-question quiz with answer key","Maswali (20)":"20-question quiz","QCM WASSCE (50)":"50 WASSCE-style MCQs","Nadharia WASSCE":"WASSCE theory questions","Mtihani BECE":"BECE-style exam","Kazi ya Nyumbani":"homework with minimal resources","Shughuli ya Kikundi":"group activity","Ufahamu wa Kusoma":"reading passage with questions","Mazoezi bila Maabara":"hands-on zero-cost activity","Rubriiki":"grading rubric","Mwongozo wa Mkakati":"teaching strategies","Barua kwa Mzazi":"parent communication","Mpango wa Wiki":"5-day scheme of work","Mpango wa Muhula":"term plan","Nyenzo za Kufidia":"catch-up material","Muhtasari wa Masomo":"revision guide","Mchezo wa Kielimu":"zero-cost teaching game","Somo Lenye Mchoro (picha AI)":"lesson with AI-generated visual"}
 SW_GRADES=["Darasa la 9","Darasa la 10","Darasa la 11","Darasa la 12","Darasa la 12 (WASSCE)"]
-SW_SUBJECTS=["Hisabati","Lugha ya Kiingereza","Sayansi Jumuishi","Maarifa ya Jamii","Fizikia","Kemia","Biolojia","Uchumi","Serikali / Uraia","Fasihi ya Kiingereza","Historia","Jiografia","Kilimo","Kifaransa","Masomo ya Dini","Usimamizi wa Biashara","Uhasibu","Kompyuta / TEHAMA","Uchora Ufundi","Uchumi wa Nyumbani","Elimu ya Mwili","Sanaa / Sanaa Bunifu","Muziki"]
+SW_SUBJECTS=["Hisabati","Lugha ya Kiingereza","Sayansi Jumuishi","Maarifa ya Jamii","Fizikia","Kemia","Biolojia","Uchumi","Serikali / Uraia","Fasihi ya Kiingereza","Historia","Jiografia","Kilimo","Kifaransa","Masomo ya Dini","Usimamizi wa Biashara","Uhasibu","Kompyuta / TEHAMA","Uchora Ufundi","Elimu ya Mwili","Sanaa / Sanaa Bunifu","Muziki"]
 SW_SIZES={"Ndogo (<25)":"<25 students","Wastani (25-40)":"25-40","Kubwa (40-60)":"40-60","Kubwa sana (60+)":"60+"}
 SW_RESOURCES={"Ubao tu":"chalkboard/chalk only","+ vitabu vya kushiriki":"chalkboard + shared textbooks","+ nakala":"+ printable handouts","Kompyuta/projekta":"occasional tech","Simu/tableti":"student devices","Vifaa kamili":"regular tech"}
 SW_ABILITY={"Mchanganyiko":"mixed-ability","Wanaoshindwa":"below grade level","Kiwango sahihi":"at expected level","Wenye uwezo":"needs challenge","Jumuishi":"includes learning differences"}
@@ -1951,14 +1951,13 @@ def main():
             grade=st.selectbox(T("grade"),_grades(),index=1,label_visibility="collapsed",format_func=lambda x: f"🎓 Grade: {x}")
             subject=st.selectbox(T("subject"),_subjects(),label_visibility="collapsed",format_func=lambda x: f"📚 Subject: {x}")
             clsz=st.selectbox(T("class_size"),list(_sizes().keys()),index=2,label_visibility="collapsed",format_func=lambda x: f"👥 Class Size: {x}")
-            res=st.selectbox(T("resources"),list(_resources().keys()),index=1,label_visibility="collapsed",format_func=lambda x: f"🧰 Resources: {x}")
             abl=st.selectbox(T("student_level"),list(_ability().keys()),label_visibility="collapsed",format_func=lambda x: f"📊 Student Level: {x}")
         # Map French display values back to English for AI
         _region_val=_regions()[region]
         _grade_en=_to_en_grade(grade)
         _subj_en=_to_en_subj(subject)
         _size_val=_sizes()[clsz]
-        _res_val=_resources()[res]
+        _res_val="standard resources"   # fixed default — resources config removed
         _abl_val=_ability()[abl]
         st.markdown("---"); 
         # MOE Curriculum Toggle — Liberia only
@@ -1991,7 +1990,7 @@ def main():
         _pf1,_pf2=st.columns(2)
         with _pf1:
             if st.button("💾 Save Configuration",use_container_width=True,key="sv_prof"):
-                st.session_state.saved_profile={"school":school_name,"teacher":teacher_name,"phone":teacher_phone,"country":country,"lang":lang,"region":region,"grade":grade,"subject":subject,"class_size":clsz,"resources":res,"ability":abl,"moe_on":moe_on,"mano_on":mano_on}
+                st.session_state.saved_profile={"school":school_name,"teacher":teacher_name,"phone":teacher_phone,"country":country,"lang":lang,"region":region,"grade":grade,"subject":subject,"class_size":clsz,"ability":abl,"moe_on":moe_on,"mano_on":mano_on}
                 st.session_state.profile_set=True
                 st.success("Saved!")
         with _pf2:
