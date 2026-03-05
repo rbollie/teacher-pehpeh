@@ -623,6 +623,7 @@ REGIONS={"Urban":"urban","Suburban":"suburban","Rural":"rural"}
 # Sub-Saharan African countries only
 COUNTRIES=["Liberia","Sierra Leone","Ghana","Nigeria","Kenya","Uganda","Tanzania","Ethiopia","Senegal","Cameroon","Gambia","Guinea","Côte d'Ivoire","Mali","Burkina Faso","Rwanda","Malawi","Zambia","Zimbabwe","Mozambique","South Africa","Botswana","Namibia","DRC","Angola","Togo","Benin","Niger","Chad","Somalia","Eritrea","Djibouti","South Sudan","Sudan","Central African Republic","Republic of Congo","Gabon","Equatorial Guinea","São Tomé and Príncipe","Cape Verde","Comoros","Madagascar","Mauritius","Seychelles","Eswatini","Lesotho","Burundi","Guinea-Bissau"]
 FLAGS={"Liberia":"🇱🇷","Sierra Leone":"🇸🇱","Ghana":"🇬🇭","Nigeria":"🇳🇬","Kenya":"🇰🇪","Uganda":"🇺🇬","Tanzania":"🇹🇿","Ethiopia":"🇪🇹","Senegal":"🇸🇳","Cameroon":"🇨🇲","Gambia":"🇬🇲","Guinea":"🇬🇳","Côte d'Ivoire":"🇨🇮","Mali":"🇲🇱","Burkina Faso":"🇧🇫","Rwanda":"🇷🇼","Malawi":"🇲🇼","Zambia":"🇿🇲","Zimbabwe":"🇿🇼","Mozambique":"🇲🇿","South Africa":"🇿🇦","Botswana":"🇧🇼","Namibia":"🇳🇦","DRC":"🇨🇩","Angola":"🇦🇴","Togo":"🇹🇬","Benin":"🇧🇯","Niger":"🇳🇪","Chad":"🇹🇩","Somalia":"🇸🇴","Eritrea":"🇪🇷","Djibouti":"🇩🇯","South Sudan":"🇸🇸","Sudan":"🇸🇩","Central African Republic":"🇨🇫","Republic of Congo":"🇨🇬","Gabon":"🇬🇦","Equatorial Guinea":"🇬🇶","São Tomé and Príncipe":"🇸🇹","Cape Verde":"🇨🇻","Comoros":"🇰🇲","Madagascar":"🇲🇬","Mauritius":"🇲🇺","Seychelles":"🇸🇨","Eswatini":"🇸🇿","Lesotho":"🇱🇸","Burundi":"🇧🇮","Guinea-Bissau":"🇬🇼"}
+FLAG_CODES={"Liberia":"lr","Sierra Leone":"sl","Ghana":"gh","Nigeria":"ng","Kenya":"ke","Uganda":"ug","Tanzania":"tz","Ethiopia":"et","Senegal":"sn","Cameroon":"cm","Gambia":"gm","Guinea":"gn","Côte d'Ivoire":"ci","Mali":"ml","Burkina Faso":"bf","Rwanda":"rw","Malawi":"mw","Zambia":"zm","Zimbabwe":"zw","Mozambique":"mz","South Africa":"za","Botswana":"bw","Namibia":"na","DRC":"cd","Angola":"ao","Togo":"tg","Benin":"bj","Niger":"ne","Chad":"td","Somalia":"so","Eritrea":"er","Djibouti":"dj","South Sudan":"ss","Sudan":"sd","Central African Republic":"cf","Republic of Congo":"cg","Gabon":"ga","Equatorial Guinea":"gq","São Tomé and Príncipe":"st","Cape Verde":"cv","Comoros":"km","Madagascar":"mg","Mauritius":"mu","Seychelles":"sc","Eswatini":"sz","Lesotho":"ls","Burundi":"bi","Guinea-Bissau":"gw"}
 GRADES=["9th Grade","10th Grade","11th Grade","12th Grade","12th Grade (WASSCE Prep)"]
 SUBJECTS=["Mathematics","English Language","Social Studies","Physics","Chemistry","Biology","Economics","Government / Civics","Literature in English","History","Geography","Agriculture","French","Religious Studies","Business Management","Accounting","Computer Studies / ICT","Physical Education"]
 TOPICS={"Mathematics":["Number and Numeration","Fractions and Decimals","Percentages","Ratio and Proportion","Algebraic Expressions","Linear Equations","Quadratic Equations","Simultaneous Equations","Sets and Venn Diagrams","Trigonometry","Mensuration","Geometry","Statistics","Probability","Vectors","Logarithms","Indices and Surds"],
@@ -899,8 +900,25 @@ def get_b64():
 def show_logo(country=None):
     b=get_b64()
     flag=FLAGS.get(country,"") if country else ""
-    if b: st.markdown(f'<div style="text-align:center;padding:.8rem 0 .2rem;display:flex;align-items:center;justify-content:center;gap:16px"><span style="font-size:3rem">{flag}</span><img src="data:image/png;base64,{b}" style="max-height:170px;filter:drop-shadow(0 4px 12px rgba(212,168,67,.3))"><span style="font-size:3rem">{flag}</span></div>',unsafe_allow_html=True)
-    else: st.markdown(f'<div style="text-align:center"><h1 style="color:{C_GOLD}">{flag} Teacher Pehpeh by IBT {flag}</h1></div>',unsafe_allow_html=True)
+    # Flags hidden by default via opacity:0. Canvas test reveals them only if they
+    # render as actual graphics (wide) — not as fallback text like "LR" on Windows.
+    detect_js=('<script>(function(){'+
+        'var spans=document.querySelectorAll(".tp-flag");'+
+        'spans.forEach(function(s){'+
+            'var cv=document.createElement("canvas"),ctx=cv.getContext("2d");'+
+            'ctx.font="32px serif";'+
+            'var fw=ctx.measureText(s.dataset.flag).width;'+
+            'var lw=ctx.measureText("LR").width;'+
+            'if(fw>lw*1.5){s.style.opacity="1";}'+  # real flag renders much wider than two Latin letters
+        '});'+
+    '})();</script>') if flag else ""
+    flag_span=(f'<span class="tp-flag" style="font-size:3rem;opacity:0;transition:opacity .3s" '+
+               f'data-flag="{flag}">{flag}</span>') if flag else ""
+    if b: st.markdown(
+        f'<div style="text-align:center;padding:.8rem 0 .2rem;display:flex;align-items:center;justify-content:center;gap:16px">'+
+        f'{flag_span}<img src="data:image/png;base64,{b}" style="max-height:170px;filter:drop-shadow(0 4px 12px rgba(212,168,67,.3))">{flag_span}</div>'+
+        detect_js,unsafe_allow_html=True)
+    else: st.markdown(f'<div style="text-align:center"><h1 style="color:{C_GOLD}">Teacher Pehpeh by IBT</h1></div>',unsafe_allow_html=True)
 
 def ico(s=20):
     b=get_b64()
@@ -2028,25 +2046,41 @@ def main():
                             unsafe_allow_html=True)
         st.markdown("---")
         # Save / Load Classroom Profile
+        # ── Save configuration ────────────────────────────────────────────
         _pf1,_pf2=st.columns(2)
         with _pf1:
             if st.button("💾 Save Configuration",use_container_width=True,key="sv_prof"):
                 st.session_state.saved_profile={"school":school_name,"teacher":teacher_name,"phone":teacher_phone,"country":country,"lang":lang,"region":region,"grade":grade,"subject":subject,"class_size":clsz,"ability":abl,"moe_on":moe_on,"mano_on":mano_on}
                 st.session_state.profile_set=True
-                st.success("Saved!")
+                st.session_state["_show_save_opts"]=True
+                st.rerun()
         with _pf2:
             if st.button("📂 Load Configuration",use_container_width=True,key="ld_prof"):
                 st.session_state["_show_load_opts"]=not st.session_state.get("_show_load_opts",False)
+                st.session_state["_show_save_opts"]=False
                 st.rerun()
+        # Save panel — name the file then download
+        if st.session_state.get("_show_save_opts") and "saved_profile" in st.session_state:
+            st.success("✅ Configuration saved to this session!")
+            st.markdown("<small style='color:#aaa'>Give your profile a name and download it to your drive so you can reload it anytime.</small>",unsafe_allow_html=True)
+            _default_name=(school_name.strip().replace(" ","_") or "my_classroom")
+            _prof_name=st.text_input("File name (no spaces):",value=_default_name,key="prof_filename").strip().replace(" ","_")
+            if not _prof_name: _prof_name="teacher_pehpeh_profile"
+            _pj=json.dumps(st.session_state.saved_profile,indent=2)
+            st.download_button("📥 Download to my drive",data=_pj,
+                file_name=f"{_prof_name}.json",mime="application/json",
+                key="dl_prof",use_container_width=True)
+            if st.button("✖ Close",key="close_save_opts",use_container_width=True):
+                st.session_state["_show_save_opts"]=False
+                st.rerun()
+        # Load panel
         if st.session_state.get("_show_load_opts"):
             if "saved_profile" in st.session_state:
-                if st.button("Restore last saved profile",use_container_width=True,key="ld_restore"):
+                if st.button("↩ Restore last saved profile",use_container_width=True,key="ld_restore"):
                     st.session_state["_pending_load"]=st.session_state.saved_profile
                     st.session_state["_show_load_opts"]=False
                     st.rerun()
-                _pj=json.dumps(st.session_state.saved_profile,indent=2)
-                st.download_button("Download Profile to Desktop",data=_pj,file_name="teacher_pehpeh_profile.json",mime="application/json",key="dl_prof",use_container_width=True)
-            _up_prof=st.file_uploader("Load from file:",type=["json"],key="up_prof",label_visibility="visible")
+            _up_prof=st.file_uploader("Or load from a saved file:",type=["json"],key="up_prof",label_visibility="visible")
             if _up_prof:
                 try:
                     _loaded=json.loads(_up_prof.read().decode("utf-8"))
