@@ -1787,6 +1787,9 @@ def main():
 
     # CSS with dark/light mode detection
     st.markdown(f"""<style>
+    /* Collapse Streamlit header and tighten top padding */
+    [data-testid="stHeader"] {{height:0 !important;min-height:0 !important;overflow:hidden !important;opacity:0 !important;padding:0 !important}}
+    .block-container {{padding-top:0.5rem !important}}
     @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap');
     /* Dark mode (default) */
     :root {{
