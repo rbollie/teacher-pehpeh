@@ -3425,19 +3425,60 @@ document.getElementById('submit-btn').disabled = true;
                 _c1.html(_practice_html, height=700, scrolling=True)
 
         else:
-            # ── ADAPTIVE QUIZ (existing) ──
+            # ── ADAPTIVE QUIZ ──
             if not online or not keys:
                 st.markdown(f'<div style="background:rgba(239,83,80,.12);border:2px solid {C_RED_L};border-radius:12px;padding:16px;margin-bottom:12px"><h3 style="color:#EF9A9A;margin:0 0 6px">{T("offline_title")}</h3><p style="color:#FFCDD2;font-size:.9rem;margin:0">{T("offline_msg")}</p></div>',unsafe_allow_html=True)
             else:
-                st.markdown(f'<div style="background:rgba(43,125,233,.08);border:1px solid {C_BLUE};border-radius:12px;padding:12px 18px;margin-bottom:10px">{ico(16)} <strong style="color:{C_BLUE}">{T("practice_quiz")}</strong> <span style="color:#7BB8F5;font-size:.85rem">— {T("adaptive")}</span></div>',unsafe_allow_html=True)
+                st.markdown(f'<div style="background:rgba(43,125,233,.08);border:1px solid {C_BLUE};border-radius:12px;padding:10px 18px;margin-bottom:8px">{ico(16)} <strong style="color:{C_BLUE}">{T("practice_quiz")}</strong> <span style="color:#7BB8F5;font-size:.85rem">— {T("adaptive")}</span></div>',unsafe_allow_html=True)
 
-            qsub_display=st.selectbox(f"{T('subject')}:",_quiz_subjects(),key="qs")
-            qsub=_quiz_subj_en(qsub_display)  # English key for QUIZ dict
+            # ── Subject selector + manual level toggle ──
+            _sub_col, _lv_col = st.columns([2, 3])
+            with _sub_col:
+                qsub_display=st.selectbox(f"{T('subject')}:",_quiz_subjects(),key="qs",label_visibility="collapsed",
+                                          format_func=lambda x: f"📚 {x}")
+            qsub=_quiz_subj_en(qsub_display)
             qs=st.session_state[f"qz_{qsub}"]
-            bank=QUIZ[qsub]; lv=qs["lv"]; questions=bank.get(lv,bank["easy"]); qi=qs["qi"]%len(questions); cur=questions[qi]
+
+            with _lv_col:
+                # Three level buttons — active one highlighted gold
+                _LV_LABELS = {"easy": "🟢 Easy", "medium": "🟡 Medium", "hard": "🔴 Hard"}
+                _lv_b1, _lv_b2, _lv_b3 = st.columns(3)
+                for _lv_btn, _lv_col_obj in [("easy", _lv_b1), ("medium", _lv_b2), ("hard", _lv_b3)]:
+                    _is_active = qs["lv"] == _lv_btn
+                    with _lv_col_obj:
+                        if st.button(
+                            _LV_LABELS[_lv_btn],
+                            key=f"lvbtn_{qsub}_{_lv_btn}",
+                            use_container_width=True,
+                            type="primary" if _is_active else "secondary",
+                            help=f"Jump to {_lv_btn} questions (adaptive engine continues from here)"
+                        ):
+                            if not _is_active:
+                                qs["lv"] = _lv_btn
+                                qs["manual_lv"] = True   # flag: user set this manually
+                                qs["qi"] = 0
+                                qs["done"] = False
+                                qs["sel"] = None
+                                st.toast(f"Switched to {_lv_btn.upper()} — adaptive engine active from here 🎯")
+                                st.rerun()
+
+            # ── Adaptive mode badge ──
+            bank=QUIZ[qsub]; lv=qs["lv"]
+            questions=bank.get(lv,bank["easy"]); qi=qs["qi"]%len(questions); cur=questions[qi]
             pct=f"{round(qs['sc']/qs['tot']*100)}%" if qs["tot"] else "—"
             stk=f"🔥 {qs['stk']} {T('streak')}!" if qs["stk"]>=3 else ""
-            st.markdown(f'<div class="qsc">{ico(16)} {T("score")}: <strong>{qs["sc"]}/{qs["tot"]}</strong> ({pct}) · {T("level")}: <strong>{lv.upper()}</strong> {stk}</div>',unsafe_allow_html=True)
+            _manual_flag = qs.get("manual_lv", False)
+            _mode_badge = (
+                f'<span style="background:rgba(212,168,67,.15);border:1px solid {C_GOLD}55;border-radius:10px;padding:1px 8px;font-size:.72rem;color:{C_GOLD}">🎯 Auto-adaptive</span>'
+                if not _manual_flag else
+                f'<span style="background:rgba(43,125,233,.12);border:1px solid {C_BLUE}55;border-radius:10px;padding:1px 8px;font-size:.72rem;color:#7BB8F5">🔧 Manual: {lv.upper()}</span>'
+            )
+            st.markdown(
+                f'<div class="qsc" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">' +
+                f'<span>{ico(16)} {T("score")}: <strong>{qs["sc"]}/{qs["tot"]}</strong> ({pct}) · {T("level")}: <strong>{lv.upper()}</strong> {stk}</span>' +
+                f'{_mode_badge}</div>',
+                unsafe_allow_html=True
+            )
             st.markdown(f'<div class="qbox"><strong style="color:white">Q{qs["tot"]+1}:</strong><br><span style="color:#D0D8E8;line-height:1.6">{cur["q"]}</span></div>',unsafe_allow_html=True)
 
             if not qs["done"]:
@@ -3458,14 +3499,22 @@ document.getElementById('submit-btn').disabled = true;
                 recent=[h for h in qs["hist"][-5:]]; rc=sum(1 for h in recent if h["c"])
                 if st.button(T("next"),type="primary",key=f"nx_{qsub}_{qs['tot']}",use_container_width=True):
                     if len(recent)>=3:
-                        if rc>=4 and lv!="hard": qs["lv"]="medium" if lv=="easy" else "hard"; st.toast(f"🌶️ Level UP → {qs['lv'].upper()}")
-                        elif rc<=1 and lv!="easy": qs["lv"]="easy" if lv=="medium" else "medium"; st.toast(f"Adjusting → {qs['lv'].upper()}")
+                        if rc>=4 and lv!="hard":
+                            qs["lv"]="medium" if lv=="easy" else "hard"
+                            qs["manual_lv"]=False   # adaptive took over
+                            st.toast(f"🌶️ Level UP → {qs['lv'].upper()}")
+                        elif rc<=1 and lv!="easy":
+                            qs["lv"]="easy" if lv=="medium" else "medium"
+                            qs["manual_lv"]=False
+                            st.toast(f"Adjusting → {qs['lv'].upper()}")
                     qs["qi"]=(qi+1)%len(bank.get(qs["lv"],bank["easy"])); qs["done"]=False; qs["sel"]=None; st.rerun()
 
             st.markdown("---")
             r1,r2=st.columns(2)
             with r1:
-                if st.button(T("reset"),key=f"rst_{qsub}"): st.session_state[f"qz_{qsub}"]={"lv":"easy","qi":0,"sc":0,"tot":0,"stk":0,"done":False,"sel":None,"hist":[]}; st.rerun()
+                if st.button(T("reset"),key=f"rst_{qsub}"):
+                    st.session_state[f"qz_{qsub}"]={"lv":"easy","qi":0,"sc":0,"tot":0,"stk":0,"done":False,"sel":None,"hist":[],"manual_lv":False}
+                    st.rerun()
             with r2:
                 if st.button(T("wassce_tips"),key="wt"): st.markdown(f'<div style="background:{C_NAVY_L};border:1px solid {C_GOLD};border-radius:12px;padding:16px;color:#D0D8E8;white-space:pre-wrap;line-height:1.7">{WASSCE_TIPS}</div>',unsafe_allow_html=True)
 
