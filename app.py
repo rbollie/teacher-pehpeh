@@ -1784,6 +1784,10 @@ def main():
         # Restore toggles
         st.session_state["moe_toggle"]=bool(_lp.get("moe_on",False))
         st.session_state["mano_toggle"]=bool(_lp.get("mano_on",False))
+        # Restore main-area settings
+        if _lp.get("task_cat"): st.session_state["task_cat"]=_lp.get("task_cat")
+        if _lp.get("task"): st.session_state["task_sel"]=_lp.get("task")
+        if _lp.get("agent"): st.session_state["agent_pick"]=_lp.get("agent")
         st.session_state.profile_set=True
     for sk in QUIZ: 
         k=f"qz_{sk}"
@@ -2059,7 +2063,7 @@ def main():
         _pf1,_pf2=st.columns(2)
         with _pf1:
             if st.button("💾 Save Configuration",use_container_width=True,key="sv_prof"):
-                st.session_state.saved_profile={"school":school_name,"teacher":teacher_name,"phone":teacher_phone,"country":country,"lang":lang,"region":region,"grade":grade,"subject":subject,"class_size":clsz,"ability":abl,"moe_on":moe_on,"mano_on":mano_on}
+                st.session_state.saved_profile={"school":school_name,"teacher":teacher_name,"phone":teacher_phone,"country":country,"lang":lang,"region":region,"grade":grade,"subject":subject,"class_size":clsz,"ability":abl,"moe_on":moe_on,"mano_on":mano_on,"task_cat":st.session_state.get("task_cat","📋 Planning"),"task":st.session_state.get("task_sel",""),"agent":st.session_state.get("agent_pick","")}
                 st.session_state.profile_set=True
                 st.session_state["_show_save_opts"]=True
                 st.rerun()
