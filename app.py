@@ -2865,38 +2865,109 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
             unsafe_allow_html=True
         )
 
-        # ── Quick Mock Test buttons ──
-        _MOCK_SUBJECTS = {
-            "➕ Mathematics": "Generate 10 WASSCE-style Mathematics MCQs covering algebra, geometry, and statistics. "
-                             "Format each as:\n1. Question\nA) option B) option C) option D) option\n\nAnswer: X",
-            "⚛️ Physics":    "Generate 10 WASSCE-style Physics MCQs covering mechanics, waves, electricity, and optics. "
-                             "Format each as:\n1. Question\nA) option B) option C) option D) option\n\nAnswer: X",
-            "🧬 Biology":    "Generate 10 WASSCE-style Biology MCQs covering cells, genetics, ecology, and body systems. "
-                             "Format each as:\n1. Question\nA) option B) option C) option D) option\n\nAnswer: X",
-            "🧪 Chemistry":  "Generate 10 WASSCE-style Chemistry MCQs covering atomic structure, bonding, reactions, and organic chemistry. "
-                             "Format each as:\n1. Question\nA) option B) option C) option D) option\n\nAnswer: X",
-            "📖 Literature": "Generate 10 MCQs on West African literature — themes, characters, and literary devices in texts like Things Fall Apart, The African Child, and Weep Not Child. "
-                             "Format each as:\n1. Question\nA) option B) option C) option D) option\n\nAnswer: X",
-            "🔤 English":    "Generate 10 WASSCE-style English Language MCQs covering comprehension, grammar, vocabulary, and idioms. "
-                             "Format each as:\n1. Question\nA) option B) option C) option D) option\n\nAnswer: X",
-        }
-        st.markdown(f'<div style="color:{C_GOLD};font-size:.82rem;font-weight:700;margin-bottom:6px">⚡ Quick Mock Test</div>', unsafe_allow_html=True)
-        _mb_cols = st.columns(6)
-        for _mbi, (_mlabel, _mprompt) in enumerate(_MOCK_SUBJECTS.items()):
-            with _mb_cols[_mbi]:
-                if st.button(_mlabel, key=f"mock_{_mbi}", use_container_width=True,
-                             help=f"Generate 10 {_mlabel.split()[-1]} questions with answer sheet"):
-                    _mock_q = f"📝 Quick Mock: {_mlabel.split()[-1]} (10 questions)"
-                    st.session_state.chat_messages.append({"role":"user","content":_mock_q})
-                    with st.status("Generating mock test...", expanded=True) as _ms:
-                        st.write("Consulting question bank...")
-                        _mr, _mm, _mallr = best_all(build_free_chat(), _mprompt,
-                                                    [{"role":x["role"],"content":x["content"]}
-                                                     for x in st.session_state.chat_messages[:-1]])
-                        _ms.update(label="Mock test ready!", state="complete", expanded=False)
+        # ── Africa Discovery buttons ──
+        # Each tuple: (button label, hook line, full prompt for AI)
+        _AFRICA_SPARKS = [
+            (
+                "🏠 Huts & Aerodynamics",
+                "African huts are round for a reason physics teachers love",
+                "A student just asked: why are traditional African huts built round? "
+                "Answer in 4-6 sentences max. Be vivid and surprising. Cover: aerodynamics (wind passes around, not against), "
+                "structural strength (no corners to crack), heat circulation (air rises evenly), and how this is the same principle "
+                "used in modern wind-resistant architecture. End with one punchy sentence that connects this ancient wisdom to modern engineering. "
+                "Use bold for 2-3 key phrases. No bullet points — flowing prose only. Emotive and proud tone."
+            ),
+            (
+                "🌶️ Liberia: Pepper Coast",
+                "Before it was Liberia, Europeans had a spicier name for it",
+                "A student just discovered that Liberia was once called the Pepper Coast by European traders. "
+                "Answer in 4-6 sentences. Be vivid: explain that the Grain of Selim (Grains of Paradise) — a peppery spice — grew wild along this coast "
+                "and was so valuable it drove European trade routes. The coast was so associated with this spice that Portuguese and Dutch traders named entire "
+                "stretches after it. Connect this to why Liberia's geography made it a crossroads of Atlantic trade before colonisation. "
+                "End with something that makes the student feel proud of this heritage. Bold 2-3 key facts. Prose only, no lists."
+            ),
+            (
+                "👑 Mansa Musa's Wealth",
+                "He was so rich his vacation crashed an entire economy",
+                "A student asks: was Mansa Musa really the richest person in history? "
+                "Answer in 4-6 vivid sentences. Cover: his 1324 pilgrimage to Mecca with 60,000 people and 100 camel-loads of gold; "
+                "how he gave away so much gold in Cairo that he caused inflation and crashed the Egyptian gold market for a decade; "
+                "estimates of his wealth at $400 billion in today's money; and how the Mali Empire sat on over half the world's gold supply. "
+                "Tone: jaw-dropping, proud, cinematic. Bold 2-3 key facts. Prose only."
+            ),
+            (
+                "🌍 Oldest University",
+                "The world's oldest university is in Africa — and still running",
+                "A student just heard that the world's oldest university is in Africa. Answer in 4-6 sentences. "
+                "Cover: the University of al-Qarawiyyin in Fez, Morocco, founded in 859 CE by Fatima al-Fihri — a woman — "
+                "over 200 years before Oxford; what was taught there (theology, grammar, rhetoric, logic, astronomy, music); "
+                "that it still operates today; and that Timbuktu's universities held over a million manuscripts. "
+                "Tone: astonishing, empowering, proud. Bold 2-3 key facts. Prose only, no bullet points."
+            ),
+            (
+                "🧬 We Are All African",
+                "Every human alive today traces their DNA to one place",
+                "A student asks about the Out of Africa theory. Answer in 4-6 vivid sentences. "
+                "Cover: that modern Homo sapiens evolved in Africa around 300,000 years ago; that all non-African humans descend from "
+                "a small group that left Africa roughly 60,000-70,000 years ago; that Africa contains more genetic diversity than the rest "
+                "of the world combined; and what this means — that 'race' as a biological concept has no scientific basis, because we are all, "
+                "at root, African. End with something that reframes how the student sees human identity. Bold 2-3 key facts. Emotive, precise prose."
+            ),
+            (
+                "📐 Egypt & Pi",
+                "Ancient Egyptians calculated Pi 4,000 years before your calculator",
+                "A student asks how advanced ancient Egyptian mathematics really was. Answer in 4-6 sentences. "
+                "Cover: the Rhind Papyrus (1650 BCE) showing multiplication, fractions, and a value of Pi accurate to within 1%; "
+                "the Pythagorean theorem used in pyramid construction centuries before Pythagoras was born; "
+                "that the Great Pyramid of Giza aligns to true north with 0.05 degree accuracy — better than the Greenwich Observatory; "
+                "and that the Ishango bone from Congo (25,000 BCE) is the world's oldest known mathematical object. "
+                "Tone: proud, mind-blowing, precise. Bold 2-3 key facts. Prose only."
+            ),
+            (
+                "🌊 The Niger's Secret",
+                "The Niger River flows backwards — and baffled explorers for centuries",
+                "A student is puzzled about the Niger River's unusual geography. Answer in 4-6 vivid sentences. "
+                "Cover: that the Niger is one of the only major rivers that flows AWAY from the sea before turning back toward it — "
+                "creating a massive inland delta in Mali (the Inner Niger Delta); that European explorers spent 300 years trying to trace it "
+                "and repeatedly got the direction wrong; that the inland delta floods 30,000 sq km and supports millions of people, birds, "
+                "and fish in the middle of the Sahel; and how the ancient Mali and Songhai empires were built around controlling this waterway. "
+                "Tone: mysterious, epic, proud. Bold 2-3 facts. Prose only."
+            ),
+            (
+                "🦁 Ubuntu Philosophy",
+                "One African word that philosophers say changes everything about how you see yourself",
+                "A student asks what Ubuntu means beyond just a Linux operating system. Answer in 4-6 vivid sentences. "
+                "Cover: the Nguni Bantu phrase 'Umuntu ngumuntu ngabantu' — a person is a person through other persons; "
+                "how this philosophy underpins traditional governance, conflict resolution, and identity across Sub-Saharan Africa; "
+                "Nelson Mandela's use of Ubuntu as the moral foundation of post-apartheid South Africa; "
+                "and how it challenges Western individualism — you are not a self-made person, you are a we-made person. "
+                "End with something that makes the student rethink their own identity. Bold 2-3 phrases. Emotive prose only."
+            ),
+        ]
+        # Rotate buttons based on day of month so they feel fresh
+        import datetime as _dt
+        _day_offset = _dt.date.today().day % len(_AFRICA_SPARKS)
+        _todays_sparks = (_AFRICA_SPARKS[_day_offset:] + _AFRICA_SPARKS[:_day_offset])[:6]
+
+        st.markdown(
+            f'<div style="color:{C_GOLD};font-size:.82rem;font-weight:700;margin-bottom:4px">' +
+            f'🌍 Did You Know? &nbsp;<span style="color:#8899aa;font-size:.76rem;font-weight:400">— Click to discover something amazing about Africa</span></div>',
+            unsafe_allow_html=True
+        )
+        _spark_cols = st.columns(6)
+        for _sbi, (_slabel, _shook, _sprompt) in enumerate(_todays_sparks):
+            with _spark_cols[_sbi]:
+                if st.button(_slabel, key=f"spark_{_sbi}", use_container_width=True, help=_shook):
+                    _spark_user_msg = f"🌍 {_shook}"
+                    st.session_state.chat_messages.append({"role":"user","content":_spark_user_msg})
+                    with st.status("🌍 Discovering...", expanded=False) as _ss:
+                        _sr, _sm, _sallr = best_all(build_free_chat(), _sprompt,
+                                                     [{"role":x["role"],"content":x["content"]}
+                                                      for x in st.session_state.chat_messages[:-1]])
+                        _ss.update(label="✨ Here it is!", state="complete", expanded=False)
                     st.session_state.chat_messages.append({
-                        "role":"assistant","content":_mr,"model":_mm,"all_responses":_mallr,
-                        "is_mock_test": True, "mock_subject": _mlabel.split()[-1]
+                        "role":"assistant","content":_sr,"model":_sm,"all_responses":_sallr,
+                        "is_africa_spark": True
                     })
                     st.rerun()
 
