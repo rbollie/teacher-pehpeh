@@ -1817,6 +1817,8 @@ def main():
         --tip-color: #555;
     }}
     .stApp {{font-family:'Source Sans Pro',sans-serif}}
+    .block-container {{padding-top:0.5rem !important}}
+    [data-testid="stHeader"] {{height:0 !important;min-height:0 !important;visibility:hidden}}
     section[data-testid="stSidebar"] {{background:linear-gradient(180deg,#4A0E0E 0%,{C_RED} 40%,#7B2020 100%) !important}}
     section[data-testid="stSidebar"] .stMarkdown h2 {{color:{C_GOLD_L} !important;font-family:'Playfair Display',serif}}
     section[data-testid="stSidebar"] .stMarkdown p,section[data-testid="stSidebar"] .stMarkdown li {{color:#F0D5D5}}
