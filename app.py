@@ -2100,7 +2100,7 @@ def main():
             _ms = get_mano_stats()
             mano_html=f'<span style="color:#FFB74D">🗣️ Mano: {_ms["total"]}+ words</span>' if _ms else ""
             if mano_html: bar_parts.append(mano_html)
-        # Unified status bar with embedded device check
+        # Unified status bar — Re-check is the last segment inside the bar itself
         import streamlit.components.v1 as _conn_comp
         _status_bar_html = div.join(bar_parts)
         _conn_comp.html(f"""
@@ -2111,7 +2111,7 @@ def main():
   display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
   padding: 6px 16px; border-radius: 20px;
   border: 1px dashed #2a3a5a; opacity: .85;
-  margin-bottom: .5rem;
+  margin-bottom: .3rem;
 }}
 .tp-bar span {{ white-space: nowrap; }}
 .tp-div {{ color: #3a4a6a; margin: 0 8px; font-size: 1.1rem; }}
@@ -2121,6 +2121,14 @@ def main():
   background:rgba(0,0,0,.2); border:1px solid #2a3a5a;
   transition: all .3s;
 }}
+#recheck-btn {{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:3px 10px; border-radius:12px; cursor:pointer;
+  background:rgba(43,125,233,.15); border:1px solid rgba(43,125,233,.4);
+  color:#7BB8F5; font-size:.78rem; font-family:inherit;
+  transition:all .2s;
+}}
+#recheck-btn:hover {{ background:rgba(43,125,233,.3); border-color:rgba(43,125,233,.7); }}
 </style>
 <div class="tp-bar">
   <div id="dev-chip" title="Shows whether your device is connected to the internet">
@@ -2129,13 +2137,15 @@ def main():
   </div>
   <span class="tp-div">│</span>
   {_status_bar_html}
+  <span class="tp-div">│</span>
+  <button id="recheck-btn" title="Re-test connection to AI services" onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:true}},'*')">🔄 Re-check</button>
 </div>
 <script>
 (function(){{
   var icon=document.getElementById('dev-icon');
   var lbl=document.getElementById('dev-lbl');
   var chip=document.getElementById('dev-chip');
-  function setDev(ok,ms){{
+  function setDev(ok){{
     if(ok){{
       icon.textContent='💻';
       lbl.style.color='#81C784';
@@ -2153,28 +2163,20 @@ def main():
   if(!navigator.onLine){{setDev(false);return;}}
   var t=Date.now();
   fetch('https://www.google.com/favicon.ico',{{mode:'no-cors',cache:'no-store'}})
-    .then(function(){{setDev(true,Date.now()-t);}})
+    .then(function(){{setDev(true);}})
     .catch(function(){{setDev(false);}});
   window.addEventListener('offline',function(){{setDev(false);}});
   window.addEventListener('online',function(){{
-    var t2=Date.now();
     fetch('https://www.google.com/favicon.ico',{{mode:'no-cors',cache:'no-store'}})
-      .then(function(){{setDev(true,Date.now()-t2);}})
+      .then(function(){{setDev(true);}})
       .catch(function(){{setDev(false);}});
   }});
 }})();
 </script>
 """, height=46, scrolling=False)
-    # Recheck button — visible inline below status bar, not just sidebar
-    _rc1, _rc2 = st.columns([6,1])
-    with _rc2:
-        if st.button("🔄 Re-check", key="recheck_btn", use_container_width=True,
-                     help="Re-test whether Teacher Pehpeh can reach the AI services"):
+        if st.sidebar.button(T("recheck"), key="recheck_sidebar"):
             st.session_state.conn_checked = False
             st.rerun()
-    if st.sidebar.button(T("recheck"), key="recheck_sidebar"):
-        st.session_state.conn_checked = False
-        st.rerun()
 
     # Compute general MOE curriculum context for chat (available across tabs)
     _chat_curr_ctx = ""
