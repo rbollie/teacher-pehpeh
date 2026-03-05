@@ -3288,9 +3288,24 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
             st.session_state.chat_messages.append(msg_data); st.rerun()
         if st.session_state.chat_messages and st.button(T("clear"),key="cc"): st.session_state.chat_messages=[]; st.rerun()
 
-    # TAB 4: QUIZ (works offline)
+    # TAB 4: QUIZ (works offline — no internet or API keys needed)
     with t4:
+        # Safe fallback: keys may not be in scope if user jumped directly to quiz tab
+        try:
+            _quiz_keys = keys
+        except NameError:
+            _quiz_keys = sum([bool(OPENAI_API_KEY), bool(ANTHROPIC_API_KEY), bool(GOOGLE_API_KEY)])
         # Mode toggle: adaptive quiz OR full WASSCE practice test
+        # Show a live connectivity note — both modes work offline
+        _quiz_online = (st.session_state.conn_info or {}).get("online", False)
+        if not _quiz_online:
+            st.markdown(
+                '<div style="background:rgba(255,152,0,.1);border:1px solid #FF9800;border-radius:8px;' +
+                'padding:7px 14px;margin-bottom:8px;font-size:.85rem;color:#FFB74D">' +
+                '📴 <strong>Offline mode</strong> — Adaptive Quiz and WASSCE Practice Test both work fully offline. ' +
+                'AI generation and chat need internet.</div>',
+                unsafe_allow_html=True
+            )
         _quiz_mode = st.radio("", ["📝 Adaptive Quiz", "🎯 WASSCE Practice Test"],
                               horizontal=True, key="quiz_mode_sel", label_visibility="collapsed")
 
@@ -3548,11 +3563,13 @@ document.getElementById('submit-btn').disabled = true;
                 _c1.html(_practice_html, height=700, scrolling=True)
 
         else:
-            # ── ADAPTIVE QUIZ ──
-            if not online or not keys:
-                st.markdown(f'<div style="background:rgba(239,83,80,.12);border:2px solid {C_RED_L};border-radius:12px;padding:16px;margin-bottom:12px"><h3 style="color:#EF9A9A;margin:0 0 6px">{T("offline_title")}</h3><p style="color:#FFCDD2;font-size:.9rem;margin:0">{T("offline_msg")}</p></div>',unsafe_allow_html=True)
-            else:
-                st.markdown(f'<div style="background:rgba(43,125,233,.08);border:1px solid {C_BLUE};border-radius:12px;padding:10px 18px;margin-bottom:8px">{ico(16)} <strong style="color:{C_BLUE}">{T("practice_quiz")}</strong> <span style="color:#7BB8F5;font-size:.85rem">— {T("adaptive")}</span></div>',unsafe_allow_html=True)
+            # ── ADAPTIVE QUIZ — always available, no internet needed ──
+            st.markdown(
+                f'<div style="background:rgba(43,125,233,.08);border:1px solid {C_BLUE};border-radius:12px;padding:10px 18px;margin-bottom:8px">' +
+                f'{ico(16)} <strong style="color:{C_BLUE}">{T("practice_quiz")}</strong> ' +
+                f'<span style="color:#7BB8F5;font-size:.85rem">— Adaptive · ✅ Works offline</span></div>',
+                unsafe_allow_html=True
+            )
 
             # ── Subject selector + manual level toggle ──
             _sub_col, _lv_col = st.columns([2, 3])
