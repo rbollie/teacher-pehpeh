@@ -890,6 +890,19 @@ def build_chat(reg,cty,grd,subj,cls,res,lng,abl,sch="",curr_ctx="",mano_ctx=""):
     mano_block=f"\n\n{mano_ctx}" if mano_ctx else ""
     return f"{_p()}\nWhen greeted: 'Hello, how can Teacher Pehpeh help you today!'\nCLASS: {cty},{reg},{grd},{subj},{cls},{res},{lng},{abl}{s_tag}\n{_g()}\n{_kb()}\nIntervention WORKS. Teacher's work matters.{curr_block}{mano_block}\n{_r()}"
 
+def build_free_chat():
+    """Free-flowing chat system prompt — independent of classroom config."""
+    return (
+        f"{_p()}\n"
+        "You are Teacher Pehpeh, a friendly and knowledgeable educational assistant for African students and teachers. "
+        "You answer questions on any subject — Mathematics, Sciences, Languages, Literature, History, and more. "
+        "You can generate practice questions, explain concepts, give study tips, and discuss any topic. "
+        "When generating MCQs, always format them as:\n"
+        "1. Question text\nA) option\nB) option\nC) option\nD) option\n\nAnswer: X\n\n"
+        "Be encouraging, clear, and culturally relevant to West African education contexts. "
+        f"{_kb()}\n{_r()}"
+    )
+
 def build_stu(reg,cty,grd,subj,cls,res,lng,abl,info,sch=""):
     s_tag=f",School:{sch}" if sch else ""
     return f"{_p()}\nCLASS: {cty},{reg},{grd},{subj},{cls},{res},{lng},{abl}{s_tag}\nSTUDENT: {info}\n{_kb()}\nTargeted advice. Compare to data. Risk factors. Interventions.\n{_r()}"
@@ -1064,6 +1077,49 @@ def generate_docx_from_text(text, title="Transcribed Notes", school="", teacher=
         return buf.getvalue()
     except Exception as e:
         return None
+
+def parse_mcq_for_sheet(text):
+    """Parse AI-generated MCQ text into structured list of {q, o, a} dicts."""
+    import re
+    questions = []
+    blocks = re.split(r'\n(?=\d{1,2}[\.\.\)]\s)', text.strip())
+    for block in blocks:
+        block = block.strip()
+        if not block: continue
+        lines = [l.strip() for l in block.split('\n') if l.strip()]
+        if not lines: continue
+        q_lines, opts, answer_idx = [], [], None
+        i = 0
+        while i < len(lines) and not re.match(r'^[A-E][\)\.] |^\([A-E]\)', lines[i], re.IGNORECASE):
+            q_lines.append(re.sub(r'^\d{1,2}[\.\.\)]\s*', '', lines[i]))
+            i += 1
+        while i < len(lines):
+            line = lines[i]
+            # Answer line — look for letter AFTER the colon
+            if re.match(r'^[Aa]nswer\s*[:.]?', line):
+                m = re.search(r'[Aa]nswer\s*[:.]?\s*\(?([A-Ea-e])\)?', line)
+                if m:
+                    answer_idx = ord(m.group(1).upper()) - ord('A')
+                i += 1; continue
+            # Standard option  A) or A.
+            m = re.match(r'^([A-E])[\)\.] \s*(.*)', line, re.IGNORECASE)
+            if m:
+                opts.append(m.group(2).strip())
+                i += 1; continue
+            # Parenthesised (A)
+            m = re.match(r'^\(([A-E])\)\s*(.*)', line, re.IGNORECASE)
+            if m:
+                opts.append(m.group(2).strip())
+                i += 1; continue
+            # Inline: (A) x  (B) y  (C) z
+            if re.search(r'\([A-E]\)', line):
+                parts = re.findall(r'\([A-E]\)\s*([^(]+)', line)
+                opts.extend([p.strip() for p in parts if p.strip()])
+                i += 1; continue
+            i += 1
+        if q_lines and len(opts) >= 2:
+            questions.append({"q": ' '.join(q_lines), "o": opts[:5], "a": answer_idx})
+    return questions
 
 def generate_result_docx(text, task, topic, grade, subject, school="", teacher=""):
     """Generate a polished Word .docx for any AI result."""
@@ -1983,6 +2039,170 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                 _from={"en":"Combined from","fr":"Combiné de","sw":"Imechanganywa kutoka"}.get(_lang_key(),"Combined from")
                 st.markdown(f'<div style="background:rgba(212,168,67,.1);border-left:4px solid {C_GOLD};padding:6px 12px;border-radius:6px;font-size:.82rem;color:{C_GOLD};margin-bottom:8px">🔀 <strong>{_synth}</strong> — {_from} {" + ".join(valid_rs.keys())}</div>',unsafe_allow_html=True)
             st.markdown(f'<div class="rb">{highlight_result(gr["result"])}</div>',unsafe_allow_html=True)
+
+            # === INTERACTIVE ANSWER SHEET for MCQ tasks ===
+            _MCQ_TASKS = {"50 WASSCE-style MCQs","10-question quiz with answer key","20-question quiz","BECE-style exam"}
+            if gr.get("task") in _MCQ_TASKS:
+                _parsed_qs = parse_mcq_for_sheet(gr["result"])
+                if len(_parsed_qs) >= 2:
+                    import streamlit.components.v1 as _comp
+                    import json as _json
+                    _qs_data = _json.dumps(_parsed_qs)
+                    _n_qs = len(_parsed_qs)
+                    _has_answers = any(q.get("a") is not None for q in _parsed_qs)
+                    _sheet_component = f"""<!DOCTYPE html>
+<html><head><style>
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{background:#0a0e1a;font-family:Georgia,serif;padding:10px;color:#D0D8E8;font-size:13px}}
+h2{{color:#D4A843;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}}
+.layout{{display:grid;grid-template-columns:1fr 220px;gap:12px;align-items:start}}
+@media(max-width:550px){{.layout{{grid-template-columns:1fr}}}}
+/* Question list */
+.qlist{{display:flex;flex-direction:column;gap:6px}}
+.qcard{{background:#0F2247;border:1px solid #1e3060;border-radius:8px;padding:10px 12px;border-left:3px solid #2a4070;transition:border-color .2s,background .2s;cursor:default}}
+.qcard.answered{{border-left-color:#D4A843;background:rgba(212,168,67,.04)}}
+.qcard.correct{{border-left-color:#81C784;background:rgba(129,199,132,.06)}}
+.qcard.wrong{{border-left-color:#EF5350;background:rgba(239,83,80,.06)}}
+.qnum{{color:#D4A843;font-size:10px;font-weight:700;margin-bottom:3px}}
+.qtext{{color:#D0D8E8;font-size:11.5px;line-height:1.5;margin-bottom:7px}}
+.opts{{display:flex;flex-direction:column;gap:3px}}
+.opt{{display:flex;align-items:center;gap:7px;padding:4px 8px;border-radius:5px;border:1px solid #1e3060;cursor:pointer;transition:all .15s;font-size:11px;color:#A0B0C8}}
+.opt:hover{{border-color:#D4A843;color:#D4A843;background:rgba(212,168,67,.05)}}
+.opt.sel{{border-color:#D4A843;background:rgba(212,168,67,.12);color:#F5D98E;font-weight:700}}
+.opt.correct-opt{{border-color:#81C784 !important;background:rgba(129,199,132,.15) !important;color:#81C784 !important;font-weight:700}}
+.opt.wrong-opt{{border-color:#EF5350 !important;background:rgba(239,83,80,.1) !important;color:#EF9A9A !important}}
+.obubble{{width:15px;height:15px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;flex-shrink:0}}
+.opt.sel .obubble,.opt.correct-opt .obubble{{background:currentColor}}
+.expl{{display:none;margin-top:6px;padding:6px 8px;background:rgba(212,168,67,.07);border-radius:5px;font-size:10px;color:#B0C8E8;line-height:1.5;border-left:2px solid #D4A843}}
+.expl.show{{display:block}}
+/* Answer sheet */
+.sheet{{background:#0F2247;border-radius:10px;padding:12px;border:1px solid #D4A84333;position:sticky;top:8px}}
+.sh-title{{color:#D4A843;font-weight:700;font-size:11px;text-align:center;letter-spacing:1.5px;margin-bottom:8px;text-transform:uppercase}}
+.sh-grid{{display:grid;grid-template-columns:repeat(2,1fr);gap:2px 6px}}
+.sh-row{{display:flex;align-items:center;gap:2px;padding:1px 2px}}
+.sn{{font-size:9px;color:#556;font-weight:700;width:16px;text-align:right;flex-shrink:0}}
+.sb{{width:15px;height:15px;border-radius:50%;border:1.5px solid #3a4a6a;display:flex;align-items:center;justify-content:center;font-size:6px;color:#556;cursor:pointer;transition:all .15s;flex-shrink:0}}
+.sb:hover{{border-color:#D4A843;color:#D4A843;transform:scale(1.15)}}
+.sb.shaded{{background:#1a1a2e;border-color:#D4A843;color:transparent}}
+.sb.correct-sh{{background:#81C784 !important;border-color:#81C784 !important}}
+.sb.wrong-sh{{background:#EF5350 !important;border-color:#EF5350 !important}}
+.sb.answer-sh{{box-shadow:0 0 0 2px #81C784}}
+.score-box{{margin-top:8px;background:rgba(212,168,67,.07);border-radius:6px;padding:7px;text-align:center}}
+.score-big{{color:#81C784;font-size:18px;font-weight:700}}
+.score-lbl{{color:#D4A843;font-size:9px;margin-top:1px;text-transform:uppercase;letter-spacing:1px}}
+.action-btns{{display:flex;flex-direction:column;gap:4px;margin-top:8px}}
+.btn{{width:100%;padding:6px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;border:1px solid}}
+.btn-submit{{background:#8B1A1A;color:#F5D98E;border-color:#D4A843}}
+.btn-submit:hover{{background:#B22234}}
+.btn-submit:disabled{{opacity:.35;cursor:not-allowed}}
+.btn-reset{{background:transparent;color:#A0B0C8;border-color:#2a3a5a}}
+.btn-reset:hover{{border-color:#D4A843;color:#D4A843}}
+.progress{{height:3px;background:#1a2a3a;border-radius:2px;margin-bottom:8px;overflow:hidden}}
+.progress-fill{{height:100%;background:linear-gradient(90deg,#8B1A1A,#D4A843);border-radius:2px;transition:width .3s}}
+.result-banner{{display:none;padding:8px;border-radius:7px;text-align:center;margin-bottom:8px;font-size:11px}}
+.result-banner.show{{display:block}}
+</style></head><body>
+<div id="result-banner" class="result-banner"></div>
+<div class="layout">
+  <div>
+    <h2>📝 {_n_qs} Questions — {gr['topic']}</h2>
+    <div class="progress"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+    <div class="qlist" id="qlist"></div>
+  </div>
+  <div class="sheet">
+    <div class="sh-title">📋 Answer Sheet</div>
+    <div class="sh-grid" id="sh-grid"></div>
+    <div class="score-box"><div class="score-big" id="score-disp">—</div><div class="score-lbl">Score</div></div>
+    <div class="action-btns">
+      <button class="btn btn-submit" id="sub-btn" onclick="submitAll()" disabled>✅ Submit & Mark</button>
+      <button class="btn btn-reset" onclick="resetAll()">🔄 Reset</button>
+    </div>
+  </div>
+</div>
+<script>
+const QS={_qs_data};
+const N=QS.length;
+const OPTS=['A','B','C','D','E'];
+const sel=new Array(N).fill(null);
+let done=false;
+const ql=document.getElementById('qlist');
+const sg=document.getElementById('sh-grid');
+// Build questions
+QS.forEach((q,i)=>{{
+  const card=document.createElement('div');
+  card.className='qcard';card.id='qc'+i;
+  const opts=q.o.map((o,j)=>`<div class="opt" id="op${{i}}_${{j}}" onclick="pick(${{i}},${{j}})"><div class="obubble">${{OPTS[j]||String.fromCharCode(65+j)}}</div><span>${{o}}</span></div>`).join('');
+  card.innerHTML=`<div class="qnum">Q${{i+1}}</div><div class="qtext">${{q.q}}</div><div class="opts">${{opts}}</div><div class="expl" id="ex${{i}}"></div>`;
+  ql.appendChild(card);
+  // Sheet row
+  const row=document.createElement('div');row.className='sh-row';
+  const bubbles=q.o.map((_,j)=>`<div class="sb" id="sb${{i}}_${{j}}" onclick="pick(${{i}},${{j}})">${{OPTS[j]||String.fromCharCode(65+j)}}</div>`).join('');
+  row.innerHTML=`<span class="sn">${{i+1}}.</span>${{bubbles}}`;
+  sg.appendChild(row);
+}});
+function pick(qi,oi){{
+  if(done)return;
+  if(sel[qi]!==null){{
+    document.getElementById('op'+qi+'_'+sel[qi]).classList.remove('sel');
+    const psb=document.getElementById('sb'+qi+'_'+sel[qi]);
+    psb.classList.remove('shaded');psb.textContent=OPTS[sel[qi]]||String.fromCharCode(65+sel[qi]);
+  }}
+  sel[qi]=oi;
+  document.getElementById('op'+qi+'_'+oi).classList.add('sel');
+  const sb=document.getElementById('sb'+qi+'_'+oi);
+  sb.classList.add('shaded');sb.textContent='';
+  document.getElementById('qc'+qi).classList.add('answered');
+  const ans=sel.filter(s=>s!==null).length;
+  document.getElementById('prog').style.width=(ans/N*100)+'%';
+  document.getElementById('sub-btn').disabled=(ans<N);
+  // Scroll question card into view from sheet click
+  document.getElementById('qc'+qi).scrollIntoView({{behavior:'smooth',block:'nearest'}});
+}}
+function submitAll(){{
+  if(done)return;done=true;
+  let sc=0;
+  QS.forEach((q,i)=>{{
+    const correct=q.a;const userPick=sel[i];
+    const card=document.getElementById('qc'+i);
+    if(userPick!==null){{
+      document.getElementById('sb'+i+'_'+userPick).classList.remove('shaded');
+      if(userPick===correct){{document.getElementById('sb'+i+'_'+userPick).classList.add('correct-sh');sc++;card.className='qcard correct';}}
+      else{{document.getElementById('sb'+i+'_'+userPick).classList.add('wrong-sh');card.className='qcard wrong';}}
+    }}
+    if(correct!==null&&correct!==undefined){{
+      document.getElementById('sb'+i+'_'+correct).classList.add('answer-sh');
+      document.getElementById('op'+i+'_'+correct).classList.add('correct-opt');
+      if(userPick!==null&&userPick!==correct)document.getElementById('op'+i+'_'+userPick).classList.add('wrong-opt');
+    }}
+  }});
+  const pct=Math.round(sc/N*100);
+  document.getElementById('score-disp').textContent=sc+'/'+N+' ('+pct+'%)';
+  const rb=document.getElementById('result-banner');
+  if(pct>=75){{rb.style.cssText='display:block;background:rgba(129,199,132,.15);border:1px solid #81C784';rb.innerHTML='<strong style="color:#81C784">🎉 '+pct+'% — Excellent!</strong>';}}
+  else if(pct>=50){{rb.style.cssText='display:block;background:rgba(212,168,67,.12);border:1px solid #D4A843';rb.innerHTML='<strong style="color:#D4A843">📚 '+pct+'% — Keep Studying</strong>';}}
+  else{{rb.style.cssText='display:block;background:rgba(139,26,26,.2);border:1px solid #EF5350';rb.innerHTML='<strong style="color:#EF9A9A">💪 '+pct+'% — More Practice Needed</strong>';}}
+  rb.classList.add('show');
+}}
+function resetAll(){{
+  done=false;sel.fill(null);
+  document.getElementById('prog').style.width='0%';
+  document.getElementById('score-disp').textContent='—';
+  document.getElementById('sub-btn').disabled=true;
+  document.getElementById('result-banner').style.cssText='display:none';
+  QS.forEach((q,i)=>{{
+    document.getElementById('qc'+i).className='qcard';
+    const ex=document.getElementById('ex'+i);if(ex)ex.className='expl';
+    q.o.forEach((_,j)=>{{
+      document.getElementById('op'+i+'_'+j).className='opt';
+      const sb=document.getElementById('sb'+i+'_'+j);
+      sb.className='sb';sb.textContent=OPTS[j]||String.fromCharCode(65+j);
+    }});
+  }});
+}}
+</script></body></html>"""
+                    with st.expander(f"📋 Interactive Answer Sheet ({_n_qs} questions)", expanded=True):
+                        _comp.html(_sheet_component, height=min(600, 200 + _n_qs * 28), scrolling=True)
+
             if len(valid_rs)>1:
                 _indiv={"en":"Individual Model Responses","fr":"Réponses individuelles des modèles","sw":"Majibu ya modeli binafsi"}.get(_lang_key(),"Individual Model Responses")
                 st.markdown(f'<div style="font-size:.85rem;color:{C_GOLD};margin:12px 0 6px">📋 <strong>{_indiv}</strong></div>',unsafe_allow_html=True)
@@ -2434,22 +2654,50 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
     # TAB 3: CHAT
     if t3:
      with t3:
-        st.markdown(f'<div style="background:rgba(139,26,26,.12);border:1px solid rgba(178,34,52,.3);border-radius:12px;padding:14px 18px;margin-bottom:10px">{ico(20)} <strong style="color:{C_GOLD}">{T("ask_tp")}</strong> <span style="color:#C0A070;font-size:.85rem">— {grade} · {subject}</span></div>',unsafe_allow_html=True)
-        ec=st.columns(3)
-        _chat_examples=[T("chat_ex1"),T("chat_ex2"),T("chat_ex3")]
-        for i,ex in enumerate(_chat_examples):
-            with ec[i]:
-                if st.button(f"💡 {ex[:38]}...",key=f"ex{i}",use_container_width=True):
-                    st.session_state.chat_messages.append({"role":"user","content":ex})
-                    with st.status(T("thinking"),expanded=True) as status:
-                        st.write(T("asking_claude"))
-                        st.write(T("asking_chatgpt"))
-                        st.write(T("asking_gemini"))
-                        r,m,allr=best_all(build_chat(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,school_name,_chat_curr_ctx,_chat_mano_ctx),ex,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[:-1]])
-                        status.update(label=T("response_ready"),state="complete",expanded=False)
-                    st.session_state.chat_messages.append({"role":"assistant","content":r,"model":m,"all_responses":allr}); st.rerun()
-        st.markdown("---")
-        st.markdown(f'<div style="font-size:.8rem;color:#8899AA;margin-bottom:4px">💡 Tips: Start with "draw" to generate images &nbsp;|&nbsp; 📸 Upload a photo + say "transcribe" to get a Word document of handwritten notes</div>',unsafe_allow_html=True)
+        # Free-flowing header — independent of classroom config
+        st.markdown(
+            f'<div style="background:rgba(139,26,26,.12);border:1px solid rgba(178,34,52,.3);border-radius:12px;padding:12px 18px;margin-bottom:10px">' +
+            f'{ico(20)} <strong style="color:{C_GOLD}">Teacher Pehpeh Chat</strong> ' +
+            f'<span style="color:#A09080;font-size:.82rem">— Ask anything · Any subject · Any level</span></div>',
+            unsafe_allow_html=True
+        )
+
+        # ── Quick Mock Test buttons ──
+        _MOCK_SUBJECTS = {
+            "➕ Mathematics": "Generate 10 WASSCE-style Mathematics MCQs covering algebra, geometry, and statistics. "
+                             "Format each as:\n1. Question\nA) option B) option C) option D) option\n\nAnswer: X",
+            "⚛️ Physics":    "Generate 10 WASSCE-style Physics MCQs covering mechanics, waves, electricity, and optics. "
+                             "Format each as:\n1. Question\nA) option B) option C) option D) option\n\nAnswer: X",
+            "🧬 Biology":    "Generate 10 WASSCE-style Biology MCQs covering cells, genetics, ecology, and body systems. "
+                             "Format each as:\n1. Question\nA) option B) option C) option D) option\n\nAnswer: X",
+            "🧪 Chemistry":  "Generate 10 WASSCE-style Chemistry MCQs covering atomic structure, bonding, reactions, and organic chemistry. "
+                             "Format each as:\n1. Question\nA) option B) option C) option D) option\n\nAnswer: X",
+            "📖 Literature": "Generate 10 MCQs on West African literature — themes, characters, and literary devices in texts like Things Fall Apart, The African Child, and Weep Not Child. "
+                             "Format each as:\n1. Question\nA) option B) option C) option D) option\n\nAnswer: X",
+            "🔤 English":    "Generate 10 WASSCE-style English Language MCQs covering comprehension, grammar, vocabulary, and idioms. "
+                             "Format each as:\n1. Question\nA) option B) option C) option D) option\n\nAnswer: X",
+        }
+        st.markdown(f'<div style="color:{C_GOLD};font-size:.82rem;font-weight:700;margin-bottom:6px">⚡ Quick Mock Test</div>', unsafe_allow_html=True)
+        _mb_cols = st.columns(6)
+        for _mbi, (_mlabel, _mprompt) in enumerate(_MOCK_SUBJECTS.items()):
+            with _mb_cols[_mbi]:
+                if st.button(_mlabel, key=f"mock_{_mbi}", use_container_width=True,
+                             help=f"Generate 10 {_mlabel.split()[-1]} questions with answer sheet"):
+                    _mock_q = f"📝 Quick Mock: {_mlabel.split()[-1]} (10 questions)"
+                    st.session_state.chat_messages.append({"role":"user","content":_mock_q})
+                    with st.status("Generating mock test...", expanded=True) as _ms:
+                        st.write("Consulting question bank...")
+                        _mr, _mm, _mallr = best_all(build_free_chat(), _mprompt,
+                                                    [{"role":x["role"],"content":x["content"]}
+                                                     for x in st.session_state.chat_messages[:-1]])
+                        _ms.update(label="Mock test ready!", state="complete", expanded=False)
+                    st.session_state.chat_messages.append({
+                        "role":"assistant","content":_mr,"model":_mm,"all_responses":_mallr,
+                        "is_mock_test": True, "mock_subject": _mlabel.split()[-1]
+                    })
+                    st.rerun()
+
+        st.markdown(f'<div style="font-size:.78rem;color:#6677AA;margin:6px 0 4px">💡 Ask anything — explain a concept, get study tips, generate questions, start with <em>draw</em> for images, or 📸 upload a photo and say <em>transcribe</em></div>', unsafe_allow_html=True)
         st.markdown("---")
         for mi,msg in enumerate(st.session_state.chat_messages):
             _you_label={"en":"🧑‍🏫 You","fr":"🧑‍🏫 Vous","sw":"🧑‍🏫 Wewe"}.get(_lang_key(),"🧑‍🏫 You")
@@ -2464,6 +2712,124 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
             else:
                 allr=msg.get("all_responses",{})
                 st.markdown(f'<div class="cp"><div style="font-size:.75rem;font-weight:700;color:{C_GOLD};margin-bottom:4px">{ico(16)} Teacher Pehpeh</div>{highlight_result(msg["content"])}<div style="font-size:.65rem;color:#556;margin-top:4px">{_by_label} {msg.get("model","AI")}</div></div>',unsafe_allow_html=True)
+                # Auto-render interactive answer sheet for mock test responses
+                if msg.get("is_mock_test"):
+                    _chat_parsed = parse_mcq_for_sheet(msg["content"])
+                    if len(_chat_parsed) >= 2:
+                        import streamlit.components.v1 as _comp2
+                        import json as _json2
+                        _cqs = _json2.dumps(_chat_parsed)
+                        _cn = len(_chat_parsed)
+                        _csubj = msg.get("mock_subject","")
+                        _chat_sheet = f"""<!DOCTYPE html><html><head><style>
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{background:#0a0e1a;font-family:Georgia,serif;padding:8px;color:#D0D8E8;font-size:12px}}
+.layout{{display:grid;grid-template-columns:1fr 200px;gap:10px;align-items:start}}
+@media(max-width:480px){{.layout{{grid-template-columns:1fr}}}}
+.qlist{{display:flex;flex-direction:column;gap:5px}}
+.qcard{{background:#0F2247;border:1px solid #1e3060;border-radius:7px;padding:9px 11px;border-left:3px solid #2a4070;transition:all .2s}}
+.qcard.answered{{border-left-color:#D4A843}}
+.qcard.correct{{border-left-color:#81C784;background:rgba(129,199,132,.05)}}
+.qcard.wrong{{border-left-color:#EF5350;background:rgba(239,83,80,.05)}}
+.qnum{{color:#D4A843;font-size:10px;font-weight:700;margin-bottom:2px}}
+.qtext{{color:#D0D8E8;font-size:11px;line-height:1.45;margin-bottom:6px}}
+.opts{{display:grid;grid-template-columns:1fr 1fr;gap:3px}}
+.opt{{display:flex;align-items:center;gap:5px;padding:3px 7px;border-radius:5px;border:1px solid #1e3060;cursor:pointer;transition:all .13s;font-size:10.5px;color:#A0B0C8}}
+.opt:hover{{border-color:#D4A843;color:#D4A843}}
+.opt.sel{{border-color:#D4A843;background:rgba(212,168,67,.12);color:#F5D98E;font-weight:700}}
+.opt.correct-opt{{border-color:#81C784!important;background:rgba(129,199,132,.15)!important;color:#81C784!important;font-weight:700}}
+.opt.wrong-opt{{border-color:#EF5350!important;background:rgba(239,83,80,.1)!important;color:#EF9A9A!important}}
+.ob{{width:13px;height:13px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:6px;font-weight:700;flex-shrink:0}}
+.opt.sel .ob,.opt.correct-opt .ob{{background:currentColor}}
+.sheet{{background:#0F2247;border-radius:9px;padding:10px;border:1px solid #D4A84333;position:sticky;top:6px}}
+.sh-t{{color:#D4A843;font-weight:700;font-size:10px;text-align:center;letter-spacing:1px;margin-bottom:7px;text-transform:uppercase}}
+.sh-grid{{display:grid;grid-template-columns:repeat(2,1fr);gap:1px 4px}}
+.sh-row{{display:flex;align-items:center;gap:2px;padding:1px}}
+.sn{{font-size:8px;color:#445;font-weight:700;width:14px;text-align:right;flex-shrink:0}}
+.sb{{width:13px;height:13px;border-radius:50%;border:1.5px solid #2a3a5a;display:flex;align-items:center;justify-content:center;font-size:5px;color:#445;cursor:pointer;transition:all .13s;flex-shrink:0}}
+.sb:hover{{border-color:#D4A843;transform:scale(1.2)}}
+.sb.shaded{{background:#1a1a2e;border-color:#D4A843;color:transparent}}
+.sb.correct-sh{{background:#81C784!important;border-color:#81C784!important}}
+.sb.wrong-sh{{background:#EF5350!important;border-color:#EF5350!important}}
+.sb.ans-sh{{box-shadow:0 0 0 2px #81C784}}
+.score-box{{margin-top:7px;background:rgba(212,168,67,.07);border-radius:5px;padding:6px;text-align:center}}
+.score-big{{color:#81C784;font-size:16px;font-weight:700}}
+.score-lbl{{color:#D4A843;font-size:8px;margin-top:1px;text-transform:uppercase}}
+.prog{{height:3px;background:#1a2a3a;border-radius:2px;margin-bottom:7px;overflow:hidden}}
+.prog-fill{{height:100%;background:linear-gradient(90deg,#8B1A1A,#D4A843);border-radius:2px;transition:width .3s}}
+.btns{{display:flex;flex-direction:column;gap:3px;margin-top:7px}}
+.btn{{width:100%;padding:5px;border-radius:5px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;border:1px solid}}
+.btn-sub{{background:#8B1A1A;color:#F5D98E;border-color:#D4A843}}
+.btn-sub:disabled{{opacity:.3;cursor:not-allowed}}
+.btn-rst{{background:transparent;color:#889;border-color:#2a3a5a}}
+.banner{{display:none;padding:6px;border-radius:6px;text-align:center;margin-bottom:7px;font-size:10px}}
+.banner.show{{display:block}}
+</style></head><body>
+<div id="banner" class="banner"></div>
+<div class="layout">
+  <div>
+    <div style="color:#D4A843;font-size:10px;font-weight:700;letter-spacing:1px;margin-bottom:6px">📝 {_csubj} · {_cn} Questions</div>
+    <div class="prog"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+    <div class="qlist" id="ql"></div>
+  </div>
+  <div class="sheet">
+    <div class="sh-t">📋 Answer Sheet</div>
+    <div class="sh-grid" id="sg"></div>
+    <div class="score-box"><div class="score-big" id="sd">—</div><div class="score-lbl">Score</div></div>
+    <div class="btns">
+      <button class="btn btn-sub" id="sb2" onclick="sub()" disabled>✅ Submit</button>
+      <button class="btn btn-rst" onclick="rst()">🔄 Reset</button>
+    </div>
+  </div>
+</div>
+<script>
+const Q={_cqs},N=Q.length,OP=["A","B","C","D","E"],s=new Array(N).fill(null);let done=false;
+const ql=document.getElementById("ql"),sg=document.getElementById("sg");
+Q.forEach((q,i)=>{{
+  const c=document.createElement("div");c.className="qcard";c.id="qc"+i;
+  c.innerHTML=`<div class="qnum">Q${{i+1}}</div><div class="qtext">${{q.q}}</div><div class="opts">${{q.o.map((o,j)=>`<div class="opt" id="op${{i}}_${{j}}" onclick="pk(${{i}},${{j}})"><div class="ob">${{OP[j]||String.fromCharCode(65+j)}}</div><span>${{o}}</span></div>`).join("")}}</div>`;
+  ql.appendChild(c);
+  const r=document.createElement("div");r.className="sh-row";
+  r.innerHTML=`<span class="sn">${{i+1}}.</span>${{q.o.map((_,j)=>`<div class="sb" id="sb${{i}}_${{j}}" onclick="pk(${{i}},${{j}})">${{OP[j]||String.fromCharCode(65+j)}}</div>`).join("")}}`;
+  sg.appendChild(r);
+}});
+function pk(qi,oi){{
+  if(done)return;
+  if(s[qi]!==null){{document.getElementById("op"+qi+"_"+s[qi]).classList.remove("sel");const b=document.getElementById("sb"+qi+"_"+s[qi]);b.classList.remove("shaded");b.textContent=OP[s[qi]]||String.fromCharCode(65+s[qi]);}}
+  s[qi]=oi;
+  document.getElementById("op"+qi+"_"+oi).classList.add("sel");
+  const b=document.getElementById("sb"+qi+"_"+oi);b.classList.add("shaded");b.textContent="";
+  document.getElementById("qc"+qi).classList.add("answered");
+  const a=s.filter(x=>x!==null).length;
+  document.getElementById("prog").style.width=(a/N*100)+"%";
+  document.getElementById("sb2").disabled=(a<N);
+  document.getElementById("qc"+qi).scrollIntoView({{behavior:"smooth",block:"nearest"}});
+}}
+function sub(){{
+  if(done)return;done=true;let sc=0;
+  Q.forEach((q,i)=>{{
+    const c=q.a,u=s[i],card=document.getElementById("qc"+i);
+    if(u!==null){{document.getElementById("sb"+i+"_"+u).classList.remove("shaded");if(u===c){{document.getElementById("sb"+i+"_"+u).classList.add("correct-sh");sc++;card.className="qcard correct";}}else{{document.getElementById("sb"+i+"_"+u).classList.add("wrong-sh");card.className="qcard wrong";}}}}
+    if(c!=null){{document.getElementById("sb"+i+"_"+c).classList.add("ans-sh");document.getElementById("op"+i+"_"+c).classList.add("correct-opt");if(u!==null&&u!==c)document.getElementById("op"+i+"_"+u).classList.add("wrong-opt");}}
+  }});
+  const p=Math.round(sc/N*100);document.getElementById("sd").textContent=sc+"/"+N+" ("+p+"%)";
+  const b=document.getElementById("banner");
+  if(p>=75){{b.style.cssText="display:block;background:rgba(129,199,132,.15);border:1px solid #81C784";b.innerHTML="<strong style='color:#81C784'>🎉 "+p+"% — Excellent!</strong>";}}
+  else if(p>=50){{b.style.cssText="display:block;background:rgba(212,168,67,.12);border:1px solid #D4A843";b.innerHTML="<strong style='color:#D4A843'>📚 "+p+"% — Keep Studying</strong>";}}
+  else{{b.style.cssText="display:block;background:rgba(139,26,26,.2);border:1px solid #EF5350";b.innerHTML="<strong style='color:#EF9A9A'>💪 "+p+"% — More Practice Needed</strong>";}}
+  b.classList.add("show");
+}}
+function rst(){{
+  done=false;s.fill(null);
+  document.getElementById("prog").style.width="0%";document.getElementById("sd").textContent="—";document.getElementById("sb2").disabled=true;document.getElementById("banner").style.cssText="display:none";
+  Q.forEach((q,i)=>{{
+    document.getElementById("qc"+i).className="qcard";
+    q.o.forEach((_,j)=>{{document.getElementById("op"+i+"_"+j).className="opt";const b=document.getElementById("sb"+i+"_"+j);b.className="sb";b.textContent=OP[j]||String.fromCharCode(65+j);}});
+  }});
+}}
+</script></body></html>"""
+                        with st.expander(f"📋 Interactive Answer Sheet — {_csubj} ({_cn} questions)", expanded=True):
+                            _comp2.html(_chat_sheet, height=min(620, 180 + _cn * 32), scrolling=True)
                 if msg.get("image"):
                     st.image(msg["image"],caption=f"🎨 Generated by {msg.get('image_src','AI')}",use_container_width=True)
                 if msg.get("docx_bytes"):
@@ -2600,13 +2966,13 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                         msg_data={"role":"assistant","content":f"📝 **Transcription** (Word doc generation failed — here is the text):\n\n{r}","model":m,"all_responses":allr}
                 elif _attached_photo:
                     st.write(T("analyzing_photo"))
-                    _vision_sp = build_chat(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,school_name,_chat_curr_ctx,_chat_mano_ctx)
+                    _vision_sp = build_free_chat()
                     r, m = best_vision(_vision_sp, uq, _attached_photo, _attached_mime or "image/jpeg")
                     allr = {m: r} if m else {"AI": r}
                     msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
                 else:
                     st.write(f"{T('asking_claude')} {T('asking_chatgpt')} {T('asking_gemini')}")
-                    r,m,allr=best_all(build_chat(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,school_name,_chat_curr_ctx,_chat_mano_ctx),uq,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]])
+                    r,m,allr=best_all(build_free_chat(),uq,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]])
                     msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
                 if want_chat_img:
                     st.write(T("creating_img"))
