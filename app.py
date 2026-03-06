@@ -176,6 +176,23 @@ try:
 except ImportError:
     CURRICULUM_AVAILABLE = False
 
+# === IBT PROPRIETARY ENGINE & REPORTS ===
+try:
+    from ibt_engine import (
+        compute_ibt_risk_score, classify_subgroup, build_trajectory_data,
+        generate_intervention_plan, letter_grade, status_label, get_trend,
+        IBT_SUBGROUP_DATA, IBT_UNIVERSAL_FINDINGS, IBT_SUBJECT_BENCHMARKS,
+    )
+    IBT_ENGINE_AVAILABLE = True
+except ImportError:
+    IBT_ENGINE_AVAILABLE = False
+
+try:
+    from ibt_reports_tab import render_ibt_report_tab
+    IBT_REPORTS_AVAILABLE = True
+except ImportError:
+    IBT_REPORTS_AVAILABLE = False
+
 CURRICULA = {}
 if CURRICULUM_AVAILABLE:
     CURRICULA = load_all_curricula()
@@ -2437,9 +2454,10 @@ def main():
 .stTabs [data-baseweb="tab"]:nth-child(4):hover::after { opacity:1; }
 </style>
 """, unsafe_allow_html=True)
-        t1,t3,t4,t2,t5=st.tabs([T("generate"),T("chat"),T("quiz"),T("students"),"📊 Academic Report"])
+        t1,t3,t4,t2,t5,t6=st.tabs([T("generate"),T("chat"),T("quiz"),T("students"),"📊 Academic Report","📈 IBT Reports"])
         t5=t5  # Academic Report tab
-    else: t1=t2=t3=None; t4=st.container(); t5=None
+        t6=t6  # IBT Reports tab
+    else: t1=t2=t3=None; t4=st.container(); t5=None; t6=None
 
     # TAB 1: GENERATE
     if t1:
@@ -4716,5 +4734,22 @@ def wassce_shading_modal():
                 unsafe_allow_html=True
             )
 
+
+    # TAB 6: IBT REPORTS
+    if t6:
+     with t6:
+        if IBT_REPORTS_AVAILABLE:
+            render_ibt_report_tab()
+        else:
+            st.markdown(
+                '<div style="background:rgba(212,168,67,.08);border:1px solid #D4A84344;border-radius:12px;'
+                'padding:24px;text-align:center;margin:1rem 0">'
+                '<p style="color:#D4A843;font-size:1.1rem;font-weight:700;margin-bottom:.5rem">📈 IBT Student Analysis Engine</p>'
+                '<p style="color:#8899BB;font-size:.9rem">The <code>ibt_engine.py</code> and <code>ibt_reports_tab.py</code> files '
+                'need to be in the same folder as <code>app.py</code> to activate this tab.<br><br>'
+                'Contact IBT or check the deployment guide to add these files.</p>'
+                '</div>',
+                unsafe_allow_html=True
+            )
 
 if __name__=="__main__": main()
