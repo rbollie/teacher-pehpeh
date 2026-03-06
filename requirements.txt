@@ -8,4 +8,6 @@ openpyxl
 qrcode
 Pillow
 python-docx
-elevenlabs
+lxml
+python-pptx
+altair
