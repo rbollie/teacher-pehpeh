@@ -823,6 +823,11 @@ UI_TEXT={
   "ask_tp":"Ask Teacher Pehpeh","thinking":"⏳ Teacher Pehpeh is thinking...","response_ready":"✅ Response ready!",
   "asking_claude":"🟣 Asking Claude...","asking_chatgpt":"🟢 Asking ChatGPT...","asking_gemini":"🔵 Asking Gemini...",
   "chat_ex1":"How to teach fractions with no textbooks?","chat_ex2":"My students keep failing WASSCE.","chat_ex3":"Managing 60+ students?",
+  "cat_planning":"📋 Planning","cat_assessment":"📝 Assessment","cat_activities":"🎯 Activities","cat_study":"📚 Study Support",
+  "cat_tip_planning":"Lesson plans, weekly & term schemes, teaching strategies",
+  "cat_tip_assessment":"Quizzes, WASSCE/BECE exam prep, grading rubrics",
+  "cat_tip_activities":"Homework, group work, reading comprehension, educational games",
+  "cat_tip_study":"Revision notes and remedial catch-up material",
   "combining":"🔀 Combining the best...","creating_img":"🎨 Creating illustration...",
   "photo_hint":"📸 Upload or snap a photo to ask Teacher Pehpeh about it",
   "photo_upload":"Upload image","photo_camera":"📷 Take photo",
@@ -869,6 +874,11 @@ UI_TEXT={
   "ask_tp":"Demandez à Teacher Pehpeh","thinking":"⏳ Teacher Pehpeh réfléchit...","response_ready":"✅ Réponse prête !",
   "asking_claude":"🟣 Consultation de Claude...","asking_chatgpt":"🟢 Consultation de ChatGPT...","asking_gemini":"🔵 Consultation de Gemini...",
   "chat_ex1":"Comment enseigner les fractions sans manuels ?","chat_ex2":"Mes élèves échouent au WASSCE.","chat_ex3":"Gérer plus de 60 élèves ?",
+  "cat_planning":"📋 Planification","cat_assessment":"📝 Évaluation","cat_activities":"🎯 Activités","cat_study":"📚 Soutien scolaire",
+  "cat_tip_planning":"Plans de cours, plans hebdomadaires et trimestriels, stratégies d'enseignement",
+  "cat_tip_assessment":"Quiz, préparation WASSCE/BECE, grilles d'évaluation",
+  "cat_tip_activities":"Devoirs, travail de groupe, compréhension de lecture, jeux éducatifs",
+  "cat_tip_study":"Notes de révision et rattrapage scolaire",
   "combining":"🔀 Combinaison des meilleurs...","creating_img":"🎨 Création d'illustration...",
   "photo_hint":"📸 Téléchargez ou prenez une photo pour demander à Teacher Pehpeh",
   "photo_upload":"Télécharger image","photo_camera":"📷 Prendre une photo",
@@ -915,6 +925,11 @@ UI_TEXT={
   "ask_tp":"Muulize Teacher Pehpeh","thinking":"⏳ Teacher Pehpeh anafikiria...","response_ready":"✅ Jibu liko tayari!",
   "asking_claude":"🟣 Kuuliza Claude...","asking_chatgpt":"🟢 Kuuliza ChatGPT...","asking_gemini":"🔵 Kuuliza Gemini...",
   "chat_ex1":"Jinsi ya kufundisha sehemu bila vitabu?","chat_ex2":"Wanafunzi wangu wanashindwa WASSCE.","chat_ex3":"Kusimamia wanafunzi 60+?",
+  "cat_planning":"📋 Mipango","cat_assessment":"📝 Tathmini","cat_activities":"🎯 Shughuli","cat_study":"📚 Msaada wa Masomo",
+  "cat_tip_planning":"Mipango ya masomo, mpango wa wiki na muhula, mikakati ya kufundisha",
+  "cat_tip_assessment":"Maswali, maandalizi ya WASSCE/BECE, vikwazo vya tathmini",
+  "cat_tip_activities":"Kazi za nyumbani, kazi ya kikundi, ufahamu wa kusoma, michezo ya elimu",
+  "cat_tip_study":"Maelezo ya marudio na nyenzo za kusaidia wanafunzi wanaopungukiwa",
   "combining":"🔀 Kuchanganya bora zaidi...","creating_img":"🎨 Kuunda mchoro...",
   "photo_hint":"📸 Pakia au piga picha kumuuliza Teacher Pehpeh",
   "photo_upload":"Pakia picha","photo_camera":"📷 Piga picha",
@@ -2081,7 +2096,7 @@ def main():
         # Country first - drives auto language
         country=st.selectbox(T("country"),COUNTRIES,key="country_sel")
         # Auto-detect language from country (user can still override)
-        # Auto-switch language whenever the country changes
+        # Auto-switch language whenever the country changes (including switching back)
         if st.session_state.get("_last_auto_country") != country:
             st.session_state["_last_auto_country"] = country
             if country in FRANCOPHONE: st.session_state.lang_sel="Français"
@@ -2462,20 +2477,27 @@ def main():
 
         # ── Category pill buttons ──
         if "task_cat" not in st.session_state: st.session_state.task_cat="📋 Planning"
+        # Translated display labels — session state always stores the English key
+        _CAT_LABELS = {
+            "📋 Planning":      T("cat_planning"),
+            "📝 Assessment":    T("cat_assessment"),
+            "🎯 Activities":    T("cat_activities"),
+            "📚 Study Support": T("cat_study"),
+        }
         _CAT_TIPS = {
-            "📋 Planning":     "Lesson plans, weekly & term schemes, teaching strategies",
-            "📝 Assessment":   "Quizzes, WASSCE/BECE exam prep, grading rubrics",
-            "🎯 Activities":   "Homework, group work, reading comprehension, educational games",
-            "📚 Study Support":"Revision notes and remedial catch-up material",
+            "📋 Planning":      T("cat_tip_planning"),
+            "📝 Assessment":    T("cat_tip_assessment"),
+            "🎯 Activities":    T("cat_tip_activities"),
+            "📚 Study Support": T("cat_tip_study"),
         }
         _cat_cols = st.columns(len(_TASK_CATEGORIES))
         for _ci, _cname in enumerate(_TASK_CATEGORIES):
             with _cat_cols[_ci]:
                 _is_cat = st.session_state.task_cat == _cname
-                if st.button(_cname, key=f"cat_{_ci}", use_container_width=True,
+                if st.button(_CAT_LABELS[_cname], key=f"cat_{_ci}", use_container_width=True,
                              type="primary" if _is_cat else "secondary",
                              help=_CAT_TIPS.get(_cname,"")):
-                    st.session_state.task_cat = _cname
+                    st.session_state.task_cat = _cname   # always English key
                     st.session_state.pop("task_sel", None)
                     st.rerun()
 
