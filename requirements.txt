@@ -4,6 +4,8 @@ anthropic
 google-generativeai
 python-dotenv
 pandas
+openpyxl
 qrcode
 Pillow
 python-docx
+elevenlabs
