@@ -3177,7 +3177,10 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                         _xf=pd.ExcelFile(uploaded)
                         # Priority 1: IBT Grade Tracker "Roster" sheet
                         # Layout: row 0=title, row 1=subtitle, row 2=column headers, row 3+=students
-                        if "Roster" in _xf.sheet_names:
+                        _IBT_SUBJ_SHEETS = ["Mathematics","English Grammar","Literature",
+                                            "Physics","Chemistry","Biology","Economics","French"]
+                        _ibt_tracker = "Roster" in _xf.sheet_names
+                        if _ibt_tracker:
                             _rdf=pd.read_excel(_xf,sheet_name="Roster",header=2)
                             _rdf.dropna(how="all",inplace=True)
                             if _name_col(_rdf) is not None:
@@ -3185,12 +3188,60 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                                 _source_note="📋 Roster sheet (IBT Grade Tracker)"
                         # Priority 2: Auto-detect header row on first sheet
                         if df is None:
+                            _ibt_tracker = False
                             for _hdr_row in [0,1,2]:
                                 _tdf=pd.read_excel(_xf,sheet_name=_xf.sheet_names[0],header=_hdr_row)
                                 if _name_col(_tdf) is not None:
                                     df=_tdf
                                     _source_note=f"Sheet: {_xf.sheet_names[0]}"
                                     break
+                        # ── IBT Grade Tracker: parse subject sheets ────────────────────────
+                        # S1_AVG is col index 35 (0-based), S2_AVG is col index 70 in each sheet
+                        # Data rows start at row 9 (1-indexed) = header=8 -> iloc[8:]
+                        if _ibt_tracker:
+                            def _safe_num(v):
+                                try:
+                                    f=float(v)
+                                    return round(f,1) if 0<=f<=100 else None
+                                except: return None
+                            _subj_data={}
+                            for _sname in _IBT_SUBJ_SHEETS:
+                                if _sname not in _xf.sheet_names: continue
+                                _sdf=pd.read_excel(_xf,sheet_name=_sname,header=None)
+                                _subj_data[_sname]={}
+                                for _row in _sdf.iloc[8:].itertuples(index=False):
+                                    _rvals=list(_row)
+                                    if not _rvals or not _rvals[0] or str(_rvals[0]).strip() in ("","GRADES","nan"): continue
+                                    _stn=str(_rvals[0]).strip()
+                                    _s1a=_safe_num(_rvals[35]) if len(_rvals)>35 else None
+                                    _s2a=_safe_num(_rvals[70]) if len(_rvals)>70 else None
+                                    # Compute from raw HW/Quiz/Test if weighted avg cells empty
+                                    if _s1a is None:
+                                        _hw1=[_safe_num(_rvals[i]) for i in range(2,17) if i<len(_rvals) and _safe_num(_rvals[i]) is not None]
+                                        _qz1=[_safe_num(_rvals[i]) for i in range(17,32) if i<len(_rvals) and _safe_num(_rvals[i]) is not None]
+                                        _t1=[_safe_num(_rvals[i]) for i in range(32,35) if i<len(_rvals) and _safe_num(_rvals[i]) is not None]
+                                        _parts,_wts=[],[]
+                                        if _hw1: _parts.append(sum(_hw1)/len(_hw1)); _wts.append(0.10)
+                                        if _qz1: _parts.append(sum(_qz1)/len(_qz1)); _wts.append(0.20)
+                                        if _t1:  _parts.append(sum(_t1)/len(_t1));   _wts.append(0.70)
+                                        if _parts: _s1a=round(sum(p*w for p,w in zip(_parts,_wts))/sum(_wts),1)
+                                    if _s2a is None:
+                                        _hw2=[_safe_num(_rvals[i]) for i in range(37,52) if i<len(_rvals) and _safe_num(_rvals[i]) is not None]
+                                        _qz2=[_safe_num(_rvals[i]) for i in range(52,67) if i<len(_rvals) and _safe_num(_rvals[i]) is not None]
+                                        _t2=[_safe_num(_rvals[i]) for i in range(67,70) if i<len(_rvals) and _safe_num(_rvals[i]) is not None]
+                                        _parts2,_wts2=[],[]
+                                        if _hw2: _parts2.append(sum(_hw2)/len(_hw2)); _wts2.append(0.10)
+                                        if _qz2: _parts2.append(sum(_qz2)/len(_qz2)); _wts2.append(0.20)
+                                        if _t2:  _parts2.append(sum(_t2)/len(_t2));   _wts2.append(0.70)
+                                        if _parts2: _s2a=round(sum(p*w for p,w in zip(_parts2,_wts2))/sum(_wts2),1)
+                                    _subj_data[_sname][_stn]={"s1_avg":_s1a,"s2_avg":_s2a}
+                            # Detect whether grades exist (any non-None semester avg)
+                            _any_grades=any(
+                                d.get("s1_avg") is not None or d.get("s2_avg") is not None
+                                for sd in _subj_data.values() for d in sd.values()
+                            )
+                            st.session_state["_ar_subject_data"]=_subj_data
+                            st.session_state["_ibt_has_grades"]=_any_grades
                     if df is None:
                         st.error("❌ Could not find a student name column. Expected a 'Roster' sheet or a column named 'Name'.")
                     else:
@@ -3236,7 +3287,27 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                                     if nt_v in ("nan","None"): nt_v=""
                                     st.session_state.students.append(dict(name=name,sib=sib_v,mom=mom_v,sm=sm_v,wk=wk_v,cp=cp_v,nt=nt_v))
                                     imported+=1
-                                st.success(f"✅ Imported {imported} student(s)!"); time.sleep(1); st.rerun()
+                                # If IBT Grade Tracker with existing grades, populate grade_history
+                                _gh_added=0
+                                if st.session_state.get("_ibt_has_grades") and st.session_state.get("_ar_subject_data"):
+                                    import datetime as _idt
+                                    _existing_gh={(g["student"],g["subject"],g["topic"]) for g in st.session_state.grade_history}
+                                    for _subj,_sdata in st.session_state["_ar_subject_data"].items():
+                                        for _stn,_scores in _sdata.items():
+                                            for _sem,_key in [("Semester 1 Avg","s1_avg"),("Semester 2 Avg","s2_avg")]:
+                                                _sc=_scores.get(_key)
+                                                if _sc is not None and (_stn,_subj,_sem) not in _existing_gh:
+                                                    st.session_state.grade_history.append({
+                                                        "student":_stn,"subject":_subj,"topic":_sem,
+                                                        "score":_sc,"date":_idt.datetime.now().isoformat(),
+                                                        "grade_level":_grade_en,"model":"IBT Tracker"
+                                                    })
+                                                    _gh_added+=1
+                                if _gh_added:
+                                    st.success(f"✅ Imported {imported} student(s) + {_gh_added} grade records from IBT Grade Tracker! Head to 📊 Academic Report or 📈 IBT Reports tabs.")
+                                else:
+                                    st.success(f"✅ Imported {imported} student(s)! Enter grades below or via camera.")
+                                time.sleep(1); st.rerun()
                 except Exception as e:
                     st.error(f"❌ Error reading file: {e}")
         for i,s in enumerate(st.session_state.students):
@@ -3310,25 +3381,37 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     else:
                         st.warning(f"Could not generate card: {card_fname}")
         if st.session_state.students:
-            # ── Gate: skip manual/camera entry when Excel grades are already loaded ──────
-            _excel_grades_loaded = bool(st.session_state.get("_ar_subject_data"))
-            if _excel_grades_loaded:
-                _n_subj_loaded = len([v for v in st.session_state["_ar_subject_data"].values() if v])
-                _n_stu_loaded  = len(st.session_state.get("_ar_roster") or st.session_state.students)
+            st.markdown("---")
+            # ── Grade Status Banner ───────────────────────────────────────────────────
+            _ibt_grades_loaded = st.session_state.get("_ibt_has_grades") and bool(st.session_state.grade_history)
+            _manual_grades_exist = bool(st.session_state.grade_history) and not st.session_state.get("_ibt_has_grades")
+            if _ibt_grades_loaded:
+                _gh_subjs = len({g["subject"] for g in st.session_state.grade_history})
+                _gh_stus  = len({g["student"] for g in st.session_state.grade_history})
                 st.markdown(
-                    f'<div style="background:linear-gradient(135deg,#0D3B14,#1B5E20);'
-                    f'border-radius:12px;padding:14px 18px;margin:8px 0;border:1px solid #2E7D32">'
+                    f'<div style="background:linear-gradient(135deg,#0D3B14,#1B5E20);border-radius:12px;'
+                    f'padding:14px 18px;margin-bottom:10px;border:1px solid #2E7D32">'
                     f'<div style="color:#81C784;font-weight:700;font-size:.95rem;margin-bottom:4px">'
                     f'✅ Grades loaded from IBT Grade Tracker Excel</div>'
                     f'<div style="color:#A5D6A7;font-size:.84rem">'
-                    f'{_n_stu_loaded} students · {_n_subj_loaded} subject{"s" if _n_subj_loaded!=1 else ""} · '
-                    f'Go to the <strong>📊 Academic Report</strong> or <strong>📈 IBT Reports</strong> tabs to view analysis.</div>'
-                    f'<div style="color:#556;font-size:.78rem;margin-top:6px">'
-                    f'Manual entry and photo grading are hidden while Excel grades are active. '
-                    f'Clear the Excel upload in the Academic Report tab to re-enable them.</div>'
+                    f'{_gh_stus} students · {_gh_subjs} subjects · {len(st.session_state.grade_history)} grade records — '
+                    f'<strong>→ Go to 📊 Academic Report or 📈 IBT Reports tabs for full analysis</strong></div>'
+                    f'<div style="color:#556;font-size:.78rem;margin-top:5px">'
+                    f'You can still add grades manually below to supplement the Excel data.</div>'
                     f'</div>', unsafe_allow_html=True)
-        if st.session_state.students and not st.session_state.get("_ar_subject_data"):
-            st.markdown("---"); st.markdown(f"#### {ico(16)} {T('grade_work')}",unsafe_allow_html=True)
+            elif not st.session_state.grade_history and st.session_state.get("_ar_subject_data") and not st.session_state.get("_ibt_has_grades"):
+                # Sheet loaded but no grades — guide teacher to enter them
+                _names_only_count = len(st.session_state.students)
+                st.markdown(
+                    f'<div style="background:rgba(212,168,67,.08);border:1px solid #D4A84366;border-radius:12px;'
+                    f'padding:14px 18px;margin-bottom:10px">'
+                    f'<div style="color:#D4A843;font-weight:700;font-size:.95rem;margin-bottom:4px">'
+                    f'📋 {_names_only_count} students imported — no grades yet</div>'
+                    f'<div style="color:#D0D8E8;font-size:.84rem">'
+                    f'Enter grades below using manual entry or 📸 photo grading. '
+                    f'Once grades are recorded the Academic Report and IBT Reports tabs activate.</div>'
+                    f'</div>', unsafe_allow_html=True)
+            st.markdown(f"#### {ico(16)} {T('grade_work')}",unsafe_allow_html=True)
             gs=st.selectbox("Student:",[s["name"] for s in st.session_state.students],key="gs")
             gw_col, gw_mic = st.columns([5,1])
             with gw_col:
@@ -3360,7 +3443,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     tts_player(r, "grade")
 
         # === PHOTO GRADING — Batch scan student work ===
-        if st.session_state.students and not st.session_state.get("_ar_subject_data"):
+        if st.session_state.students:
             st.markdown("---")
 
             # If teacher is in manual entry mode, collapse camera by default
@@ -3463,9 +3546,6 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                         st.success(f"✅ Graded {_graded} student{'s' if _graded>1 else ''}'s work!")
 
         # === TREND ANALYTICS — Performance over time ===
-        # When Excel grades loaded, show a summary bridge to the report tabs instead
-        if st.session_state.get("_ar_subject_data") and not st.session_state.grade_history:
-            pass  # Trend view lives in Academic Report / IBT tabs when Excel is active
         if st.session_state.grade_history:
             st.markdown("---")
             st.markdown(f'<div style="background:linear-gradient(135deg,#2E7D32,#1B5E20);border-radius:12px;padding:14px 18px;margin-bottom:10px;color:white"><strong>📈 Performance Trends</strong> — Track student progress over time</div>',unsafe_allow_html=True)
@@ -3552,6 +3632,15 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
      with t5:
         import datetime as _ardt
         _school_label = st.session_state.get("_classroom_label", school_name or "My School")
+        # ── Route: Excel grades loaded → enhanced report; otherwise → original ──
+        _rendered_excel_report = False
+        if st.session_state.get("_ibt_has_grades") and st.session_state.grade_history:
+            try:
+                from academic_report_excel_tab import render_academic_report_from_excel
+                render_academic_report_from_excel()
+                _rendered_excel_report = True
+            except ImportError:
+                pass  # fall through to original report
 
         # ── Header ────────────────────────────────────────────────────────
         st.markdown(f"""
@@ -3571,9 +3660,11 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
   </div>
 </div>""", unsafe_allow_html=True)
 
-        _gh = st.session_state.grade_history
-        if not _gh:
-            st.info("📭 No grade data yet. Enter or upload grades in the Students tab to generate the Academic Report.")
+        _gh = [] if _rendered_excel_report else st.session_state.grade_history
+        if not _gh and not _rendered_excel_report:
+            st.info("📭 No grade data yet. Enter grades in the Students tab (manually or via camera), or upload the IBT Grade Tracker Excel to generate this report.")
+        elif _rendered_excel_report:
+            pass  # enhanced Excel report already rendered above
         elif not PD:
             st.warning("⚠️ pandas not available. Cannot generate report.")
         else:
@@ -4794,9 +4885,20 @@ def wassce_shading_modal():
     # TAB 6: IBT REPORTS
     if t6:
      with t6:
+        # If IBT grades loaded, show what-if analysis first
+        if st.session_state.get("_ibt_has_grades") and st.session_state.grade_history:
+            try:
+                from ibt_whatif_tab import render_ibt_whatif_tab
+                render_ibt_whatif_tab(
+                    roster=st.session_state.get("_ar_roster"),
+                    subject_data=st.session_state.get("_ar_subject_data"),
+                )
+                st.markdown("---")
+            except ImportError:
+                pass
         if IBT_REPORTS_AVAILABLE:
             render_ibt_report_tab()
-        else:
+        elif not (st.session_state.get("_ibt_has_grades") and st.session_state.grade_history):
             st.markdown(
                 '<div style="background:rgba(212,168,67,.08);border:1px solid #D4A84344;border-radius:12px;'
                 'padding:24px;text-align:center;margin:1rem 0">'
