@@ -261,6 +261,16 @@ def render_academic_report_from_excel():
         horizontal=True, key="ar_data_source_v2"
     )
 
+    # Show "switch back" button when Excel data is cached and user picks manual mode
+    if st.session_state.get("_ar_subject_data") and dsrc == "📝 Use Manually-Entered Grades":
+        cc1, cc2 = st.columns([3,1])
+        with cc2:
+            if st.button("🗑️ Clear Excel grades", key="ar_clear_excel",
+                         help="Removes loaded Excel grades — re-enables camera/manual entry in Students tab"):
+                st.session_state.pop("_ar_subject_data", None)
+                st.session_state.pop("_ar_roster", None)
+                st.rerun()
+
     if dsrc == "📊 Upload IBT Grade Tracker Excel":
         _render_excel_path(school_label, grade_en)
     else:

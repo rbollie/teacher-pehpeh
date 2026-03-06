@@ -3310,6 +3310,24 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     else:
                         st.warning(f"Could not generate card: {card_fname}")
         if st.session_state.students:
+            # ── Gate: skip manual/camera entry when Excel grades are already loaded ──────
+            _excel_grades_loaded = bool(st.session_state.get("_ar_subject_data"))
+            if _excel_grades_loaded:
+                _n_subj_loaded = len([v for v in st.session_state["_ar_subject_data"].values() if v])
+                _n_stu_loaded  = len(st.session_state.get("_ar_roster") or st.session_state.students)
+                st.markdown(
+                    f'<div style="background:linear-gradient(135deg,#0D3B14,#1B5E20);'
+                    f'border-radius:12px;padding:14px 18px;margin:8px 0;border:1px solid #2E7D32">'
+                    f'<div style="color:#81C784;font-weight:700;font-size:.95rem;margin-bottom:4px">'
+                    f'✅ Grades loaded from IBT Grade Tracker Excel</div>'
+                    f'<div style="color:#A5D6A7;font-size:.84rem">'
+                    f'{_n_stu_loaded} students · {_n_subj_loaded} subject{"s" if _n_subj_loaded!=1 else ""} · '
+                    f'Go to the <strong>📊 Academic Report</strong> or <strong>📈 IBT Reports</strong> tabs to view analysis.</div>'
+                    f'<div style="color:#556;font-size:.78rem;margin-top:6px">'
+                    f'Manual entry and photo grading are hidden while Excel grades are active. '
+                    f'Clear the Excel upload in the Academic Report tab to re-enable them.</div>'
+                    f'</div>', unsafe_allow_html=True)
+        if st.session_state.students and not st.session_state.get("_ar_subject_data"):
             st.markdown("---"); st.markdown(f"#### {ico(16)} {T('grade_work')}",unsafe_allow_html=True)
             gs=st.selectbox("Student:",[s["name"] for s in st.session_state.students],key="gs")
             gw_col, gw_mic = st.columns([5,1])
@@ -3342,7 +3360,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     tts_player(r, "grade")
 
         # === PHOTO GRADING — Batch scan student work ===
-        if st.session_state.students:
+        if st.session_state.students and not st.session_state.get("_ar_subject_data"):
             st.markdown("---")
 
             # If teacher is in manual entry mode, collapse camera by default
@@ -3445,6 +3463,9 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                         st.success(f"✅ Graded {_graded} student{'s' if _graded>1 else ''}'s work!")
 
         # === TREND ANALYTICS — Performance over time ===
+        # When Excel grades loaded, show a summary bridge to the report tabs instead
+        if st.session_state.get("_ar_subject_data") and not st.session_state.grade_history:
+            pass  # Trend view lives in Academic Report / IBT tabs when Excel is active
         if st.session_state.grade_history:
             st.markdown("---")
             st.markdown(f'<div style="background:linear-gradient(135deg,#2E7D32,#1B5E20);border-radius:12px;padding:14px 18px;margin-bottom:10px;color:white"><strong>📈 Performance Trends</strong> — Track student progress over time</div>',unsafe_allow_html=True)
