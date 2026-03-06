@@ -730,7 +730,7 @@ COUNTRIES=["Liberia","Sierra Leone","Ghana","Nigeria","Kenya","Uganda","Tanzania
 FLAGS={"Liberia":"🇱🇷","Sierra Leone":"🇸🇱","Ghana":"🇬🇭","Nigeria":"🇳🇬","Kenya":"🇰🇪","Uganda":"🇺🇬","Tanzania":"🇹🇿","Ethiopia":"🇪🇹","Senegal":"🇸🇳","Cameroon":"🇨🇲","Gambia":"🇬🇲","Guinea":"🇬🇳","Côte d'Ivoire":"🇨🇮","Mali":"🇲🇱","Burkina Faso":"🇧🇫","Rwanda":"🇷🇼","Malawi":"🇲🇼","Zambia":"🇿🇲","Zimbabwe":"🇿🇼","Mozambique":"🇲🇿","South Africa":"🇿🇦","Botswana":"🇧🇼","Namibia":"🇳🇦","DRC":"🇨🇩","Angola":"🇦🇴","Togo":"🇹🇬","Benin":"🇧🇯","Niger":"🇳🇪","Chad":"🇹🇩","Somalia":"🇸🇴","Eritrea":"🇪🇷","Djibouti":"🇩🇯","South Sudan":"🇸🇸","Sudan":"🇸🇩","Central African Republic":"🇨🇫","Republic of Congo":"🇨🇬","Gabon":"🇬🇦","Equatorial Guinea":"🇬🇶","São Tomé and Príncipe":"🇸🇹","Cape Verde":"🇨🇻","Comoros":"🇰🇲","Madagascar":"🇲🇬","Mauritius":"🇲🇺","Seychelles":"🇸🇨","Eswatini":"🇸🇿","Lesotho":"🇱🇸","Burundi":"🇧🇮","Guinea-Bissau":"🇬🇼"}
 FLAG_CODES={"Liberia":"lr","Sierra Leone":"sl","Ghana":"gh","Nigeria":"ng","Kenya":"ke","Uganda":"ug","Tanzania":"tz","Ethiopia":"et","Senegal":"sn","Cameroon":"cm","Gambia":"gm","Guinea":"gn","Côte d'Ivoire":"ci","Mali":"ml","Burkina Faso":"bf","Rwanda":"rw","Malawi":"mw","Zambia":"zm","Zimbabwe":"zw","Mozambique":"mz","South Africa":"za","Botswana":"bw","Namibia":"na","DRC":"cd","Angola":"ao","Togo":"tg","Benin":"bj","Niger":"ne","Chad":"td","Somalia":"so","Eritrea":"er","Djibouti":"dj","South Sudan":"ss","Sudan":"sd","Central African Republic":"cf","Republic of Congo":"cg","Gabon":"ga","Equatorial Guinea":"gq","São Tomé and Príncipe":"st","Cape Verde":"cv","Comoros":"km","Madagascar":"mg","Mauritius":"mu","Seychelles":"sc","Eswatini":"sz","Lesotho":"ls","Burundi":"bi","Guinea-Bissau":"gw"}
 GRADES=["9th Grade","10th Grade","11th Grade","12th Grade","12th Grade (WASSCE Prep)"]
-SUBJECTS=["Mathematics","English Language","Social Studies","Physics","Chemistry","Biology","Economics","Government / Civics","Literature in English","History","Geography","Agriculture","French","Computer Studies / ICT","Physical Education"]
+SUBJECTS=["Mathematics","English Language","Social Studies","Physics","Chemistry","Biology","Economics","Government / Civics","Literature in English","History","Geography","Agriculture","French","Religious Studies","Business Management","Accounting","Computer Studies / ICT","Physical Education"]
 TOPICS={"Mathematics":["Number and Numeration","Fractions and Decimals","Percentages","Ratio and Proportion","Algebraic Expressions","Linear Equations","Quadratic Equations","Simultaneous Equations","Sets and Venn Diagrams","Trigonometry","Mensuration","Geometry","Statistics","Probability","Vectors","Logarithms","Indices and Surds"],
 "English Language":["Comprehension","Summary Writing","Essay (Narrative)","Essay (Argumentative)","Letter Writing (Formal)","Parts of Speech","Tenses","Active/Passive Voice","Punctuation","Vocabulary","Idioms"],
 "Physics":["Measurement","Motion","Newton's Laws","Work Energy Power","Simple Machines","Pressure","Heat Transfer","Gas Laws","Waves","Sound","Light","Electricity","Ohm's Law"],
@@ -943,7 +943,7 @@ EXTRAS=["Differentiation","Formative assessment","Take-home activity","WASSCE al
 # French dropdown translations (display→English value for AI)
 FR_TASKS={"Plan de cours":"detailed lesson plan","Quiz (10 Q)":"10-question quiz with answer key","Quiz (20 Q)":"20-question quiz","QCM WASSCE (50)":"50 WASSCE-style MCQs","Théorie WASSCE":"WASSCE theory questions","Examen BECE":"BECE-style exam","Devoirs":"homework with minimal resources","Activité de groupe":"group activity","Compréhension écrite":"reading passage with questions","Pratique sans labo":"hands-on zero-cost activity","Grille d'évaluation":"grading rubric","Guide stratégique":"teaching strategies","Plan hebdomadaire":"5-day scheme of work","Plan trimestriel":"term plan","Rattrapage":"catch-up material","Notes de révision":"revision guide","Jeu éducatif":"zero-cost teaching game","Leçon illustrée (image IA)":"lesson with AI-generated visual"}
 FR_GRADES=["9e année","10e année","11e année","12e année","12e année (WASSCE Prép)"]
-FR_SUBJECTS=["Mathématiques","Langue anglaise","Sciences intégrées","Études sociales","Physique","Chimie","Biologie","Économie","Gouvernement / Éducation civique","Littérature anglaise","Histoire","Géographie","Agriculture","Français","Informatique / TIC","Éducation physique","Art / Arts créatifs","Musique"]
+FR_SUBJECTS=["Mathématiques","Langue anglaise","Sciences intégrées","Études sociales","Physique","Chimie","Biologie","Économie","Gouvernement / Éducation civique","Littérature anglaise","Histoire","Géographie","Agriculture","Français","Études religieuses","Gestion des affaires","Comptabilité","Informatique / TIC","Éducation physique","Art / Arts créatifs","Musique"]
 FR_SIZES={"Petit (<25)":"<25 students","Moyen (25-40)":"25-40","Grand (40-60)":"40-60","Très grand (60+)":"60+"}
 FR_RESOURCES={"Tableau noir seul":"chalkboard/chalk only","+ manuels partagés":"chalkboard + shared textbooks","+ polycopiés":"+ printable handouts","Ordinateur/projecteur":"occasional tech","Téléphones/tablettes":"student devices","Bien équipé":"regular tech"}
 FR_ABILITY={"Mixte":"mixed-ability","En difficulté":"below grade level","Au niveau":"at expected level","Avancé":"needs challenge","Inclusif":"includes learning differences"}
@@ -953,7 +953,7 @@ FR_REGIONS={"Urbain":"urban","Banlieue":"suburban","Rural":"rural"}
 # Swahili dropdown translations
 SW_TASKS={"Mpango wa Somo":"detailed lesson plan","Maswali (10)":"10-question quiz with answer key","Maswali (20)":"20-question quiz","QCM WASSCE (50)":"50 WASSCE-style MCQs","Nadharia WASSCE":"WASSCE theory questions","Mtihani BECE":"BECE-style exam","Kazi ya Nyumbani":"homework with minimal resources","Shughuli ya Kikundi":"group activity","Ufahamu wa Kusoma":"reading passage with questions","Mazoezi bila Maabara":"hands-on zero-cost activity","Rubriiki":"grading rubric","Mwongozo wa Mkakati":"teaching strategies","Mpango wa Wiki":"5-day scheme of work","Mpango wa Muhula":"term plan","Nyenzo za Kufidia":"catch-up material","Muhtasari wa Masomo":"revision guide","Mchezo wa Kielimu":"zero-cost teaching game","Somo Lenye Mchoro (picha AI)":"lesson with AI-generated visual"}
 SW_GRADES=["Darasa la 9","Darasa la 10","Darasa la 11","Darasa la 12","Darasa la 12 (WASSCE)"]
-SW_SUBJECTS=["Hisabati","Lugha ya Kiingereza","Sayansi Jumuishi","Maarifa ya Jamii","Fizikia","Kemia","Biolojia","Uchumi","Serikali / Uraia","Fasihi ya Kiingereza","Historia","Jiografia","Kilimo","Kifaransa","Kompyuta / TEHAMA","Uchora Ufundi","Elimu ya Mwili","Sanaa / Sanaa Bunifu","Muziki"]
+SW_SUBJECTS=["Hisabati","Lugha ya Kiingereza","Sayansi Jumuishi","Maarifa ya Jamii","Fizikia","Kemia","Biolojia","Uchumi","Serikali / Uraia","Fasihi ya Kiingereza","Historia","Jiografia","Kilimo","Kifaransa","Masomo ya Dini","Usimamizi wa Biashara","Uhasibu","Kompyuta / TEHAMA","Uchora Ufundi","Elimu ya Mwili","Sanaa / Sanaa Bunifu","Muziki"]
 SW_SIZES={"Ndogo (<25)":"<25 students","Wastani (25-40)":"25-40","Kubwa (40-60)":"40-60","Kubwa sana (60+)":"60+"}
 SW_RESOURCES={"Ubao tu":"chalkboard/chalk only","+ vitabu vya kushiriki":"chalkboard + shared textbooks","+ nakala":"+ printable handouts","Kompyuta/projekta":"occasional tech","Simu/tableti":"student devices","Vifaa kamili":"regular tech"}
 SW_ABILITY={"Mchanganyiko":"mixed-ability","Wanaoshindwa":"below grade level","Kiwango sahihi":"at expected level","Wenye uwezo":"needs challenge","Jumuishi":"includes learning differences"}
@@ -3195,36 +3195,144 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     else:
                         st.warning(f"Could not generate card: {card_fname}")
         if st.session_state.students:
-            st.markdown("---"); st.markdown(f"#### {ico(16)} {T('grade_work')}",unsafe_allow_html=True)
-            gs=st.selectbox("Student:",[s["name"] for s in st.session_state.students],key="gs")
-            gw_col, gw_mic = st.columns([5,1])
-            with gw_col:
-                gw=st.text_area(T("students_work"),height=100,key="gw")
-            with gw_mic:
-                st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
-                grade_audio=st.audio_input("🎤",key="grade_mic",label_visibility="collapsed")
-            if grade_audio:
-                with st.spinner(T("transcribing")):
-                    grade_text=transcribe_audio(grade_audio.read())
-                if grade_text:
-                    st.session_state["gw"]=grade_text; st.rerun()
-            gsub=st.selectbox(f"{T('subject')}:",_subjects(),key="gsub"); gt=st.text_input(f"{T('topic')}:",key="gt")
-            _gsub_en=_to_en_subj(gsub)
-            if st.button(T("grade_btn"),type="primary",key="gb") and gw.strip():
-                sel=next((s for s in st.session_state.students if s["name"]==gs),None)
-                if sel:
-                    info=f'{sel["name"]},{sel["sib"]}sib,Mom:{sel["mom"]},SM:{sel["sm"]},Works:{sel["wk"]},Comp:{sel["cp"]},{sel["nt"]}'
-                    with st.spinner("Grading..."):
-                        r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_gsub_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),f"Grade:\nSTUDENT:{info}\n{_gsub_en} {gt}\n\nWORK:\n{gw}\n\nGive: grade, praise, corrections, tips, next step.")
-                    _fb={"en":"Feedback","fr":"Commentaires","sw":"Maoni"}.get(_lang_key(),"Feedback")
-                    st.markdown(f'<div class="rh"><h3>{ico(16)} {_fb}: {gs}</h3></div><div class="rb">{highlight_result(r)}</div>',unsafe_allow_html=True)
-                    if len(allr)>1:
-                        with st.expander(f"{T('see_all')} {len(allr)} {T('model_responses')}"):
-                            for mn,mr in allr.items():
-                                mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mn,"⚪")
-                                st.markdown(f"**{mico} {mn}{'  ✅' if mn==m else ''}**"); st.markdown(mr); st.markdown("---")
-                    email_result(r, f"Teacher Pehpeh — Grade Feedback for {gs} ({gsub}, {grade})", "grade")
-                    tts_player(r, "grade")
+            st.markdown("---")
+            st.markdown(f"#### {ico(16)} {T('grade_work')}",unsafe_allow_html=True)
+
+            # ── Student + subject + topic + date (shared by both modes) ──
+            _gc1, _gc2 = st.columns(2)
+            with _gc1:
+                gs = st.selectbox("Student:", [s["name"] for s in st.session_state.students], key="gs")
+            with _gc2:
+                gsub = st.selectbox(f"{T('subject')}:", _subjects(), key="gsub")
+            _gc3, _gc4, _gc5 = st.columns(3)
+            with _gc3:
+                gt = st.text_input("Topic / Assignment:", key="gt", placeholder="e.g., Algebra Quiz 1")
+            with _gc4:
+                import datetime as _gdt
+                gdate = st.date_input("Date:", value=_gdt.date.today(), key="gdate")
+            with _gc5:
+                # Grade level override — teacher may want to note a step-back grade
+                _all_grade_opts = ["(Use classroom grade)"] + GRADES
+                _ggrade_override = st.selectbox("Grade level:", _all_grade_opts, key="ggrade_override",
+                    help="Override if you're testing the student at a lower level")
+            _gsub_en = _to_en_subj(gsub)
+            _effective_grade = _grade_en if _ggrade_override == "(Use classroom grade)" else _to_en_grade(_ggrade_override)
+
+            # ── Entry mode toggle ──
+            _gmode = st.radio("How are you entering this grade?",
+                ["✏️ Student typed/dictated work (AI grades it)",
+                 "🔢 Enter score manually (you already marked it)"],
+                key="gmode", horizontal=True)
+            st.markdown("<div style='margin-top:4px'></div>", unsafe_allow_html=True)
+
+            if "✏️" in _gmode:
+                # ── Mode A: AI grades typed/spoken work ──
+                gw_col, gw_mic = st.columns([5, 1])
+                with gw_col:
+                    gw = st.text_area(T("students_work"), height=110, key="gw",
+                                      placeholder="Type or paste the student's answer here, then click Grade...")
+                with gw_mic:
+                    st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
+                    grade_audio = st.audio_input("🎤", key="grade_mic", label_visibility="collapsed")
+                if grade_audio:
+                    with st.spinner(T("transcribing")):
+                        grade_text = transcribe_audio(grade_audio.read())
+                    if grade_text:
+                        st.session_state["gw"] = grade_text; st.rerun()
+
+                _can_grade = bool(st.session_state.get("gw","").strip())
+                if not _can_grade:
+                    st.caption("⚠️ Enter the student's work above before grading.")
+                if st.button(T("grade_btn"), type="primary", key="gb", disabled=not _can_grade):
+                    sel = next((s for s in st.session_state.students if s["name"] == gs), None)
+                    if sel:
+                        gw = st.session_state.get("gw","")
+                        info = f'{sel["name"]},{sel["sib"]}sib,Mom:{sel["mom"]},SM:{sel["sm"]},Works:{sel["wk"]},Comp:{sel["cp"]},{sel["nt"]}'
+                        _grade_prompt = (
+                            f"Grade this student's work. FIRST LINE must be: SCORE: XX/100\n"
+                            f"STUDENT: {info}\n"
+                            f"SUBJECT: {_gsub_en} | GRADE: {_effective_grade} | TOPIC: {gt or 'General'}\n\n"
+                            f"WORK:\n{gw}\n\n"
+                            "INSTRUCTIONS:\n"
+                            "1. SCORE: XX/100 on the very first line.\n"
+                            "2. Start with ONE specific thing they got RIGHT — celebrate it warmly.\n"
+                            "3. Point out errors clearly but kindly. No jargon.\n"
+                            "4. Give 2-3 concrete corrections the student can act on TODAY without internet.\n"
+                            "5. ADAPTIVE SUPPORT: If score < 60, suggest the student revisit a foundational "
+                            f"concept from a lower level (e.g. if this is {_effective_grade} work, suggest "
+                            "reviewing the same topic from 1-2 grades below). Frame it positively: "
+                            "'Before we move forward, let us make sure the foundation is solid.'\n"
+                            "6. OFFLINE-FRIENDLY next steps ONLY — no 'watch a YouTube video' or 'Google it'. "
+                            "Suggest: re-read the textbook section, work through 3 practice problems, "
+                            "study with a classmate, draw a diagram, ask the teacher during free period or "
+                            "before/after school.\n"
+                            "7. End with one short encouraging sentence — warm, not hollow.\n"
+                            "8. Keep total response under 300 words."
+                        )
+                        with st.spinner("Grading..."):
+                            r, m, allr = best_all(build_stu(_region_val, country, _effective_grade, _gsub_en, _size_val, _res_val, LANGS[lang], _abl_val, info, school_name), _grade_prompt)
+                        # Extract score and save to history
+                        import re as _re2, datetime as _dt2
+                        _sm2 = _re2.search(r'SCORE:\s*(\d+)', r, _re2.IGNORECASE) or _re2.search(r'(\d+)\s*/\s*100', r)
+                        _sc2 = int(_sm2.group(1)) if _sm2 else None
+                        if _sc2 is not None:
+                            st.session_state.grade_history.append({
+                                "student": gs, "subject": _gsub_en,
+                                "topic": gt.strip() or "General", "score": _sc2,
+                                "date": _dt2.datetime.combine(gdate, _dt2.time()).isoformat(),
+                                "grade_level": _effective_grade, "model": m
+                            })
+                        _fb = {"en":"Feedback","fr":"Commentaires","sw":"Maoni"}.get(_lang_key(),"Feedback")
+                        _score_disp = f" — {_sc2}/100" if _sc2 else ""
+                        st.markdown(f'<div class="rh"><h3>{ico(16)} {_fb}: {gs}{_score_disp}</h3></div><div class="rb">{highlight_result(r)}</div>', unsafe_allow_html=True)
+                        if len(allr) > 1:
+                            with st.expander(f"{T('see_all')} {len(allr)} {T('model_responses')}"):
+                                for mn, mr in allr.items():
+                                    mico = {"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mn,"⚪")
+                                    st.markdown(f"**{mico} {mn}{'  ✅' if mn==m else ''}**"); st.markdown(mr); st.markdown("---")
+                        email_result(r, f"Teacher Pehpeh — Grade Feedback for {gs} ({gsub}, {grade})", "grade")
+                        tts_player(r, "grade")
+
+            else:
+                # ── Mode B: Manual score entry ──
+                st.markdown('<div style="background:rgba(212,168,67,.07);border:1px solid rgba(212,168,67,.3);border-radius:10px;padding:14px 18px;margin:6px 0">',unsafe_allow_html=True)
+                _mb1, _mb2 = st.columns(2)
+                with _mb1:
+                    _manual_score = st.number_input("Score (out of 100):", min_value=0, max_value=100,
+                                                    value=50, step=1, key="manual_score")
+                with _mb2:
+                    _manual_notes = st.text_input("Teacher notes (optional):", key="manual_notes",
+                                                  placeholder="e.g., Struggled with fractions, needs review")
+                st.markdown('</div>', unsafe_allow_html=True)
+
+                # Show offline adaptive tip inline when score is low
+                if _manual_score < 60:
+                    _grade_num = int(''.join(c for c in _effective_grade if c.isdigit()) or "9")
+                    _lower_grade = f"{max(6, _grade_num - 2)}th Grade" if _grade_num > 8 else "primary level"
+                    st.markdown(
+                        f'<div style="background:rgba(255,183,77,.08);border-left:3px solid #FFB74D;'
+                        f'border-radius:0 8px 8px 0;padding:10px 14px;margin:6px 0;font-size:.85rem">'
+                        f'<strong style="color:#FFB74D">💡 Score below 60 — suggested support:</strong><br>'
+                        f'<span style="color:#E8D5B0">'
+                        f'• Ask the student to <strong>re-read the textbook section</strong> on this topic<br>'
+                        f'• Try <strong>3 practice problems</strong> from {_lower_grade} on the same concept — build the foundation first<br>'
+                        f'• <strong>Study with a classmate</strong> who understood it — teach each other<br>'
+                        f'• <strong>Draw a diagram</strong> or write out the steps by hand before trying again<br>'
+                        f'• Ask the teacher for <strong>5 minutes before or after school</strong> — not always during class<br>'
+                        f'<em style="font-size:.78rem;opacity:.7">These steps work without internet or extra cost.</em>'
+                        f'</span></div>', unsafe_allow_html=True)
+
+                if st.button("💾 Save Score", type="primary", key="gb_manual"):
+                    import datetime as _dt3
+                    st.session_state.grade_history.append({
+                        "student": gs, "subject": _gsub_en,
+                        "topic": gt.strip() or "General", "score": int(_manual_score),
+                        "date": _dt3.datetime.combine(gdate, _dt3.time()).isoformat(),
+                        "grade_level": _effective_grade, "model": "Manual",
+                        "notes": _manual_notes.strip()
+                    })
+                    st.success(f"✅ Score saved — {gs}: {int(_manual_score)}/100 ({_gsub_en}, {gt or 'General'})")
+                    st.rerun()
 
         # === PHOTO GRADING — Batch scan student work ===
         if st.session_state.students:
