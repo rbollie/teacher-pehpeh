@@ -823,6 +823,8 @@ UI_TEXT={
   "ask_tp":"Ask Teacher Pehpeh","thinking":"⏳ Teacher Pehpeh is thinking...","response_ready":"✅ Response ready!",
   "asking_claude":"🟣 Asking Claude...","asking_chatgpt":"🟢 Asking ChatGPT...","asking_gemini":"🔵 Asking Gemini...",
   "chat_ex1":"How to teach fractions with no textbooks?","chat_ex2":"My students keep failing WASSCE.","chat_ex3":"Managing 60+ students?",
+  "configure_classroom":"⚙️ Configure Your Classroom",
+  "save_config":"💾 Save Configuration","load_config":"📂 Load Configuration",
   "cat_planning":"📋 Planning","cat_assessment":"📝 Assessment","cat_activities":"🎯 Activities","cat_study":"📚 Study Support",
   "cat_tip_planning":"Lesson plans, weekly & term schemes, teaching strategies",
   "cat_tip_assessment":"Quizzes, WASSCE/BECE exam prep, grading rubrics",
@@ -874,6 +876,8 @@ UI_TEXT={
   "ask_tp":"Demandez à Teacher Pehpeh","thinking":"⏳ Teacher Pehpeh réfléchit...","response_ready":"✅ Réponse prête !",
   "asking_claude":"🟣 Consultation de Claude...","asking_chatgpt":"🟢 Consultation de ChatGPT...","asking_gemini":"🔵 Consultation de Gemini...",
   "chat_ex1":"Comment enseigner les fractions sans manuels ?","chat_ex2":"Mes élèves échouent au WASSCE.","chat_ex3":"Gérer plus de 60 élèves ?",
+  "configure_classroom":"⚙️ Configurer votre classe",
+  "save_config":"💾 Enregistrer la configuration","load_config":"📂 Charger la configuration",
   "cat_planning":"📋 Planification","cat_assessment":"📝 Évaluation","cat_activities":"🎯 Activités","cat_study":"📚 Soutien scolaire",
   "cat_tip_planning":"Plans de cours, plans hebdomadaires et trimestriels, stratégies d'enseignement",
   "cat_tip_assessment":"Quiz, préparation WASSCE/BECE, grilles d'évaluation",
@@ -925,11 +929,13 @@ UI_TEXT={
   "ask_tp":"Muulize Teacher Pehpeh","thinking":"⏳ Teacher Pehpeh anafikiria...","response_ready":"✅ Jibu liko tayari!",
   "asking_claude":"🟣 Kuuliza Claude...","asking_chatgpt":"🟢 Kuuliza ChatGPT...","asking_gemini":"🔵 Kuuliza Gemini...",
   "chat_ex1":"Jinsi ya kufundisha sehemu bila vitabu?","chat_ex2":"Wanafunzi wangu wanashindwa WASSCE.","chat_ex3":"Kusimamia wanafunzi 60+?",
+  "configure_classroom":"⚙️ Sanidi Darasa Lako",
+  "save_config":"💾 Hifadhi Usanidi","load_config":"📂 Pakia Usanidi",
   "cat_planning":"📋 Mipango","cat_assessment":"📝 Tathmini","cat_activities":"🎯 Shughuli","cat_study":"📚 Msaada wa Masomo",
   "cat_tip_planning":"Mipango ya masomo, mpango wa wiki na muhula, mikakati ya kufundisha",
   "cat_tip_assessment":"Maswali, maandalizi ya WASSCE/BECE, vikwazo vya tathmini",
   "cat_tip_activities":"Kazi za nyumbani, kazi ya kikundi, ufahamu wa kusoma, michezo ya elimu",
-  "cat_tip_study":"Maelezo ya marudio na nyenzo za kusaidia wanafunzi wanaopungukiwa",
+  "cat_tip_study":"Maelezo ya marudio na nyenzo za kusaidia wanafunzi",
   "combining":"🔀 Kuchanganya bora zaidi...","creating_img":"🎨 Kuunda mchoro...",
   "photo_hint":"📸 Pakia au piga picha kumuuliza Teacher Pehpeh",
   "photo_upload":"Pakia picha","photo_camera":"📷 Piga picha",
@@ -2096,7 +2102,6 @@ def main():
         # Country first - drives auto language
         country=st.selectbox(T("country"),COUNTRIES,key="country_sel")
         # Auto-detect language from country (user can still override)
-        # Auto-switch language whenever the country changes (including switching back)
         if st.session_state.get("_last_auto_country") != country:
             st.session_state["_last_auto_country"] = country
             if country in FRANCOPHONE: st.session_state.lang_sel="Français"
@@ -2156,7 +2161,7 @@ def main():
             st.markdown(f'<div style="background:linear-gradient(135deg,#3D0C0C,#5A1515);border:2px solid #D4A843;border-radius:10px;padding:10px 16px;margin:6px 0;box-shadow:0 2px 8px rgba(212,168,67,.2)">👤 {_t_display}</div>',unsafe_allow_html=True)
         if "profile_set" not in st.session_state: st.session_state.profile_set=False
         # All classroom settings inside collapsible Configure block
-        with st.expander("Configure Your Classroom", expanded=False):
+        with st.expander(T("configure_classroom"), expanded=False):
             if not st.session_state.profile_set:
                 st.markdown('<div style="font-size:.85rem;color:#F0D5D5;margin-bottom:8px">Select your school setting, grade, subject, and preferences below. Save your profile to reuse later!</div>',unsafe_allow_html=True)
             region=st.selectbox(T("setting"),list(_regions().keys()),label_visibility="collapsed",format_func=lambda x: f"📍 Setting: {x}", help="Urban, rural, or remote — shapes the type of content generated",key="cfg_region")
@@ -2202,13 +2207,13 @@ def main():
         # ── Save configuration ────────────────────────────────────────────
         _pf1,_pf2=st.columns(2)
         with _pf1:
-            if st.button("💾 Save Configuration",use_container_width=True,key="sv_prof"):
+            if st.button(T("save_config"),use_container_width=True,key="sv_prof"):
                 st.session_state.saved_profile={"school":school_name,"teacher":teacher_name,"phone":teacher_phone,"country":country,"lang":lang,"region":region,"grade":grade,"subject":subject,"class_size":clsz,"ability":abl,"moe_on":moe_on,"mano_on":mano_on,"task_cat":st.session_state.get("task_cat","📋 Planning"),"task":st.session_state.get("task_sel",""),"agent":st.session_state.get("agent_pick","")}
                 st.session_state.profile_set=True
                 st.session_state["_show_save_opts"]=True
                 st.rerun()
         with _pf2:
-            if st.button("📂 Load Configuration",use_container_width=True,key="ld_prof"):
+            if st.button(T("load_config"),use_container_width=True,key="ld_prof"):
                 st.session_state["_show_load_opts"]=not st.session_state.get("_show_load_opts",False)
                 st.session_state["_show_save_opts"]=False
                 st.rerun()
@@ -2477,7 +2482,6 @@ def main():
 
         # ── Category pill buttons ──
         if "task_cat" not in st.session_state: st.session_state.task_cat="📋 Planning"
-        # Translated display labels — session state always stores the English key
         _CAT_LABELS = {
             "📋 Planning":      T("cat_planning"),
             "📝 Assessment":    T("cat_assessment"),
@@ -2497,7 +2501,7 @@ def main():
                 if st.button(_CAT_LABELS[_cname], key=f"cat_{_ci}", use_container_width=True,
                              type="primary" if _is_cat else "secondary",
                              help=_CAT_TIPS.get(_cname,"")):
-                    st.session_state.task_cat = _cname   # always English key
+                    st.session_state.task_cat = _cname   # always the English key
                     st.session_state.pop("task_sel", None)
                     st.rerun()
 
