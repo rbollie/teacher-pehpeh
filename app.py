@@ -3211,7 +3211,6 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                             for _sname in _IBT_SUBJ_SHEETS:
                                 if _sname not in _xf.sheet_names: continue
                                 import openpyxl as _oxl
-                                _swb=_oxl.load_workbook(_xf,data_only=True) if hasattr(_xf,'_reader') else None
                                 _sdf=pd.read_excel(_xf,sheet_name=_sname,header=None)
                                 _subj_data[_sname]={}
                                 for _row in _sdf.iloc[9:].itertuples(index=False):  # skip rows 1-9 (0-idx 0-8)
