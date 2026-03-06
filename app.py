@@ -3166,29 +3166,24 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     df=None
                     _source_note=""
                     _NAME_ALIASES=["name","student","student_name","student name","full name","full_name","pupil"]
-
                     def _name_col(frame):
                         for c in frame.columns:
                             if str(c).strip().lower() in _NAME_ALIASES: return c
                         return None
-
                     if uploaded.name.lower().endswith(".csv"):
                         df=pd.read_csv(uploaded)
                         _source_note="CSV"
                     else:
-                        import openpyxl as _oxl
                         _xf=pd.ExcelFile(uploaded)
-
-                        # ── Priority 1: IBT Grade Tracker "Roster" sheet ──────────
+                        # Priority 1: IBT Grade Tracker "Roster" sheet
+                        # Layout: row 0=title, row 1=subtitle, row 2=column headers, row 3+=students
                         if "Roster" in _xf.sheet_names:
-                            # Roster layout: row 1 = decorative title, row 2 = column headers, row 3+ = students
-                            _rdf=pd.read_excel(_xf,sheet_name="Roster",header=1)
+                            _rdf=pd.read_excel(_xf,sheet_name="Roster",header=2)
                             _rdf.dropna(how="all",inplace=True)
                             if _name_col(_rdf) is not None:
                                 df=_rdf
                                 _source_note="📋 Roster sheet (IBT Grade Tracker)"
-
-                        # ── Priority 2: Auto-detect header row on first sheet ─────
+                        # Priority 2: Auto-detect header row on first sheet
                         if df is None:
                             for _hdr_row in [0,1,2]:
                                 _tdf=pd.read_excel(_xf,sheet_name=_xf.sheet_names[0],header=_hdr_row)
@@ -3196,11 +3191,9 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                                     df=_tdf
                                     _source_note=f"Sheet: {_xf.sheet_names[0]}"
                                     break
-
                     if df is None:
                         st.error("❌ Could not find a student name column. Expected a 'Roster' sheet or a column named 'Name'.")
                     else:
-                        # Normalize column names
                         df.columns=[c.strip().replace(" ","_") for c in df.columns]
                         col_map={"name":"Name","student":"Name","student_name":"Name","full_name":"Name","pupil":"Name",
                                  "siblings":"Siblings","sib":"Siblings",
@@ -3210,19 +3203,16 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                                  "computer":"Computer","computer_access":"Computer","comp":"Computer",
                                  "notes":"Notes","note":"Notes","comments":"Notes"}
                         df.columns=[col_map.get(c.lower(),c) for c in df.columns]
-
-                        # Drop fully empty rows and rows where Name is blank/NaN
                         df.dropna(how="all",inplace=True)
                         if "Name" in df.columns:
                             df=df[df["Name"].notna()]
-                            df=df[df["Name"].astype(str).str.strip().str.lower().isin(["","nan","none"])==False]
-
+                            df=df[~df["Name"].astype(str).str.strip().str.lower().isin(["","nan","none"])]
                         if "Name" not in df.columns:
                             st.error("❌ Spreadsheet must have a 'Name' column.")
                         else:
-                            if _source_note:
-                                st.caption(f"Source: {_source_note}")
-                            st.dataframe(df[["Name"]+[c for c in ["Siblings","Mom_Edu","Single_Mom","Works","Computer","Notes"] if c in df.columns]],use_container_width=True,height=200)
+                            if _source_note: st.caption(f"Source: {_source_note}")
+                            _preview_cols=["Name"]+[c for c in ["Siblings","Mom_Edu","Single_Mom","Works","Computer","Notes"] if c in df.columns]
+                            st.dataframe(df[_preview_cols],use_container_width=True,height=200)
                             _valid_count=int(df["Name"].notna().sum())
                             st.markdown(f'<div style="color:var(--text-secondary);font-size:.85rem">📊 Found <strong>{_valid_count}</strong> students</div>',unsafe_allow_html=True)
                             if st.button(f"✅ Import {_valid_count} Students",type="primary",key="bulk_import"):
@@ -3231,7 +3221,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                                 for _,row in df.iterrows():
                                     name=str(row.get("Name","")).strip()
                                     if not name or name.lower() in ("nan","none",""): continue
-                                    if name in _existing: continue  # skip duplicates
+                                    if name in _existing: continue
                                     sib_v=str(row.get("Siblings","0-4")).strip()
                                     if sib_v not in ["0-4","5-8","8+"]: sib_v="0-4"
                                     mom_v=str(row.get("Mom_Edu","Unknown")).strip()
