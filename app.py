@@ -823,13 +823,6 @@ UI_TEXT={
   "ask_tp":"Ask Teacher Pehpeh","thinking":"⏳ Teacher Pehpeh is thinking...","response_ready":"✅ Response ready!",
   "asking_claude":"🟣 Asking Claude...","asking_chatgpt":"🟢 Asking ChatGPT...","asking_gemini":"🔵 Asking Gemini...",
   "chat_ex1":"How to teach fractions with no textbooks?","chat_ex2":"My students keep failing WASSCE.","chat_ex3":"Managing 60+ students?",
-  "configure_classroom":"⚙️ Configure Your Classroom",
-  "save_config":"💾 Save Configuration","load_config":"📂 Load Configuration",
-  "cat_planning":"📋 Planning","cat_assessment":"📝 Assessment","cat_activities":"🎯 Activities","cat_study":"📚 Study Support",
-  "cat_tip_planning":"Lesson plans, weekly & term schemes, teaching strategies",
-  "cat_tip_assessment":"Quizzes, WASSCE/BECE exam prep, grading rubrics",
-  "cat_tip_activities":"Homework, group work, reading comprehension, educational games",
-  "cat_tip_study":"Revision notes and remedial catch-up material",
   "combining":"🔀 Combining the best...","creating_img":"🎨 Creating illustration...",
   "photo_hint":"📸 Upload or snap a photo to ask Teacher Pehpeh about it",
   "photo_upload":"Upload image","photo_camera":"📷 Take photo",
@@ -876,13 +869,6 @@ UI_TEXT={
   "ask_tp":"Demandez à Teacher Pehpeh","thinking":"⏳ Teacher Pehpeh réfléchit...","response_ready":"✅ Réponse prête !",
   "asking_claude":"🟣 Consultation de Claude...","asking_chatgpt":"🟢 Consultation de ChatGPT...","asking_gemini":"🔵 Consultation de Gemini...",
   "chat_ex1":"Comment enseigner les fractions sans manuels ?","chat_ex2":"Mes élèves échouent au WASSCE.","chat_ex3":"Gérer plus de 60 élèves ?",
-  "configure_classroom":"⚙️ Configurer votre classe",
-  "save_config":"💾 Enregistrer la configuration","load_config":"📂 Charger la configuration",
-  "cat_planning":"📋 Planification","cat_assessment":"📝 Évaluation","cat_activities":"🎯 Activités","cat_study":"📚 Soutien scolaire",
-  "cat_tip_planning":"Plans de cours, plans hebdomadaires et trimestriels, stratégies d'enseignement",
-  "cat_tip_assessment":"Quiz, préparation WASSCE/BECE, grilles d'évaluation",
-  "cat_tip_activities":"Devoirs, travail de groupe, compréhension de lecture, jeux éducatifs",
-  "cat_tip_study":"Notes de révision et rattrapage scolaire",
   "combining":"🔀 Combinaison des meilleurs...","creating_img":"🎨 Création d'illustration...",
   "photo_hint":"📸 Téléchargez ou prenez une photo pour demander à Teacher Pehpeh",
   "photo_upload":"Télécharger image","photo_camera":"📷 Prendre une photo",
@@ -929,13 +915,6 @@ UI_TEXT={
   "ask_tp":"Muulize Teacher Pehpeh","thinking":"⏳ Teacher Pehpeh anafikiria...","response_ready":"✅ Jibu liko tayari!",
   "asking_claude":"🟣 Kuuliza Claude...","asking_chatgpt":"🟢 Kuuliza ChatGPT...","asking_gemini":"🔵 Kuuliza Gemini...",
   "chat_ex1":"Jinsi ya kufundisha sehemu bila vitabu?","chat_ex2":"Wanafunzi wangu wanashindwa WASSCE.","chat_ex3":"Kusimamia wanafunzi 60+?",
-  "configure_classroom":"⚙️ Sanidi Darasa Lako",
-  "save_config":"💾 Hifadhi Usanidi","load_config":"📂 Pakia Usanidi",
-  "cat_planning":"📋 Mipango","cat_assessment":"📝 Tathmini","cat_activities":"🎯 Shughuli","cat_study":"📚 Msaada wa Masomo",
-  "cat_tip_planning":"Mipango ya masomo, mpango wa wiki na muhula, mikakati ya kufundisha",
-  "cat_tip_assessment":"Maswali, maandalizi ya WASSCE/BECE, vikwazo vya tathmini",
-  "cat_tip_activities":"Kazi za nyumbani, kazi ya kikundi, ufahamu wa kusoma, michezo ya elimu",
-  "cat_tip_study":"Maelezo ya marudio na nyenzo za kusaidia wanafunzi",
   "combining":"🔀 Kuchanganya bora zaidi...","creating_img":"🎨 Kuunda mchoro...",
   "photo_hint":"📸 Pakia au piga picha kumuuliza Teacher Pehpeh",
   "photo_upload":"Pakia picha","photo_camera":"📷 Piga picha",
@@ -2102,8 +2081,9 @@ def main():
         # Country first - drives auto language
         country=st.selectbox(T("country"),COUNTRIES,key="country_sel")
         # Auto-detect language from country (user can still override)
-        if st.session_state.get("_last_auto_country") != country:
-            st.session_state["_last_auto_country"] = country
+        if "lang_auto_done" not in st.session_state: st.session_state.lang_auto_done=set()
+        if country not in st.session_state.lang_auto_done:
+            st.session_state.lang_auto_done.add(country)
             if country in FRANCOPHONE: st.session_state.lang_sel="Français"
             elif country in SWAHILI_COUNTRIES: st.session_state.lang_sel="Kiswahili"
             else: st.session_state.lang_sel="English"
@@ -2118,6 +2098,7 @@ def main():
 
         _sn = st.session_state["_school_confirmed"]
         classroom_label=f"{_sn} {_cls_word}" if _sn.strip() else T("my_classroom")
+        st.session_state["_classroom_label"] = classroom_label
         _logo_b64=get_b64()
         if _logo_b64:
             _logo_html=f'<img src="data:image/png;base64,{_logo_b64}" style="height:36px;width:36px;vertical-align:middle;border-radius:50%;margin-right:8px;filter:drop-shadow(0 2px 6px rgba(212,168,67,.4))">'
@@ -2161,7 +2142,7 @@ def main():
             st.markdown(f'<div style="background:linear-gradient(135deg,#3D0C0C,#5A1515);border:2px solid #D4A843;border-radius:10px;padding:10px 16px;margin:6px 0;box-shadow:0 2px 8px rgba(212,168,67,.2)">👤 {_t_display}</div>',unsafe_allow_html=True)
         if "profile_set" not in st.session_state: st.session_state.profile_set=False
         # All classroom settings inside collapsible Configure block
-        with st.expander(T("configure_classroom"), expanded=False):
+        with st.expander("Configure Your Classroom", expanded=False):
             if not st.session_state.profile_set:
                 st.markdown('<div style="font-size:.85rem;color:#F0D5D5;margin-bottom:8px">Select your school setting, grade, subject, and preferences below. Save your profile to reuse later!</div>',unsafe_allow_html=True)
             region=st.selectbox(T("setting"),list(_regions().keys()),label_visibility="collapsed",format_func=lambda x: f"📍 Setting: {x}", help="Urban, rural, or remote — shapes the type of content generated",key="cfg_region")
@@ -2207,13 +2188,13 @@ def main():
         # ── Save configuration ────────────────────────────────────────────
         _pf1,_pf2=st.columns(2)
         with _pf1:
-            if st.button(T("save_config"),use_container_width=True,key="sv_prof"):
+            if st.button("💾 Save Configuration",use_container_width=True,key="sv_prof"):
                 st.session_state.saved_profile={"school":school_name,"teacher":teacher_name,"phone":teacher_phone,"country":country,"lang":lang,"region":region,"grade":grade,"subject":subject,"class_size":clsz,"ability":abl,"moe_on":moe_on,"mano_on":mano_on,"task_cat":st.session_state.get("task_cat","📋 Planning"),"task":st.session_state.get("task_sel",""),"agent":st.session_state.get("agent_pick","")}
                 st.session_state.profile_set=True
                 st.session_state["_show_save_opts"]=True
                 st.rerun()
         with _pf2:
-            if st.button(T("load_config"),use_container_width=True,key="ld_prof"):
+            if st.button("📂 Load Configuration",use_container_width=True,key="ld_prof"):
                 st.session_state["_show_load_opts"]=not st.session_state.get("_show_load_opts",False)
                 st.session_state["_show_save_opts"]=False
                 st.rerun()
@@ -2482,26 +2463,20 @@ def main():
 
         # ── Category pill buttons ──
         if "task_cat" not in st.session_state: st.session_state.task_cat="📋 Planning"
-        _CAT_LABELS = {
-            "📋 Planning":      T("cat_planning"),
-            "📝 Assessment":    T("cat_assessment"),
-            "🎯 Activities":    T("cat_activities"),
-            "📚 Study Support": T("cat_study"),
-        }
         _CAT_TIPS = {
-            "📋 Planning":      T("cat_tip_planning"),
-            "📝 Assessment":    T("cat_tip_assessment"),
-            "🎯 Activities":    T("cat_tip_activities"),
-            "📚 Study Support": T("cat_tip_study"),
+            "📋 Planning":     "Lesson plans, weekly & term schemes, teaching strategies",
+            "📝 Assessment":   "Quizzes, WASSCE/BECE exam prep, grading rubrics",
+            "🎯 Activities":   "Homework, group work, reading comprehension, educational games",
+            "📚 Study Support":"Revision notes and remedial catch-up material",
         }
         _cat_cols = st.columns(len(_TASK_CATEGORIES))
         for _ci, _cname in enumerate(_TASK_CATEGORIES):
             with _cat_cols[_ci]:
                 _is_cat = st.session_state.task_cat == _cname
-                if st.button(_CAT_LABELS[_cname], key=f"cat_{_ci}", use_container_width=True,
+                if st.button(_cname, key=f"cat_{_ci}", use_container_width=True,
                              type="primary" if _is_cat else "secondary",
                              help=_CAT_TIPS.get(_cname,"")):
-                    st.session_state.task_cat = _cname   # always the English key
+                    st.session_state.task_cat = _cname
                     st.session_state.pop("task_sel", None)
                     st.rerun()
 
@@ -3193,7 +3168,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             # Student ID Card display with save options
             if st.session_state.get(f"_show_card_{i}"):
                 with st.container():
-                    card_bytes, card_fname = generate_student_card(s, school_name, _grade_en, _subj_en, country)
+                    card_bytes, card_fname = generate_student_card(s, st.session_state.get("_classroom_label", school_name), _grade_en, _subj_en, country)
                     if card_bytes:
                         st.image(card_bytes, caption=f"Student ID — {s['name']}", use_container_width=True)
                         _save_label={"en":"Save card to...","fr":"Enregistrer la carte...","sw":"Hifadhi kadi..."}.get(_lang_key(),"Save card to...")
@@ -3241,7 +3216,18 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                 if sel:
                     info=f'{sel["name"]},{sel["sib"]}sib,Mom:{sel["mom"]},SM:{sel["sm"]},Works:{sel["wk"]},Comp:{sel["cp"]},{sel["nt"]}'
                     with st.spinner("Grading..."):
-                        r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_gsub_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),f"Grade:\nSTUDENT:{info}\n{_gsub_en} {gt}\n\nWORK:\n{gw}\n\nGive: grade, praise, corrections, tips, next step.")
+                        r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_gsub_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),f"Grade:\nSTUDENT:{info}\n{_gsub_en} {gt}\n\nWORK:\n{gw}\n\nGive: grade, praise, corrections, tips, next step.\nFIRST LINE must be: SCORE: XX/100")
+                    # Extract and store score in grade history
+                    import re as _re2, datetime as _dt2
+                    _sm2 = _re2.search(r'SCORE:\s*(\d+)', r, _re2.IGNORECASE) or _re2.search(r'(\d+)\s*/\s*100', r)
+                    _sc2 = int(_sm2.group(1)) if _sm2 else None
+                    if _sc2 is not None:
+                        st.session_state.grade_history.append({
+                            "student": gs, "subject": _gsub_en,
+                            "topic": gt.strip() or "General", "score": _sc2,
+                            "date": _dt2.datetime.now().isoformat(),
+                            "grade_level": _grade_en, "model": m
+                        })
                     _fb={"en":"Feedback","fr":"Commentaires","sw":"Maoni"}.get(_lang_key(),"Feedback")
                     st.markdown(f'<div class="rh"><h3>{ico(16)} {_fb}: {gs}</h3></div><div class="rb">{highlight_result(r)}</div>',unsafe_allow_html=True)
                     if len(allr)>1:
@@ -3351,19 +3337,22 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
         # === TREND ANALYTICS — Performance over time ===
         if st.session_state.grade_history:
             st.markdown("---")
-            st.markdown(f'<div style="background:linear-gradient(135deg,#2E7D32,#1B5E20);border-radius:12px;padding:14px 18px;margin-bottom:10px;color:white"><strong>📈 Performance Trends</strong> — Track student progress over time</div>',unsafe_allow_html=True)
+            st.markdown(f'<div style="background:linear-gradient(135deg,#2E7D32,#1B5E20);border-radius:12px;padding:14px 18px;margin-bottom:10px;color:white"><strong>📈 Performance Trends & Intervention Tracker</strong> — Track student progress · Flag who needs support</div>',unsafe_allow_html=True)
 
-            import datetime
+            import datetime as _dtt, re as _re3
             _gh = st.session_state.grade_history
 
-            # Filter controls
-            _tc1, _tc2 = st.columns(2)
+            # ── Filter controls ──
+            _tc1, _tc2, _tc3 = st.columns(3)
             with _tc1:
                 _all_stu = sorted(set(g["student"] for g in _gh))
                 _sel_stu = st.multiselect("Filter by student:", _all_stu, default=_all_stu, key="trend_stu")
             with _tc2:
                 _all_subj = sorted(set(g["subject"] for g in _gh))
                 _sel_subj = st.multiselect("Filter by subject:", _all_subj, default=_all_subj, key="trend_subj")
+            with _tc3:
+                _intervention_threshold = st.slider("Intervention threshold (score)", 30, 70, 50, key="trend_thresh",
+                    help="Students averaging below this score are flagged for intervention")
 
             _filtered = [g for g in _gh if g["student"] in _sel_stu and g["subject"] in _sel_subj]
 
@@ -3371,63 +3360,244 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                 _df = pd.DataFrame(_filtered)
                 _df["date"] = pd.to_datetime(_df["date"])
                 _df["date_str"] = _df["date"].dt.strftime("%b %d")
+                _df = _df.sort_values("date")
 
-                # Summary stats
+                # ── Summary metrics ──
                 _avg = _df["score"].mean()
-                _latest_avg = _df.sort_values("date").tail(max(1,len(_df)//3))["score"].mean()
-                _earliest_avg = _df.sort_values("date").head(max(1,len(_df)//3))["score"].mean()
-                _trend_dir = "📈" if _latest_avg > _earliest_avg else ("📉" if _latest_avg < _earliest_avg else "➡️")
+                _tail_n = max(1, len(_df)//3)
+                _latest_avg = _df.tail(_tail_n)["score"].mean()
+                _earliest_avg = _df.head(_tail_n)["score"].mean()
                 _improvement = _latest_avg - _earliest_avg
+                _trend_dir = "📈" if _improvement > 2 else ("📉" if _improvement < -2 else "➡️")
+                _pass_rate = len(_df[_df["score"] >= _intervention_threshold]) / len(_df) * 100
+                _stu_avg = _df.groupby("student")["score"].mean()
+                _n_intervention = int((_stu_avg < _intervention_threshold).sum())
 
                 _m1, _m2, _m3, _m4 = st.columns(4)
-                with _m1:
-                    st.metric("Avg Score", f"{_avg:.0f}/100")
-                with _m2:
-                    st.metric("Assignments Graded", len(_filtered))
-                with _m3:
-                    st.metric("Trend", f"{_trend_dir} {'+' if _improvement>0 else ''}{_improvement:.1f}pts")
-                with _m4:
-                    _pass_rate = len(_df[_df["score"]>=50])/len(_df)*100
-                    st.metric("Pass Rate (≥50)", f"{_pass_rate:.0f}%")
+                with _m1: st.metric("Class Avg", f"{_avg:.0f}/100")
+                with _m2: st.metric("Graded", len(_filtered))
+                with _m3: st.metric("Trend", f"{_trend_dir} {'+' if _improvement>0 else ''}{_improvement:.1f}pts")
+                with _m4: st.metric(f"Need Intervention (<{_intervention_threshold})", _n_intervention,
+                                    delta=f"{_n_intervention} students" if _n_intervention else "✅ All on track",
+                                    delta_color="inverse")
 
-                # Per-student scores over time
-                st.markdown("**Student Performance Over Time**")
+                # ── Per-student scores over time chart ──
+                st.markdown("**📊 Student Scores Over Time**")
                 _pivot = _df.groupby(["date_str","student"])["score"].mean().reset_index()
-                _chart_data = _pivot.pivot(index="date_str", columns="student", values="score")
+                try:
+                    _chart_data = _pivot.pivot(index="date_str", columns="student", values="score")
+                    # Add target reference line
+                    _chart_data[f"🎯 Target ({_intervention_threshold})"] = _intervention_threshold
+                    st.line_chart(_chart_data, use_container_width=True)
+                except Exception:
+                    st.line_chart(_df.set_index("date_str")[["student","score"]], use_container_width=True)
 
-                # Add projected improvement line (target: 5% improvement per assessment)
-                if len(_chart_data) > 1:
-                    _baseline = _df.sort_values("date").head(max(1,len(_df)//3))["score"].mean()
-                    _proj = []
-                    for idx, dt in enumerate(_chart_data.index):
-                        _proj.append(_baseline + (idx * 5))  # 5pts projected improvement per session
-                    _chart_data["🎯 Projected Target"] = [min(100, p) for p in _proj]
+                # ── Per-topic performance table ──
+                if len(_df["topic"].unique()) > 1:
+                    st.markdown("**📋 Performance by Topic/Assignment**")
+                    _topic_tbl = _df.groupby(["student","topic"])["score"].mean().round(1).reset_index()
+                    _topic_tbl.columns = ["Student","Topic/Assignment","Avg Score"]
+                    _topic_tbl["Status"] = _topic_tbl["Avg Score"].apply(
+                        lambda s: "🔴 Intervention" if s < _intervention_threshold else "🟢 On Track")
+                    st.dataframe(_topic_tbl, use_container_width=True, hide_index=True)
 
-                st.line_chart(_chart_data, use_container_width=True)
+                # ── Intervention alert box ──
+                _at_risk = _stu_avg[_stu_avg < _intervention_threshold].sort_values()
+                _on_track = _stu_avg[_stu_avg >= _intervention_threshold].sort_values(ascending=False)
+                if len(_at_risk):
+                    st.markdown(
+                        f'<div style="background:rgba(239,83,80,.1);border:2px solid #EF5350;border-radius:10px;padding:14px 16px;margin:8px 0">'
+                        f'<strong style="color:#EF5350">⚠️ INTERVENTION NEEDED — {len(_at_risk)} student{"s" if len(_at_risk)>1 else ""}</strong>'
+                        f'<div style="margin-top:6px">'
+                        + "".join(f'<div style="color:#F0D5D5;margin:3px 0">🔴 <strong>{nm}</strong>: {sc:.0f}/100 avg — <em>below threshold of {_intervention_threshold}</em></div>'
+                                  for nm, sc in _at_risk.items())
+                        + '</div></div>', unsafe_allow_html=True)
+                if len(_on_track):
+                    st.markdown(
+                        f'<div style="background:rgba(46,125,50,.1);border:1px solid #4CAF50;border-radius:10px;padding:10px 16px;margin:4px 0">'
+                        f'<strong style="color:#66BB6A">✅ On Track — {len(_on_track)} student{"s" if len(_on_track)>1 else ""}</strong>'
+                        f'<div style="margin-top:4px;font-size:.85rem">'
+                        + " · ".join(f'<span style="color:#C8E6C9"><strong>{nm}</strong>: {sc:.0f}</span>'
+                                     for nm, sc in _on_track.items())
+                        + '</div></div>', unsafe_allow_html=True)
 
-                # Subject breakdown
+                # ── Subject breakdown ──
                 if len(_all_subj) > 1:
                     st.markdown("**Average by Subject**")
                     _subj_avg = _df.groupby("subject")["score"].agg(["mean","count"]).round(1)
                     _subj_avg.columns = ["Avg Score", "Assignments"]
+                    _subj_avg["Status"] = _subj_avg["Avg Score"].apply(
+                        lambda s: "🔴 Intervention" if s < _intervention_threshold else "🟢 On Track")
                     st.dataframe(_subj_avg, use_container_width=True)
 
-                # At-risk students (below 50 average)
-                _stu_avg = _df.groupby("student")["score"].mean()
-                _at_risk = _stu_avg[_stu_avg < 50].sort_values()
-                if len(_at_risk):
-                    st.markdown(f'<div style="background:rgba(239,83,80,.1);border:2px solid #EF5350;border-radius:10px;padding:12px;margin:8px 0">'
-                                f'<strong style="color:#EF5350">⚠️ Students Needing Intervention ({len(_at_risk)})</strong><br>'
-                                + "<br>".join(f'<span style="color:#F0D5D5">• <strong>{name}</strong>: {score:.0f}/100 avg</span>' for name,score in _at_risk.items())
-                                + '</div>', unsafe_allow_html=True)
-
-                # Export grades
-                _exp1, _exp2 = st.columns(2)
+                # ── Export buttons ──
+                st.markdown("---")
+                _exp1, _exp2, _exp3 = st.columns(3)
                 with _exp1:
-                    _csv = _df[["student","subject","topic","score","date_str","grade_level"]].to_csv(index=False)
-                    st.download_button("📥 Export Grades (CSV)", data=_csv, file_name=f"teacher_pehpeh_grades_{school_name or 'class'}.csv", mime="text/csv", key="exp_grades")
+                    _csv = _df[["student","subject","topic","score","date_str","grade_level"]].rename(
+                        columns={"date_str":"Date","grade_level":"Grade Level"}).to_csv(index=False)
+                    st.download_button("📥 Export CSV", data=_csv,
+                        file_name=f"grades_{school_name or 'class'}.csv",
+                        mime="text/csv", key="exp_grades_csv", use_container_width=True)
                 with _exp2:
-                    if st.button("🗑️ Clear Grade History", key="clr_grades"):
+                    # ── XLSX export with two sheets ──
+                    try:
+                        import openpyxl
+                        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side, numbers
+                        from openpyxl.chart import LineChart, Reference
+                        from openpyxl.chart.series import SeriesLabel
+                        from openpyxl.utils import get_column_letter
+                        import io as _io2
+                        _wb = openpyxl.Workbook()
+
+                        # ── Sheet 1: Grade History ──
+                        _ws1 = _wb.active; _ws1.title = "Grade History"
+                        _gold = "D4A843"; _navy = "0F2247"; _red = "EF5350"; _green = "66BB6A"
+                        _hdr_fill = PatternFill("solid", fgColor=_navy)
+                        _hdr_font = Font(bold=True, color=_gold, size=11)
+                        _gold_fill = PatternFill("solid", fgColor="3D1C02")
+                        _thin = Side(style="thin", color="2A3A5A")
+                        _border = Border(left=_thin, right=_thin, top=_thin, bottom=_thin)
+
+                        _ws1.append(["TEACHER PEHPEH — Grade History"])
+                        _ws1["A1"].font = Font(bold=True, color=_gold, size=14)
+                        _ws1.append([f"School: {st.session_state.get('_classroom_label', school_name or 'Class')}  |  Generated: {_dtt.datetime.now().strftime('%Y-%m-%d %H:%M')}"])
+                        _ws1["A2"].font = Font(italic=True, color="AAAAAA", size=10)
+                        _ws1.append([])
+
+                        _h1_cols = ["Student", "Subject", "Topic / Assignment", "Score (/100)", "Date", "Grade Level", "Graded By", "Intervention?"]
+                        _ws1.append(_h1_cols)
+                        for ci, hdr in enumerate(_h1_cols, 1):
+                            cell = _ws1.cell(4, ci)
+                            cell.fill = _hdr_fill; cell.font = _hdr_font
+                            cell.alignment = Alignment(horizontal="center"); cell.border = _border
+
+                        for row in _df.itertuples():
+                            _needs = "🔴 Yes" if row.score < _intervention_threshold else "🟢 No"
+                            _row_data = [row.student, row.subject, row.topic, row.score,
+                                         row.date.strftime("%Y-%m-%d"), row.grade_level,
+                                         getattr(row,"model","AI"), _needs]
+                            _ws1.append(_row_data)
+                            _ri = _ws1.max_row
+                            for ci2, val in enumerate(_row_data, 1):
+                                c = _ws1.cell(_ri, ci2); c.border = _border
+                                c.alignment = Alignment(horizontal="center" if ci2 in (4,6,7,8) else "left")
+                            # Colour score cell
+                            _sc = _ws1.cell(_ri, 4)
+                            _sc.fill = PatternFill("solid", fgColor="3B0000" if row.score < _intervention_threshold else "1B3A1B")
+                            _sc.font = Font(bold=True, color=_red if row.score < _intervention_threshold else _green)
+
+                        # Column widths
+                        for ci3, w in enumerate([20,18,28,14,14,14,12,16], 1):
+                            _ws1.column_dimensions[get_column_letter(ci3)].width = w
+
+                        # ── Sheet 2: Trend Analysis ──
+                        _ws2 = _wb.create_sheet("Trend Analysis")
+                        _ws2.append(["TEACHER PEHPEH — Trend & Intervention Analysis"])
+                        _ws2["A1"].font = Font(bold=True, color=_gold, size=14)
+                        _ws2.append([f"Intervention Threshold: {_intervention_threshold}/100  |  School: {st.session_state.get('_classroom_label', school_name or 'Class')}"])
+                        _ws2["A2"].font = Font(italic=True, color="AAAAAA", size=10)
+                        _ws2.append([])
+
+                        # Per-student per-topic summary
+                        _h2_cols = ["Student", "Topic / Assignment", "Scores (chronological)", "Latest Score", "Avg Score", "Trend", "Status"]
+                        _ws2.append(_h2_cols)
+                        for ci, hdr in enumerate(_h2_cols, 1):
+                            cell = _ws2.cell(4, ci)
+                            cell.fill = _hdr_fill; cell.font = _hdr_font
+                            cell.alignment = Alignment(horizontal="center"); cell.border = _border
+
+                        _analysis_start_row = 5
+                        for stu in sorted(_df["student"].unique()):
+                            _sdf = _df[_df["student"] == stu]
+                            for topic in sorted(_sdf["topic"].unique()):
+                                _tdf = _sdf[_sdf["topic"] == topic].sort_values("date")
+                                _scores = list(_tdf["score"].astype(int))
+                                _latest = _scores[-1]; _avg_s = sum(_scores)/len(_scores)
+                                _trnd = ("📈 Improving" if len(_scores) > 1 and _scores[-1] > _scores[0]
+                                         else ("📉 Declining" if len(_scores) > 1 and _scores[-1] < _scores[0]
+                                               else "➡️ Stable"))
+                                _status = "🔴 INTERVENTION" if _avg_s < _intervention_threshold else "🟢 On Track"
+                                _scores_str = " → ".join(str(s) for s in _scores)
+                                _ws2.append([stu, topic, _scores_str, _latest, round(_avg_s,1), _trnd, _status])
+                                _ri2 = _ws2.max_row
+                                for ci2 in range(1, 8):
+                                    c = _ws2.cell(_ri2, ci2); c.border = _border
+                                    c.alignment = Alignment(horizontal="center" if ci2 >= 4 else "left")
+                                _ws2.cell(_ri2, 5).fill = PatternFill("solid",
+                                    fgColor="3B0000" if _avg_s < _intervention_threshold else "1B3A1B")
+                                _ws2.cell(_ri2, 5).font = Font(bold=True,
+                                    color=_red if _avg_s < _intervention_threshold else _green)
+                                _ws2.cell(_ri2, 7).font = Font(bold=True,
+                                    color=_red if _avg_s < _intervention_threshold else _green)
+
+                        # Column widths for sheet 2
+                        for ci3, w in enumerate([20,28,36,14,12,16,18], 1):
+                            _ws2.column_dimensions[get_column_letter(ci3)].width = w
+
+                        # ── Sheet 3: Class Summary ──
+                        _ws3 = _wb.create_sheet("Class Summary")
+                        _ws3.append(["TEACHER PEHPEH — Class Summary"])
+                        _ws3["A1"].font = Font(bold=True, color=_gold, size=14)
+                        _ws3.append([f"Generated: {_dtt.datetime.now().strftime('%Y-%m-%d %H:%M')}  |  Threshold: {_intervention_threshold}/100"])
+                        _ws3["A2"].font = Font(italic=True, color="AAAAAA", size=10)
+                        _ws3.append([])
+                        _ws3.append(["Student", "Avg Score", "Assignments", "Subjects", "Status"])
+                        for ci, hdr in enumerate(["Student","Avg Score","Assignments","Subjects","Status"], 1):
+                            cell = _ws3.cell(4, ci)
+                            cell.fill = _hdr_fill; cell.font = _hdr_font
+                            cell.alignment = Alignment(horizontal="center"); cell.border = _border
+                        for stu in sorted(_df["student"].unique()):
+                            _sdf2 = _df[_df["student"] == stu]
+                            _sa = _sdf2["score"].mean(); _sn2 = len(_sdf2); _ss = ", ".join(sorted(_sdf2["subject"].unique()))
+                            _st = "🔴 INTERVENTION" if _sa < _intervention_threshold else "🟢 On Track"
+                            _ws3.append([stu, round(_sa,1), _sn2, _ss, _st])
+                            _ri3 = _ws3.max_row
+                            for ci2 in range(1,6):
+                                c = _ws3.cell(_ri3, ci2); c.border = _border
+                                c.alignment = Alignment(horizontal="center" if ci2 >= 2 else "left")
+                            _ws3.cell(_ri3, 2).font = Font(bold=True, color=_red if _sa < _intervention_threshold else _green)
+                            _ws3.cell(_ri3, 5).font = Font(bold=True, color=_red if _sa < _intervention_threshold else _green)
+                        for ci3, w in enumerate([20,14,14,32,18], 1):
+                            _ws3.column_dimensions[get_column_letter(ci3)].width = w
+
+                        # ── Line chart on Class Summary sheet ──
+                        if len(_df["date_str"].unique()) > 1:
+                            try:
+                                _chart_df = _df.groupby(["date_str","student"])["score"].mean().unstack(fill_value=0)
+                                _cr = _ws3.max_row + 3
+                                _ws3.cell(_cr, 1, "Date")
+                                for ci_c, col in enumerate(_chart_df.columns, 2):
+                                    _ws3.cell(_cr, ci_c, col)
+                                for ri_c, (dt, row_vals) in enumerate(_chart_df.iterrows(), _cr+1):
+                                    _ws3.cell(ri_c, 1, dt)
+                                    for ci_c, val in enumerate(row_vals, 2):
+                                        _ws3.cell(ri_c, ci_c, float(val))
+                                _chart = LineChart()
+                                _chart.title = "Student Scores Over Time"
+                                _chart.style = 10
+                                _chart.y_axis.title = "Score"
+                                _chart.y_axis.scaling.min = 0
+                                _chart.y_axis.scaling.max = 100
+                                _chart.x_axis.title = "Date"
+                                _data_ref = Reference(_ws3, min_col=2, min_row=_cr, max_col=len(_chart_df.columns)+1, max_row=_cr+len(_chart_df))
+                                _chart.add_data(_data_ref, titles_from_data=True)
+                                _cats = Reference(_ws3, min_col=1, min_row=_cr+1, max_row=_cr+len(_chart_df))
+                                _chart.set_categories(_cats)
+                                _chart.shape = 4; _chart.width = 24; _chart.height = 14
+                                _ws3.add_chart(_chart, f"A{_cr + len(_chart_df) + 3}")
+                            except Exception:
+                                pass
+
+                        _xbuf = _io2.BytesIO(); _wb.save(_xbuf); _xbuf.seek(0)
+                        _fname_xlsx = f"grades_{(school_name or 'class').replace(' ','_')}.xlsx"
+                        st.download_button("📊 Export Excel (3 sheets)", data=_xbuf.getvalue(),
+                            file_name=_fname_xlsx, mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            key="exp_grades_xlsx", use_container_width=True)
+                    except Exception as _xe:
+                        st.error(f"Excel export error: {_xe}")
+                with _exp3:
+                    if st.button("🗑️ Clear Grade History", key="clr_grades", use_container_width=True):
                         st.session_state.grade_history = []; st.rerun()
 
     # TAB 3: CHAT
