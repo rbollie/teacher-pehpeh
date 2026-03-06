@@ -3163,54 +3163,90 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             uploaded=st.file_uploader("Choose file",type=["csv","xlsx","xls"],key="stu_upload",label_visibility="collapsed")
             if uploaded and PD:
                 try:
-                    if uploaded.name.endswith(".csv"):
+                    df=None
+                    _source_note=""
+                    _NAME_ALIASES=["name","student","student_name","student name","full name","full_name","pupil"]
+
+                    def _name_col(frame):
+                        for c in frame.columns:
+                            if str(c).strip().lower() in _NAME_ALIASES: return c
+                        return None
+
+                    if uploaded.name.lower().endswith(".csv"):
                         df=pd.read_csv(uploaded)
+                        _source_note="CSV"
                     else:
-                        df=pd.read_excel(uploaded,header=0)
-                        # Auto-detect header row: skip title/instruction rows if first col isn't a name-like header
-                        _cols_lower=[str(c).strip().lower() for c in df.columns]
-                        if "name" not in _cols_lower and "student" not in _cols_lower:
-                            # Try header at row 1
-                            df=pd.read_excel(uploaded,header=1)
-                            _cols_lower=[str(c).strip().lower() for c in df.columns]
-                        if "name" not in _cols_lower and "student" not in _cols_lower:
-                            # Try header at row 2 (template has title + instruction rows)
-                            df=pd.read_excel(uploaded,header=2)
-                    # Normalize column names
-                    df.columns=[c.strip().replace(" ","_") for c in df.columns]
-                    # Map common variations
-                    col_map={"name":"Name","student":"Name","student_name":"Name","siblings":"Siblings","sib":"Siblings",
-                             "mom_edu":"Mom_Edu","mother_education":"Mom_Edu","mom":"Mom_Edu","mother":"Mom_Edu",
-                             "single_mom":"Single_Mom","single_mother":"Single_Mom","sm":"Single_Mom",
-                             "works":"Works","works_after_school":"Works","working":"Works",
-                             "computer":"Computer","computer_access":"Computer","comp":"Computer",
-                             "notes":"Notes","note":"Notes","comments":"Notes"}
-                    df.columns=[col_map.get(c.lower(),c) for c in df.columns]
-                    if "Name" not in df.columns:
-                        st.error("❌ Spreadsheet must have a 'Name' column.")
+                        import openpyxl as _oxl
+                        _xf=pd.ExcelFile(uploaded)
+
+                        # ── Priority 1: IBT Grade Tracker "Roster" sheet ──────────
+                        if "Roster" in _xf.sheet_names:
+                            # Roster layout: row 1 = decorative title, row 2 = column headers, row 3+ = students
+                            _rdf=pd.read_excel(_xf,sheet_name="Roster",header=1)
+                            _rdf.dropna(how="all",inplace=True)
+                            if _name_col(_rdf) is not None:
+                                df=_rdf
+                                _source_note="📋 Roster sheet (IBT Grade Tracker)"
+
+                        # ── Priority 2: Auto-detect header row on first sheet ─────
+                        if df is None:
+                            for _hdr_row in [0,1,2]:
+                                _tdf=pd.read_excel(_xf,sheet_name=_xf.sheet_names[0],header=_hdr_row)
+                                if _name_col(_tdf) is not None:
+                                    df=_tdf
+                                    _source_note=f"Sheet: {_xf.sheet_names[0]}"
+                                    break
+
+                    if df is None:
+                        st.error("❌ Could not find a student name column. Expected a 'Roster' sheet or a column named 'Name'.")
                     else:
-                        st.dataframe(df,use_container_width=True,height=200)
-                        st.markdown(f'<div style="color:var(--text-secondary);font-size:.85rem">📊 Found <strong>{len(df)}</strong> students</div>',unsafe_allow_html=True)
-                        if st.button(f"✅ Import {len(df)} Students",type="primary",key="bulk_import"):
-                            imported=0
-                            for _,row in df.iterrows():
-                                name=str(row.get("Name","")).strip()
-                                if not name: continue
-                                sib_v=str(row.get("Siblings","0-4")).strip()
-                                if sib_v not in ["0-4","5-8","8+"]: sib_v="0-4"
-                                mom_v=str(row.get("Mom_Edu","Unknown")).strip()
-                                if mom_v not in ["HS Grad","No HS","Unknown"]: mom_v="Unknown"
-                                sm_v=str(row.get("Single_Mom","Unknown")).strip()
-                                if sm_v not in ["Yes","No","Unknown"]: sm_v="Unknown"
-                                wk_v=str(row.get("Works","Unknown")).strip()
-                                if wk_v not in ["Yes","No","Unknown"]: wk_v="Unknown"
-                                cp_v=str(row.get("Computer","Never")).strip()
-                                if cp_v not in ["Never","Rarely","Sometimes","Often"]: cp_v="Never"
-                                nt_v=str(row.get("Notes","")).strip()
-                                if nt_v=="nan": nt_v=""
-                                st.session_state.students.append(dict(name=name,sib=sib_v,mom=mom_v,sm=sm_v,wk=wk_v,cp=cp_v,nt=nt_v))
-                                imported+=1
-                            st.success(f"✅ Imported {imported} students!"); time.sleep(1); st.rerun()
+                        # Normalize column names
+                        df.columns=[c.strip().replace(" ","_") for c in df.columns]
+                        col_map={"name":"Name","student":"Name","student_name":"Name","full_name":"Name","pupil":"Name",
+                                 "siblings":"Siblings","sib":"Siblings",
+                                 "mom_edu":"Mom_Edu","mother_education":"Mom_Edu","mom":"Mom_Edu","mother":"Mom_Edu",
+                                 "single_mom":"Single_Mom","single_mother":"Single_Mom","sm":"Single_Mom",
+                                 "works":"Works","works_after_school":"Works","working":"Works",
+                                 "computer":"Computer","computer_access":"Computer","comp":"Computer",
+                                 "notes":"Notes","note":"Notes","comments":"Notes"}
+                        df.columns=[col_map.get(c.lower(),c) for c in df.columns]
+
+                        # Drop fully empty rows and rows where Name is blank/NaN
+                        df.dropna(how="all",inplace=True)
+                        if "Name" in df.columns:
+                            df=df[df["Name"].notna()]
+                            df=df[df["Name"].astype(str).str.strip().str.lower().isin(["","nan","none"])==False]
+
+                        if "Name" not in df.columns:
+                            st.error("❌ Spreadsheet must have a 'Name' column.")
+                        else:
+                            if _source_note:
+                                st.caption(f"Source: {_source_note}")
+                            st.dataframe(df[["Name"]+[c for c in ["Siblings","Mom_Edu","Single_Mom","Works","Computer","Notes"] if c in df.columns]],use_container_width=True,height=200)
+                            _valid_count=int(df["Name"].notna().sum())
+                            st.markdown(f'<div style="color:var(--text-secondary);font-size:.85rem">📊 Found <strong>{_valid_count}</strong> students</div>',unsafe_allow_html=True)
+                            if st.button(f"✅ Import {_valid_count} Students",type="primary",key="bulk_import"):
+                                imported=0
+                                _existing={s["name"] for s in st.session_state.students}
+                                for _,row in df.iterrows():
+                                    name=str(row.get("Name","")).strip()
+                                    if not name or name.lower() in ("nan","none",""): continue
+                                    if name in _existing: continue  # skip duplicates
+                                    sib_v=str(row.get("Siblings","0-4")).strip()
+                                    if sib_v not in ["0-4","5-8","8+"]: sib_v="0-4"
+                                    mom_v=str(row.get("Mom_Edu","Unknown")).strip()
+                                    if mom_v not in ["HS Grad","No HS","Unknown"]: mom_v="Unknown"
+                                    sm_v=str(row.get("Single_Mom","Unknown")).strip()
+                                    if sm_v not in ["Yes","No","Unknown"]: sm_v="Unknown"
+                                    wk_v=str(row.get("Works","Unknown")).strip()
+                                    if wk_v not in ["Yes","No","Unknown"]: wk_v="Unknown"
+                                    cp_v=str(row.get("Computer","Never")).strip()
+                                    if cp_v not in ["Never","Rarely","Sometimes","Often"]: cp_v="Never"
+                                    nt_v=str(row.get("Notes","")).strip()
+                                    if nt_v in ("nan","None"): nt_v=""
+                                    st.session_state.students.append(dict(name=name,sib=sib_v,mom=mom_v,sm=sm_v,wk=wk_v,cp=cp_v,nt=nt_v))
+                                    imported+=1
+                                st.success(f"✅ Imported {imported} student(s)!"); time.sleep(1); st.rerun()
                 except Exception as e:
                     st.error(f"❌ Error reading file: {e}")
         for i,s in enumerate(st.session_state.students):
