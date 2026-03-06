@@ -3781,7 +3781,7 @@ Be factual. Do not invent data. Keep each section focused and practical."""
             st.markdown(f'<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin-bottom:8px">📊 Export Full Report</div>', unsafe_allow_html=True)
 
             try:
-                import openpyxl
+                import io, openpyxl
                 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
                 from openpyxl.chart import LineChart, Reference
 
