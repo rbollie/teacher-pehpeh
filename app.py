@@ -808,41 +808,6 @@ UI_TEXT={
   "voice_ready":"🔊 Voice Ready","no_models":"🤖 No models","offline":"OFFLINE",
   "generating":"🔊 Generating audio...","transcribing":"🎤 Transcribing your voice...",
   "audio_failed":"Audio failed","try_again":"Try again",
-  "lbl_setting":"📍 Setting","lbl_grade":"🎓 Grade","lbl_subject":"📚 Subject",
-  "lbl_class_size":"👥 Class Size","lbl_student_level":"📊 Student Level",
-  "lbl_task":"📝 Task","lbl_time":"⏱️ Time","lbl_topic":"📖 Topic",
-  "configure_classroom":"⚙️ Configure Your Classroom",
-  "save_config":"💾 Save Configuration","load_config":"📂 Load Configuration",
-  "restore_profile":"↩ Restore last saved profile",
-  "file_name_lbl":"File name (no spaces):","download_profile":"📥 Download to my drive",
-  "load_from_file":"Or load from a saved file:",
-  "enter_school_teacher":"✏️ Enter school & teacher name to personalize",
-  "add_your_name":"✏️ Add your name — parents will see it on letters",
-  "select_agent_lbl":"AI:","agent_only":" only",
-  "best_answer_all":"Best answer — all","agents_lbl":"agents",
-  "heads_up":"Heads up",
-  "heads_up_msg":"Using all {n} agents gives richer results — though it may take a little longer and could use more mobile data on slower connections. Just something to keep in mind!",
-  "time_not_needed":"⏱️ Time: not needed for this task",
-  "topic_not_needed":"📖 Topic: not needed for this task",
-  "net_no_internet":"No Internet","net_slow":"Slow Connection",
-  "voice_on":"🔊 Voice on","voice_off":"🔇 Voice off",
-  "img_gen_on":"🎨 Image generation on","no_ai":"⚠️ No AI connected",
-  "device_checking":"Checking device…","device_connected":"Device connected","device_offline":"Device offline",
-  "recheck_btn":"🔄 Re-check",
-  "free_account_msg":"🆓 Free account — AI generation not active",
-  "sub_expired_msg":"⚠️ Subscription expired — AI generation paused",
-  "sign_out":"Sign out",
-  "cat_planning":"📋 Planning","cat_assessment":"📝 Assessment",
-  "cat_activities":"🎯 Activities","cat_study":"📚 Study Support",
-  "cat_tip_planning":"Lesson plans, weekly & term schemes, teaching strategies",
-  "cat_tip_assessment":"Quizzes, WASSCE/BECE exam prep, grading rubrics",
-  "cat_tip_activities":"Homework, group work, reading comprehension, educational games",
-  "cat_tip_study":"Revision notes and remedial catch-up material",
-  "moe_aligned_badge":"✅ MOE Curriculum-Aligned",
-  "moe_req_expander":"📋 View Ministry of Education Requirements for This Topic",
-  "learning_objectives":"Learning Objectives:","content_outline":"Content Outline:",
-  "suggested_activities":"Suggested Activities:","local_context":"Liberian Contextualization:",
-  "lab_materials":"Lab Materials:",
   "assignments":"Personalized Assignments","risk_flags":"Risk & Support Flags",
   "no_students":"No students added yet","single_period":"Single period (30-40 min)",
   "double":"Double (60-80 min)","half_day":"Half day","full_day":"Full day","weekly":"Weekly","na":"N/A",
@@ -889,41 +854,6 @@ UI_TEXT={
   "voice_ready":"🔊 Voix prête","no_models":"🤖 Aucun modèle","offline":"HORS LIGNE",
   "generating":"🔊 Génération audio...","transcribing":"🎤 Transcription en cours...",
   "audio_failed":"Échec audio","try_again":"Réessayer",
-  "lbl_setting":"📍 Contexte","lbl_grade":"🎓 Classe","lbl_subject":"📚 Matière",
-  "lbl_class_size":"👥 Taille de classe","lbl_student_level":"📊 Niveau des élèves",
-  "lbl_task":"📝 Tâche","lbl_time":"⏱️ Durée","lbl_topic":"📖 Sujet",
-  "configure_classroom":"⚙️ Configurer votre classe",
-  "save_config":"💾 Enregistrer la configuration","load_config":"📂 Charger la configuration",
-  "restore_profile":"↩ Restaurer le dernier profil enregistré",
-  "file_name_lbl":"Nom du fichier (sans espaces) :","download_profile":"📥 Télécharger sur mon appareil",
-  "load_from_file":"Ou charger depuis un fichier enregistré :",
-  "enter_school_teacher":"✏️ Entrez le nom de l'école et de l'enseignant pour personnaliser",
-  "add_your_name":"✏️ Ajoutez votre nom — les parents le verront sur les lettres",
-  "select_agent_lbl":"IA :","agent_only":" seulement",
-  "best_answer_all":"Meilleure réponse — les","agents_lbl":"agents",
-  "heads_up":"À noter",
-  "heads_up_msg":"Utiliser les {n} agents donne des résultats plus riches — cela peut prendre un peu plus de temps et utiliser plus de données mobiles sur les connexions lentes. Juste pour information !",
-  "time_not_needed":"⏱️ Durée : non requise pour cette tâche",
-  "topic_not_needed":"📖 Sujet : non requis pour cette tâche",
-  "net_no_internet":"Pas d'Internet","net_slow":"Connexion lente",
-  "voice_on":"🔊 Voix activée","voice_off":"🔇 Voix désactivée",
-  "img_gen_on":"🎨 Génération d'images activée","no_ai":"⚠️ Aucune IA connectée",
-  "device_checking":"Vérification…","device_connected":"Appareil connecté","device_offline":"Appareil hors ligne",
-  "recheck_btn":"🔄 Vérifier",
-  "free_account_msg":"🆓 Compte gratuit — Génération IA non activée",
-  "sub_expired_msg":"⚠️ Abonnement expiré — Génération IA suspendue",
-  "sign_out":"Déconnexion",
-  "cat_planning":"📋 Planification","cat_assessment":"📝 Évaluation",
-  "cat_activities":"🎯 Activités","cat_study":"📚 Soutien scolaire",
-  "cat_tip_planning":"Plans de cours, plans hebdomadaires et trimestriels, stratégies d'enseignement",
-  "cat_tip_assessment":"Quiz, préparation WASSCE/BECE, grilles d'évaluation",
-  "cat_tip_activities":"Devoirs, travail de groupe, compréhension, jeux éducatifs",
-  "cat_tip_study":"Notes de révision et rattrapage",
-  "moe_aligned_badge":"✅ Aligné sur le programme MOE",
-  "moe_req_expander":"📋 Voir les exigences du Ministère de l'Éducation pour ce sujet",
-  "learning_objectives":"Objectifs pédagogiques :","content_outline":"Plan de contenu :",
-  "suggested_activities":"Activités suggérées :","local_context":"Contextualisation libérienne :",
-  "lab_materials":"Matériaux de laboratoire :",
   "assignments":"Devoirs personnalisés","risk_flags":"Signaux de risque et soutien",
   "no_students":"Aucun élève ajouté","single_period":"Période simple (30-40 min)",
   "double":"Double (60-80 min)","half_day":"Demi-journée","full_day":"Journée complète","weekly":"Hebdomadaire","na":"N/A",
@@ -970,41 +900,6 @@ UI_TEXT={
   "voice_ready":"🔊 Sauti tayari","no_models":"🤖 Hakuna modeli","offline":"NJE YA MTANDAO",
   "generating":"🔊 Inatengeneza sauti...","transcribing":"🎤 Inabadilisha sauti kuwa maandishi...",
   "audio_failed":"Sauti imeshindwa","try_again":"Jaribu tena",
-  "lbl_setting":"📍 Mazingira","lbl_grade":"🎓 Darasa","lbl_subject":"📚 Somo",
-  "lbl_class_size":"👥 Ukubwa wa darasa","lbl_student_level":"📊 Kiwango cha wanafunzi",
-  "lbl_task":"📝 Kazi","lbl_time":"⏱️ Muda","lbl_topic":"📖 Mada",
-  "configure_classroom":"⚙️ Sanidi Darasa Lako",
-  "save_config":"💾 Hifadhi Usanidi","load_config":"📂 Pakia Usanidi",
-  "restore_profile":"↩ Rejesha wasifu uliookuwa umehifadhi",
-  "file_name_lbl":"Jina la faili (bila nafasi):","download_profile":"📥 Pakua kwenye kifaa changu",
-  "load_from_file":"Au pakia kutoka faili lililohifadhiwa:",
-  "enter_school_teacher":"✏️ Ingiza jina la shule na mwalimu kupersonalize",
-  "add_your_name":"✏️ Ongeza jina lako — wazazi wataona kwenye barua",
-  "select_agent_lbl":"AI:","agent_only":" tu",
-  "best_answer_all":"Jibu bora — wote","agents_lbl":"mawakala",
-  "heads_up":"Kumbuka",
-  "heads_up_msg":"Kutumia mawakala {n} wote hutoa matokeo bora zaidi — ingawa inaweza kuchukua muda mrefu kidogo na kutumia data zaidi kwenye miunganisho ya polepole. Kitu cha kukumbuka!",
-  "time_not_needed":"⏱️ Muda: hauhitajiki kwa kazi hii",
-  "topic_not_needed":"📖 Mada: haihitajiki kwa kazi hii",
-  "net_no_internet":"Hakuna Intaneti","net_slow":"Mwunganisho wa polepole",
-  "voice_on":"🔊 Sauti imewashwa","voice_off":"🔇 Sauti imezimwa",
-  "img_gen_on":"🎨 Utengenezaji wa picha umewashwa","no_ai":"⚠️ Hakuna AI iliyounganishwa",
-  "device_checking":"Inaangalia kifaa…","device_connected":"Kifaa kimeunganishwa","device_offline":"Kifaa kiko nje ya mtandao",
-  "recheck_btn":"🔄 Angalia tena",
-  "free_account_msg":"🆓 Akaunti ya bure — Utengenezaji wa AI haujawashwa",
-  "sub_expired_msg":"⚠️ Usajili umeisha — Utengenezaji wa AI umesimamishwa",
-  "sign_out":"Toka",
-  "cat_planning":"📋 Mipango","cat_assessment":"📝 Tathmini",
-  "cat_activities":"🎯 Shughuli","cat_study":"📚 Msaada wa Masomo",
-  "cat_tip_planning":"Mipango ya masomo, mpango wa wiki na muhula, mikakati ya kufundisha",
-  "cat_tip_assessment":"Maswali, maandalizi ya WASSCE/BECE, vikwazo vya tathmini",
-  "cat_tip_activities":"Kazi za nyumbani, kazi ya kikundi, ufahamu wa kusoma, michezo ya elimu",
-  "cat_tip_study":"Maelezo ya marudio na nyenzo za kusaidia wanafunzi wanaopungukiwa",
-  "moe_aligned_badge":"✅ Imelingana na Mtaala wa MOE",
-  "moe_req_expander":"📋 Tazama Mahitaji ya Wizara ya Elimu kwa Mada Hii",
-  "learning_objectives":"Malengo ya Kujifunza:","content_outline":"Muhtasari wa Maudhui:",
-  "suggested_activities":"Shughuli Zilizopendekezwa:","local_context":"Ulinganifu wa Liberia:",
-  "lab_materials":"Vifaa vya Maabara:",
   "assignments":"Kazi za kibinafsi","risk_flags":"Ishara za hatari na msaada",
   "no_students":"Hakuna wanafunzi walioongezwa","single_period":"Kipindi kimoja (dak 30-40)",
   "double":"Mara mbili (dak 60-80)","half_day":"Nusu siku","full_day":"Siku nzima","weekly":"Kila wiki","na":"H/T",
@@ -2186,9 +2081,9 @@ def main():
         # Country first - drives auto language
         country=st.selectbox(T("country"),COUNTRIES,key="country_sel")
         # Auto-detect language from country (user can still override)
-        if "lang_auto_done" not in st.session_state: st.session_state.lang_auto_done=set()
-        if country not in st.session_state.lang_auto_done:
-            st.session_state.lang_auto_done.add(country)
+        # Auto-switch language whenever the country changes
+        if st.session_state.get("_last_auto_country") != country:
+            st.session_state["_last_auto_country"] = country
             if country in FRANCOPHONE: st.session_state.lang_sel="Français"
             elif country in SWAHILI_COUNTRIES: st.session_state.lang_sel="Kiswahili"
             else: st.session_state.lang_sel="English"
@@ -2237,23 +2132,23 @@ def main():
                 st.rerun()
             teacher_phone=st.session_state["_phone_confirmed"]
         if not school_name.strip() and not teacher_name.strip():
-            st.caption(T("enter_school_teacher"))
+            st.caption("✏️ Enter school & teacher name to personalize")
         elif not teacher_name.strip():
-            st.caption(T("add_your_name"))
+            st.caption("✏️ Add your name — parents will see it on letters")
         else:
             _t_display=f'<span style="color:#FFFFFF;font-size:1.05rem;font-weight:700">{teacher_name}</span>'
             if teacher_phone.strip(): _t_display+=f'<span style="color:#FFFFFF;font-size:1rem;font-weight:700;margin-left:8px">• {teacher_phone.strip()}</span>'
             st.markdown(f'<div style="background:linear-gradient(135deg,#3D0C0C,#5A1515);border:2px solid #D4A843;border-radius:10px;padding:10px 16px;margin:6px 0;box-shadow:0 2px 8px rgba(212,168,67,.2)">👤 {_t_display}</div>',unsafe_allow_html=True)
         if "profile_set" not in st.session_state: st.session_state.profile_set=False
         # All classroom settings inside collapsible Configure block
-        with st.expander(T("configure_classroom"), expanded=False):
+        with st.expander("Configure Your Classroom", expanded=False):
             if not st.session_state.profile_set:
                 st.markdown('<div style="font-size:.85rem;color:#F0D5D5;margin-bottom:8px">Select your school setting, grade, subject, and preferences below. Save your profile to reuse later!</div>',unsafe_allow_html=True)
-            region=st.selectbox(T("setting"),list(_regions().keys()),label_visibility="collapsed",format_func=lambda x: f"{T('lbl_setting')}: {x}", help="Urban, rural, or remote — shapes the type of content generated",key="cfg_region")
-            grade=st.selectbox(T("grade"),_grades(),label_visibility="collapsed",format_func=lambda x: f"{T('lbl_grade')}: {x}", help="The class level you are teaching",key="cfg_grade")
-            subject=st.selectbox(T("subject"),_subjects(),label_visibility="collapsed",format_func=lambda x: f"{T('lbl_subject')}: {x}", help="Choose the subject you want content for",key="cfg_subject")
-            clsz=st.selectbox(T("class_size"),list(_sizes().keys()),label_visibility="collapsed",format_func=lambda x: f"{T('lbl_class_size')}: {x}", help="Helps Teacher Pehpeh suggest realistic group sizes and activities",key="cfg_clsz")
-            abl=st.selectbox(T("student_level"),list(_ability().keys()),label_visibility="collapsed",format_func=lambda x: f"{T('lbl_student_level')}: {x}", help="Mixed, advanced, or struggling — adjusts difficulty and scaffolding",key="cfg_abl")
+            region=st.selectbox(T("setting"),list(_regions().keys()),label_visibility="collapsed",format_func=lambda x: f"📍 Setting: {x}", help="Urban, rural, or remote — shapes the type of content generated",key="cfg_region")
+            grade=st.selectbox(T("grade"),_grades(),label_visibility="collapsed",format_func=lambda x: f"🎓 Grade: {x}", help="The class level you are teaching",key="cfg_grade")
+            subject=st.selectbox(T("subject"),_subjects(),label_visibility="collapsed",format_func=lambda x: f"📚 Subject: {x}", help="Choose the subject you want content for",key="cfg_subject")
+            clsz=st.selectbox(T("class_size"),list(_sizes().keys()),label_visibility="collapsed",format_func=lambda x: f"👥 Class Size: {x}", help="Helps Teacher Pehpeh suggest realistic group sizes and activities",key="cfg_clsz")
+            abl=st.selectbox(T("student_level"),list(_ability().keys()),label_visibility="collapsed",format_func=lambda x: f"📊 Student Level: {x}", help="Mixed, advanced, or struggling — adjusts difficulty and scaffolding",key="cfg_abl")
         # Map French display values back to English for AI
         _region_val=_regions()[region]
         _grade_en=_to_en_grade(grade)
@@ -2292,13 +2187,13 @@ def main():
         # ── Save configuration ────────────────────────────────────────────
         _pf1,_pf2=st.columns(2)
         with _pf1:
-            if st.button(T("save_config"),use_container_width=True,key="sv_prof"):
+            if st.button("💾 Save Configuration",use_container_width=True,key="sv_prof"):
                 st.session_state.saved_profile={"school":school_name,"teacher":teacher_name,"phone":teacher_phone,"country":country,"lang":lang,"region":region,"grade":grade,"subject":subject,"class_size":clsz,"ability":abl,"moe_on":moe_on,"mano_on":mano_on,"task_cat":st.session_state.get("task_cat","📋 Planning"),"task":st.session_state.get("task_sel",""),"agent":st.session_state.get("agent_pick","")}
                 st.session_state.profile_set=True
                 st.session_state["_show_save_opts"]=True
                 st.rerun()
         with _pf2:
-            if st.button(T("load_config"),use_container_width=True,key="ld_prof"):
+            if st.button("📂 Load Configuration",use_container_width=True,key="ld_prof"):
                 st.session_state["_show_load_opts"]=not st.session_state.get("_show_load_opts",False)
                 st.session_state["_show_save_opts"]=False
                 st.rerun()
@@ -2307,10 +2202,10 @@ def main():
             st.success("✅ Configuration saved to this session!")
             st.markdown("<small style='color:#aaa'>Give your profile a name and download it to your drive so you can reload it anytime.</small>",unsafe_allow_html=True)
             _default_name=(school_name.strip().replace(" ","_") or "my_classroom")
-            _prof_name=st.text_input(T("file_name_lbl"),value=_default_name,key="prof_filename").strip().replace(" ","_")
+            _prof_name=st.text_input("File name (no spaces):",value=_default_name,key="prof_filename").strip().replace(" ","_")
             if not _prof_name: _prof_name="teacher_pehpeh_profile"
             _pj=json.dumps(st.session_state.saved_profile,indent=2)
-            st.download_button(T("download_profile"),data=_pj,
+            st.download_button("📥 Download to my drive",data=_pj,
                 file_name=f"{_prof_name}.json",mime="application/json",
                 key="dl_prof",use_container_width=True)
             if st.button("✖ Close",key="close_save_opts",use_container_width=True):
@@ -2319,11 +2214,11 @@ def main():
         # Load panel
         if st.session_state.get("_show_load_opts"):
             if "saved_profile" in st.session_state:
-                if st.button(T("restore_profile"),use_container_width=True,key="ld_restore"):
+                if st.button("↩ Restore last saved profile",use_container_width=True,key="ld_restore"):
                     st.session_state["_pending_load"]=st.session_state.saved_profile
                     st.session_state["_show_load_opts"]=False
                     st.rerun()
-            _up_prof=st.file_uploader(T("load_from_file"),type=["json"],key="up_prof",label_visibility="visible")
+            _up_prof=st.file_uploader("Or load from a saved file:",type=["json"],key="up_prof",label_visibility="visible")
             if _up_prof:
                 try:
                     _loaded=json.loads(_up_prof.read().decode("utf-8"))
@@ -2339,16 +2234,16 @@ def main():
             _badge_text = f"Active · {_SUB_DAYS_LEFT}d left" if _SUB_DAYS_LEFT <= 60 else "Active"
             st.markdown(f'<div style="text-align:center;padding:4px 0;font-size:.75rem;color:{_badge_color}">✅ Subscription: {_badge_text}</div>',unsafe_allow_html=True)
         elif _SUB_TIER == "expired":
-            st.markdown(f'<div style="text-align:center;padding:4px 0;font-size:.75rem;color:#E74C3C">{T("sub_expired_msg")}</div>',unsafe_allow_html=True)
+            st.markdown('<div style="text-align:center;padding:4px 0;font-size:.75rem;color:#E74C3C">⚠️ Subscription expired — AI generation paused</div>',unsafe_allow_html=True)
         else:
-            st.markdown(f'<div style="text-align:center;padding:4px 0;font-size:.75rem;color:#8899BB">{T("free_account_msg")}</div>',unsafe_allow_html=True)
+            st.markdown('<div style="text-align:center;padding:4px 0;font-size:.75rem;color:#8899BB">🆓 Free account — AI generation not active</div>',unsafe_allow_html=True)
         if _login_required() and _is_logged_in():
             _login_lbl = st.session_state.get("_login_label","")
             _lcol1, _lcol2 = st.columns([2,1])
             with _lcol1:
                 st.markdown(f'<p style="font-size:.75rem;color:#8899BB;margin:4px 0">👤 {_login_lbl}</p>',unsafe_allow_html=True)
             with _lcol2:
-                if st.button(T("sign_out"), key="logout_btn", use_container_width=True):
+                if st.button("Sign out", key="logout_btn", use_container_width=True):
                     st.session_state["_logged_in"] = False
                     st.session_state["_login_label"] = ""
                     st.rerun()
@@ -2365,28 +2260,28 @@ def main():
         act=[n for k,n in [(OPENAI_API_KEY,"ChatGPT"),(ANTHROPIC_API_KEY,"Claude"),(GOOGLE_API_KEY,"Gemini")] if k]
         # Network: only show when there's a problem — device chip handles the "all good" state
         if conn["quality"]=="none":
-            net_html=f'<span style="color:#EF5350" title="Teacher Pehpeh cannot reach the AI services right now">🔴 <strong>{T("net_no_internet")}</strong></span>'
+            net_html=f'<span style="color:#EF5350" title="Teacher Pehpeh cannot reach the AI services right now">🔴 <strong>No Internet</strong></span>'
         elif conn["quality"] not in ("high","medium"):
-            net_html=f'<span style="color:#FFB74D" title="Connection is slow — AI may take longer to respond">🟠 <strong>{T("net_slow")}</strong></span>'
+            net_html=f'<span style="color:#FFB74D" title="Connection is slow — AI may take longer to respond">🟠 <strong>Slow Connection</strong></span>'
         else:
             net_html=""   # device chip already shows connected — no need to repeat
         # AI Agents section — friendly count + names
         if act:
             models_html=f'<span style="color:#7BB8F5" title="The AI assistants that will answer your requests">🤖 <strong>{len(act)} AI Agent{"s" if len(act)!=1 else ""}</strong>: {" · ".join(act)}</span>'
         else:
-            models_html=f'<span style="color:#EF9A9A" title="No AI keys configured — check your settings">{T("no_ai")}</span>'
+            models_html=f'<span style="color:#EF9A9A" title="No AI keys configured — check your settings">⚠️ No AI connected</span>'
         # Image section — simplified
         _has_img = bool(OPENAI_API_KEY or GOOGLE_API_KEY)
-        img_html=f'<span style="color:#C9A0DC" title="Can generate diagrams and visual aids for your lessons">{T("img_gen_on")}</span>' if _has_img else ""
+        img_html=f'<span style="color:#C9A0DC" title="Can generate diagrams and visual aids for your lessons">🎨 Image generation on</span>' if _has_img else ""
         # Divider
         div='<span style="color:#3a4a6a;margin:0 10px;font-size:1.1rem">│</span>'
         bar_parts=[m for m in [net_html, models_html] if m]
         if img_html: bar_parts.append(img_html)
         # Voice section — no key details
         if ELEVENLABS_API_KEY:
-            bar_parts.append(f'<span style="color:#81D4A8" title="Text-to-speech — Teacher Pehpeh can read responses aloud">{T("voice_on")}</span>')
+            bar_parts.append(f'<span style="color:#81D4A8" title="Text-to-speech — Teacher Pehpeh can read responses aloud">🔊 Voice on</span>')
         else:
-            bar_parts.append(f'<span style="color:#EF9A9A" title="No voice key — audio playback unavailable">{T("voice_off")}</span>')
+            bar_parts.append('<span style="color:#EF9A9A" title="No voice key — audio playback unavailable">🔇 Voice off</span>')
         # MOE Curriculum section
         if moe_on and CURRICULA:
             curr_subjects = get_available_subjects(CURRICULA)
@@ -2400,10 +2295,6 @@ def main():
         # Unified status bar — Re-check is the last segment inside the bar itself
         import streamlit.components.v1 as _conn_comp
         _status_bar_html = div.join(bar_parts)
-        _t_checking = T("device_checking")
-        _t_connected = T("device_connected")
-        _t_offline = T("device_offline")
-        _t_recheck = T("recheck_btn")
         _conn_comp.html(f"""
 <style>
 .tp-bar {{
@@ -2434,12 +2325,12 @@ def main():
 <div class="tp-bar">
   <div id="dev-chip" title="Shows whether your device is connected to the internet">
     <span id="dev-icon">📱</span>
-    <span id="dev-lbl" style="color:#8899aa">{_t_checking}</span>
+    <span id="dev-lbl" style="color:#8899aa">Checking device…</span>
   </div>
   <span class="tp-div">│</span>
   {_status_bar_html}
   <span class="tp-div">│</span>
-  <button id="recheck-btn" title="Re-test connection to AI services" onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:true}},'*')">{_t_recheck}</button>
+  <button id="recheck-btn" title="Re-test connection to AI services" onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:true}},'*')">🔄 Re-check</button>
 </div>
 <script>
 (function(){{
@@ -2450,13 +2341,13 @@ def main():
     if(ok){{
       icon.textContent='💻';
       lbl.style.color='#81C784';
-      lbl.textContent='{_t_connected}';
+      lbl.textContent='Device connected';
       chip.style.border='1px solid #81C78444';
       chip.style.background='rgba(46,125,50,.15)';
     }}else{{
       icon.textContent='📵';
       lbl.style.color='#EF9A9A';
-      lbl.textContent='{_t_offline}';
+      lbl.textContent='Device offline';
       chip.style.border='1px solid #EF535044';
       chip.style.background='rgba(139,26,26,.2)';
     }}
@@ -2559,19 +2450,6 @@ def main():
             "🎯 Activities":   ["Homework","Group Activity","Reading Comprehension","No-Lab Practical","Educational Game","Illustrated Lesson (AI image)"],
             "📚 Study Support":["Study Notes","Remedial Material"],
         }
-        # Category button display labels → English keys (for session_state matching)
-        _CAT_DISPLAY = {
-            "📋 Planning":      T("cat_planning"),
-            "📝 Assessment":    T("cat_assessment"),
-            "🎯 Activities":    T("cat_activities"),
-            "📚 Study Support": T("cat_study"),
-        }
-        _CAT_TIPS = {
-            "📋 Planning":      T("cat_tip_planning"),
-            "📝 Assessment":    T("cat_tip_assessment"),
-            "🎯 Activities":    T("cat_tip_activities"),
-            "📚 Study Support": T("cat_tip_study"),
-        }
         # Tasks that need topic selector
         _NO_TOPIC_TASKS={"teaching strategies","term plan"}
         # Tasks that need time selector
@@ -2584,11 +2462,17 @@ def main():
 
         # ── Category pill buttons ──
         if "task_cat" not in st.session_state: st.session_state.task_cat="📋 Planning"
+        _CAT_TIPS = {
+            "📋 Planning":     "Lesson plans, weekly & term schemes, teaching strategies",
+            "📝 Assessment":   "Quizzes, WASSCE/BECE exam prep, grading rubrics",
+            "🎯 Activities":   "Homework, group work, reading comprehension, educational games",
+            "📚 Study Support":"Revision notes and remedial catch-up material",
+        }
         _cat_cols = st.columns(len(_TASK_CATEGORIES))
         for _ci, _cname in enumerate(_TASK_CATEGORIES):
             with _cat_cols[_ci]:
                 _is_cat = st.session_state.task_cat == _cname
-                if st.button(_CAT_DISPLAY[_cname], key=f"cat_{_ci}", use_container_width=True,
+                if st.button(_cname, key=f"cat_{_ci}", use_container_width=True,
                              type="primary" if _is_cat else "secondary",
                              help=_CAT_TIPS.get(_cname,"")):
                     st.session_state.task_cat = _cname
@@ -2605,7 +2489,7 @@ def main():
         with c1:
             task = st.selectbox(T("task"), _cat_display_keys, key="task_sel",
                                 label_visibility="collapsed",
-                                format_func=lambda x: f"{T('lbl_task')}: {x}", help="What you want Teacher Pehpeh to create for you")
+                                format_func=lambda x: f"\U0001f4dd Task: {x}", help="What you want Teacher Pehpeh to create for you")
         _task_val = _all_tasks.get(task, "detailed lesson plan")
         _IS_PARENT_LETTER = False   # Parent Letter moved to Students tab
         _show_time    = _task_val in _NEEDS_TIME
@@ -2622,10 +2506,10 @@ def main():
         with c2:
             if _show_time:
                 tm = st.selectbox(T("time"), _times(), label_visibility="collapsed",
-                                  format_func=lambda x: f"{T('lbl_time')}: {x}", help="How long your lesson or activity will run")
+                                  format_func=lambda x: f"\u23f1\ufe0f Time: {x}", help="How long your lesson or activity will run")
             else:
                 tm = "N/A"
-                st.markdown(f'<div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:10px 14px;color:var(--text-muted);font-size:.85rem;opacity:.5">{T("time_not_needed")}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:10px 14px;color:var(--text-muted);font-size:.85rem;opacity:.5">\u23f1\ufe0f Time: not needed for this task</div>', unsafe_allow_html=True)
 
         _parent_letter_override=None
         _pl_delivery=None
@@ -2735,11 +2619,11 @@ def main():
 
         else:
             if _show_topic:
-                topic=st.selectbox(T("topic"),_get_topics(_subj_en),label_visibility="collapsed",format_func=lambda x: f"{T('lbl_topic')}: {x}", help="The specific topic inside this subject")
+                topic=st.selectbox(T("topic"),_get_topics(_subj_en),label_visibility="collapsed",format_func=lambda x: f"\U0001f4d6 Topic: {x}", help="The specific topic inside this subject")
                 _topic_en=_to_en_topic(topic)
             else:
                 topic=_subj_en; _topic_en=_subj_en
-                st.markdown(f'<div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:10px 14px;color:var(--text-muted);font-size:.85rem;opacity:.5">{T("topic_not_needed")}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:10px 14px;color:var(--text-muted);font-size:.85rem;opacity:.5">\U0001f4d6 Topic: not needed for this task</div>', unsafe_allow_html=True)
 
         # === MOE Curriculum: override topics + show badge when aligned ===
         is_curriculum_aligned = False
@@ -2754,34 +2638,34 @@ def main():
                 _topic_en = topic  # Curriculum topics are already in English
                 st.markdown(f'<div style="display:inline-block;background:linear-gradient(135deg,#1B5E20,#388E3C);'
                             f'color:white;padding:3px 10px;border-radius:16px;font-size:.72rem;font-weight:600;margin:2px 0">'
-                            f'{T("moe_aligned_badge")}</div>', unsafe_allow_html=True)
+                            f'✅ MOE Curriculum-Aligned</div>', unsafe_allow_html=True)
                 # Get details for this topic
                 curriculum_details = get_topic_details(CURRICULA, _subj_en, _grade_num, topic)
                 curriculum_context = build_curriculum_context(CURRICULA, _subj_en, _grade_num, topic)
         # === MOE Curriculum Preview (expandable) ===
         if is_curriculum_aligned and curriculum_details:
-            with st.expander(T("moe_req_expander")):
+            with st.expander("📋 View Ministry of Education Requirements for This Topic"):
                 objectives = curriculum_details.get("specific_objectives", [])
                 if objectives:
-                    st.markdown(f"**{T('learning_objectives')}**")
+                    st.markdown(f"**Learning Objectives:**")
                     for obj in objectives:
                         st.markdown(f"- {obj}")
                 content = curriculum_details.get("content_outline", [])
                 if content:
-                    st.markdown(f"**{T('content_outline')}**")
+                    st.markdown(f"**Content Outline:**")
                     for item in content:
                         st.markdown(f"- {item}")
                 activities = curriculum_details.get("suggested_activities", [])
                 if activities:
-                    st.markdown(f"**{T('suggested_activities')}**")
+                    st.markdown(f"**Suggested Activities:**")
                     for act in activities:
                         st.markdown(f"- {act}")
                 local_notes = curriculum_details.get("local_contextualization_notes", "")
                 if local_notes:
-                    st.markdown(f"**{T('local_context')}** {local_notes}")
+                    st.markdown(f"**Liberian Contextualization:** {local_notes}")
                 materials = curriculum_details.get("lab_materials", [])
                 if materials:
-                    st.markdown(f"**{T('lab_materials')}** {', '.join(materials)}")
+                    st.markdown(f"**Lab Materials:** {', '.join(materials)}")
 
         # === Mano Language: vocabulary preview for selected topic ===
         _mano_prompt_ctx = ""
@@ -2868,21 +2752,21 @@ def main():
         if GOOGLE_API_KEY: _avail_agents.append("Gemini")
         if _avail_agents:
             _n=len(_avail_agents)
-            _all_label=f"{T('best_answer_all')} {_n} {T('agents_lbl')}" if _n>1 else f"{_avail_agents[0]}"
-            _agent_opts=[_all_label]+[f"{a}{T('agent_only')}" for a in _avail_agents]
-            _agent_sel=st.selectbox(T("select_agent_lbl"),_agent_opts,key="agent_pick",label_visibility="collapsed",
+            _all_label=f"Best answer — all {_n} agents" if _n>1 else f"{_avail_agents[0]}"
+            _agent_opts=[_all_label]+[f"{a} only" for a in _avail_agents]
+            _agent_sel=st.selectbox("AI:",_agent_opts,key="agent_pick",label_visibility="collapsed",
                                     help="All agents gives the best result but may take a little longer and use more data. If you're on a slow connection, picking one agent can be faster.")
-            if _agent_sel==_all_label and _n>1:
+            if "all" in _agent_sel or _agent_sel==_all_label and _n>1:
                 _agent_pick=_avail_agents
             else:
-                _agent_pick=[_agent_sel.replace(T("agent_only"),"") for a in _avail_agents if a in _agent_sel]
-                if not _agent_pick: _agent_pick=[_agent_sel.replace(T("agent_only"),"").strip()]
+                _agent_pick=[_agent_sel.replace(" only","")]
             # Soft advisory when all agents selected and more than one available
             if len(_agent_pick)>1:
                 st.markdown(
                     f'<div style="background:rgba(212,168,67,.07);border-left:3px solid {C_GOLD}88;' +
                     f'border-radius:0 6px 6px 0;padding:6px 12px;margin:4px 0 2px;font-size:.78rem;color:#C8B06A">' +
-                    f'<strong>{T("heads_up")}:</strong> {T("heads_up_msg").format(n=len(_agent_pick))}</div>',
+                    f'<strong>Heads up:</strong> Using all {len(_agent_pick)} agents gives richer results — though it may take a little longer ' +
+                    f'and could use more mobile data on slower connections. Just something to keep in mind!</div>',
                     unsafe_allow_html=True
                 )
         else: _agent_pick=[]
