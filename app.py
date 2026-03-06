@@ -46,111 +46,6 @@ GOOGLE_API_KEY = _get_key("GOOGLE_API_KEY")
 ELEVENLABS_API_KEY = _get_key("ELEVENLABS_API_KEY")
 LOGO_FILENAME = "logo.png"
 
-# ═══════════════════════════════════════════════════════════
-# SUBSCRIPTION & LICENSE SYSTEM
-# ═══════════════════════════════════════════════════════════
-import datetime
-
-def _check_subscription():
-    """
-    Returns (is_active, days_left, tier)
-    Reads LICENSE_KEY and LICENSE_EXPIRY from secrets/env.
-    If not set, defaults to free tier.
-    """
-    expiry_str = _get_key("LICENSE_EXPIRY")   # format: YYYY-MM-DD  e.g. 2026-12-31
-    license_key = _get_key("LICENSE_KEY")      # any non-empty string = paid school
-    if not license_key or not expiry_str:
-        return False, 0, "free"
-    try:
-        expiry = datetime.date.fromisoformat(expiry_str.strip())
-        today  = datetime.date.today()
-        days_left = (expiry - today).days
-        if days_left >= 0:
-            return True, days_left, "paid"
-        else:
-            return False, days_left, "expired"
-    except Exception:
-        return False, 0, "free"
-
-SUBSCRIPTION_ACTIVE, _SUB_DAYS_LEFT, _SUB_TIER = _check_subscription()
-
-# ═══════════════════════════════════════════════════════════
-# LOGIN SYSTEM
-# Schools get a SCHOOL_CODE and SCHOOL_PASS in their secrets.
-# IBT admin can also set ADMIN_PASS to access all schools.
-# ═══════════════════════════════════════════════════════════
-
-def _get_credentials():
-    """Return list of valid (username, password, label) tuples from secrets."""
-    creds = []
-    # Primary school account
-    sc = _get_key("SCHOOL_CODE")
-    sp = _get_key("SCHOOL_PASS")
-    sl = _get_key("SCHOOL_NAME_LOGIN") or "School Account"
-    if sc and sp:
-        creds.append((sc.strip(), sp.strip(), sl.strip()))
-    # Admin / IBT account
-    ap = _get_key("ADMIN_PASS")
-    if ap:
-        creds.append(("ibt_admin", ap.strip(), "IBT Admin"))
-    # If no credentials configured at all, use a simple open-access mode
-    return creds
-
-def _login_required():
-    """True if the app has login credentials configured."""
-    return len(_get_credentials()) > 0
-
-def _is_logged_in():
-    return st.session_state.get("_logged_in", False)
-
-def _show_login_screen():
-    """Render the login screen and return True once authenticated."""
-    b = get_b64()
-    if b:
-        st.markdown(
-            f'<div style="text-align:center;padding:2rem 0 1rem">'+
-            f'<img src="data:image/png;base64,{b}" style="max-height:200px;filter:drop-shadow(0 4px 16px rgba(212,168,67,.4))"></div>',
-            unsafe_allow_html=True)
-    st.markdown(
-        '<h2 style="text-align:center;color:#D4A843;margin-bottom:.2rem">Teacher Pehpeh by IBT</h2>'+
-        '<p style="text-align:center;color:#8899BB;font-size:.9rem;margin-bottom:1.5rem">Enter your school login to continue</p>',
-        unsafe_allow_html=True)
-
-    with st.form("login_form", clear_on_submit=False):
-        username = st.text_input("School Code / Username", placeholder="e.g. grandfield_hs")
-        password = st.text_input("Password", type="password", placeholder="Your school password")
-        submitted = st.form_submit_button("🔐 Sign In", use_container_width=True, type="primary")
-
-    if submitted:
-        creds = _get_credentials()
-        match = next((c for c in creds if c[0].lower()==username.strip().lower() and c[1]==password.strip()), None)
-        if match:
-            st.session_state["_logged_in"] = True
-            st.session_state["_login_label"] = match[2]
-            st.rerun()
-        else:
-            st.error("Incorrect username or password. Please contact IBT for access.")
-
-    st.markdown(
-        '<p style="text-align:center;font-size:.8rem;color:#556;margin-top:2rem">'+
-        'Don\'t have a login? '+
-        '<a href="https://www.institutebasictechnology.org" target="_blank" style="color:#D4A843">Contact IBT</a> to get your school set up.</p>',
-        unsafe_allow_html=True)
-
-def _show_upgrade_prompt(context="generate"):
-    """Show the free-tier upgrade wall in place of AI generation."""
-    st.markdown(
-        f'''<div style="border:1px solid #D4A84366;border-radius:12px;padding:1.2rem 1.4rem;background:rgba(212,168,67,.05);text-align:center;margin:1rem 0">'+
-        f'<p style="font-size:1.1rem;color:#D4A843;font-weight:700;margin-bottom:.4rem">🔒 AI Generation — Paid Feature</p>'+
-        f'<p style="color:#9AAABB;font-size:.9rem;margin-bottom:.8rem">Your school\'s subscription has expired or is not yet active.<br>'+
-        f'Everything you\'ve built is still here — your student records, quizzes, and past content.</p>'+
-        f'<p style="color:#D4A843;font-size:.85rem">📲 WhatsApp IBT to renew: '+
-        f'<a href="https://wa.me/message/IBTWHALINK" style="color:#D4A843;font-weight:600">Get in touch</a> &nbsp;|&nbsp; '+
-        f'<a href="https://www.institutebasictechnology.org" style="color:#D4A843">Visit our website</a></p>'+
-        f'</div>''',
-        unsafe_allow_html=True)
-
-
 try:
     import openai; OAI = True
 except ImportError: OAI = False
@@ -1083,18 +978,7 @@ def build_stu(reg,cty,grd,subj,cls,res,lng,abl,info,sch=""):
     return f"{_p()}\nCLASS: {cty},{reg},{grd},{subj},{cls},{res},{lng},{abl}{s_tag}\nSTUDENT: {info}\n{_kb()}\nTargeted advice. Compare to data. Risk factors. Interventions.\n{_r()}"
 
 # === AI ===
-def _sub_blocked():
-    """Return upgrade message if subscription is not active, else None."""
-    if not SUBSCRIPTION_ACTIVE:
-        tier_msg = "expired" if _SUB_TIER == "expired" else "not yet active"
-        return (f"🔒 **AI generation is paused** — your school subscription is {tier_msg}.\n\n"
-                f"Your student data and past content are safe. "
-                f"Contact IBT to renew: [institutebasictechnology.org](https://www.institutebasictechnology.org)")
-    return None
-
 def ask_gpt(sp,q,h=None):
-    blocked = _sub_blocked()
-    if blocked: return blocked
     if not OAI or not OPENAI_API_KEY: return None
     try:
         m=[{"role":"system","content":sp}]+(h or [])+[{"role":"user","content":q}]
@@ -1102,8 +986,6 @@ def ask_gpt(sp,q,h=None):
     except Exception as e: return f"⚠️ {e}"
 
 def ask_cl(sp,q,h=None):
-    blocked = _sub_blocked()
-    if blocked: return blocked
     if not ANT or not ANTHROPIC_API_KEY: return None
     try:
         m=list(h or [])+[{"role":"user","content":q}]
@@ -1111,8 +993,6 @@ def ask_cl(sp,q,h=None):
     except Exception as e: return f"⚠️ {e}"
 
 def ask_gem(sp,q):
-    blocked = _sub_blocked()
-    if blocked: return blocked
     if not GEM or not GOOGLE_API_KEY: return None
     try:
         genai.configure(api_key=GOOGLE_API_KEY)
@@ -1879,11 +1759,6 @@ def main():
     st.markdown(_fav_js, unsafe_allow_html=True)
     # Sidebar starts expanded so users immediately see Configure Your Classroom
     # (throb animation on the toggle button draws attention when collapsed)
-    # ── LOGIN GATE ──────────────────────────────────────────────────
-    if _login_required() and not _is_logged_in():
-        _show_login_screen()
-        st.stop()
-
     for k in ["chat_messages","students","conn_checked","conn_info","gen_result","grade_history"]:
         if k not in st.session_state: st.session_state[k]=[] if k in ("chat_messages","students","grade_history") else (False if k=="conn_checked" else None)
     # Always sync quiz state for ALL subjects (catches new subjects added after first run)
@@ -2228,25 +2103,6 @@ def main():
                     st.rerun()
                 except Exception as e:
                     st.error(f"Invalid file: {e}")
-        # ── Subscription status + logout ──────────────────────────
-        if SUBSCRIPTION_ACTIVE:
-            _badge_color = "#27AE60" if _SUB_DAYS_LEFT > 30 else "#F39C12"
-            _badge_text = f"Active · {_SUB_DAYS_LEFT}d left" if _SUB_DAYS_LEFT <= 60 else "Active"
-            st.markdown(f'<div style="text-align:center;padding:4px 0;font-size:.75rem;color:{_badge_color}">✅ Subscription: {_badge_text}</div>',unsafe_allow_html=True)
-        elif _SUB_TIER == "expired":
-            st.markdown('<div style="text-align:center;padding:4px 0;font-size:.75rem;color:#E74C3C">⚠️ Subscription expired — AI generation paused</div>',unsafe_allow_html=True)
-        else:
-            st.markdown('<div style="text-align:center;padding:4px 0;font-size:.75rem;color:#8899BB">🆓 Free account — AI generation not active</div>',unsafe_allow_html=True)
-        if _login_required() and _is_logged_in():
-            _login_lbl = st.session_state.get("_login_label","")
-            _lcol1, _lcol2 = st.columns([2,1])
-            with _lcol1:
-                st.markdown(f'<p style="font-size:.75rem;color:#8899BB;margin:4px 0">👤 {_login_lbl}</p>',unsafe_allow_html=True)
-            with _lcol2:
-                if st.button("Sign out", key="logout_btn", use_container_width=True):
-                    st.session_state["_logged_in"] = False
-                    st.session_state["_login_label"] = ""
-                    st.rerun()
         st.caption("© 2026 Institute of Basic Technology")
         st.markdown("[🌐 Visit our website](https://www.institutebasictechnology.org/index.php)")
 
@@ -2777,9 +2633,6 @@ def main():
             if st.button(T("clear"),use_container_width=True,key="gen_clr"):
                 st.session_state.gen_result=None; st.rerun()
         if gen_btn:
-            if not SUBSCRIPTION_ACTIVE:
-                _show_upgrade_prompt("generate")
-                st.stop()
             # Build prompt
             if _IS_PARENT_LETTER and _parent_letter_override:
                 _tn=teacher_name.strip() if teacher_name.strip() else "the teacher"
