@@ -3080,11 +3080,11 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
 
         with st.expander({"en":"➕ Add Profile","fr":"➕ Ajouter un profil","sw":"➕ Ongeza Wasifu"}.get(_lang_key(),"➕ Add Profile"),expanded=not st.session_state.students):
             c1,c2=st.columns(2)
-            with c1: sn=st.text_input(T("name"),key="sn"); sg=st.text_input({"en":"Grade","fr":"Classe","sw":"Darasa"}.get(_lang_key(),"Grade"),key="sg",placeholder="e.g. 10A"); sib=st.selectbox({"en":"Siblings","fr":"Frères et sœurs","sw":"Ndugu"}.get(_lang_key(),"Siblings"),["0-4","5-8","8+"],key="sb"); me=st.selectbox({"en":"Mom Edu","fr":"Éducation mère","sw":"Elimu ya mama"}.get(_lang_key(),"Mom Edu"),["HS Grad","No HS","Unknown"],key="me")
-            with c2: ss=st.number_input({"en":"Avg Score (0-100)","fr":"Score moyen","sw":"Alama ya wastani"}.get(_lang_key(),"Avg Score (0-100)"),min_value=0,max_value=100,value=0,step=1,key="ss"); sm=st.selectbox({"en":"Single Mom?","fr":"Mère seule ?","sw":"Mama peke yake?"}.get(_lang_key(),"Single Mom?"),["No","Yes","Unknown"],key="sm"); wk=st.selectbox({"en":"Works?","fr":"Travaille ?","sw":"Anafanya kazi?"}.get(_lang_key(),"Works?"),["No","Yes","Unknown"],key="wk"); cp=st.selectbox({"en":"Computer?","fr":"Ordinateur ?","sw":"Kompyuta?"}.get(_lang_key(),"Computer?"),["Never","Rarely","Sometimes","Often"],key="cp")
+            with c1: sn=st.text_input(T("name"),key="sn"); sib=st.selectbox({"en":"Siblings","fr":"Frères et sœurs","sw":"Ndugu"}.get(_lang_key(),"Siblings"),["0-4","5-8","8+"],key="sb"); me=st.selectbox({"en":"Mom Edu","fr":"Éducation mère","sw":"Elimu ya mama"}.get(_lang_key(),"Mom Edu"),["HS Grad","No HS","Unknown"],key="me")
+            with c2: sm=st.selectbox({"en":"Single Mom?","fr":"Mère seule ?","sw":"Mama peke yake?"}.get(_lang_key(),"Single Mom?"),["No","Yes","Unknown"],key="sm"); wk=st.selectbox({"en":"Works?","fr":"Travaille ?","sw":"Anafanya kazi?"}.get(_lang_key(),"Works?"),["No","Yes","Unknown"],key="wk"); cp=st.selectbox({"en":"Computer?","fr":"Ordinateur ?","sw":"Kompyuta?"}.get(_lang_key(),"Computer?"),["Never","Rarely","Sometimes","Often"],key="cp")
             nt=st.text_area("Notes",key="nt",height=50)
             if st.button({"en":"✅ Save","fr":"✅ Enregistrer","sw":"✅ Hifadhi"}.get(_lang_key(),"✅ Save"),key="sv") and sn.strip():
-                st.session_state.students.append(dict(name=sn.strip(),sib=sib,mom=me,sm=sm,wk=wk,cp=cp,nt=nt.strip(),grade=sg.strip(),avg_score=int(ss) if ss else None))
+                st.session_state.students.append(dict(name=sn.strip(),sib=sib,mom=me,sm=sm,wk=wk,cp=cp,nt=nt.strip()))
                 st.session_state["_stu_saved_flash"] = True
                 st.rerun()
         # Flash confirmation + Excel download after save
@@ -3154,8 +3154,8 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             <strong>Single_Mom</strong> (Yes, No, or Unknown), <strong>Works</strong> (Yes, No, or Unknown),
             <strong>Computer</strong> (Never, Rarely, Sometimes, or Often), <strong>Notes</strong> (optional)
             </div>""",unsafe_allow_html=True)
-            dl_cols=["Name","Grade","Siblings","Mom_Edu","Single_Mom","Works","Computer","Avg_Score","Notes"]
-            dl_example=[["Janjay Kollie","10A","5-8","No HS","Yes","No","Never",58,"Quiet, needs encouragement"],["Hawa Sirleaf","10A","0-4","HS Grad","No","No","Sometimes",71,""]]
+            dl_cols=["Name","Siblings","Mom_Edu","Single_Mom","Works","Computer","Notes"]
+            dl_example=[["Janjay Kollie","5-8","No HS","Yes","No","Never","Quiet, needs encouragement"],["Hawa Sirleaf","0-4","HS Grad","No","No","Sometimes",""]]
             if PD:
                 template_df=pd.DataFrame(dl_example,columns=dl_cols)
                 csv_data=template_df.to_csv(index=False)
@@ -3166,13 +3166,16 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     if uploaded.name.endswith(".csv"):
                         df=pd.read_csv(uploaded)
                     else:
-                        df=pd.read_excel(uploaded)
-                    # ── Drop blank / nan rows BEFORE anything else ──
-                    df=df.dropna(how="all")
-                    if "Name" in df.columns or any(c.lower()=="name" for c in df.columns):
-                        _name_col=next((c for c in df.columns if c.lower()=="name"),None) or "Name"
-                        df=df[df[_name_col].astype(str).str.strip().str.lower().isin(["nan","none",""])== False]
-                    df=df.reset_index(drop=True)
+                        df=pd.read_excel(uploaded,header=0)
+                        # Auto-detect header row: skip title/instruction rows if first col isn't a name-like header
+                        _cols_lower=[str(c).strip().lower() for c in df.columns]
+                        if "name" not in _cols_lower and "student" not in _cols_lower:
+                            # Try header at row 1
+                            df=pd.read_excel(uploaded,header=1)
+                            _cols_lower=[str(c).strip().lower() for c in df.columns]
+                        if "name" not in _cols_lower and "student" not in _cols_lower:
+                            # Try header at row 2 (template has title + instruction rows)
+                            df=pd.read_excel(uploaded,header=2)
                     # Normalize column names
                     df.columns=[c.strip().replace(" ","_") for c in df.columns]
                     # Map common variations
@@ -3181,8 +3184,6 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                              "single_mom":"Single_Mom","single_mother":"Single_Mom","sm":"Single_Mom",
                              "works":"Works","works_after_school":"Works","working":"Works",
                              "computer":"Computer","computer_access":"Computer","comp":"Computer",
-                             "grade":"Grade","class":"Grade","form":"Grade","year_group":"Grade",
-                             "avg_score":"Avg_Score","average_score":"Avg_Score","score":"Avg_Score","average":"Avg_Score",
                              "notes":"Notes","note":"Notes","comments":"Notes"}
                     df.columns=[col_map.get(c.lower(),c) for c in df.columns]
                     if "Name" not in df.columns:
@@ -3207,35 +3208,11 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                                 if cp_v not in ["Never","Rarely","Sometimes","Often"]: cp_v="Never"
                                 nt_v=str(row.get("Notes","")).strip()
                                 if nt_v=="nan": nt_v=""
-                                gr_v=str(row.get("Grade","")).strip()
-                                if gr_v in ("nan","None",""): gr_v=""
-                                sc_v=row.get("Avg_Score","")
-                                try: sc_v=int(float(sc_v)) if str(sc_v) not in ("nan","None","") else None
-                                except: sc_v=None
-                                st.session_state.students.append(dict(name=name,sib=sib_v,mom=mom_v,sm=sm_v,wk=wk_v,cp=cp_v,nt=nt_v,grade=gr_v,avg_score=sc_v))
+                                st.session_state.students.append(dict(name=name,sib=sib_v,mom=mom_v,sm=sm_v,wk=wk_v,cp=cp_v,nt=nt_v))
                                 imported+=1
                             st.success(f"✅ Imported {imported} students!"); time.sleep(1); st.rerun()
                 except Exception as e:
                     st.error(f"❌ Error reading file: {e}")
-        # ── AI Agent Selector ────────────────────────────────────────────
-        if st.session_state.students:
-            if "selected_agents" not in st.session_state:
-                st.session_state.selected_agents = ["assignment","risk"]
-            st.markdown(
-                f'<div style="background:var(--bg-card);border:1px solid {C_GOLD}44;border-radius:10px;'
-                f'padding:10px 14px;margin:6px 0 10px"><strong style="color:{C_GOLD}">🤖 AI Analysis Mode</strong>'
-                f' <span style="font-size:.8rem;color:var(--text-secondary)">— toggle which buttons appear on each student card</span></div>',
-                unsafe_allow_html=True)
-            _agent_cols = st.columns(3)
-            _agents = [("assignment","📄 Assignment","assignment"),("risk","⚠️ Risk Analysis","risk"),("idcard","🪪 ID Card","idcard")]
-            for _ac, (_akey, _alabel, _aid) in zip(_agent_cols, _agents):
-                _active = _akey in st.session_state.selected_agents
-                if _ac.button(_alabel, key=f"agent_tog_{_akey}", type="primary" if _active else "secondary", use_container_width=True):
-                    if _active: st.session_state.selected_agents.remove(_akey)
-                    else: st.session_state.selected_agents.append(_akey)
-                    st.rerun()
-            st.markdown('<div style="height:4px"></div>', unsafe_allow_html=True)
-
         for i,s in enumerate(st.session_state.students):
             rsk=[]
             if s["mom"]=="No HS": rsk.append("🔴 No HS Mom")
@@ -3243,44 +3220,38 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             if s["sib"]=="8+": rsk.append("🟠 8+ siblings")
             if s["wk"]=="Yes": rsk.append("🟠 Works")
             if s["cp"]=="Never": rsk.append("🟡 No computer")
-            _gr_tag=f" · Grade <strong>{s['grade']}</strong>" if s.get("grade") else ""
-            _sc_tag=f" · Score: <strong>{s['avg_score']}</strong>" if s.get("avg_score") is not None else ""
-            st.markdown(f'<div class="sc"><strong style="color:{C_BLUE}">{s["name"]}</strong>{_gr_tag}{_sc_tag} — {s["sib"]} sib, Mom:{s["mom"]}<br><span style="font-size:.82rem">{" · ".join(rsk) or "🟢 Lower risk"}</span></div>',unsafe_allow_html=True)
-            info=f'{s["name"]},{s.get("grade","")},{s["sib"]}sib,Mom:{s["mom"]},SM:{s["sm"]},Works:{s["wk"]},Comp:{s["cp"]},Score:{s.get("avg_score","N/A")},{s["nt"]}'
-            _sel_agents=st.session_state.get("selected_agents",["assignment","risk","idcard"])
-            _btn_cols=st.columns([3,3,3,1])
-            with _btn_cols[0]:
-                if "assignment" in _sel_agents:
-                    if st.button(T("assignment"),key=f"a{i}"):
-                        with st.spinner(T("creating")):
-                            r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),f"Tailored {_subj_en} assignment. Max 3 problems.")
-                        _by={"en":"by","fr":"par","sw":"na"}.get(_lang_key(),"by"); st.markdown(f'<div class="rb">{highlight_result(r)}<div style="font-size:.65rem;color:#556;margin-top:4px">{_by} {m}</div></div>',unsafe_allow_html=True)
-                        if len(allr)>1:
-                            with st.expander(f"{T('see_all')} {len(allr)} {T('model_responses')}"):
-                                for mn,mr in allr.items():
-                                    mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mn,"⚪")
-                                    st.markdown(f"**{mico} {mn}{'  ✅' if mn==m else ''}**"); st.markdown(mr); st.markdown("---")
-                        email_result(r, f"Teacher Pehpeh — Assignment for {s['name']} ({subject}, {grade})", f"asn_{i}")
-                        tts_player(r, f"asn_{i}")
-            with _btn_cols[1]:
-                if "risk" in _sel_agents:
-                    if st.button(T("risk"),key=f"r{i}"):
-                        with st.spinner("Analyzing..."):
-                            r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),"Risk analysis using IBT data. Compare to 183-student dataset.")
-                        _by={"en":"by","fr":"par","sw":"na"}.get(_lang_key(),"by"); st.markdown(f'<div class="rb">{highlight_result(r)}<div style="font-size:.65rem;color:#556;margin-top:4px">{_by} {m}</div></div>',unsafe_allow_html=True)
-                        if len(allr)>1:
-                            with st.expander(f"{T('see_all')} {len(allr)} {T('model_responses')}"):
-                                for mn,mr in allr.items():
-                                    mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mn,"⚪")
-                                    st.markdown(f"**{mico} {mn}{'  ✅' if mn==m else ''}**"); st.markdown(mr); st.markdown("---")
-                        email_result(r, f"Teacher Pehpeh — Risk Analysis for {s['name']} ({subject}, {grade})", f"rsk_{i}")
-                        tts_player(r, f"rsk_{i}")
-            with _btn_cols[2]:
-                if "idcard" in _sel_agents:
-                    if st.button("🪪 ID Card",key=f"card{i}"):
-                        st.session_state[f"_show_card_{i}"]=not st.session_state.get(f"_show_card_{i}",False)
-                        st.rerun()
-            with _btn_cols[3]:
+            st.markdown(f'<div class="sc"><strong style="color:{C_BLUE}">{s["name"]}</strong> — {s["sib"]} sib, Mom:{s["mom"]}<br><span style="font-size:.82rem">{" · ".join(rsk) or "🟢 Lower risk"}</span></div>',unsafe_allow_html=True)
+            info=f'{s["name"]},{s["sib"]}sib,Mom:{s["mom"]},SM:{s["sm"]},Works:{s["wk"]},Comp:{s["cp"]},{s["nt"]}'
+            b1,b2,b3,b4=st.columns([3,3,3,1])
+            with b1:
+                if st.button(T("assignment"),key=f"a{i}"):
+                    with st.spinner(T("creating")):
+                        r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),f"Tailored {_subj_en} assignment. Max 3 problems.")
+                    _by={"en":"by","fr":"par","sw":"na"}.get(_lang_key(),"by"); st.markdown(f'<div class="rb">{highlight_result(r)}<div style="font-size:.65rem;color:#556;margin-top:4px">{_by} {m}</div></div>',unsafe_allow_html=True)
+                    if len(allr)>1:
+                        with st.expander(f"{T('see_all')} {len(allr)} {T('model_responses')}"):
+                            for mn,mr in allr.items():
+                                mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mn,"⚪")
+                                st.markdown(f"**{mico} {mn}{'  ✅' if mn==m else ''}**"); st.markdown(mr); st.markdown("---")
+                    email_result(r, f"Teacher Pehpeh — Assignment for {s['name']} ({subject}, {grade})", f"asn_{i}")
+                    tts_player(r, f"asn_{i}")
+            with b2:
+                if st.button(T("risk"),key=f"r{i}"):
+                    with st.spinner("Analyzing..."):
+                        r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),"Risk analysis using IBT data. Compare to 183-student dataset.")
+                    _by={"en":"by","fr":"par","sw":"na"}.get(_lang_key(),"by"); st.markdown(f'<div class="rb">{highlight_result(r)}<div style="font-size:.65rem;color:#556;margin-top:4px">{_by} {m}</div></div>',unsafe_allow_html=True)
+                    if len(allr)>1:
+                        with st.expander(f"{T('see_all')} {len(allr)} {T('model_responses')}"):
+                            for mn,mr in allr.items():
+                                mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mn,"⚪")
+                                st.markdown(f"**{mico} {mn}{'  ✅' if mn==m else ''}**"); st.markdown(mr); st.markdown("---")
+                    email_result(r, f"Teacher Pehpeh — Risk Analysis for {s['name']} ({subject}, {grade})", f"rsk_{i}")
+                    tts_player(r, f"rsk_{i}")
+            with b3:
+                if st.button("🪪 ID Card",key=f"card{i}"):
+                    st.session_state[f"_show_card_{i}"]=not st.session_state.get(f"_show_card_{i}",False)
+                    st.rerun()
+            with b4:
                 if st.button("🗑️",key=f"d{i}"): st.session_state.students.pop(i); st.rerun()
             # Student ID Card display with save options
             if st.session_state.get(f"_show_card_{i}"):
