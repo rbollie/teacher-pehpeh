@@ -3423,7 +3423,6 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             with gw_col:
                 gw=st.text_area(T("students_work"),height=100,key="gw")
             with gw_mic:
-                st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
                 grade_audio=st.audio_input("🎤",key="grade_mic",label_visibility="collapsed")
             if grade_audio:
                 with st.spinner(T("transcribing")):
@@ -3687,8 +3686,6 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
             with _ma3: st.metric("Total Records", _n_records)
             with _ma4: st.metric("Need Intervention", f"{_below50} student{'s' if _below50!=1 else ''}", delta=f"{_at_risk_pct:.0f}% of class", delta_color="inverse")
 
-            st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
-
             # ── Per-student summary table ──────────────────────────────────
             st.markdown(f'<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin-bottom:6px">📋 Student Performance Summary</div>', unsafe_allow_html=True)
             _stu_summary = []
@@ -3776,161 +3773,71 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                     f'padding:20px 24px;color:#D0D8E8;line-height:1.8;font-size:.88rem;white-space:pre-wrap">'
                     f'{_ar_text}</div>', unsafe_allow_html=True)
 
-            # ── Excel Report Download ──────────────────────────────────────
-            st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
-            st.markdown(f'<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin-bottom:8px">📊 Export Full Report</div>', unsafe_allow_html=True)
-
-            try:
-                import io, openpyxl
-                from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-                from openpyxl.chart import LineChart, Reference
-
-                _rpt_wb = openpyxl.Workbook()
-
-                # Shared styles
-                _navy_fill = PatternFill("solid", fgColor="0D1B2A")
-                _blue_fill = PatternFill("solid", fgColor="0D3B8C")
-                _gold_fill = PatternFill("solid", fgColor="D4A843")
-                _alt_fill  = PatternFill("solid", fgColor="131F30")
-                _red_fill  = PatternFill("solid", fgColor="5C1010")
-                _grn_fill  = PatternFill("solid", fgColor="0D3B14")
-                _ylw_fill  = PatternFill("solid", fgColor="3B2D00")
-                _thin = Side(style="thin", color="1E3050")
-                _bdr  = Border(left=_thin, right=_thin, top=_thin, bottom=_thin)
-
-                def _hdr_cell(ws, row, col, val, size=11):
-                    c = ws.cell(row, col, val)
-                    c.font = Font(bold=True, color="FFFFFF", size=size)
-                    c.fill = _gold_fill
-                    c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-                    c.border = _bdr
-                    return c
-
-                def _title_row(ws, row, ncols, text, subtitle=""):
-                    ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=ncols)
-                    tc = ws.cell(row, 1, text)
-                    tc.font = Font(bold=True, color="FFFFFF", size=14)
-                    tc.fill = _blue_fill
-                    tc.alignment = Alignment(horizontal="center", vertical="center")
-                    ws.row_dimensions[row].height = 30
-                    if subtitle:
-                        ws.merge_cells(start_row=row+1, start_column=1, end_row=row+1, end_column=ncols)
-                        sc = ws.cell(row+1, 1, subtitle)
-                        sc.font = Font(italic=True, color="D4A843", size=10)
-                        sc.fill = _navy_fill
-                        sc.alignment = Alignment(horizontal="center")
-
-                # ── Sheet 1: Grade History ─────────────────────────────────
-                _ws1 = _rpt_wb.active; _ws1.title = "Grade History"
-                _title_row(_ws1, 1, 8, f"TEACHER PEHPEH — Grade History",
-                           f"{_school_label} | Grade {_grade_en} | Generated {_ardt.datetime.now().strftime('%B %d, %Y')}")
-                _h1 = ["Student","Subject","Topic / Assignment","Score (/100)","Date","Grade Level","Graded By","Intervention?"]
-                for ci, h in enumerate(_h1, 1): _hdr_cell(_ws1, 3, ci, h)
-                for _col, _w in zip(["A","B","C","D","E","F","G","H"],[22,16,26,12,14,12,14,14]):
-                    _ws1.column_dimensions[_col].width = _w
-                _thresh = 50
-                for ri, g in enumerate(_df_sorted.to_dict("records"), 4):
-                    _fill = _red_fill if g["score"] < _thresh else _grn_fill
-                    _irow = ri % 2 == 0
-                    _bg = PatternFill("solid", fgColor="1C2340") if _irow else _navy_fill
-                    for ci, val in enumerate([g["student"],g["subject"],g.get("topic","General"),
-                                              f"{g['score']}/100",g["date_str"],g.get("grade_level",""),
-                                              g.get("model","Manual"),"🔴 Yes" if g["score"] < _thresh else "🟢 No"], 1):
-                        _c = _ws1.cell(ri, ci, val)
-                        _c.font = Font(color="FFFFFF" if ci == 4 else "D0D8E8", bold=(ci==4), size=10)
-                        _c.fill = _fill if ci == 4 else _bg
-                        _c.border = _bdr
-                        _c.alignment = Alignment(horizontal="center" if ci in [4,5,6,7,8] else "left")
-
-                # ── Sheet 2: Trend Analysis ────────────────────────────────
-                _ws2 = _rpt_wb.create_sheet("Trend Analysis")
-                _title_row(_ws2, 1, 7, "TREND ANALYSIS — Student Score Progression", f"{_school_label}")
-                _h2 = ["Student","Subject","Score Sequence","Latest Score","Avg Score","Trend","Status"]
-                for ci, h in enumerate(_h2, 1): _hdr_cell(_ws2, 3, ci, h)
-                for _col, _w in zip(["A","B","C","D","E","F","G"],[22,16,36,12,12,8,16]):
-                    _ws2.column_dimensions[_col].width = _w
-                _r2 = 4
-                for _sn2 in sorted(_df["student"].unique()):
-                    for _subj2 in sorted(_df[_df["student"]==_sn2]["subject"].unique()):
-                        _sd4 = _df[(_df["student"]==_sn2)&(_df["subject"]==_subj2)].sort_values("date")
-                        if _sd4.empty: continue
-                        _seq = " → ".join(str(int(s)) for s in _sd4["score"])
-                        _lavg2 = _sd4["score"].mean()
-                        _llast2 = int(_sd4["score"].iloc[-1])
-                        _ltd = _sd4["score"].iloc[-1] - _sd4["score"].iloc[0] if len(_sd4)>1 else 0
-                        _ltr = "📈" if _ltd > 2 else ("📉" if _ltd < -2 else "➡️")
-                        _lst = "🔴 Intervention" if _lavg2 < 50 else ("🟡 Monitor" if _lavg2 < 65 else "🟢 On Track")
-                        _avg_fill = _red_fill if _lavg2 < 50 else (_ylw_fill if _lavg2 < 65 else _grn_fill)
-                        _bg2 = PatternFill("solid", fgColor="1C2340") if _r2 % 2 == 0 else _navy_fill
-                        for ci, val in enumerate([_sn2, _subj2, _seq, f"{_llast2}/100", f"{_lavg2:.0f}/100", _ltr, _lst], 1):
-                            _c2 = _ws2.cell(_r2, ci, val)
-                            _c2.font = Font(color="D0D8E8", size=10)
-                            _c2.fill = _avg_fill if ci == 5 else _bg2
-                            _c2.border = _bdr
-                        _r2 += 1
-
-                # ── Sheet 3: Class Summary + Chart ─────────────────────────
-                _ws3 = _rpt_wb.create_sheet("Class Summary")
-                _title_row(_ws3, 1, 5, "CLASS SUMMARY", f"{_school_label} | Avg: {_avg_all:.1f}/100 | Trend: {_trend_icon}")
-                _h3 = ["Student","Avg Score","# Assignments","Subjects","Status"]
-                for ci, h in enumerate(_h3, 1): _hdr_cell(_ws3, 3, ci, h)
-                for _col, _w in zip(["A","B","C","D","E"],[22,14,16,30,18]):
-                    _ws3.column_dimensions[_col].width = _w
-                _r3 = 4
-                for _sn3 in sorted(_df["student"].unique()):
-                    _sd5 = _df[_df["student"]==_sn3]
-                    _savg5 = _sd5["score"].mean()
-                    _sfill = _red_fill if _savg5 < 50 else (_ylw_fill if _savg5 < 65 else _grn_fill)
-                    _bg3 = PatternFill("solid", fgColor="1C2340") if _r3 % 2 == 0 else _navy_fill
-                    _sst = "🔴 Intervention" if _savg5 < 50 else ("🟡 Monitor" if _savg5 < 65 else "🟢 On Track")
-                    for ci, val in enumerate([_sn3, f"{_savg5:.0f}/100", len(_sd5), ", ".join(sorted(_sd5["subject"].unique())), _sst], 1):
-                        _c3 = _ws3.cell(_r3, ci, val)
-                        _c3.font = Font(color="D0D8E8", size=10)
-                        _c3.fill = _sfill if ci == 2 else _bg3
-                        _c3.border = _bdr
-                    _r3 += 1
-                # Embed chart
+            # ── Report Downloads ──────────────────────────────────────────
+            st.markdown(f'<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin-bottom:6px">📄 Export Full Report</div>', unsafe_allow_html=True)
+            _dl_c1, _dl_c2 = st.columns(2)
+            with _dl_c1:
                 try:
-                    _lc = LineChart(); _lc.title = "Class Avg Score Trend"; _lc.style = 10
-                    _lc.y_axis.numFmt = '0'; _lc.y_axis.title = "Score"; _lc.x_axis.title = "Record"
-                    _lc.y_axis.scaling.min = 0; _lc.y_axis.scaling.max = 100
-                    _scores_col = [g["score"] for g in _df_sorted.to_dict("records")]
-                    for row_i, sc_val in enumerate(_scores_col, 1):
-                        _ws3.cell(_r3 + row_i, 8, sc_val)
-                    _data_ref = Reference(_ws3, min_col=8, min_row=_r3+1, max_row=_r3+len(_scores_col))
-                    _lc.add_data(_data_ref)
-                    _lc.width = 22; _lc.height = 12
-                    _ws3.add_chart(_lc, f"A{_r3+2}")
-                except Exception: pass
+                    from word_report import generate_academic_word_report
+                    _word_bytes = generate_academic_word_report(
+                        _gh, st.session_state.students,
+                        _school_label, _grade_en,
+                        st.session_state.get(_analysis_key, "")
+                    )
+                    _word_fname = f"IBT_Academic_Report_{(_school_label or 'class').replace(' ','_')}_{_ardt.datetime.now().strftime('%Y%m%d')}.docx"
+                    st.download_button("📄 Download Word Report (.docx)", data=_word_bytes,
+                        file_name=_word_fname,
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        key="dl_word_report", type="primary", use_container_width=True)
+                except Exception as _we:
+                    st.error(f"Word report error: {_we}")
+            with _dl_c2:
+                try:
+                    import io, openpyxl
+                    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+                    from openpyxl.chart import LineChart, Reference
+                    _rpt_wb = openpyxl.Workbook()
+                    _navy_fill = PatternFill("solid", fgColor="0D1B2A")
+                    _blue_fill = PatternFill("solid", fgColor="0D3B8C")
+                    _gold_fill = PatternFill("solid", fgColor="D4A843")
+                    _alt_fill  = PatternFill("solid", fgColor="131F30")
+                    _red_fill  = PatternFill("solid", fgColor="5C1010")
+                    _grn_fill  = PatternFill("solid", fgColor="0D3B14")
+                    _ylw_fill  = PatternFill("solid", fgColor="3B2D00")
+                    _thin = Side(style="thin", color="1E3050")
+                    _bdr  = Border(left=_thin, right=_thin, top=_thin, bottom=_thin)
+                    def _hdr_cell(ws, row, col, val, size=11):
+                        c = ws.cell(row, col, val)
+                        c.font = Font(bold=True, color="FFFFFF", size=size)
+                        c.fill = _gold_fill
+                        c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+                        c.border = _bdr
+                        return c
+                    _ws1 = _rpt_wb.active; _ws1.title = "Grade History"
+                    _h1 = ["Student","Subject","Topic","Score","Date","Grade Level","Graded By","Intervention?"]
+                    for ci, h in enumerate(_h1, 1): _hdr_cell(_ws1, 1, ci, h)
+                    for _col, _w in zip(["A","B","C","D","E","F","G","H"],[22,16,26,12,14,12,14,14]):
+                        _ws1.column_dimensions[_col].width = _w
+                    for ri, g in enumerate(_df_sorted.to_dict("records"), 2):
+                        _rfill = _red_fill if g["score"] < 50 else _grn_fill
+                        _bg = PatternFill("solid", fgColor="1C2340") if ri%2==0 else _navy_fill
+                        for ci, val in enumerate([g["student"],g["subject"],g.get("topic","General"),
+                                                  f"{g['score']}/100",g["date_str"],g.get("grade_level",""),
+                                                  g.get("model","Manual"),"Yes" if g["score"]<50 else "No"], 1):
+                            _c = _ws1.cell(ri, ci, val)
+                            _c.font = Font(color="FFFFFF", bold=(ci==4), size=10)
+                            _c.fill = _rfill if ci==4 else _bg
+                            _c.border = _bdr
+                    _rpt_buf = io.BytesIO(); _rpt_wb.save(_rpt_buf); _rpt_buf.seek(0)
+                    st.download_button("📊 Download Excel (.xlsx)", data=_rpt_buf.getvalue(),
+                        file_name=f"grades_{(_school_label or 'class').replace(' ','_')}_{_ardt.datetime.now().strftime('%Y%m%d')}.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        key="dl_acad_report", use_container_width=True)
+                except Exception as _xe:
+                    st.error(f"Excel error: {_xe}")
 
-                # ── Sheet 4: AI Analysis ──────────────────────────────────
-                if st.session_state.get(_analysis_key):
-                    _ws4 = _rpt_wb.create_sheet("AI Analysis")
-                    _title_row(_ws4, 1, 2, "AI-GENERATED ACADEMIC ANALYSIS", f"Teacher Pehpeh — {_school_label}")
-                    _ws4.column_dimensions["A"].width = 20
-                    _ws4.column_dimensions["B"].width = 90
-                    _ws4.cell(3, 1, "Analysis").font = Font(bold=True, color="D4A843", size=11)
-                    _ws4.merge_cells("A3:B3"); _ws4.cell(3,1).fill = _navy_fill
-                    _ar_lines = st.session_state[_analysis_key].split("\n")
-                    for _li, _line in enumerate(_ar_lines, 4):
-                        _ws4.merge_cells(start_row=_li, start_column=1, end_row=_li, end_column=2)
-                        _lc4 = _ws4.cell(_li, 1, _line)
-                        _lc4.font = Font(color="D0D8E8", size=10)
-                        _lc4.fill = _navy_fill if _li % 2 == 0 else _alt_fill
-                        _lc4.alignment = Alignment(wrap_text=True)
-                        _ws4.row_dimensions[_li].height = 16
-
-                _rpt_buf = io.BytesIO(); _rpt_wb.save(_rpt_buf); _rpt_buf.seek(0)
-                _rpt_fname = f"academic_report_{(_school_label or 'class').replace(' ','_')}_{_ardt.datetime.now().strftime('%Y%m%d')}.xlsx"
-                st.download_button("📊 Download Full Excel Report", data=_rpt_buf.getvalue(),
-                                   file_name=_rpt_fname,
-                                   mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                                   key="dl_acad_report", type="primary", use_container_width=True)
-            except Exception as _xe:
-                st.error(f"⚠️ Could not generate Excel report: {_xe}")
 
             # ── Email button ──────────────────────────────────────────────
-            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
             _ar_email_body = (
                 f"Academic Performance Report — {_school_label}\n"
                 f"Grade: {_grade_en} | Generated: {_ardt.datetime.now().strftime('%B %d, %Y')}\n"
@@ -3951,7 +3858,6 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                     st.success("✅ Grade data cleared."); st.rerun()
 
     # ── GLOBAL RESET — bottom of every page ───────────────────────────
-    st.markdown("<div style='height:48px'></div>", unsafe_allow_html=True)
     st.markdown("<hr style='border-color:#1a2a3a;margin:0 0 12px'>", unsafe_allow_html=True)
     _grst_col = st.columns([4, 1, 4])[1]
     with _grst_col:
@@ -4880,18 +4786,16 @@ def wassce_shading_modal():
     # TAB 6: IBT REPORTS
     if t6:
      with t6:
-        if IBT_REPORTS_AVAILABLE:
-            render_ibt_report_tab()
-        else:
-            st.markdown(
-                '<div style="background:rgba(212,168,67,.08);border:1px solid #D4A84344;border-radius:12px;'
-                'padding:24px;text-align:center;margin:1rem 0">'
-                '<p style="color:#D4A843;font-size:1.1rem;font-weight:700;margin-bottom:.5rem">📈 IBT Student Analysis Engine</p>'
-                '<p style="color:#8899BB;font-size:.9rem">The <code>ibt_engine.py</code> and <code>ibt_reports_tab.py</code> files '
-                'need to be in the same folder as <code>app.py</code> to activate this tab.<br><br>'
-                'Contact IBT or check the deployment guide to add these files.</p>'
-                '</div>',
-                unsafe_allow_html=True
-            )
+        try:
+            from ibt_interactive_tab import render_ibt_interactive_tab
+            render_ibt_interactive_tab()
+        except ImportError:
+            # Fallback to old module if available
+            if IBT_REPORTS_AVAILABLE:
+                render_ibt_report_tab()
+            else:
+                st.error("IBT interactive tab module not found. Ensure ibt_interactive_tab.py is in the app directory.")
+
+
 
 if __name__=="__main__": main()
