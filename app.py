@@ -4591,182 +4591,294 @@ document.getElementById('submit-btn').disabled = true;
     # TAB 6: IBT REPORTS — inline (no external module needed)
     if t6:
      with t6:
+        import math as _imath
+        import io as _iio
+        import datetime as _idt6
         try:
-            # ── IBT constants ──────────────────────────────────────────────────
-            _IBT_BENCH = {
-                "Mathematics":39.1,"Physics":39.9,"Chemistry":49.4,"Biology":44.7,
-                "English Grammar":43.3,"Literature":43.3,"Economics":43.3,"French":43.3,
+            # ═══════════════════════════════════════════════════════════════
+            # IBT CURVED BENCHMARKS — PERMANENT (sqrt-curve applied)
+            # Source: IBT 183-student, 6-school, 8-year dataset
+            # Curve: curved = sqrt(raw/100)*100  (square-root academic curve)
+            # Raw → Curved: Math 39.1→61.1, Physics 39.9→60.9, Chem 49.4→68.6,
+            #               Bio 44.7→65.3, Overall 43.3→64.0, WASSCE 50→70.7
+            # ═══════════════════════════════════════════════════════════════
+            _IBT_BENCH_C = {
+                "Chemistry":68.6,"Physics":60.9,"Math":61.1,"Mathematics":61.1,
+                "Biology":65.3,"English Grammar":65.8,"Literature":65.8,
+                "Economics":65.8,"French":65.8,
             }
-            _IBT_WASSCE=50.0; _IBT_ATRISK=37.5; _IBT_EXCELLENT=62.5; _IBT_AVG=43.3
-            _IBT_RISK_FACTS = [
-                ("School quality","School is the #1 predictor (F=8.60, p<0.001). Best school avg: 51.2 vs worst: 35.4 — a 15.8-point gap."),
-                ("Mother's education","Students with HS-grad mothers avg 44.9 vs 41.8 for no-HS mothers (p=0.031). Physics gap widest: 43.8 vs 36.3 (p=0.0075)."),
-                ("Computer access","58.5% of IBT students never used a computer. Computer access adds +4.1 pts on average."),
+            _IBT_WASSCE_C  = 70.7   # sqrt(50/100)*100
+            _IBT_ATRISK_C  = 61.2   # sqrt(37.5/100)*100
+            _IBT_EXCELLENT_C= 79.1  # sqrt(62.5/100)*100
+            _IBT_AVG_C     = 64.0   # overall curved mean
+            _IBT_SCHOOLS = {
+                "M.I.P.H.S":69.6,"V.O.E":66.9,"B.F.T":65.1,
+                "A.F.P":62.3,"P.I":60.7,"M.C.H.S.":58.6
+            }
+            _IBT_RISK_FACTS_C = [
+                ("School quality","School is the #1 predictor (F=8.60, p<0.001). Best school curved avg: 69.6 vs worst: 58.6 — an 11-point gap."),
+                ("Mother's education","Students with HS-grad mothers avg 64.9 vs 62.3 for no-HS mothers (p=0.031). Physics gap widest: 63.3 vs 53.6 (p=0.0075)."),
+                ("Computer access","58.5% of IBT students never used a computer. Computer access adds +4.1 curved pts on average."),
                 ("Intervention impact","Without intervention: gap widens +5.5 pts over 2 years. With IBT intervention: narrows to 2.4 pts."),
-                ("WASSCE target","IBT sets WASSCE pass at 50/100. Class avg of 43.3 means most students need targeted support to reach the threshold."),
-                ("Gender parity","No statistically significant gender gap in overall scores in IBT dataset — interventions affect boys and girls equally."),
+                ("WASSCE target","Curved WASSCE pass threshold: 70.7. IBT curved avg of 64.0 means most students need targeted support."),
+                ("Gender parity","No statistically significant gender gap in overall scores — IBT interventions affect boys and girls equally."),
             ]
-            def _ibt_status(score, subj=None):
-                bench=_IBT_BENCH.get(subj,_IBT_AVG) if subj else _IBT_AVG
-                if score>=_IBT_EXCELLENT: return "⭐ Excellent","#1B5E20"
-                if score>=_IBT_WASSCE:   return "🟢 On Target","#2E7D32"
-                if score>=bench:         return "🔵 At IBT Avg","#0D47A1"
-                if score>=_IBT_ATRISK:   return "🟡 Monitor","#E65100"
-                return "🔴 Intervention","#8B1A1A"
-            def _ibt_card(col,label,value,benchmark):
-                stat,bg=_ibt_status(value,label); delta=value-benchmark
+            def _sqrt_curve(raw):
+                """Apply sqrt curve: curved = sqrt(raw/100)*100"""
+                return _imath.sqrt(max(0.0, float(raw)) / 100.0) * 100.0
+            def _ibt_status_c(score, subj=None):
+                bench = _IBT_BENCH_C.get(subj, _IBT_AVG_C) if subj else _IBT_AVG_C
+                if score >= _IBT_EXCELLENT_C: return "⭐ Excellent",   "#1B5E20"
+                if score >= _IBT_WASSCE_C:    return "🟢 On Target",   "#2E7D32"
+                if score >= bench:            return "🔵 At IBT Avg",  "#0D47A1"
+                if score >= _IBT_ATRISK_C:    return "🟡 Monitor",     "#E65100"
+                return "🔴 Intervention", "#8B1A1A"
+            def _ibt_card_c(col, label, value, benchmark):
+                stat, bg = _ibt_status_c(value, label)
+                delta = value - benchmark
                 col.markdown(
-                    f'<div style="background:{bg}22;border:1px solid {bg};border-radius:10px;'+
-                    f'padding:10px 14px;text-align:center;margin-bottom:6px">'+
-                    f'<div style="color:#8899BB;font-size:.75rem;margin-bottom:2px">{label[:12]}</div>'+
-                    f'<div style="color:#D4A843;font-size:1.2rem;font-weight:800">{value:.1f}</div>'+
-                    f'<div style="color:#aaa;font-size:.72rem">bench {benchmark:.1f} '+
-                    f'<span style="color:{"#4CAF50" if delta>=0 else "#EF5350"}">({delta:+.1f})</span></div>'+
-                    f'<div style="font-size:.75rem">{stat}</div>'+
+                    f'<div style="background:{bg}22;border:1px solid {bg};border-radius:10px;'
+                    f'padding:10px 14px;text-align:center;margin-bottom:6px">'
+                    f'<div style="color:#8899BB;font-size:.75rem;margin-bottom:2px">{label[:14]}</div>'
+                    f'<div style="color:#D4A843;font-size:1.2rem;font-weight:800">{value:.1f}</div>'
+                    f'<div style="color:#aaa;font-size:.72rem">IBT {benchmark:.1f} '
+                    f'<span style="color:{"#4CAF50" if delta>=0 else "#EF5350"}">({delta:+.1f})</span></div>'
+                    f'<div style="font-size:.75rem">{stat}</div>'
                     f'</div>', unsafe_allow_html=True)
 
-            _gh6=st.session_state.get("grade_history",[])
-            _stu6=st.session_state.get("students",[])
+            _gh6  = st.session_state.get("grade_history", [])
+            _stu6 = st.session_state.get("students", [])
 
-            # ── Banner ─────────────────────────────────────────────────────────
+            # ── Banner ──────────────────────────────────────────────────────
             st.markdown(
-                '<div style="background:linear-gradient(135deg,#0F2247,#8B1A1A);border-radius:14px;'+
-                'padding:18px 24px 14px;margin-bottom:12px;border:1px solid #D4A84344">'+
-                '<div style="color:#D4A843;font-size:1.1rem;font-weight:800">📈 IBT INTERVENTION ANALYSIS ENGINE</div>'+
-                '<div style="color:#D0D8E8;font-size:.85rem;margin-top:4px">'+
-                'Compares your class data against IBT 183-student, 6-school, 8-year research dataset - '+
-                'WASSCE target: 50 | At-risk threshold: 37.5 | IBT overall avg: 43.3</div>'+
+                '<div style="background:linear-gradient(135deg,#0F2247,#8B1A1A);border-radius:14px;'
+                'padding:18px 24px 14px;margin-bottom:12px;border:1px solid #D4A84344">'
+                '<div style="color:#D4A843;font-size:1.1rem;font-weight:800">📈 IBT INTERVENTION ANALYSIS ENGINE</div>'
+                '<div style="color:#D0D8E8;font-size:.85rem;margin-top:4px">'
+                'Compares your class (√-curved) against IBT 8-year research dataset · '
+                'WASSCE target: <b>70.7</b> · At-risk: <b>61.2</b> · IBT curved avg: <b>64.0</b> · '
+                '<span style="color:#D4A84399;font-size:.78rem">Sqrt curve: all raw scores → √(raw/100)×100 before comparison</span>'
+                '</div>'
                 '</div>', unsafe_allow_html=True)
 
             if not _gh6:
                 st.info("📭 No grade data loaded yet. Upload the IBT Grade Tracker Excel or enter grades in the Students tab first.")
             else:
-                _gmap6={}
+                # ── Build curved grade map ─────────────────────────────────
+                _gmap6 = {}
                 for _g6 in _gh6:
-                    _gmap6.setdefault(_g6["student"],{}).setdefault(_g6["subject"],[]).append(_g6["score"])
-                _all_stu6=sorted(_gmap6.keys())
-                _all_subj6=sorted({_g6["subject"] for _g6 in _gh6})
+                    _gmap6.setdefault(_g6["student"], {}).setdefault(_g6["subject"], []).append(_g6["score"])
+                _all_stu6  = sorted(_gmap6.keys())
+                _all_subj6 = sorted({_g6["subject"] for _g6 in _gh6})
 
-                # ── Section 1: Class vs IBT Benchmarks ──────────────────────────
-                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:1rem;margin:8px 0 6px">📊 Class vs IBT Benchmarks</div>', unsafe_allow_html=True)
-                _bench_rows6=[]
-                for _sub6 in list(_IBT_BENCH.keys()):
-                    _sc6=[sc for s in _all_stu6 for sc in _gmap6.get(s,{}).get(_sub6,[])]
-                    _ca6=sum(_sc6)/len(_sc6) if _sc6 else None
-                    _bench_rows6.append((_sub6,_ca6,_IBT_BENCH[_sub6]))
-                _with_data6=[r for r in _bench_rows6 if r[1] is not None]
-                if _with_data6:
-                    _bc6=st.columns(min(4,len(_with_data6)))
-                    for _ci6,(_sub6,_ca6,_be6) in enumerate(_with_data6):
-                        with _bc6[_ci6%len(_bc6)]:
-                            _ibt_card(_bc6[_ci6%len(_bc6)],_sub6,_ca6,_be6)
-                if PD and _with_data6:
-                    _trows6=[{"Subject":s,"Class Avg":f"{ca:.1f}","IBT Bench":f"{be:.1f}",
-                              "Gap":f"{ca-be:+.1f}","Gap to WASSCE":f"{ca-50:+.1f}",
-                              "Status":_ibt_status(ca,s)[0]} for s,ca,be in _with_data6]
-                    st.dataframe(pd.DataFrame(_trows6),use_container_width=True,hide_index=True)
+                # Curved subject averages for class
+                def _class_curved_avg(subj):
+                    scores = [sc for s in _all_stu6 for sc in _gmap6.get(s, {}).get(subj, [])]
+                    if not scores: return None
+                    return sum(_sqrt_curve(sc) for sc in scores) / len(scores)
+
+                def _stu_curved_avg(stu, subj):
+                    scores = _gmap6.get(stu, {}).get(subj, [])
+                    if not scores: return None
+                    return sum(_sqrt_curve(sc) for sc in scores) / len(scores)
+
+                # ╔══════════════════════════════════════════════════════════╗
+                # SECTION 1 — CLASS vs IBT CURVED BENCHMARKS               ║
+                # ╚══════════════════════════════════════════════════════════╝
+                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:1rem;margin:8px 0 6px">📊 CLASS vs IBT Curved Benchmarks</div>', unsafe_allow_html=True)
+                _bench_rows6 = []
+                for _sub6 in list(_IBT_BENCH_C.keys()):
+                    if _sub6 == "Mathematics": continue   # dedupe Math alias
+                    _ca6 = _class_curved_avg(_sub6)
+                    if _ca6 is not None:
+                        _bench_rows6.append((_sub6, _ca6, _IBT_BENCH_C[_sub6]))
+                if _bench_rows6:
+                    _bc6 = st.columns(min(4, len(_bench_rows6)))
+                    for _ci6, (_sub6, _ca6, _be6) in enumerate(_bench_rows6):
+                        with _bc6[_ci6 % len(_bc6)]:
+                            _ibt_card_c(_bc6[_ci6 % len(_bc6)], _sub6, _ca6, _be6)
+                if PD and _bench_rows6:
+                    _trows6 = [{
+                        "Subject": s, "Class Avg (curved)": f"{ca:.1f}",
+                        "IBT Bench": f"{be:.1f}", "Gap": f"{ca-be:+.1f}",
+                        "Gap to WASSCE (70.7)": f"{ca-_IBT_WASSCE_C:+.1f}",
+                        "Status": _ibt_status_c(ca, s)[0]
+                    } for s, ca, be in _bench_rows6]
+                    st.dataframe(pd.DataFrame(_trows6), use_container_width=True, hide_index=True)
                 st.markdown("---")
 
-                # ── Section 2: Student Deep-Dive ────────────────────────────────
-                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:1rem;margin:4px 0 6px">🎓 Student Deep-Dive</div>', unsafe_allow_html=True)
-                _sel6=st.selectbox("Select student:",_all_stu6,key="ibt_stu_sel6")
-                _sdata6=_gmap6.get(_sel6,{})
-                _sprof6=next((s for s in _stu6 if s.get("name")==_sel6),{})
+                # ╔══════════════════════════════════════════════════════════╗
+                # SECTION 2 — ALL STUDENTS RANKING TABLE                   ║
+                # ╚══════════════════════════════════════════════════════════╝
+                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:1rem;margin:4px 0 6px">🏆 All Students — Curved Score Ranking</div>', unsafe_allow_html=True)
+                if PD:
+                    _rank_rows = []
+                    for _sn6 in _all_stu6:
+                        _s_scores = []
+                        _s_detail = {}
+                        for _sub6 in _all_subj6:
+                            _sv = _stu_curved_avg(_sn6, _sub6)
+                            if _sv is not None:
+                                _s_scores.append(_sv)
+                                _s_detail[_sub6] = _sv
+                        _s_avg = sum(_s_scores) / len(_s_scores) if _s_scores else 0
+                        _s_stat, _ = _ibt_status_c(_s_avg)
+                        _s_gap_wassce = _s_avg - _IBT_WASSCE_C
+                        _s_gap_ibt    = _s_avg - _IBT_AVG_C
+                        _rank_row = {"Student": _sn6, "Curved Avg": round(_s_avg, 1),
+                                     "vs IBT Avg": f"{_s_gap_ibt:+.1f}",
+                                     "vs WASSCE": f"{_s_gap_wassce:+.1f}",
+                                     "Status": _s_stat, "Subjects Tested": len(_s_scores)}
+                        for _sub6 in _all_subj6:
+                            if _sub6 in _s_detail:
+                                _rank_row[_sub6[:8]] = round(_s_detail[_sub6], 1)
+                        _rank_rows.append(_rank_row)
+                    _rank_df = pd.DataFrame(_rank_rows).sort_values("Curved Avg", ascending=False).reset_index(drop=True)
+                    _rank_df.index += 1
+                    st.dataframe(_rank_df, use_container_width=True)
+                    _c_above = sum(1 for r in _rank_rows if r["Curved Avg"] >= _IBT_WASSCE_C)
+                    _c_atrisk = sum(1 for r in _rank_rows if r["Curved Avg"] < _IBT_ATRISK_C)
+                    _mc1, _mc2, _mc3, _mc4 = st.columns(4)
+                    _mc1.metric("Class Curved Avg", f"{sum(r['Curved Avg'] for r in _rank_rows)/max(1,len(_rank_rows)):.1f}")
+                    _mc2.metric("WASSCE Ready (≥70.7)", f"{_c_above}/{len(_rank_rows)}")
+                    _mc3.metric("Need Intervention (<61.2)", f"{_c_atrisk}/{len(_rank_rows)}")
+                    _mc4.metric("IBT Avg Ref", "64.0")
+                st.markdown("---")
+
+                # ╔══════════════════════════════════════════════════════════╗
+                # SECTION 3 — PER-STUDENT DEEP DIVE                        ║
+                # ╚══════════════════════════════════════════════════════════╝
+                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:1rem;margin:4px 0 6px">🎓 Student Deep-Dive vs IBT Curved</div>', unsafe_allow_html=True)
+                _sel6    = st.selectbox("Select student:", _all_stu6, key="ibt_stu_sel6")
+                _sdata6  = _gmap6.get(_sel6, {})
+                _sprof6  = next((s for s in _stu6 if s.get("name") == _sel6), {})
                 if _sprof6:
-                    _rf6=[]
-                    if _sprof6.get("mom")=="No HS":  _rf6.append("🔴 No HS mother")
-                    if _sprof6.get("sm")=="Yes":      _rf6.append("🔴 Single mother")
-                    if _sprof6.get("sib")=="8+":      _rf6.append("🟠 8+ siblings")
-                    if _sprof6.get("wk")=="Yes":      _rf6.append("🟠 Works after school")
-                    if _sprof6.get("cp")=="Never":    _rf6.append("🟡 No computer access")
-                    _n_rf6=len(_rf6); _rc6="#8B1A1A" if _n_rf6>=3 else ("#E65100" if _n_rf6>=1 else "#1B5E20")
+                    _rf6 = []
+                    if _sprof6.get("mom") == "No HS": _rf6.append("🔴 No HS mother")
+                    if _sprof6.get("sm")  == "Yes":   _rf6.append("🔴 Single mother")
+                    if _sprof6.get("sib") == "8+":    _rf6.append("🟠 8+ siblings")
+                    if _sprof6.get("wk")  == "Yes":   _rf6.append("🟠 Works after school")
+                    if _sprof6.get("cp")  == "Never": _rf6.append("🟡 No computer access")
+                    _n_rf6 = len(_rf6)
+                    _rc6 = "#8B1A1A" if _n_rf6 >= 3 else ("#E65100" if _n_rf6 >= 1 else "#1B5E20")
                     st.markdown(
-                        f'<div style="background:{_rc6}22;border:1px solid {_rc6}55;border-radius:8px;'+
-                        f'padding:8px 14px;margin-bottom:8px;font-size:.83rem">'+
-                        f'<strong style="color:#D4A843">Risk Factors ({_n_rf6}):</strong> '+
+                        f'<div style="background:{_rc6}22;border:1px solid {_rc6}55;border-radius:8px;'
+                        f'padding:8px 14px;margin-bottom:8px;font-size:.83rem">'
+                        f'<strong style="color:#D4A843">Risk Factors ({_n_rf6}):</strong> '
                         f'<span style="color:#D0D8E8">{" · ".join(_rf6) or "🟢 Lower risk profile"}</span></div>',
                         unsafe_allow_html=True)
-                _stu_subjs6=[s for s in list(_IBT_BENCH.keys()) if s in _sdata6]
+                _stu_subjs6 = [s for s in list(_IBT_BENCH_C.keys()) if s != "Mathematics" and s in _sdata6]
                 if _stu_subjs6:
-                    _sc6b=st.columns(min(4,len(_stu_subjs6)))
-                    for _ci6,_sub6 in enumerate(_stu_subjs6):
-                        _avg6=sum(_sdata6[_sub6])/len(_sdata6[_sub6])
-                        with _sc6b[_ci6%len(_sc6b)]:
-                            _ibt_card(_sc6b[_ci6%len(_sc6b)],_sub6,_avg6,_IBT_BENCH.get(_sub6,_IBT_AVG))
-                st.markdown("<div style='height:8px'></div>",unsafe_allow_html=True)
+                    _sc6b = st.columns(min(4, len(_stu_subjs6)))
+                    for _ci6, _sub6 in enumerate(_stu_subjs6):
+                        _avg6 = _stu_curved_avg(_sel6, _sub6)
+                        if _avg6 is not None:
+                            with _sc6b[_ci6 % len(_sc6b)]:
+                                _ibt_card_c(_sc6b[_ci6 % len(_sc6b)], _sub6, _avg6, _IBT_BENCH_C.get(_sub6, _IBT_AVG_C))
+                    # Per-subject raw vs curved table
+                    _sdetail_rows = []
+                    for _sub6 in _stu_subjs6:
+                        _raw_scores = _sdata6.get(_sub6, [])
+                        if _raw_scores:
+                            _raw_avg = sum(_raw_scores) / len(_raw_scores)
+                            _cur_avg = _sqrt_curve(_raw_avg)
+                            _bench   = _IBT_BENCH_C.get(_sub6, _IBT_AVG_C)
+                            _sdetail_rows.append({
+                                "Subject": _sub6, "Raw Avg": f"{_raw_avg:.1f}",
+                                "Curved Avg": f"{_cur_avg:.1f}", "IBT Bench": f"{_bench:.1f}",
+                                "Gap": f"{_cur_avg - _bench:+.1f}",
+                                "WASSCE Gap": f"{_cur_avg - _IBT_WASSCE_C:+.1f}",
+                                "Status": _ibt_status_c(_cur_avg, _sub6)[0]
+                            })
+                    if PD and _sdetail_rows:
+                        st.dataframe(pd.DataFrame(_sdetail_rows), use_container_width=True, hide_index=True)
+                st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
-                # ── Section 3: What-If ────────────────────────────────────────
+                # ╔══════════════════════════════════════════════════════════╗
+                # SECTION 4 — WHAT-IF SCENARIO                             ║
+                # ╚══════════════════════════════════════════════════════════╝
                 st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.95rem;margin:4px 0 4px">🔮 What-If Scenario</div>', unsafe_allow_html=True)
-                st.caption("Adjust target score to see projected IBT status and WASSCE readiness")
-                _wi_subj6=st.selectbox("Subject:",_stu_subjs6 or list(_IBT_BENCH.keys())[:1],key="ibt_wi_subj6")
-                _wi_scores6=_sdata6.get(_wi_subj6,[])
-                _wi_cur6=sum(_wi_scores6)/len(_wi_scores6) if _wi_scores6 else 0
-                _wc1,_wc2=st.columns([2,3])
+                st.caption("Set a target raw score — see projected curved score and WASSCE readiness")
+                _wi_subj6 = st.selectbox("Subject:", _stu_subjs6 or list(_IBT_BENCH_C.keys())[:1], key="ibt_wi_subj6")
+                _wi_raw6  = _sdata6.get(_wi_subj6, [])
+                _wi_cur_raw = sum(_wi_raw6) / len(_wi_raw6) if _wi_raw6 else 0
+                _wi_cur_c   = _sqrt_curve(_wi_cur_raw)
+                _wc1, _wc2  = st.columns([2, 3])
                 with _wc1:
-                    _wi_tgt6=st.slider("Target for next assessment:",0,100,min(100,int(_wi_cur6)+8),key="ibt_wi_sl6")
+                    _wi_tgt6 = st.slider("Target raw score:", 0, 100, min(100, int(_wi_cur_raw) + 8), key="ibt_wi_sl6")
                 with _wc2:
-                    _wi_proj6=(_wi_cur6*max(1,len(_wi_scores6))+_wi_tgt6)/(max(1,len(_wi_scores6))+1)
-                    _wi_bench6=_IBT_BENCH.get(_wi_subj6,_IBT_AVG)
-                    _wi_wprob6=min(100,max(0,(_wi_proj6-_IBT_ATRISK)/(_IBT_WASSCE-_IBT_ATRISK)*100)) if _wi_proj6>_IBT_ATRISK else 0
-                    _s_cur6,_=_ibt_status(_wi_cur6,_wi_subj6); _s_proj6,_=_ibt_status(_wi_proj6,_wi_subj6)
+                    _wi_tgt_c = _sqrt_curve(_wi_tgt6)
+                    _wi_n     = max(1, len(_wi_raw6))
+                    _wi_proj_c = (_wi_cur_c * _wi_n + _wi_tgt_c) / (_wi_n + 1)
+                    _wi_bench6 = _IBT_BENCH_C.get(_wi_subj6, _IBT_AVG_C)
+                    _wi_wprob6 = min(100, max(0, (_wi_proj_c - _IBT_ATRISK_C) / (_IBT_WASSCE_C - _IBT_ATRISK_C) * 100))
+                    _s_cur6, _ = _ibt_status_c(_wi_cur_c, _wi_subj6)
+                    _s_proj6, _ = _ibt_status_c(_wi_proj_c, _wi_subj6)
                     st.markdown(
-                        f'<div style="background:#0D1B2A;border:1px solid #1E3A6A;border-radius:10px;padding:12px 16px">'+
-                        f'<div style="display:flex;gap:24px;flex-wrap:wrap">'+
-                        f'<div><span style="color:#8899BB;font-size:.78rem">Current avg</span><br>'+
-                        f'<span style="color:#D4A843;font-weight:700;font-size:1.1rem">{_wi_cur6:.1f}</span> <span style="font-size:.78rem">{_s_cur6}</span></div>'+
-                        f'<div><span style="color:#8899BB;font-size:.78rem">→ Projected</span><br>'+
-                        f'<span style="color:#4CAF50;font-weight:700;font-size:1.1rem">{_wi_proj6:.1f}</span> <span style="font-size:.78rem">{_s_proj6}</span></div>'+
-                        f'<div><span style="color:#8899BB;font-size:.78rem">IBT bench</span><br>'+
-                        f'<span style="color:#3B6DC4;font-weight:700;font-size:1.1rem">{_wi_bench6:.1f}</span></div>'+
-                        f'<div><span style="color:#8899BB;font-size:.78rem">WASSCE readiness</span><br>'+
-                        f'<span style="color:{"#4CAF50" if _wi_wprob6>=70 else "#FFA726" if _wi_wprob6>=40 else "#EF5350"};font-weight:700;font-size:1.1rem">{_wi_wprob6:.0f}%</span></div>'+
+                        f'<div style="background:#0D1B2A;border:1px solid #1E3A6A;border-radius:10px;padding:12px 16px">'
+                        f'<div style="display:flex;gap:24px;flex-wrap:wrap">'
+                        f'<div><span style="color:#8899BB;font-size:.78rem">Current (curved)</span><br>'
+                        f'<span style="color:#D4A843;font-weight:700;font-size:1.1rem">{_wi_cur_c:.1f}</span> '
+                        f'<span style="font-size:.78rem">{_s_cur6}</span></div>'
+                        f'<div><span style="color:#8899BB;font-size:.78rem">→ Projected</span><br>'
+                        f'<span style="color:#4CAF50;font-weight:700;font-size:1.1rem">{_wi_proj_c:.1f}</span> '
+                        f'<span style="font-size:.78rem">{_s_proj6}</span></div>'
+                        f'<div><span style="color:#8899BB;font-size:.78rem">IBT bench</span><br>'
+                        f'<span style="color:#3B6DC4;font-weight:700;font-size:1.1rem">{_wi_bench6:.1f}</span></div>'
+                        f'<div><span style="color:#8899BB;font-size:.78rem">WASSCE readiness</span><br>'
+                        f'<span style="color:{"#4CAF50" if _wi_wprob6>=70 else "#FFA726" if _wi_wprob6>=40 else "#EF5350"};font-weight:700;font-size:1.1rem">{_wi_wprob6:.0f}%</span></div>'
                         f'</div></div>', unsafe_allow_html=True)
                 st.markdown("---")
 
-                # ── Section 4: IBT Research Context ─────────────────────────
-                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.95rem;margin:4px 0 6px">📚 IBT Research Context (183 students · 6 schools · 8 years)</div>', unsafe_allow_html=True)
-                _rf_cols6=st.columns(2)
-                for _ri6,(_rtitle6,_rtext6) in enumerate(_IBT_RISK_FACTS):
-                    with _rf_cols6[_ri6%2]:
+                # ╔══════════════════════════════════════════════════════════╗
+                # SECTION 5 — IBT RESEARCH CONTEXT                         ║
+                # ╚══════════════════════════════════════════════════════════╝
+                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.95rem;margin:4px 0 6px">📚 IBT Research Context (8 years · 6 schools · curved benchmarks)</div>', unsafe_allow_html=True)
+                _rf_cols6 = st.columns(2)
+                for _ri6, (_rtitle6, _rtext6) in enumerate(_IBT_RISK_FACTS_C):
+                    with _rf_cols6[_ri6 % 2]:
                         st.markdown(
-                            f'<div style="background:#0D1B2A;border-left:3px solid #D4A843;border-radius:6px;'+
-                            f'padding:8px 12px;margin-bottom:8px">'+
-                            f'<div style="color:#D4A843;font-weight:700;font-size:.8rem;margin-bottom:2px">{_rtitle6}</div>'+
+                            f'<div style="background:#0D1B2A;border-left:3px solid #D4A843;border-radius:6px;'
+                            f'padding:8px 12px;margin-bottom:8px">'
+                            f'<div style="color:#D4A843;font-weight:700;font-size:.8rem;margin-bottom:2px">{_rtitle6}</div>'
                             f'<div style="color:#C0C8D8;font-size:.78rem;line-height:1.5">{_rtext6}</div></div>',
                             unsafe_allow_html=True)
                 st.markdown("---")
 
-                # ── Section 5: AI Intervention Plan ─────────────────────────
+                # ╔══════════════════════════════════════════════════════════╗
+                # SECTION 6 — AI INTERVENTION PLAN                         ║
+                # ╚══════════════════════════════════════════════════════════╝
                 st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.95rem;margin:4px 0 6px">🤖 AI Intervention Plan</div>', unsafe_allow_html=True)
-                _ibt_ai_key6=f"ibt_ai_{_sel6}"
+                _ibt_ai_key6 = f"ibt_ai_{_sel6}"
                 if st.button("⚡ Generate IBT Intervention Plan", key="ibt_gen_ai6", type="primary"):
-                    _stu_sum6=[]
+                    _stu_sum6 = []
                     for _sub6 in _stu_subjs6:
-                        _avg6=sum(_sdata6[_sub6])/len(_sdata6[_sub6])
-                        _gap6=_avg6-_IBT_BENCH.get(_sub6,_IBT_AVG)
-                        _stu_sum6.append(f"  {_sub6}: avg {_avg6:.1f} (IBT bench {_IBT_BENCH.get(_sub6,_IBT_AVG):.1f}, gap {_gap6:+.1f})")
-                    _risk_ctx6=""
+                        _avg6_c = _stu_curved_avg(_sel6, _sub6)
+                        if _avg6_c is not None:
+                            _gap6 = _avg6_c - _IBT_BENCH_C.get(_sub6, _IBT_AVG_C)
+                            _stu_sum6.append(f"  {_sub6}: curved avg {_avg6_c:.1f} (IBT bench {_IBT_BENCH_C.get(_sub6,_IBT_AVG_C):.1f}, gap {_gap6:+.1f})")
+                    _risk_ctx6 = ""
                     if _sprof6:
-                        _rf6b=[]
-                        if _sprof6.get("mom")=="No HS": _rf6b.append("mother has no HS education (IBT: -3.1 pts avg, Physics -7.5 pts)")
-                        if _sprof6.get("sm")=="Yes":    _rf6b.append("single-mother household")
-                        if _sprof6.get("wk")=="Yes":    _rf6b.append("works after school")
-                        if _sprof6.get("cp")=="Never":  _rf6b.append("no computer access (IBT: -4.1 pts)")
+                        _rf6b = []
+                        if _sprof6.get("mom") == "No HS": _rf6b.append("mother has no HS education (IBT: -2.6 curved pts avg, Physics -9.7 pts)")
+                        if _sprof6.get("sm")  == "Yes":   _rf6b.append("single-mother household")
+                        if _sprof6.get("wk")  == "Yes":   _rf6b.append("works after school")
+                        if _sprof6.get("cp")  == "Never": _rf6b.append("no computer access (IBT: -4.1 pts)")
                         if _sprof6.get("sib") in ["5-8","8+"]: _rf6b.append(f"{_sprof6['sib']} siblings")
-                        if _rf6b: _risk_ctx6="RISK FACTORS: "+"; ".join(_rf6b)
-                    _ibt_prompt6=f"""You are an IBT education analyst. Write a structured IBT Intervention Report.
+                        if _rf6b: _risk_ctx6 = "RISK FACTORS: " + "; ".join(_rf6b)
+                    _ibt_prompt6 = f"""You are an IBT education analyst. Write a structured IBT Intervention Report (sqrt-curved scale).
 
 STUDENT: {_sel6}
 {_risk_ctx6}
 
-PERFORMANCE vs IBT BENCHMARKS:
+PERFORMANCE vs IBT CURVED BENCHMARKS (scale: 0–100 curved):
 {chr(10).join(_stu_sum6)}
 
-IBT RESEARCH: Overall avg 43.3 | WASSCE pass 50 | At-risk 37.5 | School quality #1 predictor (F=8.60) | Computer access +4.1 pts | No-HS mother: -3.1 pts overall | Without intervention gap widens +5.5 pts/2yrs | With intervention narrows to 2.4 pts
+IBT RESEARCH (curved): Overall avg 64.0 | WASSCE pass 70.7 | At-risk <61.2 | School quality #1 predictor (F=8.60) | Computer access +4.1 pts | No-HS mother: -2.6 pts overall | Without intervention gap widens +5.5 pts/2yrs | With intervention narrows to 2.4 pts
 
 Write:
-1. RISK PROFILE SUMMARY: Student risk level using scores AND home factors.
-2. SUBJECT-BY-SUBJECT ANALYSIS: Each subject score vs IBT benchmark and WASSCE readiness.
+1. RISK PROFILE SUMMARY: Student risk level using curved scores AND home factors.
+2. SUBJECT-BY-SUBJECT ANALYSIS: Each subject curved score vs IBT benchmark and WASSCE readiness.
 3. TOP 3 INTERVENTIONS (ranked): Specific, offline-doable, with measurable goal and IBT justification.
 4. TEACHER ACTIONS THIS WEEK: 2-3 concrete Monday-morning actions.
 5. PROGNOSIS: Realistic end-of-term outlook if interventions applied.
@@ -4774,44 +4886,276 @@ Write:
 Be specific, data-driven, and compassionate."""
                     with st.spinner("Generating IBT intervention analysis..."):
                         try:
-                            _ibt_r6,_ibt_m6,_=best_all(build_free_chat(),_ibt_prompt6,[])
-                            st.session_state[_ibt_ai_key6]=_ibt_r6
+                            _ibt_r6, _ibt_m6, _ = best_all(build_free_chat(), _ibt_prompt6, [])
+                            st.session_state[_ibt_ai_key6] = _ibt_r6
                         except Exception as _ae6:
                             st.error(f"AI error: {_ae6}")
                 if st.session_state.get(_ibt_ai_key6):
                     st.markdown(
-                        f'<div style="background:#0D1B2A;border:1px solid #1E3A6A;border-radius:10px;'+
-                        f'padding:18px 22px;color:#D0D8E8;font-size:.87rem;line-height:1.8;white-space:pre-wrap;margin-top:8px">'+
+                        f'<div style="background:#0D1B2A;border:1px solid #1E3A6A;border-radius:10px;'
+                        f'padding:18px 22px;color:#D0D8E8;font-size:.87rem;line-height:1.8;white-space:pre-wrap;margin-top:8px">'
                         f'{st.session_state[_ibt_ai_key6]}</div>', unsafe_allow_html=True)
                 st.markdown("---")
 
-                # ── Section 6: Downloads ─────────────────────────────────────
-                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.95rem;margin:4px 0 6px">📥 Download Reports</div>', unsafe_allow_html=True)
-                _idl1,_idl2=st.columns(2)
+                # ╔══════════════════════════════════════════════════════════╗
+                # SECTION 7 — DOWNLOADS (Excel + Word)                     ║
+                # ╚══════════════════════════════════════════════════════════╝
+                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.95rem;margin:4px 0 6px">📥 Download IBT Reports</div>', unsafe_allow_html=True)
+                _idl1, _idl2 = st.columns(2)
+
+                # ── Excel Download ──────────────────────────────────────────
                 with _idl1:
                     try:
-                        from word_report import generate_academic_word_report
-                        _ibt_word6=generate_academic_word_report(
-                            _gh6,_stu6,
-                            st.session_state.get("_classroom_label",school_name or "IBT School"),
-                            _grade_en,
-                            st.session_state.get("ar_analysis_text","")
-                        )
-                        st.download_button("📄 Download Word Report",data=_ibt_word6,
-                            file_name=f"IBT_Report_{datetime.datetime.now().strftime('%Y%m%d')}.docx",
-                            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                            key="ibt6_dl_word",type="primary",use_container_width=True)
-                    except Exception as _we6:
-                        st.warning(f"Word export: {_we6}")
+                        import openpyxl as _oxl6
+                        from openpyxl.styles import Font as _F6, PatternFill as _PF6, Alignment as _A6, Border as _B6, Side as _S6
+                        _wb6  = _oxl6.Workbook()
+                        _nv6  = _PF6("solid", fgColor="0D1B2A")
+                        _bl6  = _PF6("solid", fgColor="0D3B8C")
+                        _gd6  = _PF6("solid", fgColor="D4A843")
+                        _al6  = _PF6("solid", fgColor="131F30")
+                        _rd6  = _PF6("solid", fgColor="5C1010")
+                        _gr6  = _PF6("solid", fgColor="0D3B14")
+                        _yw6  = _PF6("solid", fgColor="3B2D00")
+                        _th6  = _S6(style="thin", color="1E3050")
+                        _bd6  = _B6(left=_th6, right=_th6, top=_th6, bottom=_th6)
+                        def _hc6(ws, r, c, v, sz=11):
+                            cel = ws.cell(r, c, v)
+                            cel.font = _F6(bold=True, color="FFFFFF", size=sz)
+                            cel.fill = _gd6; cel.border = _bd6
+                            cel.alignment = _A6(horizontal="center", vertical="center", wrap_text=True)
+                            return cel
+                        def _dc6(ws, r, c, v, fill=None, bold=False, color="FFFFFF", sz=10):
+                            cel = ws.cell(r, c, v)
+                            cel.font = _F6(bold=bold, color=color, size=sz)
+                            if fill: cel.fill = fill
+                            cel.border = _bd6
+                            cel.alignment = _A6(horizontal="center", vertical="center")
+                            return cel
+
+                        # Sheet 1 — Class Summary
+                        _ws_cls = _wb6.active; _ws_cls.title = "Class Summary"
+                        _ws_cls.merge_cells("A1:H1")
+                        _t = _ws_cls.cell(1,1,"IBT CURVED PERFORMANCE REPORT — CLASS SUMMARY"); _t.font=_F6(bold=True,color="D4A843",size=14); _t.fill=_nv6; _t.alignment=_A6(horizontal="center")
+                        _ws_cls.merge_cells("A2:H2")
+                        _gen_str = f"Generated: {_idt6.datetime.now().strftime('%B %d, %Y')}  |  Sqrt curve applied: curved = √(raw/100)×100  |  IBT avg: 64.0  |  WASSCE target: 70.7"
+                        _t2=_ws_cls.cell(2,1,_gen_str); _t2.font=_F6(color="8899BB",size=9); _t2.fill=_nv6; _t2.alignment=_A6(horizontal="center")
+                        _ws_cls.row_dimensions[1].height = 22; _ws_cls.row_dimensions[2].height = 16
+                        _cls_hdrs = ["Subject","Class Raw Avg","Class Curved Avg","IBT Bench","Gap (curved)","Gap to WASSCE","# Scores","Status"]
+                        for ci, h in enumerate(_cls_hdrs, 1): _hc6(_ws_cls, 3, ci, h)
+                        _col_ws_cls = ["A","B","C","D","E","F","G","H"]
+                        _col_ws_w   = [18, 16, 18, 12, 14, 16, 10, 16]
+                        for col, w in zip(_col_ws_cls, _col_ws_w): _ws_cls.column_dimensions[col].width = w
+                        _row = 4
+                        for _sub6 in _all_subj6:
+                            _raw_scores_all = [sc for s in _all_stu6 for sc in _gmap6.get(s,{}).get(_sub6,[])]
+                            if not _raw_scores_all: continue
+                            _raw_a = sum(_raw_scores_all)/len(_raw_scores_all)
+                            _cur_a = _class_curved_avg(_sub6)
+                            _bench = _IBT_BENCH_C.get(_sub6, _IBT_AVG_C)
+                            _gap   = _cur_a - _bench
+                            _gapw  = _cur_a - _IBT_WASSCE_C
+                            _stat, _ = _ibt_status_c(_cur_a, _sub6)
+                            _rfil = _gr6 if _cur_a >= _IBT_WASSCE_C else (_yw6 if _cur_a >= _IBT_ATRISK_C else _rd6)
+                            _bg = _PF6("solid", fgColor="1C2340") if _row%2==0 else _nv6
+                            for ci, val in enumerate([_sub6,f"{_raw_a:.1f}",f"{_cur_a:.1f}",f"{_bench:.1f}",
+                                                       f"{_gap:+.1f}",f"{_gapw:+.1f}",len(_raw_scores_all),_stat],1):
+                                _dc6(_ws_cls, _row, ci, val, fill=_rfil if ci in (3,5,6) else _bg,
+                                     bold=(ci==3), color="FFFFFF")
+                            _row += 1
+
+                        # Sheet 2 — Student Rankings
+                        _ws_stu = _wb6.create_sheet("Student Rankings")
+                        _ws_stu.merge_cells("A1:J1")
+                        _t3=_ws_stu.cell(1,1,"IBT CURVED REPORT — ALL STUDENTS RANKED"); _t3.font=_F6(bold=True,color="D4A843",size=13); _t3.fill=_nv6; _t3.alignment=_A6(horizontal="center")
+                        _ws_stu.row_dimensions[1].height = 22
+                        _all_subj_list = list(_all_subj6)
+                        _stu_hdrs = ["Rank","Student","Curved Avg","vs IBT (64.0)","vs WASSCE (70.7)","Status"] + [s[:10] for s in _all_subj_list]
+                        for ci, h in enumerate(_stu_hdrs, 1): _hc6(_ws_stu, 2, ci, h)
+                        _ws_stu.column_dimensions["A"].width = 6
+                        _ws_stu.column_dimensions["B"].width = 22
+                        for _c_idx in range(3, len(_stu_hdrs)+2): _ws_stu.column_dimensions[chr(64+_c_idx)].width = 13
+                        _stu_ranked = []
+                        for _sn6 in _all_stu6:
+                            _sv6 = [_sqrt_curve(sc) for sub in _all_subj6 for sc in _gmap6.get(_sn6,{}).get(sub,[])]
+                            _sa6 = sum(_sv6)/len(_sv6) if _sv6 else 0
+                            _stu_ranked.append((_sn6, _sa6))
+                        _stu_ranked.sort(key=lambda x: x[1], reverse=True)
+                        for _rank, (_sn6, _sa6) in enumerate(_stu_ranked, 1):
+                            _rrow = _rank + 2
+                            _bg = _PF6("solid", fgColor="1C2340") if _rrow%2==0 else _nv6
+                            _rfil = _gr6 if _sa6 >= _IBT_WASSCE_C else (_yw6 if _sa6 >= _IBT_ATRISK_C else _rd6)
+                            _dc6(_ws_stu, _rrow, 1, _rank, fill=_bg)
+                            _dc6(_ws_stu, _rrow, 2, _sn6, fill=_bg)
+                            _dc6(_ws_stu, _rrow, 3, round(_sa6,1), fill=_rfil, bold=True)
+                            _dc6(_ws_stu, _rrow, 4, f"{_sa6-_IBT_AVG_C:+.1f}", fill=_bg,
+                                 color="4CAF50" if _sa6>=_IBT_AVG_C else "EF5350")
+                            _dc6(_ws_stu, _rrow, 5, f"{_sa6-_IBT_WASSCE_C:+.1f}", fill=_bg,
+                                 color="4CAF50" if _sa6>=_IBT_WASSCE_C else "EF5350")
+                            _dc6(_ws_stu, _rrow, 6, _ibt_status_c(_sa6)[0], fill=_bg)
+                            for _c6i, _sub6 in enumerate(_all_subj_list, 7):
+                                _sv6s = [_sqrt_curve(sc) for sc in _gmap6.get(_sn6,{}).get(_sub6,[])]
+                                _sav = sum(_sv6s)/len(_sv6s) if _sv6s else None
+                                _dc6(_ws_stu, _rrow, _c6i, round(_sav,1) if _sav else "—", fill=_bg)
+
+                        # Sheet 3 — IBT Benchmarks Reference
+                        _ws_ref = _wb6.create_sheet("IBT Curved Benchmarks")
+                        _ws_ref.merge_cells("A1:F1")
+                        _t4=_ws_ref.cell(1,1,"IBT PERMANENT CURVED BENCHMARKS"); _t4.font=_F6(bold=True,color="D4A843",size=13); _t4.fill=_nv6; _t4.alignment=_A6(horizontal="center")
+                        _ws_ref.row_dimensions[1].height=22
+                        for ci,h in enumerate(["Subject","Raw Bench","Curved Bench","WASSCE Target","At-Risk Threshold","Excellent"],1): _hc6(_ws_ref,2,ci,h)
+                        _sub_ref_data=[("Chemistry",49.4,68.6),("Physics",39.9,60.9),("Math",39.1,61.1),("Biology",44.7,65.3),("English Grammar",43.3,65.8),("Literature",43.3,65.8),("Economics",43.3,65.8),("French",43.3,65.8),("OVERALL",43.3,64.0)]
+                        for ri,(_sub6,_raw6,_cur6) in enumerate(_sub_ref_data,3):
+                            _bg=_PF6("solid",fgColor="1C2340") if ri%2==0 else _nv6
+                            for ci,v in enumerate([_sub6,f"{_raw6:.1f}",f"{_cur6:.1f}","70.7","61.2","79.1"],1):
+                                _dc6(_ws_ref,ri,ci,v,fill=_bg)
+                        for col,w in zip(["A","B","C","D","E","F"],[18,12,14,14,16,12]): _ws_ref.column_dimensions[col].width=w
+                        _ws_ref.merge_cells("A13:F13")
+                        _note=_ws_ref.cell(13,1,"Curve formula: curved = √(raw/100) × 100  |  IBT 8-year research dataset, 183 students, 6 schools"); _note.font=_F6(italic=True,color="8899BB",size=9); _note.fill=_nv6; _note.alignment=_A6(horizontal="center")
+
+                        # Sheet 4 — Raw Grade History
+                        _ws_raw = _wb6.create_sheet("Raw Grade History")
+                        _raw_hdrs = ["Student","Subject","Topic","Raw Score","Curved Score","Date","Grade Level","Graded By","IBT Status"]
+                        for ci,h in enumerate(_raw_hdrs,1): _hc6(_ws_raw,1,ci,h)
+                        for col,w in zip(["A","B","C","D","E","F","G","H","I"],[22,16,26,12,13,14,12,14,16]): _ws_raw.column_dimensions[col].width=w
+                        if PD:
+                            _df6 = pd.DataFrame(_gh6); _df6["date"]=pd.to_datetime(_df6["date"]); _df6=_df6.sort_values("date")
+                            for ri,g in enumerate(_df6.to_dict("records"),2):
+                                _rsc=g["score"]; _csc=_sqrt_curve(_rsc); _stat6,_=_ibt_status_c(_csc,g.get("subject",""))
+                                _rfil2=_rd6 if _csc<_IBT_ATRISK_C else (_yw6 if _csc<_IBT_WASSCE_C else _gr6)
+                                _bg2=_PF6("solid",fgColor="1C2340") if ri%2==0 else _nv6
+                                for ci,v in enumerate([g["student"],g.get("subject",""),g.get("topic","General"),
+                                                       f"{_rsc}/100",f"{_csc:.1f}",g["date"].strftime("%b %d, %Y") if hasattr(g["date"],"strftime") else str(g["date"]),
+                                                       g.get("grade_level",""),g.get("model","Manual"),_stat6],1):
+                                    _dc6(_ws_raw,ri,ci,v,fill=_rfil2 if ci in (4,5,9) else _bg2,bold=(ci in (4,5)))
+
+                        _xl_buf6=_iio.BytesIO(); _wb6.save(_xl_buf6); _xl_buf6.seek(0)
+                        _school_lbl6 = st.session_state.get("_classroom_label", school_name or "IBTClass")
+                        st.download_button("📊 Download Excel Report (.xlsx)", data=_xl_buf6.getvalue(),
+                            file_name=f"IBT_Curved_Report_{_school_lbl6.replace(' ','_')}_{_idt6.datetime.now().strftime('%Y%m%d')}.xlsx",
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            key="ibt6_dl_xlsx", type="primary", use_container_width=True)
+                    except Exception as _xe6:
+                        st.error(f"Excel error: {_xe6}")
+                        import traceback; st.caption(traceback.format_exc())
+
+                # ── Word Download ───────────────────────────────────────────
                 with _idl2:
-                    if PD and _gh6:
-                        _ibt_csv6=pd.DataFrame(_gh6).to_csv(index=False)
-                        st.download_button("📊 Download CSV",data=_ibt_csv6,
-                            file_name=f"IBT_Grades_{datetime.datetime.now().strftime('%Y%m%d')}.csv",
-                            mime="text/csv",key="ibt6_dl_csv",use_container_width=True)
+                    try:
+                        from docx import Document as _Doc6
+                        from docx.shared import Pt as _Pt6, RGBColor as _RGB6, Inches as _In6
+                        from docx.enum.text import WD_ALIGN_PARAGRAPH as _WAP6
+                        from docx.enum.table import WD_TABLE_ALIGNMENT as _WTA6
+                        _school_lbl6 = st.session_state.get("_classroom_label", school_name or "IBT School")
+                        _doc6 = _Doc6()
+                        # Margins
+                        for _sec6 in _doc6.sections:
+                            _sec6.top_margin = _In6(0.8); _sec6.bottom_margin = _In6(0.8)
+                            _sec6.left_margin = _In6(1.0); _sec6.right_margin = _In6(1.0)
+                        def _add_heading6(doc, text, level=1, color=(212,168,67)):
+                            p = doc.add_heading(text, level=level)
+                            for run in p.runs: run.font.color.rgb = _RGB6(*color); run.font.bold = True
+                            p.paragraph_format.space_before = _Pt6(10)
+                            return p
+                        def _add_para6(doc, text, bold=False, italic=False, color=None, size=10):
+                            p = doc.add_paragraph()
+                            run = p.add_run(text)
+                            run.bold = bold; run.italic = italic
+                            if color: run.font.color.rgb = _RGB6(*color)
+                            run.font.size = _Pt6(size)
+                            return p
+                        # Title
+                        _doc6.add_paragraph()
+                        _t_p6 = _doc6.add_paragraph()
+                        _t_p6.alignment = _WAP6.CENTER
+                        _t_r6 = _t_p6.add_run("IBT INTERVENTION ANALYSIS REPORT")
+                        _t_r6.font.bold=True; _t_r6.font.size=_Pt6(16); _t_r6.font.color.rgb=_RGB6(212,168,67)
+                        _s_p6 = _doc6.add_paragraph()
+                        _s_p6.alignment = _WAP6.CENTER
+                        _s_r6 = _s_p6.add_run(f"{_school_lbl6}  |  {_idt6.datetime.now().strftime('%B %d, %Y')}  |  Sqrt-Curved Benchmarks")
+                        _s_r6.font.size=_Pt6(10); _s_r6.font.color.rgb=_RGB6(136,153,187)
+                        _doc6.add_paragraph()
+                        # Curve note
+                        _note_p = _doc6.add_paragraph()
+                        _nr = _note_p.add_run("📌 Methodology: All raw scores transformed using square-root curve: curved = √(raw÷100)×100. "
+                            "IBT benchmarks reflect 8-year, 183-student dataset post-curve. WASSCE target: 70.7 | At-risk: <61.2 | Excellent: ≥79.1")
+                        _nr.italic=True; _nr.font.size=_Pt6(9); _nr.font.color.rgb=_RGB6(160,168,188)
+                        _doc6.add_paragraph()
+                        # Class summary table
+                        _add_heading6(_doc6, "1. Class Performance vs IBT Curved Benchmarks")
+                        if _bench_rows6:
+                            _tbl6 = _doc6.add_table(rows=1, cols=6)
+                            _tbl6.style = "Table Grid"
+                            for ci, h in enumerate(["Subject","Class Avg (Curved)","IBT Bench","Gap","Gap to WASSCE","Status"]):
+                                _tbl6.rows[0].cells[ci].text = h
+                                for run in _tbl6.rows[0].cells[ci].paragraphs[0].runs:
+                                    run.bold = True; run.font.size = _Pt6(9)
+                            for _sub6, _ca6, _be6 in _bench_rows6:
+                                _row6 = _tbl6.add_row()
+                                for ci, v in enumerate([_sub6, f"{_ca6:.1f}", f"{_be6:.1f}",
+                                                         f"{_ca6-_be6:+.1f}", f"{_ca6-_IBT_WASSCE_C:+.1f}",
+                                                         _ibt_status_c(_ca6, _sub6)[0]]):
+                                    _row6.cells[ci].text = str(v)
+                                    for run in _row6.cells[ci].paragraphs[0].runs:
+                                        run.font.size = _Pt6(9)
+                        _doc6.add_paragraph()
+                        # Student ranking table
+                        _add_heading6(_doc6, "2. All Students — Curved Score Ranking")
+                        if _stu_ranked:
+                            _tbl7 = _doc6.add_table(rows=1, cols=5)
+                            _tbl7.style = "Table Grid"
+                            for ci, h in enumerate(["Rank","Student","Curved Avg","vs IBT Avg","Status"]):
+                                _tbl7.rows[0].cells[ci].text = h
+                                for run in _tbl7.rows[0].cells[ci].paragraphs[0].runs:
+                                    run.bold=True; run.font.size=_Pt6(9)
+                            for _rank, (_sn6, _sa6) in enumerate(_stu_ranked, 1):
+                                _r7 = _tbl7.add_row()
+                                for ci, v in enumerate([str(_rank), _sn6, f"{_sa6:.1f}",
+                                                         f"{_sa6-_IBT_AVG_C:+.1f}", _ibt_status_c(_sa6)[0]]):
+                                    _r7.cells[ci].text = str(v)
+                                    for run in _r7.cells[ci].paragraphs[0].runs:
+                                        run.font.size=_Pt6(9)
+                        _doc6.add_paragraph()
+                        # IBT Research context
+                        _add_heading6(_doc6, "3. IBT Research Context")
+                        for _rtitle6, _rtext6 in _IBT_RISK_FACTS_C:
+                            _p7 = _doc6.add_paragraph()
+                            _r_title = _p7.add_run(f"{_rtitle6}: ")
+                            _r_title.bold = True; _r_title.font.size = _Pt6(10)
+                            _r_body = _p7.add_run(_rtext6)
+                            _r_body.font.size = _Pt6(9.5)
+                        _doc6.add_paragraph()
+                        # AI analysis (if generated)
+                        _ibt_ai_txt6 = st.session_state.get(f"ibt_ai_{_sel6}", "")
+                        if _ibt_ai_txt6:
+                            _add_heading6(_doc6, f"4. AI Intervention Plan — {_sel6}")
+                            _doc6.add_paragraph(_ibt_ai_txt6).runs[0].font.size = _Pt6(9.5) if _doc6.paragraphs[-1].runs else None
+                        _word_buf6 = _iio.BytesIO(); _doc6.save(_word_buf6); _word_buf6.seek(0)
+                        st.download_button("📄 Download Word Report (.docx)", data=_word_buf6.getvalue(),
+                            file_name=f"IBT_Curved_Report_{_school_lbl6.replace(' ','_')}_{_idt6.datetime.now().strftime('%Y%m%d')}.docx",
+                            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                            key="ibt6_dl_word", use_container_width=True)
+                    except ImportError:
+                        # Fallback: use existing word_report module
+                        try:
+                            from word_report import generate_academic_word_report
+                            _ibt_word6 = generate_academic_word_report(
+                                _gh6, _stu6,
+                                st.session_state.get("_classroom_label", school_name or "IBT School"),
+                                _grade_en, st.session_state.get("ar_analysis_text", ""))
+                            st.download_button("📄 Download Word Report (.docx)", data=_ibt_word6,
+                                file_name=f"IBT_Report_{_idt6.datetime.now().strftime('%Y%m%d')}.docx",
+                                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                key="ibt6_dl_word", use_container_width=True)
+                        except Exception as _we6:
+                            st.warning(f"Word export unavailable: {_we6}")
+                    except Exception as _we6b:
+                        st.error(f"Word report error: {_we6b}")
+                        import traceback; st.caption(traceback.format_exc())
+
         except Exception as _t6_err:
             st.error(f"IBT Reports error: {_t6_err}")
             import traceback; st.code(traceback.format_exc())
+
 
 
 
