@@ -3379,6 +3379,21 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                                     st.success(f"✅ Imported {imported} student(s) + {_gh_added} grade records! → Go to 📊 Academic Report or 📈 IBT Reports for analysis.")
                                 else:
                                     st.success(f"✅ Imported {imported} student(s). Enter grades below via text or 📸 photo grading.")
+                                # ── Sync classroom config grade to sheet grade ──────────────
+                                _cfg_grade_to_set = _sheet_grade_level.strip() if _sheet_grade_level else ""
+                                if _cfg_grade_to_set:
+                                    # Match to closest GRADES entry (exact first, then partial)
+                                    _matched_grade = None
+                                    for _g in GRADES:
+                                        if _g.lower() == _cfg_grade_to_set.lower():
+                                            _matched_grade = _g; break
+                                    if not _matched_grade:
+                                        for _g in GRADES:
+                                            if _cfg_grade_to_set[:4].lower() in _g.lower():
+                                                _matched_grade = _g; break
+                                    if _matched_grade:
+                                        st.session_state["cfg_grade"] = _matched_grade
+                                        st.info(f"📋 Classroom grade updated to **{_matched_grade}** based on uploaded sheet.")
                                 time.sleep(1); st.rerun()
                 except Exception as e:
                     st.error(f"❌ Error reading file: {e}")
