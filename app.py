@@ -3097,9 +3097,26 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                 _plx_r = strip_markdown_for_voice(_plx_saved["text"])
                 _plx_saved_delivery = _plx_saved["delivery"]
                 st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:10px;padding:14px 18px;margin:8px 0;white-space:pre-wrap;color:#D0D8E8;line-height:1.7">{_plx_r}</div>',unsafe_allow_html=True)
-                if "🔊" in _plx_saved_delivery:
+                # DEBUG — remove once audio is confirmed working
+                with st.expander("🛠️ Audio Debug Info", expanded=True):
+                    st.write(f"**ElevenLabs key present:** `{bool(ELEVENLABS_API_KEY)}`")
+                    st.write(f"**Key prefix:** `{ELEVENLABS_API_KEY[:6] + '...' if ELEVENLABS_API_KEY else 'MISSING'}`")
+                    st.write(f"**Saved delivery string:** `{repr(_plx_saved_delivery)}`")
+                    st.write(f"**🔊 in delivery:** `{'🔊' in str(_plx_saved_delivery)}`")
+                    st.write(f"**Text length:** `{len(_plx_r)} chars`")
+                    st.write(f"**Text preview:** `{_plx_r[:80]}`")
+                    if st.button("🧪 Test ElevenLabs API now", key="plx_tts_debug_test"):
+                        with st.spinner("Calling ElevenLabs..."):
+                            _db64, _dsrc = speak_elevenlabs("Hello, this is a test.")
+                        if _db64:
+                            st.success(f"✅ API call succeeded! Audio bytes: {len(import_base64_decode(_db64)) if False else '(ok)'}")
+                            _test_audio = base64.b64decode(_db64)
+                            st.audio(_test_audio, format="audio/mp3")
+                        else:
+                            st.error(f"❌ API failed: {_dsrc}")
+                if "🔊" in str(_plx_saved_delivery):
                     tts_player(_plx_r, "plx_voice")
-                elif "📱" in _plx_saved_delivery:
+                elif "📱" in str(_plx_saved_delivery):
                     st.code(_plx_r, language=None)
                 else:
                     st.download_button("📥 Download Letter", data=_plx_r, file_name="parent_letter.txt", key="plx_dl_letter")
