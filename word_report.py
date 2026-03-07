@@ -9,11 +9,14 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-import numpy as np
+try:
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+    HAS_MPL = True
+except ImportError:
+    HAS_MPL = False
 
 # ── IBT brand colours ──────────────────────────────────────────────────────────
 NAVY   = RGBColor(0x0F, 0x22, 0x47)
@@ -76,6 +79,7 @@ def _add_heading(doc, text, level=1):
     return p
 
 def _chart_bytes_bar(labels, values, benchmarks, title, figsize=(7, 2.8)):
+    if not HAS_MPL: return None
     fig, ax = plt.subplots(figsize=figsize)
     fig.patch.set_facecolor("#0F2247")
     ax.set_facecolor("#0D1B2A")
@@ -108,6 +112,7 @@ def _chart_bytes_bar(labels, values, benchmarks, title, figsize=(7, 2.8)):
     return buf
 
 def _chart_bytes_class_bar(students, avg_scores, figsize=(7, 2.6)):
+    if not HAS_MPL: return None
     fig, ax = plt.subplots(figsize=figsize)
     fig.patch.set_facecolor("#0F2247")
     ax.set_facecolor("#0D1B2A")
@@ -210,8 +215,9 @@ def generate_academic_word_report(grade_history, students, school_label, grade_e
     stu_names  = sorted(df["student"].unique())
     stu_avgs   = [df[df["student"]==s]["score"].mean() for s in stu_names]
     chart1_buf = _chart_bytes_class_bar([s.split()[0] for s in stu_names], stu_avgs)
-    doc.add_picture(chart1_buf, width=Inches(6.5))
-    doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+    if chart1_buf:
+        doc.add_picture(chart1_buf, width=Inches(6.5))
+        doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
     doc.add_paragraph()
 
     # ── Student performance table ───────────────────────────────────────────────
@@ -281,8 +287,11 @@ def generate_academic_word_report(grade_history, students, school_label, grade_e
             cell = img_pair.rows[0].cells[offset]
             _cell_bg(cell, "0D1B2A")
             cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
-            run = cell.paragraphs[0].add_run()
-            run.add_picture(chart_buf, width=Inches(3.1))
+            if chart_buf:
+                run = cell.paragraphs[0].add_run()
+                run.add_picture(chart_buf, width=Inches(3.1))
+            else:
+                _set_cell_text(cell.paragraphs[0].runs[0] if cell.paragraphs[0].runs else cell.paragraphs[0].add_run(), f"{subj}: {[f'{v:.0f}' for v in student_avgs]}", color=WHITE, size=8) if False else cell.paragraphs[0].add_run(f"{subj} — chart unavailable (install matplotlib)")
         doc.add_paragraph()
 
     # ── IBT Benchmark comparison table ────────────────────────────────────────

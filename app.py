@@ -4788,7 +4788,10 @@ def wassce_shading_modal():
      with t6:
         try:
             from ibt_interactive_tab import render_ibt_interactive_tab
-            render_ibt_interactive_tab()
+            # Store AI functions in session_state so the tab can call them
+            st.session_state["_best_all_fn"] = best_all
+            st.session_state["_build_free_chat_fn"] = build_free_chat
+            render_ibt_interactive_tab(best_all_fn=best_all, build_free_chat_fn=build_free_chat)
         except ImportError:
             # Fallback to old module if available
             if IBT_REPORTS_AVAILABLE:

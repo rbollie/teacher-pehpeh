@@ -59,7 +59,7 @@ def _build_grade_map(grade_history):
         gmap.setdefault(s, {}).setdefault(sub, []).append(sc)
     return gmap
 
-def render_ibt_interactive_tab():
+def render_ibt_interactive_tab(best_all_fn=None, build_free_chat_fn=None):
     gh = st.session_state.get("grade_history", [])
     students_list = st.session_state.get("students", [])
 
@@ -282,10 +282,14 @@ Write a structured IBT INTERVENTION REPORT for this student. Include:
 Be specific, data-driven, and compassionate. Acknowledge home barriers."""
 
             try:
-                from app import best_all, build_free_chat
-                with st.spinner("Generating IBT intervention analysis..."):
-                    r, m, _ = best_all(build_free_chat(), prompt, [])
-                st.session_state[ibt_ai_key] = r
+                _baf = best_all_fn or st.session_state.get("_best_all_fn")
+                _bcf = build_free_chat_fn or st.session_state.get("_build_free_chat_fn")
+                if not _baf or not _bcf:
+                    st.warning("AI functions not available. Please ensure the app is running correctly.")
+                else:
+                    with st.spinner("Generating IBT intervention analysis..."):
+                        r, m, _ = _baf(_bcf(), prompt, [])
+                    st.session_state[ibt_ai_key] = r
             except Exception as e:
                 st.error(f"Could not generate analysis: {e}")
 
