@@ -4854,8 +4854,8 @@ document.getElementById('submit-btn').disabled = true;
                     _wi_bench6 = _IBT_BENCH_C.get(_wi_subj6, _IBT_AVG_C)
                     _s_cur6, _ = _ibt_status_c(_wi_cur_c, _wi_subj6, _sel_grade)
                     _s_proj6, _ = _ibt_status_c(_wi_proj_c, _wi_subj6, _sel_grade)
-                    _wi_gap_cur   = _wi_cur_c  - _wi_bench6   # current curved vs bench
-                    _wi_gap_proj  = _wi_proj_c - _wi_bench6   # projected curved vs bench
+                    _wi_gap_cur   = _wi_cur_raw - _wi_bench6   # raw vs bench
+                    _wi_gap_proj  = _wi_proj_c  - _wi_bench6   # projected curved vs bench
                     _wi_info = (
                         # ── Left block: Current ──
                         f'<div style="border-right:1px solid #1E3A6A;padding-right:20px">'
@@ -4863,9 +4863,6 @@ document.getElementById('submit-btn').disabled = true;
                         f'<div style="display:flex;gap:16px;flex-wrap:wrap">'
                         f'<div><span style="color:#8899BB;font-size:.75rem">Raw score</span><br>'
                         f'<span style="color:#D4A843;font-weight:700;font-size:1.15rem">{_wi_cur_raw:.1f}</span></div>'
-                        f'<div><span style="color:#8899BB;font-size:.75rem">Curved</span><br>'
-                        f'<span style="color:#D4A843;font-weight:700;font-size:1.15rem">{_wi_cur_c:.1f}</span> '
-                        f'<span style="font-size:.72rem;color:#8899BB">{_s_cur6}</span></div>'
                         f'<div><span style="color:#8899BB;font-size:.75rem">Gap to bench</span><br>'
                         f'<span style="color:{"#4CAF50" if _wi_gap_cur>=0 else "#EF5350"};font-weight:700;font-size:1.15rem">{_wi_gap_cur:+.1f}</span></div>'
                         f'</div></div>'
