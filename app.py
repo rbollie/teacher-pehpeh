@@ -1243,20 +1243,56 @@ def generate_docx_from_text(text, title="Transcribed Notes", school="", teacher=
         font = style.font
         font.name = 'Calibri'
         font.size = Pt(11)
-        # ── Logo header ──────────────────────────────────────────────
-        _logo_par = doc.add_paragraph()
-        _logo_par.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        # ── 3-col logo / contact header table ───────────────────────
+        from docx.oxml.ns import qn as _qn_d
+        from docx.oxml import OxmlElement as _OE
+        from docx.enum.table import WD_TABLE_ALIGNMENT
+        _htbl = doc.add_table(rows=1, cols=3)
+        _htbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+        # Remove all table borders
+        def _no_border(cell):
+            tc = cell._tc
+            tcPr = tc.get_or_add_tcPr()
+            tcBorders = _OE('w:tcBorders')
+            for side in ('top','left','bottom','right','insideH','insideV'):
+                b = _OE(f'w:{side}')
+                b.set(_qn_d('w:val'), 'none')
+                tcBorders.append(b)
+            tcPr.append(tcBorders)
+        for _hc in _htbl.columns[0].cells + _htbl.columns[1].cells + _htbl.columns[2].cells:
+            _no_border(_hc)
+        # Cell 0 – IBT logo left
+        _htbl.cell(0,0).width = Inches(1.2)
         try:
-            for _ldat in [_IBT_LOGO_MD_B64, _PEHPEH_LOGO_MD_B64]:
-                _ib = io.BytesIO(_b64ar.b64decode(_ldat))
-                _logo_par.add_run().add_picture(_ib, height=Inches(0.7))
-                _logo_par.add_run("   ")
+            _r0 = _htbl.cell(0,0).paragraphs[0]
+            _r0.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            _r0.add_run().add_picture(io.BytesIO(_b64ar.b64decode(_IBT_LOGO_MD_B64)), height=Inches(0.75))
         except Exception: pass
-        # Title
+        # Cell 1 – contact info center
+        _htbl.cell(0,1).width = Inches(4.6)
+        _cp = _htbl.cell(0,1).paragraphs[0]
+        _cp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        _cr = _cp.add_run("Institute of Basic Technology")
+        _cr.bold = True; _cr.font.size = Pt(10); _cr.font.color.rgb = RGBColor(0x8B,0x1A,0x1A)
+        _cp2 = _htbl.cell(0,1).add_paragraph(f"{_IBT_PHONE}  |  {_IBT_EMAIL}")
+        _cp2.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        for _r2 in _cp2.runs: _r2.font.size = Pt(8.5); _r2.font.color.rgb = RGBColor(0x00,0x33,0x99)
+        _cp3 = _htbl.cell(0,1).add_paragraph("www.institutebasictechnology.org")
+        _cp3.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        for _r3 in _cp3.runs: _r3.font.size = Pt(8); _r3.font.color.rgb = RGBColor(0x00,0x33,0x99)
+        # Cell 2 – Pehpeh logo right
+        _htbl.cell(0,2).width = Inches(1.2)
+        try:
+            _r2c = _htbl.cell(0,2).paragraphs[0]
+            _r2c.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+            _r2c.add_run().add_picture(io.BytesIO(_b64ar.b64decode(_PEHPEH_LOGO_MD_B64)), height=Inches(0.75))
+        except Exception: pass
+        doc.add_paragraph()  # spacer after header table
+        # Title — accessible dark red
         t_para = doc.add_heading(title, level=1)
         t_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
         for run in t_para.runs:
-            run.font.color.rgb = RGBColor(0x8B, 0x1A, 0x1A)  # IBT red
+            run.font.color.rgb = RGBColor(0x8B, 0x1A, 0x1A)
         # Metadata line
         meta_parts = []
         if school: meta_parts.append(f"School: {school}")
@@ -1267,15 +1303,8 @@ def generate_docx_from_text(text, title="Transcribed Notes", school="", teacher=
             meta = doc.add_paragraph(" | ".join(meta_parts))
             meta.alignment = WD_ALIGN_PARAGRAPH.CENTER
             for run in meta.runs:
-                run.font.size = Pt(9)
-                run.font.color.rgb = RGBColor(0x66, 0x66, 0x66)
-            doc.add_paragraph("")  # spacer
-        # Contact info line
-        _ct_par = doc.add_paragraph(f"{_IBT_PHONE}  |  {_IBT_EMAIL}  |  www.institutebasictechnology.org")
-        _ct_par.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        for run in _ct_par.runs:
-            run.font.size = Pt(8.5)
-            run.font.color.rgb = RGBColor(0x64, 0x78, 0xA0)
+                run.font.size = Pt(9); run.font.color.rgb = RGBColor(0x00,0x33,0x66)
+            doc.add_paragraph()
         # Add a thin line
         border_para = doc.add_paragraph()
         border_para.paragraph_format.space_after = Pt(12)
@@ -1772,43 +1801,56 @@ def generate_result_docx(text, task, topic, grade, subject, school="", teacher="
 def generate_result_xlsx(text, task, topic, grade, subject):
     """Generate an Excel workbook — best for quizzes and MCQs."""
     try:
-        import openpyxl
+        import openpyxl, io, re, base64 as _b64rx
         from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-        import io, re
+        from openpyxl.drawing.image import Image as _XlImg
         wb = openpyxl.Workbook(); ws = wb.active
         ws.title = topic[:30] if topic else "Quiz"
-        # Header row
-        hdr_fill = PatternFill("solid", fgColor="8B1A1A")
-        gold_fill = PatternFill("solid", fgColor="D4A843")
-        navy_fill = PatternFill("solid", fgColor="0F2247")
         thin = Side(style="thin", color="CCCCCC")
         border = Border(left=thin, right=thin, top=thin, bottom=thin)
-        ws.merge_cells("A1:D1")
-        ws["A1"] = f"Teacher Pehpeh — {task}: {topic}"
-        ws["A1"].font = Font(bold=True, color="FFFFFF", size=13)
-        ws["A1"].fill = hdr_fill
-        ws["A1"].alignment = Alignment(horizontal="center")
+        # ── Row 1: Logo | Contact | Logo (height 52pt) ──────────────
+        ws.row_dimensions[1].height = 52
+        ws.column_dimensions["A"].width = 10
+        ws.column_dimensions["B"].width = 55
+        ws.column_dimensions["C"].width = 25
+        ws.column_dimensions["D"].width = 25
+        ws.merge_cells("B1:C1")
+        _ct1 = ws.cell(1,2,"Institute of Basic Technology — Teacher Pehpeh")
+        _ct1.font = Font(bold=True, color="8B1A1A", size=11)
+        _ct1.alignment = Alignment(horizontal="center", vertical="center")
+        _ct1b = ws.cell(1,4,f"{_IBT_PHONE}  |  {_IBT_EMAIL}")
+        _ct1b.font = Font(color="003399", size=8.5)
+        _ct1b.alignment = Alignment(horizontal="center", vertical="center")
+        try:
+            _i1 = _XlImg(io.BytesIO(_b64rx.b64decode(_IBT_LOGO_MD_B64)))
+            _i1.width=48; _i1.height=44; ws.add_image(_i1,"A1")
+        except Exception: pass
+        try:
+            _i2 = _XlImg(io.BytesIO(_b64rx.b64decode(_PEHPEH_LOGO_MD_B64)))
+            _i2.width=48; _i2.height=44; ws.add_image(_i2,"D1")
+        except Exception: pass
+        # ── Row 2: Title + subject/grade (accessible dark colors) ──
+        ws.row_dimensions[2].height = 20
         ws.merge_cells("A2:D2")
-        ws["A2"] = f"{subject} | {grade}"
-        ws["A2"].font = Font(bold=True, color="D4A843", size=10)
-        ws["A2"].fill = navy_fill
-        ws["A2"].alignment = Alignment(horizontal="center")
-        ws.row_dimensions[1].height = 22; ws.row_dimensions[2].height = 16
-        # Parse questions from text
-        lines = [l.strip() for l in text.split("\n") if l.strip()]
-        q_num = 0; row = 4
-        ws["A3"] = "#"; ws["B3"] = "Question / Content"; ws["C3"] = "Answer / Key"; ws["D3"] = "Notes"
-        for cell in [ws["A3"],ws["B3"],ws["C3"],ws["D3"]]:
+        _t2 = ws.cell(2,1,f"Teacher Pehpeh — {task}: {topic}")
+        _t2.font = Font(bold=True, color="8B1A1A", size=13)
+        _t2.alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[3].height = 16
+        ws.merge_cells("A3:D3")
+        _t3 = ws.cell(3,1,f"{subject} | {grade}")
+        _t3.font = Font(color="003366", size=10)
+        _t3.alignment = Alignment(horizontal="center", vertical="center")
+        # ── Row 4: Table column headers (keep dark fill — it's a table) ──
+        ws["A4"] = "#"; ws["B4"] = "Question / Content"; ws["C4"] = "Answer / Key"; ws["D4"] = "Notes"
+        for cell in [ws["A4"],ws["B4"],ws["C4"],ws["D4"]]:
             cell.font = Font(bold=True, color="FFFFFF")
             cell.fill = PatternFill("solid", fgColor="1A2744")
             cell.alignment = Alignment(horizontal="center")
             cell.border = border
-        ws.column_dimensions["A"].width = 5
-        ws.column_dimensions["B"].width = 55
-        ws.column_dimensions["C"].width = 25
-        ws.column_dimensions["D"].width = 25
+        # Parse questions from text
+        lines = [l.strip() for l in text.split("\n") if l.strip()]
+        q_num = 0; row = 5
         for line in lines:
-            # Detect question lines
             m = re.match(r"^(\d+)[.):] (.+)", line)
             if m:
                 q_num += 1
@@ -1822,15 +1864,13 @@ def generate_result_xlsx(text, task, topic, grade, subject):
                     ws.cell(row,c).font = Font(color="D0D8E8", size=10)
                 row += 1
             elif line.lower().startswith("answer:") or line.lower().startswith("ans:"):
-                # Write answer into previous row col C
-                if row > 4:
+                if row > 5:
                     ws.cell(row-1, 3, line.split(":",1)[-1].strip()).font = Font(color="81C784", bold=True, size=10)
             elif line.startswith(("A)","B)","C)","D)","a)","b)","c)","d)")):
-                # MCQ option — append to col B notes
-                pass  # already embedded in question usually
-        # IBT footer
-        ws.cell(row+1, 1, "Teacher Pehpeh by IBT — institutebasictechnology.org").font = Font(italic=True, color="888888", size=8)
+                pass
+        # IBT footer — accessible dark color
         ws.merge_cells(f"A{row+1}:D{row+1}")
+        ws.cell(row+1,1,"Teacher Pehpeh by IBT  |  www.institutebasictechnology.org  |  "+_IBT_PHONE).font = Font(italic=True, color="003366", size=8)
         buf = io.BytesIO(); wb.save(buf); buf.seek(0); return buf.getvalue()
     except Exception: return None
 
@@ -3167,22 +3207,34 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                 _bdr  = Border(left=_thin, right=_thin, top=_thin, bottom=_thin)
                 _school_label = st.session_state.get("_classroom_label", school_name or "My Classroom")
                 # Title row
-                _rws.merge_cells("A1:G1")
-                _t = _rws.cell(1,1,f"Student Roster — {_school_label}")
-                _t.font = Font(bold=True, color="FFFFFF", size=13)
-                _t.fill = PatternFill("solid", fgColor="0D3B8C")
-                _t.alignment = Alignment(horizontal="center", vertical="center")
-                _rws.row_dimensions[1].height = 28
-                # Sub-header
+                # ── Row 1: Logo | Contact | Logo ─────────────────────
+                _rws.row_dimensions[1].height = 52
+                _rws.merge_cells("B1:F1")
+                _rct = _rws.cell(1,2,"Institute of Basic Technology — Teacher Pehpeh")
+                _rct.font = Font(bold=True, color="8B1A1A", size=11)
+                _rct.alignment = Alignment(horizontal="center", vertical="center")
+                _rct2 = _rws.cell(1,7,f"{_IBT_PHONE}  |  {_IBT_EMAIL}")
+                _rct2.font = Font(color="003399", size=8); _rct2.alignment = Alignment(horizontal="right", vertical="center")
+                try:
+                    import openpyxl.drawing.image as _oxdi, io as _oxio2, base64 as _b64rs
+                    _ri1=_oxdi.Image(io.BytesIO(_b64rs.b64decode(_IBT_LOGO_MD_B64))); _ri1.width=48; _ri1.height=44; _rws.add_image(_ri1,"A1")
+                    _ri2=_oxdi.Image(io.BytesIO(_b64rs.b64decode(_PEHPEH_LOGO_MD_B64))); _ri2.width=48; _ri2.height=44; _rws.add_image(_ri2,"G1")
+                except Exception: pass
+                # ── Row 2: Title + grade (accessible dark colors) ─────
+                _rws.row_dimensions[2].height = 20
                 _rws.merge_cells("A2:G2")
-                _sh = _rws.cell(2,1,f"Grade: {_grade_en}  |  Generated by Teacher Pehpeh – IBT")
-                _sh.font = Font(italic=True, color="D4A843", size=10)
-                _sh.fill = _navy
+                _t = _rws.cell(2,1,f"Student Roster — {_school_label}")
+                _t.font = Font(bold=True, color="8B1A1A", size=13)
+                _t.alignment = Alignment(horizontal="center", vertical="center")
+                _rws.row_dimensions[3].height = 16
+                _rws.merge_cells("A3:G3")
+                _sh = _rws.cell(3,1,f"Grade: {_grade_en}  |  Generated by Teacher Pehpeh – IBT  |  www.institutebasictechnology.org")
+                _sh.font = Font(italic=True, color="003366", size=9)
                 _sh.alignment = Alignment(horizontal="center")
                 # Column headers
                 _hdrs = ["Name","Siblings","Mom Education","Single Mom","Works After School","Computer Access","Notes"]
                 for ci, h in enumerate(_hdrs, 1):
-                    _c = _rws.cell(3, ci, h)
+                    _c = _rws.cell(4, ci, h)
                     _c.font = Font(bold=True, color="FFFFFF", size=10)
                     _c.fill = _gold
                     _c.alignment = Alignment(horizontal="center")
@@ -3191,7 +3243,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                 for _col in ["B","C","D","E","F"]: _rws.column_dimensions[_col].width = 16
                 _rws.column_dimensions["G"].width = 30
                 # Student rows
-                for ri, _s in enumerate(st.session_state.students, 4):
+                for ri, _s in enumerate(st.session_state.students, 5):
                     _fill = _navy if ri % 2 == 0 else _alt
                     for ci, val in enumerate([_s["name"],_s["sib"],_s["mom"],_s["sm"],_s["wk"],_s["cp"],_s.get("nt","")], 1):
                         _c = _rws.cell(ri, ci, val)
@@ -3199,7 +3251,8 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                         _c.fill = _fill
                         _c.border = _bdr
                 # Footer
-                _rws.cell(len(st.session_state.students)+5, 1, "Teacher Pehpeh by IBT — institutebasictechnology.org").font = Font(italic=True, color="888888", size=8)
+                _rws.cell(len(st.session_state.students)+6, 1, f"Teacher Pehpeh by IBT  |  {_IBT_PHONE}  |  {_IBT_EMAIL}  |  www.institutebasictechnology.org").font = Font(italic=True, color="003366", size=8)
+                _rws.merge_cells(f"A{len(st.session_state.students)+6}:G{len(st.session_state.students)+6}")
                 _roster_buf = io.BytesIO(); _roster_wb.save(_roster_buf); _roster_buf.seek(0)
                 _fname = f"student_roster_{(school_name or 'class').replace(' ','_')}.xlsx"
                 st.download_button("📥 Download Student Roster (Excel)", data=_roster_buf.getvalue(),
@@ -3910,17 +3963,14 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                     st.error(f"Word report error: {_we}")
             with _dl_c2:
                 try:
-                    import io, openpyxl
+                    import io, openpyxl, base64 as _b64ar2
                     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-                    from openpyxl.chart import LineChart, Reference
+                    from openpyxl.drawing.image import Image as _XlImg2
                     _rpt_wb = openpyxl.Workbook()
                     _navy_fill = PatternFill("solid", fgColor="0D1B2A")
-                    _blue_fill = PatternFill("solid", fgColor="0D3B8C")
                     _gold_fill = PatternFill("solid", fgColor="D4A843")
-                    _alt_fill  = PatternFill("solid", fgColor="131F30")
                     _red_fill  = PatternFill("solid", fgColor="5C1010")
                     _grn_fill  = PatternFill("solid", fgColor="0D3B14")
-                    _ylw_fill  = PatternFill("solid", fgColor="3B2D00")
                     _thin = Side(style="thin", color="1E3050")
                     _bdr  = Border(left=_thin, right=_thin, top=_thin, bottom=_thin)
                     def _hdr_cell(ws, row, col, val, size=11):
@@ -3930,12 +3980,41 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                         c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
                         c.border = _bdr
                         return c
+                    def _add_xl_logo_hdr(ws, ncols):
+                        """Row 1: IBT logo | contact | Pehpeh logo. Row 2: title. Row 3: subtitle."""
+                        ws.row_dimensions[1].height = 52
+                        last_col_ltr = chr(64+ncols)
+                        mid_s = chr(65); mid_e = chr(64+max(2,ncols-1))
+                        ws.merge_cells(f"{mid_s}1:{mid_e}1")
+                        _c = ws.cell(1,1,"Institute of Basic Technology — Teacher Pehpeh")
+                        _c.font = Font(bold=True, color="8B1A1A", size=11)
+                        _c.alignment = Alignment(horizontal="center", vertical="center")
+                        _c2 = ws.cell(1,ncols,f"{_IBT_PHONE}  |  {_IBT_EMAIL}")
+                        _c2.font = Font(color="003399", size=8)
+                        _c2.alignment = Alignment(horizontal="right", vertical="center")
+                        try:
+                            _ii1=_XlImg2(io.BytesIO(_b64ar2.b64decode(_IBT_LOGO_MD_B64))); _ii1.width=48; _ii1.height=44; ws.add_image(_ii1,"A1")
+                            _ii2=_XlImg2(io.BytesIO(_b64ar2.b64decode(_PEHPEH_LOGO_MD_B64))); _ii2.width=48; _ii2.height=44; ws.add_image(_ii2,last_col_ltr+"1")
+                        except Exception: pass
                     _ws1 = _rpt_wb.active; _ws1.title = "Grade History"
-                    _h1 = ["Student","Subject","Topic","Score","Date","Grade Level","Graded By","Intervention?"]
-                    for ci, h in enumerate(_h1, 1): _hdr_cell(_ws1, 1, ci, h)
                     for _col, _w in zip(["A","B","C","D","E","F","G","H"],[22,16,26,12,14,12,14,14]):
                         _ws1.column_dimensions[_col].width = _w
-                    for ri, g in enumerate(_df_sorted.to_dict("records"), 2):
+                    # Logo header
+                    _add_xl_logo_hdr(_ws1, 8)
+                    _ws1.row_dimensions[2].height = 18
+                    _ws1.merge_cells("A2:H2")
+                    _tt2 = _ws1.cell(2,1,f"Academic Grade Report — {_school_label}  |  Grade: {_effective_grade}  |  {_ardt.datetime.now().strftime('%B %d, %Y')}")
+                    _tt2.font = Font(bold=True, color="8B1A1A", size=12)
+                    _tt2.alignment = Alignment(horizontal="center", vertical="center")
+                    _ws1.row_dimensions[3].height = 14
+                    _ws1.merge_cells("A3:H3")
+                    _tt3 = _ws1.cell(3,1,"www.institutebasictechnology.org")
+                    _tt3.font = Font(italic=True, color="003366", size=9)
+                    _tt3.alignment = Alignment(horizontal="center")
+                    # Table headers at row 4
+                    _h1 = ["Student","Subject","Topic","Score","Date","Grade Level","Graded By","Intervention?"]
+                    for ci, h in enumerate(_h1, 1): _hdr_cell(_ws1, 4, ci, h)
+                    for ri, g in enumerate(_df_sorted.to_dict("records"), 5):
                         _rfill = _red_fill if g["score"] < 50 else _grn_fill
                         _bg = PatternFill("solid", fgColor="1C2340") if ri%2==0 else _navy_fill
                         for ci, val in enumerate([g["student"],g["subject"],g.get("topic","General"),
@@ -5093,8 +5172,9 @@ Be specific, data-driven, and compassionate."""
                 # ── Excel Download ──────────────────────────────────────────
                 with _idl1:
                     try:
-                        import openpyxl as _oxl6
+                        import openpyxl as _oxl6, base64 as _b64xl6, io as _iio_xl6
                         from openpyxl.styles import Font as _F6, PatternFill as _PF6, Alignment as _A6, Border as _B6, Side as _S6
+                        from openpyxl.drawing.image import Image as _XlImg6
                         _wb6  = _oxl6.Workbook()
                         _nv6  = _PF6("solid", fgColor="0D1B2A")
                         _bl6  = _PF6("solid", fgColor="0D3B8C")
@@ -5118,22 +5198,37 @@ Be specific, data-driven, and compassionate."""
                             cel.border = _bd6
                             cel.alignment = _A6(horizontal="center", vertical="center")
                             return cel
+                        def _xl_logo_hdr6(ws, ncols, title_str, sub_str):
+                            """Rows 1-3: logos | contact | title | subtitle. Data starts row 4."""
+                            lc = chr(64+ncols)
+                            ws.row_dimensions[1].height = 52
+                            ws.merge_cells(f"B1:{chr(64+max(2,ncols-1))}1")
+                            _lh = ws.cell(1,1,"Institute of Basic Technology — Teacher Pehpeh")
+                            _lh.font=_F6(bold=True,color="8B1A1A",size=11); _lh.alignment=_A6(horizontal="center",vertical="center")
+                            _rh = ws.cell(1,ncols,f"{_IBT_PHONE}  |  {_IBT_EMAIL}")
+                            _rh.font=_F6(color="003399",size=8); _rh.alignment=_A6(horizontal="right",vertical="center")
+                            try:
+                                _ix1=_XlImg6(_iio_xl6.BytesIO(_b64xl6.b64decode(_IBT_LOGO_MD_B64))); _ix1.width=48; _ix1.height=44; ws.add_image(_ix1,"A1")
+                                _ix2=_XlImg6(_iio_xl6.BytesIO(_b64xl6.b64decode(_PEHPEH_LOGO_MD_B64))); _ix2.width=48; _ix2.height=44; ws.add_image(_ix2,lc+"1")
+                            except Exception: pass
+                            ws.row_dimensions[2].height=20; ws.merge_cells(f"A2:{lc}2")
+                            _tt=ws.cell(2,1,title_str); _tt.font=_F6(bold=True,color="8B1A1A",size=13); _tt.alignment=_A6(horizontal="center",vertical="center")
+                            ws.row_dimensions[3].height=14; ws.merge_cells(f"A3:{lc}3")
+                            _st=ws.cell(3,1,sub_str); _st.font=_F6(italic=True,color="003366",size=9); _st.alignment=_A6(horizontal="center")
 
                         # Sheet 1 — Class Summary
                         _ws_cls = _wb6.active; _ws_cls.title = "Class Summary"
-                        _ws_cls.merge_cells("A1:H1")
-                        _t = _ws_cls.cell(1,1,"IBT CURVED PERFORMANCE REPORT — CLASS SUMMARY"); _t.font=_F6(bold=True,color="D4A843",size=14); _t.fill=_nv6; _t.alignment=_A6(horizontal="center")
-                        _ws_cls.merge_cells("A2:H2")
-                        _gen_str = f"Generated: {_idt6.datetime.now().strftime('%B %d, %Y')}  |  Sqrt curve applied: curved = √(raw/100)×100  |  IBT avg: 64.0  |  WASSCE target: 70.7"
-                        _t2=_ws_cls.cell(2,1,_gen_str); _t2.font=_F6(color="8899BB",size=9); _t2.fill=_nv6; _t2.alignment=_A6(horizontal="center")
-                        _ws_cls.row_dimensions[1].height = 22; _ws_cls.row_dimensions[2].height = 16
+                        _ncls = 8 + (1 if _cls_is_12 else 0)
+                        _xl_logo_hdr6(_ws_cls, _ncls,
+                            "IBT CURVED PERFORMANCE REPORT — CLASS SUMMARY",
+                            f"Generated: {_idt6.datetime.now().strftime('%B %d, %Y')}  |  IBT avg: 64.0  |  WASSCE target: 70.7  |  www.institutebasictechnology.org")
                         _cls_hdrs = ["Subject","Class Raw Avg","Class Curved Avg","IBT Bench","Gap (curved)","# Scores","Status"]
                         if _cls_is_12: _cls_hdrs.insert(5, "Gap to WASSCE")
-                        for ci, h in enumerate(_cls_hdrs, 1): _hc6(_ws_cls, 3, ci, h)
+                        for ci, h in enumerate(_cls_hdrs, 1): _hc6(_ws_cls, 4, ci, h)
                         _col_ws_cls = [chr(65+i) for i in range(len(_cls_hdrs))]
                         _col_ws_w   = [18,16,18,12,14,16,10,16][:len(_cls_hdrs)]
                         for col, w in zip(_col_ws_cls, _col_ws_w): _ws_cls.column_dimensions[col].width = w
-                        _row = 4
+                        _row = 5
                         for _sub6 in _all_subj6:
                             _raw_scores_all = [sc for s in _all_stu6 for sc in _gmap6.get(s,{}).get(_sub6,[])]
                             if not _raw_scores_all: continue
@@ -5153,17 +5248,18 @@ Be specific, data-driven, and compassionate."""
 
                         # Sheet 2 — Student Rankings
                         _ws_stu = _wb6.create_sheet("Student Rankings")
-                        _ws_stu.merge_cells("A1:J1")
-                        _t3=_ws_stu.cell(1,1,"IBT CURVED REPORT — ALL STUDENTS RANKED"); _t3.font=_F6(bold=True,color="D4A843",size=13); _t3.fill=_nv6; _t3.alignment=_A6(horizontal="center")
-                        _ws_stu.row_dimensions[1].height = 22
                         _all_subj_list = list(_all_subj6)
                         _stu_hdrs = ["Rank","Student","Grade","Curved Avg","vs IBT (64.0)","vs WASSCE*","Status"] + [s[:10] for s in _all_subj_list]
-                        for ci, h in enumerate(_stu_hdrs, 1): _hc6(_ws_stu, 2, ci, h)
+                        _xl_logo_hdr6(_ws_stu, max(len(_stu_hdrs),7),
+                            "IBT CURVED REPORT — ALL STUDENTS RANKED",
+                            f"School: {_school_lbl6}  |  {_idt6.datetime.now().strftime('%B %d, %Y')}  |  www.institutebasictechnology.org")
+                        for ci, h in enumerate(_stu_hdrs, 1): _hc6(_ws_stu, 4, ci, h)
                         _ws_stu.column_dimensions["A"].width = 6
                         _ws_stu.column_dimensions["B"].width = 22
                         _ws_stu.column_dimensions["C"].width = 14
                         for _c_idx in range(4, len(_stu_hdrs)+2): _ws_stu.column_dimensions[chr(64+_c_idx)].width = 13
                         _stu_ranked = []
+                        _stu_data_start6 = 5
                         for _sn6 in _all_stu6:
                             _sn_grades2 = [g.get("grade_level","") for g in _gh6 if g["student"]==_sn6]
                             _sn_grade2  = next((g for g in _sn_grades2 if g), _cls_grade)
@@ -5172,7 +5268,7 @@ Be specific, data-driven, and compassionate."""
                             _stu_ranked.append((_sn6, _sa6, _sn_grade2))
                         _stu_ranked.sort(key=lambda x: x[1], reverse=True)
                         for _rank, (_sn6, _sa6, _sn_gr2) in enumerate(_stu_ranked, 1):
-                            _rrow = _rank + 2
+                            _rrow = _rank + _stu_data_start6 - 1
                             _bg = _PF6("solid", fgColor="1C2340") if _rrow%2==0 else _nv6
                             _rfil = _gr6 if _sa6 >= (_IBT_WASSCE_C if _is_12th(_sn_gr2) else _IBT_EXCELLENT_C) else (_yw6 if _sa6 >= _IBT_ATRISK_C else _rd6)
                             _dc6(_ws_stu, _rrow, 1, _rank, fill=_bg)
@@ -5190,32 +5286,34 @@ Be specific, data-driven, and compassionate."""
                                 _sav = sum(_sv6s)/len(_sv6s) if _sv6s else None
                                 _dc6(_ws_stu, _rrow, _c6i, round(_sav,1) if _sav else "—", fill=_bg)
                         # Footnote
-                        _fn_row = len(_stu_ranked) + 4
-                        _ws_stu.cell(_fn_row, 1, "* vs WASSCE column only applies to 12th grade students. All other grades target IBT subject benchmarks.").font = _F6(italic=True, color="8899BB", size=9)
+                        _fn_row = len(_stu_ranked) + _stu_data_start6 + 1
+                        _ws_stu.cell(_fn_row, 1, "* vs WASSCE column only applies to 12th grade students. All other grades target IBT subject benchmarks.").font = _F6(italic=True, color="003366", size=9)
+                        _ws_stu.merge_cells(f"A{_fn_row}:{chr(64+max(7,len(_stu_hdrs)))}{_fn_row}")
 
                         # Sheet 3 — IBT Benchmarks Reference
                         _ws_ref = _wb6.create_sheet("IBT Curved Benchmarks")
-                        _ws_ref.merge_cells("A1:F1")
-                        _t4=_ws_ref.cell(1,1,"IBT PERMANENT CURVED BENCHMARKS"); _t4.font=_F6(bold=True,color="D4A843",size=13); _t4.fill=_nv6; _t4.alignment=_A6(horizontal="center")
-                        _ws_ref.row_dimensions[1].height=22
-                        for ci,h in enumerate(["Subject","Raw Bench","Curved Bench","WASSCE Target","At-Risk Threshold","Excellent"],1): _hc6(_ws_ref,2,ci,h)
+                        _xl_logo_hdr6(_ws_ref, 6, "IBT PERMANENT CURVED BENCHMARKS",
+                            "8-year research dataset · 183 students · 6 schools  |  www.institutebasictechnology.org")
+                        for ci,h in enumerate(["Subject","Raw Bench","Curved Bench","WASSCE Target","At-Risk Threshold","Excellent"],1): _hc6(_ws_ref,4,ci,h)
                         _sub_ref_data=[("Chemistry",49.4,68.6),("Physics",39.9,60.9),("Math",39.1,61.1),("Biology",44.7,65.3),("English Grammar",43.3,65.8),("Literature",43.3,65.8),("Economics",43.3,65.8),("French",43.3,65.8),("OVERALL",43.3,64.0)]
-                        for ri,(_sub6,_raw6,_cur6) in enumerate(_sub_ref_data,3):
+                        for ri,(_sub6,_raw6,_cur6) in enumerate(_sub_ref_data,5):
                             _bg=_PF6("solid",fgColor="1C2340") if ri%2==0 else _nv6
                             for ci,v in enumerate([_sub6,f"{_raw6:.1f}",f"{_cur6:.1f}","70.7","61.2","79.1"],1):
                                 _dc6(_ws_ref,ri,ci,v,fill=_bg)
                         for col,w in zip(["A","B","C","D","E","F"],[18,12,14,14,16,12]): _ws_ref.column_dimensions[col].width=w
-                        _ws_ref.merge_cells("A13:F13")
-                        _note=_ws_ref.cell(13,1,"Curve formula: curved = √(raw/100) × 100  |  IBT 8-year research dataset, 183 students, 6 schools"); _note.font=_F6(italic=True,color="8899BB",size=9); _note.fill=_nv6; _note.alignment=_A6(horizontal="center")
+                        _ws_ref.merge_cells("A14:F14")
+                        _note=_ws_ref.cell(14,1,"Curve formula: curved = √(raw/100) × 100  |  IBT 8-year dataset, 183 students, 6 schools  |  "+_IBT_PHONE); _note.font=_F6(italic=True,color="003366",size=9); _note.alignment=_A6(horizontal="center")
 
                         # Sheet 4 — Raw Grade History
                         _ws_raw = _wb6.create_sheet("Raw Grade History")
+                        _xl_logo_hdr6(_ws_raw, 9, f"RAW GRADE HISTORY — {_school_lbl6}",
+                            f"Generated: {_idt6.datetime.now().strftime('%B %d, %Y')}  |  www.institutebasictechnology.org  |  {_IBT_PHONE}")
                         _raw_hdrs = ["Student","Subject","Topic","Raw Score","Curved Score","Date","Grade Level","Graded By","IBT Status"]
-                        for ci,h in enumerate(_raw_hdrs,1): _hc6(_ws_raw,1,ci,h)
+                        for ci,h in enumerate(_raw_hdrs,1): _hc6(_ws_raw,4,ci,h)
                         for col,w in zip(["A","B","C","D","E","F","G","H","I"],[22,16,26,12,13,14,12,14,16]): _ws_raw.column_dimensions[col].width=w
                         if PD:
                             _df6 = pd.DataFrame(_gh6); _df6["date"]=pd.to_datetime(_df6["date"]); _df6=_df6.sort_values("date")
-                            for ri,g in enumerate(_df6.to_dict("records"),2):
+                            for ri,g in enumerate(_df6.to_dict("records"),5):
                                 _rsc=g["score"]; _csc=_sqrt_curve(_rsc); _stat6,_=_ibt_status_c(_csc,g.get("subject",""))
                                 _rfil2=_rd6 if _csc<_IBT_ATRISK_C else (_yw6 if _csc<_IBT_WASSCE_C else _gr6)
                                 _bg2=_PF6("solid",fgColor="1C2340") if ri%2==0 else _nv6
@@ -5248,7 +5346,7 @@ Be specific, data-driven, and compassionate."""
                         for _sec6 in _doc6.sections:
                             _sec6.top_margin = _In6(0.8); _sec6.bottom_margin = _In6(0.8)
                             _sec6.left_margin = _In6(1.0); _sec6.right_margin = _In6(1.0)
-                        def _add_heading6(doc, text, level=1, color=(212,168,67)):
+                        def _add_heading6(doc, text, level=1, color=(139,26,26)):
                             p = doc.add_heading(text, level=level)
                             for run in p.runs: run.font.color.rgb = _RGB6(*color); run.font.bold = True
                             p.paragraph_format.space_before = _Pt6(10)
@@ -5260,37 +5358,48 @@ Be specific, data-driven, and compassionate."""
                             if color: run.font.color.rgb = _RGB6(*color)
                             run.font.size = _Pt6(size)
                             return p
-                        # ── Logo header row ──────────────────────────────────
-                        _logo_p6 = _doc6.add_paragraph()
-                        _logo_p6.alignment = _WAP6.CENTER
+                        # ── 3-col logo / contact header table ──────────────
+                        from docx.oxml.ns import qn as _qn6
+                        from docx.oxml import OxmlElement as _OE6
+                        from docx.enum.table import WD_TABLE_ALIGNMENT as _WTA6b
+                        def _no_bdr6(cell):
+                            tc=cell._tc; tcPr=tc.get_or_add_tcPr()
+                            tcBords=_OE6('w:tcBorders')
+                            for _sd in ('top','left','bottom','right','insideH','insideV'):
+                                _b=_OE6(f'w:{_sd}'); _b.set(_qn6('w:val'),'none'); tcBords.append(_b)
+                            tcPr.append(tcBords)
+                        _htbl6=_doc6.add_table(rows=1,cols=3); _htbl6.alignment=_WTA6b.CENTER
+                        for _hcx in list(_htbl6.columns[0].cells)+list(_htbl6.columns[1].cells)+list(_htbl6.columns[2].cells): _no_bdr6(_hcx)
+                        _htbl6.cell(0,0).width=_In6(1.2); _htbl6.cell(0,1).width=_In6(4.6); _htbl6.cell(0,2).width=_In6(1.2)
                         try:
-                            for _ldata6 in [_IBT_LOGO_MD_B64, _PEHPEH_LOGO_MD_B64]:
-                                _img_bytes6 = _io6.BytesIO(_b64_6.b64decode(_ldata6))
-                                run_img = _logo_p6.add_run()
-                                run_img.add_picture(_img_bytes6, height=_In6(0.7))
-                                _logo_p6.add_run("   ")
+                            _rL=_htbl6.cell(0,0).paragraphs[0]; _rL.alignment=_WAP6.LEFT
+                            _rL.add_run().add_picture(_io6.BytesIO(_b64_6.b64decode(_IBT_LOGO_MD_B64)),height=_In6(0.75))
                         except Exception: pass
-                        # Title
+                        _cpc=_htbl6.cell(0,1).paragraphs[0]; _cpc.alignment=_WAP6.CENTER
+                        _cr6=_cpc.add_run("Institute of Basic Technology")
+                        _cr6.bold=True; _cr6.font.size=_Pt6(10); _cr6.font.color.rgb=_RGB6(139,26,26)
+                        _cp2c=_htbl6.cell(0,1).add_paragraph(f"{_IBT_PHONE}  |  {_IBT_EMAIL}"); _cp2c.alignment=_WAP6.CENTER
+                        for _xr in _cp2c.runs: _xr.font.size=_Pt6(8.5); _xr.font.color.rgb=_RGB6(0,51,153)
+                        _cp3c=_htbl6.cell(0,1).add_paragraph("www.institutebasictechnology.org"); _cp3c.alignment=_WAP6.CENTER
+                        for _xr in _cp3c.runs: _xr.font.size=_Pt6(8); _xr.font.color.rgb=_RGB6(0,51,153)
+                        try:
+                            _rR=_htbl6.cell(0,2).paragraphs[0]; _rR.alignment=_WAP6.RIGHT
+                            _rR.add_run().add_picture(_io6.BytesIO(_b64_6.b64decode(_PEHPEH_LOGO_MD_B64)),height=_In6(0.75))
+                        except Exception: pass
                         _doc6.add_paragraph()
-                        _t_p6 = _doc6.add_paragraph()
-                        _t_p6.alignment = _WAP6.CENTER
-                        _t_r6 = _t_p6.add_run("IBT INTERVENTION ANALYSIS REPORT")
-                        _t_r6.font.bold=True; _t_r6.font.size=_Pt6(16); _t_r6.font.color.rgb=_RGB6(212,168,67)
-                        _s_p6 = _doc6.add_paragraph()
-                        _s_p6.alignment = _WAP6.CENTER
-                        _s_r6 = _s_p6.add_run(f"{_school_lbl6}  |  {_idt6.datetime.now().strftime('%B %d, %Y')}  |  Sqrt-Curved Benchmarks")
-                        _s_r6.font.size=_Pt6(10); _s_r6.font.color.rgb=_RGB6(136,153,187)
-                        # Contact info
-                        _ct_p6 = _doc6.add_paragraph()
-                        _ct_p6.alignment = _WAP6.CENTER
-                        _ct_r6 = _ct_p6.add_run(f"{_IBT_PHONE}  |  {_IBT_EMAIL}  |  www.institutebasictechnology.org")
-                        _ct_r6.font.size=_Pt6(8.5); _ct_r6.font.color.rgb=_RGB6(100,120,160)
+                        # Title — accessible dark red
+                        _t_p6=_doc6.add_paragraph(); _t_p6.alignment=_WAP6.CENTER
+                        _t_r6=_t_p6.add_run("IBT INTERVENTION ANALYSIS REPORT")
+                        _t_r6.font.bold=True; _t_r6.font.size=_Pt6(16); _t_r6.font.color.rgb=_RGB6(139,26,26)
+                        _s_p6=_doc6.add_paragraph(); _s_p6.alignment=_WAP6.CENTER
+                        _s_r6=_s_p6.add_run(f"{_school_lbl6}  |  {_idt6.datetime.now().strftime('%B %d, %Y')}  |  Sqrt-Curved Benchmarks")
+                        _s_r6.font.size=_Pt6(10); _s_r6.font.color.rgb=_RGB6(0,51,102)
                         _doc6.add_paragraph()
                         # Curve note
                         _note_p = _doc6.add_paragraph()
                         _nr = _note_p.add_run("📌 Methodology: All raw scores transformed using square-root curve: curved = √(raw÷100)×100. "
                             "IBT benchmarks reflect 8-year, 183-student dataset post-curve. WASSCE target: 70.7 | At-risk: <61.2 | Excellent: ≥79.1")
-                        _nr.italic=True; _nr.font.size=_Pt6(9); _nr.font.color.rgb=_RGB6(160,168,188)
+                        _nr.italic=True; _nr.font.size=_Pt6(9); _nr.font.color.rgb=_RGB6(0,51,102)
                         _doc6.add_paragraph()
                         # Class summary table
                         _add_heading6(_doc6, "1. Class Performance vs IBT Curved Benchmarks")
