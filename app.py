@@ -5161,6 +5161,93 @@ Be specific, data-driven, and compassionate."""
                         f'<div style="background:#0D1B2A;border:1px solid #1E3A6A;border-radius:10px;'
                         f'padding:18px 22px;color:#D0D8E8;font-size:.87rem;line-height:1.8;white-space:pre-wrap;margin-top:8px">'
                         f'{st.session_state[_ibt_ai_key6]}</div>', unsafe_allow_html=True)
+                    # ── Download intervention plan as Word doc ──────────────
+                    try:
+                        from docx import Document as _IDoc
+                        from docx.shared import Pt as _IPt, Inches as _IIn, RGBColor as _IRGB
+                        from docx.enum.text import WD_ALIGN_PARAGRAPH as _IWAP
+                        from docx.enum.table import WD_TABLE_ALIGNMENT as _IWTA
+                        from docx.oxml.ns import qn as _Iqn
+                        from docx.oxml import OxmlElement as _IOE
+                        import io as _iio_ip, base64 as _b64ip
+                        _idoc = _IDoc()
+                        # Tight default spacing
+                        _insty = _idoc.styles["Normal"]
+                        _insty.font.name = "Calibri"; _insty.font.size = _IPt(11)
+                        _insty.paragraph_format.space_after = _IPt(4)
+                        _insty.paragraph_format.space_before = _IPt(0)
+                        for _isec in _idoc.sections:
+                            _isec.top_margin = _IIn(0.8); _isec.bottom_margin = _IIn(0.8)
+                            _isec.left_margin = _IIn(1.0); _isec.right_margin = _IIn(1.0)
+                        # 3-col logo header
+                        def _i_no_bdr(cell):
+                            tc=cell._tc; tcPr=tc.get_or_add_tcPr(); tcB=_IOE("w:tcBorders")
+                            for s in ("top","left","bottom","right","insideH","insideV"):
+                                b=_IOE(f"w:{s}"); b.set(_Iqn("w:val"),"none"); tcB.append(b)
+                            tcPr.append(tcB)
+                        _ihtbl=_idoc.add_table(rows=1,cols=3); _ihtbl.alignment=_IWTA.CENTER
+                        for _ihc in list(_ihtbl.columns[0].cells)+list(_ihtbl.columns[1].cells)+list(_ihtbl.columns[2].cells): _i_no_bdr(_ihc)
+                        _ihtbl.cell(0,0).width=_IIn(1.2); _ihtbl.cell(0,1).width=_IIn(4.6); _ihtbl.cell(0,2).width=_IIn(1.2)
+                        try:
+                            _pL=_ihtbl.cell(0,0).paragraphs[0]; _pL.alignment=_IWAP.LEFT
+                            _pL.add_run().add_picture(_iio_ip.BytesIO(_b64ip.b64decode(_IBT_LOGO_MD_B64)),height=_IIn(0.75))
+                        except Exception: pass
+                        _pC=_ihtbl.cell(0,1).paragraphs[0]; _pC.alignment=_IWAP.CENTER
+                        _rC=_pC.add_run("Institute of Basic Technology"); _rC.bold=True; _rC.font.size=_IPt(10); _rC.font.color.rgb=_IRGB(139,26,26)
+                        _pC2=_ihtbl.cell(0,1).add_paragraph(f"{_IBT_PHONE}  |  {_IBT_EMAIL}"); _pC2.alignment=_IWAP.CENTER
+                        for _r2 in _pC2.runs: _r2.font.size=_IPt(8.5); _r2.font.color.rgb=_IRGB(0,51,153)
+                        _pC3=_ihtbl.cell(0,1).add_paragraph("www.institutebasictechnology.org"); _pC3.alignment=_IWAP.CENTER
+                        for _r3 in _pC3.runs: _r3.font.size=_IPt(8); _r3.font.color.rgb=_IRGB(0,51,153)
+                        try:
+                            _pR=_ihtbl.cell(0,2).paragraphs[0]; _pR.alignment=_IWAP.RIGHT
+                            _pR.add_run().add_picture(_iio_ip.BytesIO(_b64ip.b64decode(_PEHPEH_LOGO_MD_B64)),height=_IIn(0.75))
+                        except Exception: pass
+                        # Title
+                        _itp=_idoc.add_paragraph(); _itp.alignment=_IWAP.CENTER
+                        _itp.paragraph_format.space_before=_IPt(6); _itp.paragraph_format.space_after=_IPt(2)
+                        _itr=_itp.add_run(f"IBT INTERVENTION PLAN — {_sel6}")
+                        _itr.bold=True; _itr.font.size=_IPt(15); _itr.font.color.rgb=_IRGB(139,26,26)
+                        _isp=_idoc.add_paragraph(); _isp.alignment=_IWAP.CENTER
+                        _isp.paragraph_format.space_after=_IPt(6)
+                        _isr=_isp.add_run(f"Grade: {_sel_grade or 'Unknown'}  |  School: {_school_lbl6}  |  {_idt6.datetime.now().strftime('%B %d, %Y')}")
+                        _isr.font.size=_IPt(9.5); _isr.font.color.rgb=_IRGB(0,51,102)
+                        # AI text — parse and render with tight spacing
+                        _ai_raw = st.session_state[_ibt_ai_key6]
+                        for _iline in _ai_raw.split("\n"):
+                            _ist = _iline.strip()
+                            if not _ist:
+                                # blank line → tiny spacer, not full empty paragraph
+                                _iblk = _idoc.add_paragraph()
+                                _iblk.paragraph_format.space_after = _IPt(2)
+                                continue
+                            # Detect markdown headings / bold numbered headers
+                            if _ist.startswith("##") or (_ist[:2].isdigit() and _ist[2] in ".):"):
+                                _ihp = _idoc.add_heading(_ist.lstrip("#").strip(), level=2)
+                                _ihp.paragraph_format.space_before=_IPt(8); _ihp.paragraph_format.space_after=_IPt(2)
+                                for _run in _ihp.runs: _run.font.color.rgb=_IRGB(139,26,26); _run.font.size=_IPt(11)
+                            elif _ist.startswith("#"):
+                                _ihp = _idoc.add_heading(_ist.lstrip("#").strip(), level=1)
+                                _ihp.paragraph_format.space_before=_IPt(10); _ihp.paragraph_format.space_after=_IPt(3)
+                                for _run in _ihp.runs: _run.font.color.rgb=_IRGB(13,59,140); _run.font.size=_IPt(12)
+                            elif _ist.startswith(("- ","• ","* ")):
+                                _ibp = _idoc.add_paragraph(_ist[2:], style="List Bullet")
+                                _ibp.paragraph_format.space_before=_IPt(1); _ibp.paragraph_format.space_after=_IPt(1)
+                                for _run in _ibp.runs: _run.font.size=_IPt(10)
+                            else:
+                                _ipp = _idoc.add_paragraph(_ist)
+                                _ipp.paragraph_format.space_before=_IPt(2); _ipp.paragraph_format.space_after=_IPt(3)
+                                for _run in _ipp.runs: _run.font.size=_IPt(10)
+                        # Footer
+                        _ifp=_idoc.add_paragraph(); _ifp.alignment=_IWAP.CENTER
+                        _ifp.paragraph_format.space_before=_IPt(10)
+                        _ifr=_ifp.add_run(f"Teacher Pehpeh by IBT  |  {_IBT_PHONE}  |  {_IBT_EMAIL}  |  www.institutebasictechnology.org")
+                        _ifr.font.size=_IPt(8); _ifr.italic=True; _ifr.font.color.rgb=_IRGB(0,51,102)
+                        _ibuf=_iio_ip.BytesIO(); _idoc.save(_ibuf); _ibuf.seek(0)
+                        st.download_button("📄 Download Intervention Plan (.docx)", data=_ibuf.getvalue(),
+                            file_name=f"IBT_Intervention_{_sel6.replace(' ','_')}_{_idt6.datetime.now().strftime('%Y%m%d')}.docx",
+                            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                            key="ibt6_dl_intervention", use_container_width=True)
+                    except Exception as _ie: st.caption(f"Word export: {_ie}")
                 st.markdown("---")
 
                 # ╔══════════════════════════════════════════════════════════╗
@@ -5343,14 +5430,18 @@ Be specific, data-driven, and compassionate."""
                         from docx.enum.table import WD_TABLE_ALIGNMENT as _WTA6
                         import base64 as _b64_6, io as _io6
                         _doc6 = _Doc6()
-                        # Margins
+                        # Tight default spacing + margins
+                        _d6sty = _doc6.styles["Normal"]
+                        _d6sty.paragraph_format.space_after = _Pt6(3)
+                        _d6sty.paragraph_format.space_before = _Pt6(0)
                         for _sec6 in _doc6.sections:
                             _sec6.top_margin = _In6(0.8); _sec6.bottom_margin = _In6(0.8)
                             _sec6.left_margin = _In6(1.0); _sec6.right_margin = _In6(1.0)
                         def _add_heading6(doc, text, level=1, color=(139,26,26)):
                             p = doc.add_heading(text, level=level)
                             for run in p.runs: run.font.color.rgb = _RGB6(*color); run.font.bold = True
-                            p.paragraph_format.space_before = _Pt6(10)
+                            p.paragraph_format.space_before = _Pt6(8)
+                            p.paragraph_format.space_after = _Pt6(3)
                             return p
                         def _add_para6(doc, text, bold=False, italic=False, color=None, size=10):
                             p = doc.add_paragraph()
@@ -5387,7 +5478,7 @@ Be specific, data-driven, and compassionate."""
                             _rR=_htbl6.cell(0,2).paragraphs[0]; _rR.alignment=_WAP6.RIGHT
                             _rR.add_run().add_picture(_io6.BytesIO(_b64_6.b64decode(_PEHPEH_LOGO_MD_B64)),height=_In6(0.75))
                         except Exception: pass
-                        _doc6.add_paragraph()
+                        # (no extra spacer — logo table has bottom margin)
                         # Title — accessible dark red
                         _t_p6=_doc6.add_paragraph(); _t_p6.alignment=_WAP6.CENTER
                         _t_r6=_t_p6.add_run("IBT INTERVENTION ANALYSIS REPORT")
@@ -5395,13 +5486,13 @@ Be specific, data-driven, and compassionate."""
                         _s_p6=_doc6.add_paragraph(); _s_p6.alignment=_WAP6.CENTER
                         _s_r6=_s_p6.add_run(f"{_school_lbl6}  |  {_idt6.datetime.now().strftime('%B %d, %Y')}  |  Sqrt-Curved Benchmarks")
                         _s_r6.font.size=_Pt6(10); _s_r6.font.color.rgb=_RGB6(0,51,102)
-                        _doc6.add_paragraph()
+                        _p6sp=_doc6.add_paragraph(); _p6sp.paragraph_format.space_after=_Pt6(2)
                         # Curve note
                         _note_p = _doc6.add_paragraph()
                         _nr = _note_p.add_run("📌 Methodology: All raw scores transformed using square-root curve: curved = √(raw÷100)×100. "
                             "IBT benchmarks reflect 8-year, 183-student dataset post-curve. WASSCE target: 70.7 | At-risk: <61.2 | Excellent: ≥79.1")
                         _nr.italic=True; _nr.font.size=_Pt6(9); _nr.font.color.rgb=_RGB6(0,51,102)
-                        _doc6.add_paragraph()
+                        _p6sp=_doc6.add_paragraph(); _p6sp.paragraph_format.space_after=_Pt6(2)
                         # Class summary table
                         _add_heading6(_doc6, "1. Class Performance vs IBT Curved Benchmarks")
                         if _bench_rows6:
@@ -5419,7 +5510,7 @@ Be specific, data-driven, and compassionate."""
                                     _row6.cells[ci].text = str(v)
                                     for run in _row6.cells[ci].paragraphs[0].runs:
                                         run.font.size = _Pt6(9)
-                        _doc6.add_paragraph()
+                        _p6sp=_doc6.add_paragraph(); _p6sp.paragraph_format.space_after=_Pt6(2)
                         # Student ranking table
                         _add_heading6(_doc6, "2. All Students — Curved Score Ranking")
                         if _stu_ranked:
@@ -5436,7 +5527,7 @@ Be specific, data-driven, and compassionate."""
                                     _r7.cells[ci].text = str(v)
                                     for run in _r7.cells[ci].paragraphs[0].runs:
                                         run.font.size=_Pt6(9)
-                        _doc6.add_paragraph()
+                        _p6sp=_doc6.add_paragraph(); _p6sp.paragraph_format.space_after=_Pt6(2)
                         # IBT Research context
                         _add_heading6(_doc6, "3. IBT Research Context")
                         for _rtitle6, _rtext6 in _IBT_RISK_FACTS_C:
@@ -5445,12 +5536,32 @@ Be specific, data-driven, and compassionate."""
                             _r_title.bold = True; _r_title.font.size = _Pt6(10)
                             _r_body = _p7.add_run(_rtext6)
                             _r_body.font.size = _Pt6(9.5)
-                        _doc6.add_paragraph()
+                        _p6sp=_doc6.add_paragraph(); _p6sp.paragraph_format.space_after=_Pt6(2)
                         # AI analysis (if generated)
                         _ibt_ai_txt6 = st.session_state.get(f"ibt_ai_{_sel6}", "")
                         if _ibt_ai_txt6:
                             _add_heading6(_doc6, f"4. AI Intervention Plan — {_sel6}")
-                            _doc6.add_paragraph(_ibt_ai_txt6).runs[0].font.size = _Pt6(9.5) if _doc6.paragraphs[-1].runs else None
+                            for _ai6ln in _ibt_ai_txt6.split("\n"):
+                                _ai6st = _ai6ln.strip()
+                                if not _ai6st:
+                                    _ai6sp=_doc6.add_paragraph(); _ai6sp.paragraph_format.space_after=_Pt6(2)
+                                    continue
+                                if _ai6st.startswith("##") or (_ai6st[:2].isdigit() and len(_ai6st)>2 and _ai6st[2] in ".):"):
+                                    _ai6h=_doc6.add_heading(_ai6st.lstrip("#").strip(),level=2)
+                                    _ai6h.paragraph_format.space_before=_Pt6(7); _ai6h.paragraph_format.space_after=_Pt6(2)
+                                    for _r in _ai6h.runs: _r.font.color.rgb=_RGB6(139,26,26); _r.font.size=_Pt6(11)
+                                elif _ai6st.startswith("#"):
+                                    _ai6h=_doc6.add_heading(_ai6st.lstrip("#").strip(),level=1)
+                                    _ai6h.paragraph_format.space_before=_Pt6(9); _ai6h.paragraph_format.space_after=_Pt6(3)
+                                    for _r in _ai6h.runs: _r.font.color.rgb=_RGB6(13,59,140)
+                                elif _ai6st.startswith(("- ","• ","* ")):
+                                    _ai6p=_doc6.add_paragraph(_ai6st[2:],style="List Bullet")
+                                    _ai6p.paragraph_format.space_before=_Pt6(1); _ai6p.paragraph_format.space_after=_Pt6(1)
+                                    for _r in _ai6p.runs: _r.font.size=_Pt6(9.5)
+                                else:
+                                    _ai6p=_doc6.add_paragraph(_ai6st)
+                                    _ai6p.paragraph_format.space_before=_Pt6(1); _ai6p.paragraph_format.space_after=_Pt6(3)
+                                    for _r in _ai6p.runs: _r.font.size=_Pt6(9.5)
                         _word_buf6 = _iio.BytesIO(); _doc6.save(_word_buf6); _word_buf6.seek(0)
                         st.download_button("📄 Download Word Report (.docx)", data=_word_buf6.getvalue(),
                             file_name=f"IBT_Curved_Report_{_school_lbl6.replace(' ','_')}_{_idt6.datetime.now().strftime('%Y%m%d')}.docx",
