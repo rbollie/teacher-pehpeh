@@ -5167,6 +5167,9 @@ Be specific, data-driven, and compassionate."""
                 # SECTION 7 — DOWNLOADS (Excel + Word)                     ║
                 # ╚══════════════════════════════════════════════════════════╝
                 st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.95rem;margin:4px 0 6px">📥 Download IBT Reports</div>', unsafe_allow_html=True)
+                # Define shared variables before both Excel and Word try-blocks
+                _school_lbl6 = st.session_state.get("_classroom_label", school_name or "IBT School")
+                _stu_ranked = []  # populated by Excel block, consumed by Word block
                 _idl1, _idl2 = st.columns(2)
 
                 # ── Excel Download ──────────────────────────────────────────
@@ -5323,7 +5326,6 @@ Be specific, data-driven, and compassionate."""
                                     _dc6(_ws_raw,ri,ci,v,fill=_rfil2 if ci in (4,5,9) else _bg2,bold=(ci in (4,5)))
 
                         _xl_buf6=_iio.BytesIO(); _wb6.save(_xl_buf6); _xl_buf6.seek(0)
-                        _school_lbl6 = st.session_state.get("_classroom_label", school_name or "IBTClass")
                         st.download_button("📊 Download Excel Report (.xlsx)", data=_xl_buf6.getvalue(),
                             file_name=f"IBT_Curved_Report_{_school_lbl6.replace(' ','_')}_{_idt6.datetime.now().strftime('%Y%m%d')}.xlsx",
                             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -5340,7 +5342,6 @@ Be specific, data-driven, and compassionate."""
                         from docx.enum.text import WD_ALIGN_PARAGRAPH as _WAP6
                         from docx.enum.table import WD_TABLE_ALIGNMENT as _WTA6
                         import base64 as _b64_6, io as _io6
-                        _school_lbl6 = st.session_state.get("_classroom_label", school_name or "IBT School")
                         _doc6 = _Doc6()
                         # Margins
                         for _sec6 in _doc6.sections:
