@@ -5052,7 +5052,7 @@ document.getElementById('submit-btn').disabled = true;
                 # ╔══════════════════════════════════════════════════════════╗
                 # SECTION 5 — IBT RESEARCH CONTEXT                         ║
                 # ╚══════════════════════════════════════════════════════════╝
-                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.95rem;margin:4px 0 6px">📚 IBT Research Context (8 years · 6 schools · curved benchmarks)</div>', unsafe_allow_html=True)
+                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.95rem;margin:4px 0 6px">📚 IBT Research Context (8 years · curved benchmarks)</div>', unsafe_allow_html=True)
                 _rf_cols6 = st.columns(2)
                 for _ri6, (_rtitle6, _rtext6) in enumerate(_IBT_RISK_FACTS_C):
                     with _rf_cols6[_ri6 % 2]:
