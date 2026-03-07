@@ -3830,14 +3830,77 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
 
             # ── Per-subject breakdown ──────────────────────────────────────
             if _n_subjects > 1:
-                st.markdown(f'<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin:10px 0 6px">📚 Subject Breakdown</div>', unsafe_allow_html=True)
+                st.markdown(f'''<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin:10px 0 6px">📚 Subject Breakdown — Class Averages</div>''', unsafe_allow_html=True)
+
+                # --- Class-level averages table ---
                 _subj_rows = []
                 for _subj in sorted(_df["subject"].unique()):
                     _sd2 = _df[_df["subject"]==_subj]
-                    _subj_rows.append({"Subject": _subj, "Avg Score": f"{_sd2['score'].mean():.0f}/100",
-                                       "# Graded": len(_sd2), "Top Student": _sd2.loc[_sd2["score"].idxmax(),"student"],
-                                       "Lowest Score": f"{_sd2['score'].min()}/100"})
+                    _top_stu = _sd2.loc[_sd2["score"].idxmax(), "student"]
+                    # Semester averages from IBT subject data if available
+                    _sdata = (st.session_state.get("_ar_subject_data") or {}).get(_subj, {})
+                    _s1_vals = [v["s1_avg"] for v in _sdata.values() if v.get("s1_avg") is not None]
+                    _s2_vals = [v["s2_avg"] for v in _sdata.values() if v.get("s2_avg") is not None]
+                    _row = {
+                        "Subject":      _subj,
+                        "Class Avg":    f"{_sd2['score'].mean():.1f}/100",
+                        "# Students":   _sd2["student"].nunique(),
+                        "Top Student":  _top_stu,
+                        "Lowest":       f"{_sd2['score'].min():.1f}/100",
+                    }
+                    if _s1_vals:
+                        _row["Sem 1 Cls Avg"] = f"{sum(_s1_vals)/len(_s1_vals):.1f}/100"
+                    if _s2_vals:
+                        _row["Sem 2 Cls Avg"] = f"{sum(_s2_vals)/len(_s2_vals):.1f}/100"
+                    _subj_rows.append(_row)
                 st.dataframe(pd.DataFrame(_subj_rows), use_container_width=True, hide_index=True)
+
+                # --- Individual averages per subject per semester ---
+                _sdata_all = st.session_state.get("_ar_subject_data") or {}
+                _has_sem_data = any(
+                    v.get("s1_avg") is not None or v.get("s2_avg") is not None
+                    for sd in _sdata_all.values() for v in sd.values()
+                )
+                if _has_sem_data:
+                    st.markdown('''<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin:14px 0 6px">👤 Individual Averages by Subject &amp; Semester</div>''', unsafe_allow_html=True)
+                    # Build rows: one row per student, columns = Subject · Sem1 · Sem2 · Overall
+                    _all_students = sorted({stu for sd in _sdata_all.values() for stu in sd})
+                    _all_subjs    = sorted(_sdata_all.keys())
+                    _ind_rows = []
+                    for _stu in _all_students:
+                        for _subj2 in _all_subjs:
+                            _sval = _sdata_all.get(_subj2, {}).get(_stu, {})
+                            _s1 = _sval.get("s1_avg")
+                            _s2 = _sval.get("s2_avg")
+                            if _s1 is None and _s2 is None:
+                                continue
+                            _vals = [v for v in [_s1, _s2] if v is not None]
+                            _overall = round(sum(_vals)/len(_vals), 1)
+                            _status = "🔴" if _overall < 50 else ("🟡" if _overall < 65 else "🟢")
+                            _ind_rows.append({
+                                "Student":  _stu,
+                                "Subject":  _subj2,
+                                "Sem 1":    f"{_s1:.1f}/100" if _s1 is not None else "—",
+                                "Sem 2":    f"{_s2:.1f}/100" if _s2 is not None else "—",
+                                "Overall":  f"{_overall:.1f}/100",
+                                "Status":   _status,
+                            })
+                    if _ind_rows:
+                        st.dataframe(pd.DataFrame(_ind_rows), use_container_width=True, hide_index=True)
+                elif _n_subjects > 1:
+                    # Fallback: individual subject avgs from grade_history (no semester split)
+                    st.markdown('''<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin:14px 0 6px">👤 Individual Averages by Subject</div>''', unsafe_allow_html=True)
+                    _ind_rows2 = []
+                    for _stu in sorted(_df["student"].unique()):
+                        for _subj2 in sorted(_df["subject"].unique()):
+                            _sdf = _df[(_df["student"]==_stu) & (_df["subject"]==_subj2)]
+                            if _sdf.empty: continue
+                            _savg2 = _sdf["score"].mean()
+                            _status2 = "🔴" if _savg2 < 50 else ("🟡" if _savg2 < 65 else "🟢")
+                            _ind_rows2.append({"Student": _stu, "Subject": _subj2,
+                                               "Avg Score": f"{_savg2:.1f}/100", "Status": _status2})
+                    if _ind_rows2:
+                        st.dataframe(pd.DataFrame(_ind_rows2), use_container_width=True, hide_index=True)
 
             # ── Line chart ────────────────────────────────────────────────
             try:
@@ -5052,7 +5115,7 @@ document.getElementById('submit-btn').disabled = true;
                 # ╔══════════════════════════════════════════════════════════╗
                 # SECTION 5 — IBT RESEARCH CONTEXT                         ║
                 # ╚══════════════════════════════════════════════════════════╝
-                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.95rem;margin:4px 0 6px">📚 IBT Research Context (8 years · curved benchmarks)</div>', unsafe_allow_html=True)
+                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.95rem;margin:4px 0 6px">📚 IBT Research Context (8 years · 6 schools · curved benchmarks)</div>', unsafe_allow_html=True)
                 _rf_cols6 = st.columns(2)
                 for _ri6, (_rtitle6, _rtext6) in enumerate(_IBT_RISK_FACTS_C):
                     with _rf_cols6[_ri6 % 2]:
