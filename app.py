@@ -3721,7 +3721,13 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
     if t5:
      with t5:
         import datetime as _ardt
+        from collections import Counter as _Ctr
         _school_label = st.session_state.get("_classroom_label", school_name or "My School")
+
+        # Derive effective grade before rendering header
+        _gh = st.session_state.grade_history
+        _gh_grades = [g.get("grade_level","") for g in _gh if g.get("grade_level","").strip()]
+        _effective_grade = _Ctr(_gh_grades).most_common(1)[0][0] if _gh_grades else _grade_en
 
         # ── Header ────────────────────────────────────────────────────────
         st.markdown(f"""
@@ -3741,20 +3747,8 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
   </div>
 </div>""", unsafe_allow_html=True)
 
-        _gh = st.session_state.grade_history
-        # Effective grade: prefer most common grade_level in grade_history over app config
-        if _gh:
-            _gh_grades = [g.get("grade_level","") for g in _gh if g.get("grade_level","").strip()]
-            if _gh_grades:
-                from collections import Counter as _Ctr
-                _effective_grade = _Ctr(_gh_grades).most_common(1)[0][0]
-            else:
-                _effective_grade = _grade_en
-        else:
-            _effective_grade = _grade_en
         if not _gh:
             st.info("📭 No grade data yet. Enter or upload grades in the Students tab to generate the Academic Report.")
-            st.warning("⚠️ pandas not available. Cannot generate report.")
         else:
             import re as _arre
             _df = pd.DataFrame(_gh)
