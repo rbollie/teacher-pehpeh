@@ -3030,7 +3030,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
         st.markdown(f'<div style="background:var(--bg-card);border:1px solid {C_BLUE};border-radius:12px;padding:14px 18px;margin-bottom:10px">{ico(20)} <strong style="color:{C_BLUE}">{stu_label}</strong></div>',unsafe_allow_html=True)
 
         # ── Parent Letter (moved here from Generate tab) ──
-        with st.expander("✉️ Parent Letter / Communication", expanded=False):
+        with st.expander("✉️ Parent Letter / Communication", expanded=bool(st.session_state.get("plx_comm_result"))):
             st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:10px;padding:10px 14px;margin-bottom:10px"><strong style="color:{C_GOLD}">✉️ Parent Communication</strong> <span style="font-size:.83rem;color:var(--text-secondary)"> — Adapts to each parent: audio for low-literacy, SMS or email for others</span></div>',unsafe_allow_html=True)
             _plx1,_plx2=st.columns(2)
             with _plx1:
