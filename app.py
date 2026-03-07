@@ -3076,7 +3076,23 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     st.write("Preparing sensitive, culturally appropriate message...")
                     _plx_r,_plx_m,_plx_allr=best_all(build_free_chat(),_plx_prompt,[])
                     _plx_status.update(label="✉️ Communication ready!",state="complete",expanded=False)
+                st.session_state["plx_comm_result"] = {"text": _plx_r, "delivery": _plx_delivery}
+                st.rerun()
+            if st.session_state.get("plx_comm_result"):
+                _plx_saved = st.session_state["plx_comm_result"]
+                _plx_r = _plx_saved["text"]
+                _plx_saved_delivery = _plx_saved["delivery"]
                 st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:10px;padding:14px 18px;margin:8px 0;white-space:pre-wrap;color:#D0D8E8;line-height:1.7">{_plx_r}</div>',unsafe_allow_html=True)
+                if "🔊" in _plx_saved_delivery:
+                    tts_player(_plx_r, "plx_voice")
+                elif "📱" in _plx_saved_delivery:
+                    st.code(_plx_r, language=None)
+                else:
+                    st.download_button("📥 Download Letter", data=_plx_r, file_name="parent_letter.txt", key="plx_dl_letter")
+                    tts_player(_plx_r, "plx_email")
+                if st.button("🗑️ Clear", key="plx_clear_result"):
+                    del st.session_state["plx_comm_result"]
+                    st.rerun()
 
         with st.expander({"en":"➕ Add Profile","fr":"➕ Ajouter un profil","sw":"➕ Ongeza Wasifu"}.get(_lang_key(),"➕ Add Profile"),expanded=not st.session_state.students):
             c1,c2=st.columns(2)
