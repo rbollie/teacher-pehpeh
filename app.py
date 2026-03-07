@@ -4042,6 +4042,41 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                     _savg3 = _sd3["score"].mean()
                     _data_for_ai.append(f"  • {_sname}: scores [{_scores_seq}], avg {_savg3:.0f}/100, subjects: {', '.join(_sd3['subject'].unique())}")
 
+                # Build subject-over-time trend summary for AI
+                _ai_trend_lines = []
+                try:
+                    _ai_ts = _df.copy()
+                    _ai_ts["date"] = pd.to_datetime(_ai_ts["date"], errors="coerce")
+                    _ai_ts = _ai_ts.dropna(subset=["date"]).sort_values("date")
+                    for _ais in sorted(_ai_ts["subject"].unique()):
+                        _ais_df = _ai_ts[_ai_ts["subject"]==_ais].groupby("date")["score"].mean().round(1)
+                        _pts = " → ".join(f"{v}" for v in _ais_df.values)
+                        _dir = ("↑ improving" if len(_ais_df)>1 and _ais_df.iloc[-1]>_ais_df.iloc[0]
+                                else ("↓ declining" if len(_ais_df)>1 and _ais_df.iloc[-1]<_ais_df.iloc[0] else "→ flat"))
+                        _ai_trend_lines.append(f"  • {_ais}: {_pts} ({_dir})")
+                except Exception: pass
+
+                # Build family-context summary for AI
+                _ai_family_lines = []
+                try:
+                    _ai_stu_map = {s["name"]: s for s in (st.session_state.students or [])}
+                    _ai_combo_agg: dict = {}
+                    for _aist in _df["student"].unique():
+                        _aip = _ai_stu_map.get(_aist, {})
+                        _aim = (_aip.get("mom") or "Unknown").strip() or "Unknown"
+                        _ais2 = (_aip.get("sib") or "Unknown").strip() or "Unknown"
+                        _aia = _df[_df["student"]==_aist]["score"].mean()
+                        _ai_combo_agg.setdefault((_aim, _ais2), []).append(_aia)
+                    _mom_ord = ["No HS", "HS Grad", "Unknown"]
+                    _sib_ord = ["0-4", "5-8", "8+", "Unknown"]
+                    for (_acm, _acs), _acv in sorted(
+                        _ai_combo_agg.items(),
+                        key=lambda kv: (_mom_ord.index(kv[0][0]) if kv[0][0] in _mom_ord else 99,
+                                        _sib_ord.index(kv[0][1]) if kv[0][1] in _sib_ord else 99)):
+                        _aca = sum(_acv)/len(_acv)
+                        _ai_family_lines.append(f"  • Mom: {_acm} / Kids in home: {_acs} → avg {_aca:.1f}/100 ({len(_acv)} student{'s' if len(_acv)!=1 else ''})")
+                except Exception: pass
+
                 _ar_prompt = f"""You are an expert education analyst writing a formal Academic Performance Report for {_school_label}, Grade {_effective_grade}.
 
 CLASS DATA:
@@ -4049,14 +4084,21 @@ CLASS DATA:
 
 CLASS AVERAGE: {_avg_all:.1f}/100 | TREND: {_trend_icon} ({_trend_delta:+.1f} pts) | AT-RISK STUDENTS: {_below50} of {_n_students}
 
+SUBJECT SCORE TRENDS OVER TIME:
+{chr(10).join(_ai_trend_lines) if _ai_trend_lines else "  (No dated records available)"}
+
+FAMILY CONTEXT (Mom's Education × Kids in Home → Avg Score):
+{chr(10).join(_ai_family_lines) if _ai_family_lines else "  (No family profile data available)"}
+
 Write a structured academic report with these exact sections. Be objective, specific, data-driven, and constructive. Use teacher-friendly language:
 
 1. EXECUTIVE SUMMARY (3-4 sentences): Overall class performance, key highlight, and urgent concern if any.
-2. PERFORMANCE ANALYSIS: Objective analysis of score distribution, subject strengths vs weaknesses, and individual patterns worth noting.
-3. STUDENTS REQUIRING INTERVENTION: For each student below 50 avg, state their name, score pattern, and 2 specific offline interventions (no internet/YouTube). Suggest if foundational review at a lower grade level is warranted.
-4. COMMENDATIONS: Students performing well and what's working.
-5. RECOMMENDED ACTIONS FOR TEACHER: 3-5 concrete, actionable steps the teacher can take this week — all must be implementable without internet or special resources.
-6. LOOKING AHEAD: 2-3 forward-looking recommendations to sustain or improve class performance next term.
+2. PERFORMANCE ANALYSIS: Objective analysis of score distribution, subject strengths vs weaknesses, individual patterns, and notable subject trends over time.
+3. FAMILY CONTEXT INSIGHTS: Analyze performance patterns by mom's education level and number of children in the home. Note which family profiles correlate with stronger or weaker outcomes and suggest culturally appropriate support strategies.
+4. STUDENTS REQUIRING INTERVENTION: For each student below 50 avg, state their name, score pattern, and 2 specific offline interventions (no internet/YouTube). Suggest if foundational review at a lower grade level is warranted.
+5. COMMENDATIONS: Students performing well and what's working.
+6. RECOMMENDED ACTIONS FOR TEACHER: 3-5 concrete, actionable steps the teacher can take this week — all must be implementable without internet or special resources.
+7. LOOKING AHEAD: 2-3 forward-looking recommendations to sustain or improve class performance next term.
 
 Be factual. Do not invent data. Keep each section focused and practical."""
 
@@ -4153,6 +4195,89 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                             _c.font = Font(color="FFFFFF", bold=(ci==4), size=10)
                             _c.fill = _rfill if ci==4 else _bg
                             _c.border = _bdr
+                    # ── Sheet 2: Subject Scores Over Time ─────────────────
+                    try:
+                        _ws2 = _rpt_wb.create_sheet("Subject Trend")
+                        _add_xl_logo_hdr(_ws2, 6)
+                        _ws2.merge_cells("A2:F2")
+                        _t2h = _ws2.cell(2,1,"Subject Scores Over Time")
+                        _t2h.font = Font(bold=True, color="8B1A1A", size=12)
+                        _t2h.alignment = Alignment(horizontal="center", vertical="center")
+                        _ts2_df = _df.copy()
+                        _ts2_df["date"] = pd.to_datetime(_ts2_df["date"], errors="coerce")
+                        _ts2_df = _ts2_df.dropna(subset=["date"]).sort_values("date")
+                        if not _ts2_df.empty:
+                            _ts2_agg = (_ts2_df.groupby(["date","subject"])["score"]
+                                        .mean().round(1).reset_index())
+                            _ts2_subjs = sorted(_ts2_agg["subject"].unique())
+                            _ws2.column_dimensions["A"].width = 14
+                            for _ci2, _sh in enumerate(_ts2_subjs, 2):
+                                _ws2.column_dimensions[chr(64+min(_ci2,26))].width = 16
+                            _hdr_cell(_ws2, 3, 1, "Date")
+                            for _ci2, _sh in enumerate(_ts2_subjs, 2):
+                                _hdr_cell(_ws2, 3, _ci2, _sh)
+                            _ts2_dates = sorted(_ts2_agg["date"].unique())
+                            for _ri2, _dt2 in enumerate(_ts2_dates, 4):
+                                _bg2 = PatternFill("solid", fgColor="1C2340") if _ri2%2==0 else _navy_fill
+                                _dc = _ws2.cell(_ri2, 1, str(_dt2)[:10])
+                                _dc.font = Font(color="FFFFFF", size=10); _dc.fill = _bg2; _dc.border = _bdr
+                                for _ci2, _sh in enumerate(_ts2_subjs, 2):
+                                    _row2 = _ts2_agg[(_ts2_agg["date"]==_dt2) & (_ts2_agg["subject"]==_sh)]
+                                    _sv2 = round(float(_row2["score"].iloc[0]),1) if not _row2.empty else ""
+                                    _sc2 = _ws2.cell(_ri2, _ci2, _sv2)
+                                    _sc2.font = Font(color="FFFFFF", size=10)
+                                    if isinstance(_sv2, float):
+                                        _sf2 = (_grn_fill if _sv2>=65
+                                                else (PatternFill("solid",fgColor="5C4000") if _sv2>=50
+                                                      else _red_fill))
+                                        _sc2.fill = _sf2
+                                    else:
+                                        _sc2.fill = _bg2
+                                    _sc2.border = _bdr
+                        else:
+                            _nc = _ws2.cell(4,1,"No dated grade records available.")
+                            _nc.font = Font(color="FFFFFF", italic=True)
+                    except Exception: pass
+
+                    # ── Sheet 3: Family Context (Mom's Edu × Kids) ────────
+                    try:
+                        _ws3 = _rpt_wb.create_sheet("Family Context")
+                        _add_xl_logo_hdr(_ws3, 5)
+                        _ws3.merge_cells("A2:E2")
+                        _t3h = _ws3.cell(2,1,"Avg Score by Mom's Education & Kids in Home")
+                        _t3h.font = Font(bold=True, color="8B1A1A", size=12)
+                        _t3h.alignment = Alignment(horizontal="center", vertical="center")
+                        for _col3, _w3 in zip(["A","B","C","D","E"],[22,16,14,14,22]):
+                            _ws3.column_dimensions[_col3].width = _w3
+                        _fam_hdrs = ["Mom's Education","Kids in Home","# Students","Avg Score","Performance Level"]
+                        for _ci3, _fh in enumerate(_fam_hdrs, 1): _hdr_cell(_ws3, 3, _ci3, _fh)
+                        _fam_map3: dict = {}
+                        _fam_stu_map = {s["name"]: s for s in (st.session_state.students or [])}
+                        for _fsn in _df["student"].unique():
+                            _fp = _fam_stu_map.get(_fsn, {})
+                            _fm = (_fp.get("mom") or "Unknown").strip() or "Unknown"
+                            _fs = (_fp.get("sib") or "Unknown").strip() or "Unknown"
+                            _fa = _df[_df["student"]==_fsn]["score"].mean()
+                            _fam_map3.setdefault((_fm, _fs), []).append(_fa)
+                        _fm_ord3 = ["No HS","HS Grad","Unknown"]
+                        _fs_ord3 = ["0-4","5-8","8+","Unknown"]
+                        _fam_rows3 = sorted(_fam_map3.items(),
+                            key=lambda kv: (_fm_ord3.index(kv[0][0]) if kv[0][0] in _fm_ord3 else 99,
+                                            _fs_ord3.index(kv[0][1]) if kv[0][1] in _fs_ord3 else 99))
+                        for _ri3, ((_fcm, _fcs), _fcv) in enumerate(_fam_rows3, 4):
+                            _fca = round(sum(_fcv)/len(_fcv), 1)
+                            _flvl = "On Track" if _fca>=65 else ("Monitor" if _fca>=50 else "Intervention")
+                            _fbg3 = PatternFill("solid", fgColor="1C2340") if _ri3%2==0 else _navy_fill
+                            _fscore_fill = (_grn_fill if _fca>=65
+                                            else (PatternFill("solid",fgColor="5C4000") if _fca>=50
+                                                  else _red_fill))
+                            for _ci3v, _fval in enumerate([_fcm, _fcs, len(_fcv), _fca, _flvl], 1):
+                                _fc3 = _ws3.cell(_ri3, _ci3v, _fval)
+                                _fc3.font = Font(color="FFFFFF", bold=(_ci3v==4), size=10)
+                                _fc3.fill = _fscore_fill if _ci3v in (4,5) else _fbg3
+                                _fc3.border = _bdr
+                    except Exception: pass
+
                     _rpt_buf = io.BytesIO(); _rpt_wb.save(_rpt_buf); _rpt_buf.seek(0)
                     st.download_button("📊 Download Excel (.xlsx)", data=_rpt_buf.getvalue(),
                         file_name=f"grades_{(_school_label or 'class').replace(' ','_')}_{_ardt.datetime.now().strftime('%Y%m%d')}.xlsx",
