@@ -3817,176 +3817,108 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
             _below50 = _df[_df["score"] < 50]["student"].nunique()
             _at_risk_pct = (_below50 / max(1, _n_students)) * 100
 
-            # ══════════════════════════════════════════════════════════════
-            # ── TOP CHARTS: Demographic & Subject Performance Overview ─────
-            # ══════════════════════════════════════════════════════════════
-            st.markdown('<div style="color:#D4A843;font-weight:800;font-size:1rem;margin:4px 0 10px;letter-spacing:.4px">📊 CLASS PERFORMANCE OVERVIEW</div>', unsafe_allow_html=True)
-
-            _tc1, _tc2, _tc3 = st.columns(3)
-
-            # ── Chart 1: Pie — Class performance color-coded by SUBJECT ───
-            with _tc1:
-                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.88rem;margin-bottom:4px">🥧 Performance by Subject</div>', unsafe_allow_html=True)
-                try:
-                    import plotly.graph_objects as _pgo
-                    # Distinct color palette per subject (not by status)
-                    _SUBJ_PALETTE = [
-                        "#D4A843","#3498DB","#2ECC71","#E74C3C","#9B59B6",
-                        "#1ABC9C","#E67E22","#F39C12","#EC407A","#26C6DA",
-                        "#8BC34A","#FF7043","#AB47BC","#42A5F5","#66BB6A",
-                    ]
-                    _pie_subjs = sorted(_df["subject"].unique())
-                    _pie_labels, _pie_vals, _pie_colors = [], [], []
-                    for _pi, _ps in enumerate(_pie_subjs):
-                        _ps_avg = _df[_df["subject"]==_ps]["score"].mean()
-                        _pie_labels.append(f"{_ps}<br><b>{_ps_avg:.1f}</b>")
-                        _pie_vals.append(round(_ps_avg, 1))
-                        _pie_colors.append(_SUBJ_PALETTE[_pi % len(_SUBJ_PALETTE)])
-                    _pie_fig = _pgo.Figure(data=[_pgo.Pie(
-                        labels=_pie_labels,
-                        values=_pie_vals,
-                        marker=dict(colors=_pie_colors, line=dict(color="#0a0e1a", width=2)),
-                        textinfo="label+percent",
-                        textfont=dict(size=10),
-                        hovertemplate="<b>%{label}</b><br>Avg Score: %{value}/100<br>Share: %{percent}<extra></extra>",
-                        hole=0.38,
-                        pull=[0.03]*len(_pie_subjs),
-                    )])
-                    _pie_fig.update_layout(
-                        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                        font=dict(color="#D0D8E8", size=10),
-                        margin=dict(t=8, b=8, l=8, r=8),
-                        legend=dict(
-                            font=dict(size=9, color="#D0D8E8"),
-                            bgcolor="rgba(0,0,0,0)",
-                            orientation="v", x=1.02, y=0.5,
-                        ),
-                        showlegend=True, height=310,
-                        annotations=[dict(
-                            text=f"<b>{_avg_all:.1f}</b><br>Class<br>Avg",
-                            x=0.5, y=0.5, font=dict(size=11, color="#D4A843"),
-                            showarrow=False,
-                        )],
-                    )
-                    st.plotly_chart(_pie_fig, use_container_width=True)
-                except Exception as _pe:
-                    _sb = {s: _df[_df["subject"]==s]["score"].mean() for s in _df["subject"].unique()}
-                    st.bar_chart(pd.Series(_sb, name="Avg Score"))
-
-            # ── Chart 2: Bar — Mom's Education Level vs Student Performance ─
-            with _tc2:
-                st.markdown("<div style=\"color:#D4A843;font-weight:700;font-size:.88rem;margin-bottom:4px\">📚 Mom's Education vs Performance</div>", unsafe_allow_html=True)
-                try:
-                    import plotly.graph_objects as _pgo2
-                    _stu_profile = {s["name"]: s for s in (st.session_state.students or [])}
-                    _mom_data = {}  # mom_edu → list of avg scores
-                    for _sn in _df["student"].unique():
-                        _prof = _stu_profile.get(_sn, {})
-                        _mom_v = (_prof.get("mom") or "Unknown").strip() or "Unknown"
-                        _avg_v = _df[_df["student"]==_sn]["score"].mean()
-                        _mom_data.setdefault(_mom_v, []).append(_avg_v)
-                    if _mom_data:
-                        # Sort by a sensible education order if recognizable, else alphabetical
-                        _edu_order = ["None","Primary","Elementary","Middle","Junior High",
-                                      "High School","Vocational","Some College","College",
-                                      "University","Bachelor","Bachelor's","Bachelors",
-                                      "Graduate","Master","Master's","Masters","PhD","Unknown"]
-                        def _edu_key(x):
-                            xu = x.strip().title()
-                            for i, e in enumerate(_edu_order):
-                                if xu.lower() == e.lower(): return i
-                            return 99
-                        _mom_cats  = sorted(_mom_data.keys(), key=_edu_key)
-                        _mom_avgs  = [sum(_mom_data[c])/len(_mom_data[c]) for c in _mom_cats]
-                        _mom_cnts  = [len(_mom_data[c]) for c in _mom_cats]
-                        _mom_clrs  = ["#2ECC71" if v>=65 else ("#F1C40F" if v>=50 else "#E74C3C") for v in _mom_avgs]
-                        _mbar_fig = _pgo2.Figure(data=[_pgo2.Bar(
-                            x=_mom_cats, y=_mom_avgs,
-                            text=[f"{v:.1f}" for v in _mom_avgs],
-                            textposition="outside",
-                            textfont=dict(color="#D0D8E8", size=10),
-                            marker_color=_mom_clrs,
-                            marker_line=dict(color="#0a0e1a", width=1.5),
-                            customdata=_mom_cnts,
-                            hovertemplate="<b>%{x}</b><br>Avg Score: %{y:.1f}/100<br>Students: %{customdata}<extra></extra>",
-                        )])
-                        _mbar_fig.add_hline(y=65, line_dash="dot", line_color="#2ECC71",
-                                            annotation_text="On Track (65)", annotation_font=dict(color="#2ECC71", size=9))
-                        _mbar_fig.add_hline(y=50, line_dash="dot", line_color="#F1C40F",
-                                            annotation_text="Pass (50)", annotation_font=dict(color="#F1C40F", size=9))
-                        _mbar_fig.update_layout(
-                            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                            font=dict(color="#D0D8E8", size=10),
-                            xaxis=dict(title="Mother's Education Level", color="#D0D8E8",
-                                       tickangle=-30, gridcolor="rgba(255,255,255,.05)"),
-                            yaxis=dict(title="Avg Score /100", range=[0, 110], color="#D0D8E8",
-                                       gridcolor="rgba(255,255,255,.1)"),
-                            margin=dict(t=20, b=60, l=10, r=10), height=310,
-                        )
-                        st.plotly_chart(_mbar_fig, use_container_width=True)
-                    else:
-                        st.caption("No mother's education data. Add student profiles in the Students tab.")
-                except Exception as _me:
-                    st.caption(f"Chart unavailable: {_me}")
-
-            # ── Chart 3: Bar — Kids in Home (Family Size) vs Performance ──
-            with _tc3:
-                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.88rem;margin-bottom:4px">👨‍👩‍👧‍👦 Kids in Home vs Performance</div>', unsafe_allow_html=True)
-                try:
-                    import plotly.graph_objects as _pgo3
-                    _stu_profile2 = {s["name"]: s for s in (st.session_state.students or [])}
-                    _sib_data = {}  # sib_group → list of avg scores
-                    for _sn2 in _df["student"].unique():
-                        _prof2 = _stu_profile2.get(_sn2, {})
-                        _sib_raw = (_prof2.get("sib") or "Unknown").strip() or "Unknown"
-                        _avg_v2 = _df[_df["student"]==_sn2]["score"].mean()
-                        _sib_data.setdefault(_sib_raw, []).append(_avg_v2)
-                    if _sib_data:
-                        # Sort sib categories: numeric-first groups, then Unknown
-                        def _sib_sort(x):
-                            try: return (0, int(x.split("-")[0].replace("≤","").replace("<","").strip()))
-                            except: return (1, x)
-                        _sib_cats  = sorted(_sib_data.keys(), key=_sib_sort)
-                        _sib_avgs  = [sum(_sib_data[c])/len(_sib_data[c]) for c in _sib_cats]
-                        _sib_cnts  = [len(_sib_data[c]) for c in _sib_cats]
-                        _sib_clrs  = ["#2ECC71" if v>=65 else ("#F1C40F" if v>=50 else "#E74C3C") for v in _sib_avgs]
-                        _sbar_fig = _pgo3.Figure(data=[_pgo3.Bar(
-                            x=_sib_cats, y=_sib_avgs,
-                            text=[f"{v:.1f}" for v in _sib_avgs],
-                            textposition="outside",
-                            textfont=dict(color="#D0D8E8", size=10),
-                            marker_color=_sib_clrs,
-                            marker_line=dict(color="#0a0e1a", width=1.5),
-                            customdata=_sib_cnts,
-                            hovertemplate="<b>%{x} kids</b><br>Avg Score: %{y:.1f}/100<br>Students: %{customdata}<extra></extra>",
-                        )])
-                        _sbar_fig.add_hline(y=65, line_dash="dot", line_color="#2ECC71",
-                                            annotation_text="On Track (65)", annotation_font=dict(color="#2ECC71", size=9))
-                        _sbar_fig.add_hline(y=50, line_dash="dot", line_color="#F1C40F",
-                                            annotation_text="Pass (50)", annotation_font=dict(color="#F1C40F", size=9))
-                        _sbar_fig.update_layout(
-                            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                            font=dict(color="#D0D8E8", size=10),
-                            xaxis=dict(title="# Children in Home", color="#D0D8E8",
-                                       gridcolor="rgba(255,255,255,.05)"),
-                            yaxis=dict(title="Avg Score /100", range=[0, 110], color="#D0D8E8",
-                                       gridcolor="rgba(255,255,255,.1)"),
-                            margin=dict(t=20, b=40, l=10, r=10), height=310,
-                        )
-                        st.plotly_chart(_sbar_fig, use_container_width=True)
-                    else:
-                        st.caption("No family size data. Add student profiles in the Students tab.")
-                except Exception as _se:
-                    st.caption(f"Chart unavailable: {_se}")
-
-            st.markdown("<hr style='border:1px solid rgba(212,168,67,.2);margin:10px 0'>", unsafe_allow_html=True)
-
-            # ── Class summary metrics ──────────────────────────────────────
             _ma1, _ma2, _ma3, _ma4 = st.columns(4)
             with _ma1: st.metric("Class Average", f"{_avg_all:.1f}/100")
             with _ma2: st.metric("Grade Trend", f"{_trend_icon} {abs(_trend_delta):.1f} pts", delta=f"+{_trend_delta:.1f}" if _trend_delta > 0 else f"{_trend_delta:.1f}")
             with _ma3: st.metric("Total Records", _n_records)
             with _ma4: st.metric("Need Intervention", f"{_below50} student{'s' if _below50!=1 else ''}", delta=f"{_at_risk_pct:.0f}% of class", delta_color="inverse")
+
+            # ── Visual summaries: Subject bar + Mom Edu bar ───────────────
+            _chart_col1, _chart_col2 = st.columns(2)
+
+            # ── Bar chart: Average score per subject (distinct color per bar) ─
+            with _chart_col1:
+                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin-bottom:6px">📊 Avg Score by Subject</div>', unsafe_allow_html=True)
+                try:
+                    import altair as _alt
+                    _SUBJ_PALETTE = [
+                        "#4E79A7","#F28E2B","#E15759","#76B7B2","#59A14F",
+                        "#EDC948","#B07AA1","#FF9DA7","#9C755F","#BAB0AC",
+                        "#D4A843","#2ECC71","#E74C3C","#3498DB","#9B59B6",
+                    ]
+                    _subj_rows2 = []
+                    for _ii, _ss in enumerate(sorted(_df["subject"].unique())):
+                        _ss_avg = _df[_df["subject"]==_ss]["score"].mean()
+                        _ss_status = ("Intervention" if _ss_avg < 50
+                                      else ("Monitor" if _ss_avg < 65 else "On Track"))
+                        _subj_rows2.append({
+                            "Subject": _ss,
+                            "Avg Score": round(_ss_avg, 1),
+                            "Status": _ss_status,
+                            "Color": _SUBJ_PALETTE[_ii % len(_SUBJ_PALETTE)],
+                        })
+                    _subj_df2 = pd.DataFrame(_subj_rows2)
+                    _color_scale2 = _alt.Scale(
+                        domain=_subj_df2["Subject"].tolist(),
+                        range=_subj_df2["Color"].tolist(),
+                    )
+                    _subj_chart = (
+                        _alt.Chart(_subj_df2)
+                        .mark_bar(cornerRadiusTopLeft=3, cornerRadiusTopRight=3)
+                        .encode(
+                            x=_alt.X("Subject:N", sort="-y", axis=_alt.Axis(labelAngle=-30, labelColor="#D0D8E8", titleColor="#D0D8E8"), title="Subject"),
+                            y=_alt.Y("Avg Score:Q", scale=_alt.Scale(domain=[0, 100]), axis=_alt.Axis(labelColor="#D0D8E8", titleColor="#D0D8E8"), title="Avg Score"),
+                            color=_alt.Color("Subject:N", scale=_color_scale2, legend=None),
+                            tooltip=[_alt.Tooltip("Subject:N"), _alt.Tooltip("Avg Score:Q", format=".1f"), _alt.Tooltip("Status:N")],
+                        )
+                        .properties(height=260, background="transparent")
+                        .configure_axis(gridColor="rgba(255,255,255,0.08)", domainColor="#444", tickColor="#444")
+                        .configure_view(strokeWidth=0)
+                    )
+                    st.altair_chart(_subj_chart, use_container_width=True)
+                except Exception as _pe:
+                    _sb = {s: round(_df[_df["subject"]==s]["score"].mean(), 1) for s in sorted(_df["subject"].unique())}
+                    st.bar_chart(pd.Series(_sb, name="Avg Score"))
+
+            # ── Bar chart: Performance by mom's education ─────────────────
+            with _chart_col2:
+                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin-bottom:6px">📚 Avg Score by Mom\'s Education</div>', unsafe_allow_html=True)
+                try:
+                    import altair as _alt2
+                    _stu_profile2 = {s["name"]: s for s in (st.session_state.students or [])}
+                    _mom_data = {}   # mom_edu → list of avg scores
+                    for _sname2 in _df["student"].unique():
+                        _prof2 = _stu_profile2.get(_sname2, {})
+                        _mom_v = (_prof2.get("mom") or "Unknown").strip() or "Unknown"
+                        _avg_v2 = _df[_df["student"]==_sname2]["score"].mean()
+                        _mom_data.setdefault(_mom_v, []).append(_avg_v2)
+                    if _mom_data:
+                        # Sort by education progression
+                        _mom_order = ["No HS", "HS Grad", "Unknown"]
+                        _mom_cats = sorted(_mom_data.keys(), key=lambda x: _mom_order.index(x) if x in _mom_order else 99)
+                        _mom_rows = []
+                        for _mc in _mom_cats:
+                            _ma = sum(_mom_data[_mc]) / len(_mom_data[_mc])
+                            _mom_rows.append({
+                                "Education": _mc,
+                                "Avg Score": round(_ma, 1),
+                                "Students": len(_mom_data[_mc]),
+                                "Status": ("Intervention" if _ma < 50 else ("Monitor" if _ma < 65 else "On Track")),
+                                "Color": ("#2ECC71" if _ma >= 65 else ("#F1C40F" if _ma >= 50 else "#E74C3C")),
+                            })
+                        _mom_df = pd.DataFrame(_mom_rows)
+                        _mom_color_scale = _alt2.Scale(
+                            domain=_mom_df["Education"].tolist(),
+                            range=_mom_df["Color"].tolist(),
+                        )
+                        _mom_chart = (
+                            _alt2.Chart(_mom_df)
+                            .mark_bar(cornerRadiusTopLeft=3, cornerRadiusTopRight=3)
+                            .encode(
+                                x=_alt2.X("Education:N", sort=_mom_cats, axis=_alt2.Axis(labelAngle=-20, labelColor="#D0D8E8", titleColor="#D0D8E8"), title="Mom's Education"),
+                                y=_alt2.Y("Avg Score:Q", scale=_alt2.Scale(domain=[0, 100]), axis=_alt2.Axis(labelColor="#D0D8E8", titleColor="#D0D8E8"), title="Avg Score"),
+                                color=_alt2.Color("Education:N", scale=_mom_color_scale, legend=None),
+                                tooltip=[_alt2.Tooltip("Education:N"), _alt2.Tooltip("Avg Score:Q", format=".1f"), _alt2.Tooltip("Students:Q")],
+                            )
+                            .properties(height=260, background="transparent")
+                            .configure_axis(gridColor="rgba(255,255,255,0.08)", domainColor="#444", tickColor="#444")
+                            .configure_view(strokeWidth=0)
+                        )
+                        st.altair_chart(_mom_chart, use_container_width=True)
+                    else:
+                        st.caption("No student profile data yet. Add students with Mom's Education details in the Students tab.")
+                except Exception as _be:
+                    st.caption(f"Chart unavailable: {_be}")
 
             # ── Per-subject breakdown ──────────────────────────────────────
             if _n_subjects > 1:
