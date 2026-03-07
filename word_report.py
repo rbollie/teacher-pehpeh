@@ -48,11 +48,15 @@ def generate_academic_word_report(grade_history, students, school_label, grade_l
             p.paragraph_format.space_before = Pt(0); p.paragraph_format.space_after = Pt(2)
 
         def _heading(text, level=1, color=(139,26,26)):
-            p = doc.add_heading(text, level=level)
-            p.paragraph_format.space_before = Pt(8); p.paragraph_format.space_after = Pt(3)
-            sz = Pt(12) if level == 1 else Pt(11)
-            for run in p.runs:
-                run.font.color.rgb = RGBColor(*color); run.font.bold = True; run.font.size = sz
+            # Use plain paragraph with explicit formatting to avoid
+            # Word heading-style spacing overrides
+            p = doc.add_paragraph()
+            p.paragraph_format.space_before = Pt(8 if level == 1 else 6)
+            p.paragraph_format.space_after  = Pt(3)
+            sz = Pt(13) if level == 1 else Pt(11)
+            run = p.add_run(text)
+            run.bold = True; run.font.size = sz
+            run.font.color.rgb = RGBColor(*color)
             return p
 
         # 3-col logo header
@@ -139,18 +143,23 @@ def generate_academic_word_report(grade_history, students, school_label, grade_l
                 prev_blank = False
                 clean = stripped.replace("**","").replace("__","")
 
-                # Markdown heading ##
+                # Markdown heading
                 if stripped.startswith("## ") or stripped.startswith("### "):
-                    ph = _heading(stripped.lstrip("#").strip(), level=2, color=(13,59,140))
+                    _heading(stripped.lstrip("#").strip(), level=2, color=(13,59,140))
                 elif stripped.startswith("# "):
                     _heading(stripped.lstrip("#").strip(), level=1, color=(139,26,26))
 
                 # Numbered section header e.g. "1. TITLE" or "1) ..."
                 elif (len(stripped) > 2 and stripped[0].isdigit() and stripped[1] in ".):" and stripped[2:].strip()) or \
                      (len(stripped) > 3 and stripped[:2].isdigit() and stripped[2] in ".):"):
-                    ph = doc.add_heading(clean, level=2)
-                    ph.paragraph_format.space_before = Pt(8); ph.paragraph_format.space_after = Pt(2)
-                    for run in ph.runs: run.font.color.rgb = RGBColor(139,26,26); run.font.size = Pt(11)
+                    # Use plain bold paragraph — NOT doc.add_heading() which inherits
+                    # unpredictable Word style spacing that overrides our settings
+                    ph = doc.add_paragraph()
+                    ph.paragraph_format.space_before = Pt(7)
+                    ph.paragraph_format.space_after  = Pt(2)
+                    pr = ph.add_run(clean)
+                    pr.bold = True; pr.font.size = Pt(11)
+                    pr.font.color.rgb = RGBColor(139,26,26)
 
                 # Bullet
                 elif stripped[:2] in ("- ","* ","• "):
@@ -158,11 +167,14 @@ def generate_academic_word_report(grade_history, students, school_label, grade_l
                     bp.paragraph_format.space_before = Pt(1); bp.paragraph_format.space_after = Pt(1)
                     for run in bp.runs: run.font.size = Pt(10)
 
-                # ALL-CAPS label
+                # ALL-CAPS label (e.g. "RISK PROFILE SUMMARY:")
                 elif clean == clean.upper() and len(clean) > 4:
-                    ph = doc.add_heading(clean.rstrip(":"), level=2)
-                    ph.paragraph_format.space_before = Pt(8); ph.paragraph_format.space_after = Pt(2)
-                    for run in ph.runs: run.font.color.rgb = RGBColor(139,26,26); run.font.size = Pt(11)
+                    ph = doc.add_paragraph()
+                    ph.paragraph_format.space_before = Pt(7)
+                    ph.paragraph_format.space_after  = Pt(2)
+                    pr = ph.add_run(clean.rstrip(":"))
+                    pr.bold = True; pr.font.size = Pt(11)
+                    pr.font.color.rgb = RGBColor(139,26,26)
 
                 # Body
                 else:
