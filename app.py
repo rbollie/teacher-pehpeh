@@ -4854,27 +4854,30 @@ document.getElementById('submit-btn').disabled = true;
                     _wi_bench6 = _IBT_BENCH_C.get(_wi_subj6, _IBT_AVG_C)
                     _s_cur6, _ = _ibt_status_c(_wi_cur_c, _wi_subj6, _sel_grade)
                     _s_proj6, _ = _ibt_status_c(_wi_proj_c, _wi_subj6, _sel_grade)
+                    _wi_gap_bench = _wi_proj_c - _wi_bench6   # positive = above bench, negative = below
+                    _wi_gap_color = "#4CAF50" if _wi_gap_bench >= 0 else "#EF5350"
                     _wi_info = (
-                        f'<div><span style="color:#8899BB;font-size:.78rem">Current (curved)</span><br>'
-                        f'<span style="color:#D4A843;font-weight:700;font-size:1.1rem">{_wi_cur_c:.1f}</span> '
-                        f'<span style="font-size:.78rem">{_s_cur6}</span></div>'
+                        # Current shows RAW score (what the teacher/student actually sees)
+                        f'<div><span style="color:#8899BB;font-size:.78rem">Current (raw)</span><br>'
+                        f'<span style="color:#D4A843;font-weight:700;font-size:1.1rem">{_wi_cur_raw:.1f}</span> '
+                        f'<span style="color:#8899BB;font-size:.72rem">→ {_wi_cur_c:.1f} curved</span></div>'
                         f'<div><span style="color:#8899BB;font-size:.78rem">→ Projected</span><br>'
                         f'<span style="color:#4CAF50;font-weight:700;font-size:1.1rem">{_wi_proj_c:.1f}</span> '
                         f'<span style="font-size:.78rem">{_s_proj6}</span></div>'
                         f'<div><span style="color:#8899BB;font-size:.78rem">IBT bench</span><br>'
                         f'<span style="color:#3B6DC4;font-weight:700;font-size:1.1rem">{_wi_bench6:.1f}</span></div>'
+                        # Gap to IBT bench always shown (+ above, − below) for everyone
+                        f'<div><span style="color:#8899BB;font-size:.78rem">Gap to IBT bench</span><br>'
+                        f'<span style="color:{_wi_gap_color};font-weight:700;font-size:1.1rem">{_wi_gap_bench:+.1f}</span></div>'
                     )
                     if _sel_is_12:
                         _wi_wprob6 = min(100, max(0, (_wi_proj_c - _IBT_ATRISK_C) / (_IBT_WASSCE_C - _IBT_ATRISK_C) * 100))
+                        _wi_gap_wassce = _wi_proj_c - _IBT_WASSCE_C
                         _wi_info += (
+                            f'<div><span style="color:#8899BB;font-size:.78rem">Gap to WASSCE</span><br>'
+                            f'<span style="color:{"#4CAF50" if _wi_gap_wassce>=0 else "#EF5350"};font-weight:700;font-size:1.1rem">{_wi_gap_wassce:+.1f}</span></div>'
                             f'<div><span style="color:#8899BB;font-size:.78rem">WASSCE readiness</span><br>'
                             f'<span style="color:{"#4CAF50" if _wi_wprob6>=70 else "#FFA726" if _wi_wprob6>=40 else "#EF5350"};font-weight:700;font-size:1.1rem">{_wi_wprob6:.0f}%</span></div>'
-                        )
-                    else:
-                        _wi_gap_bench = _wi_proj_c - _wi_bench6
-                        _wi_info += (
-                            f'<div><span style="color:#8899BB;font-size:.78rem">Gap to IBT bench</span><br>'
-                            f'<span style="color:{"#4CAF50" if _wi_gap_bench>=0 else "#FFA726"};font-weight:700;font-size:1.1rem">{_wi_gap_bench:+.1f}</span></div>'
                         )
                     st.markdown(
                         f'<div style="background:#0D1B2A;border:1px solid #1E3A6A;border-radius:10px;padding:12px 16px">'
