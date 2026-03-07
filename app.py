@@ -3969,7 +3969,8 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                     _word_bytes = generate_academic_word_report(
                         _gh, st.session_state.students,
                         _school_label, _effective_grade,
-                        st.session_state.get(_analysis_key, "")
+                        st.session_state.get(_analysis_key, ""),
+                        subject_data=st.session_state.get("_ar_subject_data")
                     )
                     _word_fname = f"IBT_Academic_Report_{(_school_label or 'class').replace(' ','_')}_{_ardt.datetime.now().strftime('%Y%m%d')}.docx"
                     st.download_button("📄 Download Word Report (.docx)", data=_word_bytes,
@@ -5591,7 +5592,8 @@ Be specific, data-driven, and compassionate."""
                             _ibt_word6 = generate_academic_word_report(
                                 _gh6, _stu6,
                                 st.session_state.get("_classroom_label", school_name or "IBT School"),
-                                _grade_en, st.session_state.get("ar_analysis_text", ""))
+                                _grade_en, st.session_state.get("ar_analysis_text", ""),
+                                subject_data=st.session_state.get("_ar_subject_data"))
                             st.download_button("📄 Download Word Report (.docx)", data=_ibt_word6,
                                 file_name=f"IBT_Report_{_idt6.datetime.now().strftime('%Y%m%d')}.docx",
                                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
