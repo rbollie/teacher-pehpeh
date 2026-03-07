@@ -4626,15 +4626,34 @@ document.getElementById('submit-btn').disabled = true;
             def _sqrt_curve(raw):
                 """Apply sqrt curve: curved = sqrt(raw/100)*100"""
                 return _imath.sqrt(max(0.0, float(raw)) / 100.0) * 100.0
-            def _ibt_status_c(score, subj=None):
+            def _is_12th(grade_str):
+                """True if grade string indicates 12th grade or WASSCE prep."""
+                gs = str(grade_str or "").lower()
+                return "12" in gs or "wassce" in gs
+
+            def _ibt_status_c(score, subj=None, grade=None):
+                """
+                Status relative to IBT curved benchmarks.
+                WASSCE readiness tier (🟢 On Target at ≥70.7) only applies to 12th grade.
+                All other grades use the IBT subject benchmark as the ceiling for ✅ status.
+                """
                 bench = _IBT_BENCH_C.get(subj, _IBT_AVG_C) if subj else _IBT_AVG_C
-                if score >= _IBT_EXCELLENT_C: return "⭐ Excellent",   "#1B5E20"
-                if score >= _IBT_WASSCE_C:    return "🟢 On Target",   "#2E7D32"
-                if score >= bench:            return "🔵 At IBT Avg",  "#0D47A1"
-                if score >= _IBT_ATRISK_C:    return "🟡 Monitor",     "#E65100"
-                return "🔴 Intervention", "#8B1A1A"
-            def _ibt_card_c(col, label, value, benchmark):
-                stat, bg = _ibt_status_c(value, label)
+                if _is_12th(grade):
+                    # 12th grade: full ladder including WASSCE readiness
+                    if score >= _IBT_EXCELLENT_C: return "⭐ Excellent",   "#1B5E20"
+                    if score >= _IBT_WASSCE_C:    return "🟢 WASSCE Ready","#2E7D32"
+                    if score >= bench:            return "🔵 At IBT Avg",  "#0D47A1"
+                    if score >= _IBT_ATRISK_C:    return "🟡 Monitor",     "#E65100"
+                    return "🔴 Intervention", "#8B1A1A"
+                else:
+                    # Non-12th: IBT benchmark is the target; no WASSCE tier shown
+                    if score >= _IBT_EXCELLENT_C: return "⭐ Above Bench", "#1B5E20"
+                    if score >= bench:            return "🟢 At IBT Avg",  "#2E7D32"
+                    if score >= _IBT_ATRISK_C:    return "🟡 Monitor",     "#E65100"
+                    return "🔴 Intervention", "#8B1A1A"
+
+            def _ibt_card_c(col, label, value, benchmark, grade=None):
+                stat, bg = _ibt_status_c(value, label, grade)
                 delta = value - benchmark
                 col.markdown(
                     f'<div style="background:{bg}22;border:1px solid {bg};border-radius:10px;'
@@ -4656,8 +4675,9 @@ document.getElementById('submit-btn').disabled = true;
                 '<div style="color:#D4A843;font-size:1.1rem;font-weight:800">📈 IBT INTERVENTION ANALYSIS ENGINE</div>'
                 '<div style="color:#D0D8E8;font-size:.85rem;margin-top:4px">'
                 'Compares your class (√-curved) against IBT 8-year research dataset · '
-                'WASSCE target: <b>70.7</b> · At-risk: <b>61.2</b> · IBT curved avg: <b>64.0</b> · '
-                '<span style="color:#D4A84399;font-size:.78rem">Sqrt curve: all raw scores → √(raw/100)×100 before comparison</span>'
+                'IBT avg: <b>64.0</b> · At-risk: <b>&lt;61.2</b> · '
+                '<span style="color:#D4A843">WASSCE readiness (≥70.7) shown for 12th grade only</span> · '
+                'All grades compared to IBT subject benchmarks'
                 '</div>'
                 '</div>', unsafe_allow_html=True)
 
@@ -4692,18 +4712,23 @@ document.getElementById('submit-btn').disabled = true;
                     _ca6 = _class_curved_avg(_sub6)
                     if _ca6 is not None:
                         _bench_rows6.append((_sub6, _ca6, _IBT_BENCH_C[_sub6]))
+                # Determine if class-level grade is 12th (for WASSCE display)
+                _cls_grade = _grade_en  # from sidebar/session
+                _cls_is_12 = _is_12th(_cls_grade)
                 if _bench_rows6:
                     _bc6 = st.columns(min(4, len(_bench_rows6)))
                     for _ci6, (_sub6, _ca6, _be6) in enumerate(_bench_rows6):
                         with _bc6[_ci6 % len(_bc6)]:
-                            _ibt_card_c(_bc6[_ci6 % len(_bc6)], _sub6, _ca6, _be6)
+                            _ibt_card_c(_bc6[_ci6 % len(_bc6)], _sub6, _ca6, _be6, grade=_cls_grade)
                 if PD and _bench_rows6:
-                    _trows6 = [{
-                        "Subject": s, "Class Avg (curved)": f"{ca:.1f}",
-                        "IBT Bench": f"{be:.1f}", "Gap": f"{ca-be:+.1f}",
-                        "Gap to WASSCE (70.7)": f"{ca-_IBT_WASSCE_C:+.1f}",
-                        "Status": _ibt_status_c(ca, s)[0]
-                    } for s, ca, be in _bench_rows6]
+                    _trows6 = []
+                    for s, ca, be in _bench_rows6:
+                        row = {"Subject": s, "Class Avg (curved)": f"{ca:.1f}",
+                               "IBT Bench": f"{be:.1f}", "Gap": f"{ca-be:+.1f}",
+                               "Status": _ibt_status_c(ca, s, _cls_grade)[0]}
+                        if _cls_is_12:
+                            row["Gap to WASSCE (70.7)"] = f"{ca-_IBT_WASSCE_C:+.1f}"
+                        _trows6.append(row)
                     st.dataframe(pd.DataFrame(_trows6), use_container_width=True, hide_index=True)
                 st.markdown("---")
 
@@ -4716,19 +4741,24 @@ document.getElementById('submit-btn').disabled = true;
                     for _sn6 in _all_stu6:
                         _s_scores = []
                         _s_detail = {}
+                        # Detect this student's grade from their grade records
+                        _sn_grades = [g.get("grade_level","") for g in _gh6 if g["student"]==_sn6]
+                        _sn_grade  = next((g for g in _sn_grades if g), _cls_grade)
+                        _sn_is_12  = _is_12th(_sn_grade)
                         for _sub6 in _all_subj6:
                             _sv = _stu_curved_avg(_sn6, _sub6)
                             if _sv is not None:
                                 _s_scores.append(_sv)
                                 _s_detail[_sub6] = _sv
                         _s_avg = sum(_s_scores) / len(_s_scores) if _s_scores else 0
-                        _s_stat, _ = _ibt_status_c(_s_avg)
-                        _s_gap_wassce = _s_avg - _IBT_WASSCE_C
-                        _s_gap_ibt    = _s_avg - _IBT_AVG_C
-                        _rank_row = {"Student": _sn6, "Curved Avg": round(_s_avg, 1),
+                        _s_stat, _ = _ibt_status_c(_s_avg, grade=_sn_grade)
+                        _s_gap_ibt = _s_avg - _IBT_AVG_C
+                        _rank_row = {"Student": _sn6, "Grade": _sn_grade or "—",
+                                     "Curved Avg": round(_s_avg, 1),
                                      "vs IBT Avg": f"{_s_gap_ibt:+.1f}",
-                                     "vs WASSCE": f"{_s_gap_wassce:+.1f}",
                                      "Status": _s_stat, "Subjects Tested": len(_s_scores)}
+                        if _sn_is_12:
+                            _rank_row["vs WASSCE"] = f"{_s_avg-_IBT_WASSCE_C:+.1f}"
                         for _sub6 in _all_subj6:
                             if _sub6 in _s_detail:
                                 _rank_row[_sub6[:8]] = round(_s_detail[_sub6], 1)
@@ -4736,11 +4766,12 @@ document.getElementById('submit-btn').disabled = true;
                     _rank_df = pd.DataFrame(_rank_rows).sort_values("Curved Avg", ascending=False).reset_index(drop=True)
                     _rank_df.index += 1
                     st.dataframe(_rank_df, use_container_width=True)
-                    _c_above = sum(1 for r in _rank_rows if r["Curved Avg"] >= _IBT_WASSCE_C)
+                    _c_above = sum(1 for r in _rank_rows if _is_12th(r["Grade"]) and r["Curved Avg"] >= _IBT_WASSCE_C)
                     _c_atrisk = sum(1 for r in _rank_rows if r["Curved Avg"] < _IBT_ATRISK_C)
+                    _c_12th   = sum(1 for r in _rank_rows if _is_12th(r["Grade"]))
                     _mc1, _mc2, _mc3, _mc4 = st.columns(4)
                     _mc1.metric("Class Curved Avg", f"{sum(r['Curved Avg'] for r in _rank_rows)/max(1,len(_rank_rows)):.1f}")
-                    _mc2.metric("WASSCE Ready (≥70.7)", f"{_c_above}/{len(_rank_rows)}")
+                    _mc2.metric(f"WASSCE Ready (12th, ≥70.7)", f"{_c_above}/{_c_12th}" if _c_12th else "N/A (no 12th)")
                     _mc3.metric("Need Intervention (<61.2)", f"{_c_atrisk}/{len(_rank_rows)}")
                     _mc4.metric("IBT Avg Ref", "64.0")
                 st.markdown("---")
@@ -4752,6 +4783,16 @@ document.getElementById('submit-btn').disabled = true;
                 _sel6    = st.selectbox("Select student:", _all_stu6, key="ibt_stu_sel6")
                 _sdata6  = _gmap6.get(_sel6, {})
                 _sprof6  = next((s for s in _stu6 if s.get("name") == _sel6), {})
+                # Detect this student's grade from their records; fall back to class grade
+                _sel_grade_recs = [g.get("grade_level","") for g in _gh6 if g["student"]==_sel6]
+                _sel_grade = next((g for g in _sel_grade_recs if g), _cls_grade)
+                _sel_is_12 = _is_12th(_sel_grade)
+                # Grade badge
+                _gbadge_color = "#D4A843" if _sel_is_12 else "#3B6DC4"
+                _gbadge_label = f"📋 {_sel_grade or 'Grade unknown'}" + (" — WASSCE eligible" if _sel_is_12 else " — IBT benchmark target")
+                st.markdown(f'<div style="background:{_gbadge_color}22;border:1px solid {_gbadge_color}55;border-radius:6px;'
+                            f'padding:5px 12px;margin-bottom:8px;font-size:.8rem;color:{_gbadge_color};font-weight:700">'
+                            f'{_gbadge_label}</div>', unsafe_allow_html=True)
                 if _sprof6:
                     _rf6 = []
                     if _sprof6.get("mom") == "No HS": _rf6.append("🔴 No HS mother")
@@ -4774,7 +4815,7 @@ document.getElementById('submit-btn').disabled = true;
                         _avg6 = _stu_curved_avg(_sel6, _sub6)
                         if _avg6 is not None:
                             with _sc6b[_ci6 % len(_sc6b)]:
-                                _ibt_card_c(_sc6b[_ci6 % len(_sc6b)], _sub6, _avg6, _IBT_BENCH_C.get(_sub6, _IBT_AVG_C))
+                                _ibt_card_c(_sc6b[_ci6 % len(_sc6b)], _sub6, _avg6, _IBT_BENCH_C.get(_sub6, _IBT_AVG_C), grade=_sel_grade)
                     # Per-subject raw vs curved table
                     _sdetail_rows = []
                     for _sub6 in _stu_subjs6:
@@ -4783,13 +4824,13 @@ document.getElementById('submit-btn').disabled = true;
                             _raw_avg = sum(_raw_scores) / len(_raw_scores)
                             _cur_avg = _sqrt_curve(_raw_avg)
                             _bench   = _IBT_BENCH_C.get(_sub6, _IBT_AVG_C)
-                            _sdetail_rows.append({
-                                "Subject": _sub6, "Raw Avg": f"{_raw_avg:.1f}",
-                                "Curved Avg": f"{_cur_avg:.1f}", "IBT Bench": f"{_bench:.1f}",
-                                "Gap": f"{_cur_avg - _bench:+.1f}",
-                                "WASSCE Gap": f"{_cur_avg - _IBT_WASSCE_C:+.1f}",
-                                "Status": _ibt_status_c(_cur_avg, _sub6)[0]
-                            })
+                            _row_d   = {"Subject": _sub6, "Raw Avg": f"{_raw_avg:.1f}",
+                                        "Curved Avg": f"{_cur_avg:.1f}", "IBT Bench": f"{_bench:.1f}",
+                                        "Gap": f"{_cur_avg - _bench:+.1f}",
+                                        "Status": _ibt_status_c(_cur_avg, _sub6, _sel_grade)[0]}
+                            if _sel_is_12:
+                                _row_d["WASSCE Gap"] = f"{_cur_avg - _IBT_WASSCE_C:+.1f}"
+                            _sdetail_rows.append(_row_d)
                     if PD and _sdetail_rows:
                         st.dataframe(pd.DataFrame(_sdetail_rows), use_container_width=True, hide_index=True)
                 st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
@@ -4811,12 +4852,9 @@ document.getElementById('submit-btn').disabled = true;
                     _wi_n     = max(1, len(_wi_raw6))
                     _wi_proj_c = (_wi_cur_c * _wi_n + _wi_tgt_c) / (_wi_n + 1)
                     _wi_bench6 = _IBT_BENCH_C.get(_wi_subj6, _IBT_AVG_C)
-                    _wi_wprob6 = min(100, max(0, (_wi_proj_c - _IBT_ATRISK_C) / (_IBT_WASSCE_C - _IBT_ATRISK_C) * 100))
-                    _s_cur6, _ = _ibt_status_c(_wi_cur_c, _wi_subj6)
-                    _s_proj6, _ = _ibt_status_c(_wi_proj_c, _wi_subj6)
-                    st.markdown(
-                        f'<div style="background:#0D1B2A;border:1px solid #1E3A6A;border-radius:10px;padding:12px 16px">'
-                        f'<div style="display:flex;gap:24px;flex-wrap:wrap">'
+                    _s_cur6, _ = _ibt_status_c(_wi_cur_c, _wi_subj6, _sel_grade)
+                    _s_proj6, _ = _ibt_status_c(_wi_proj_c, _wi_subj6, _sel_grade)
+                    _wi_info = (
                         f'<div><span style="color:#8899BB;font-size:.78rem">Current (curved)</span><br>'
                         f'<span style="color:#D4A843;font-weight:700;font-size:1.1rem">{_wi_cur_c:.1f}</span> '
                         f'<span style="font-size:.78rem">{_s_cur6}</span></div>'
@@ -4825,9 +4863,23 @@ document.getElementById('submit-btn').disabled = true;
                         f'<span style="font-size:.78rem">{_s_proj6}</span></div>'
                         f'<div><span style="color:#8899BB;font-size:.78rem">IBT bench</span><br>'
                         f'<span style="color:#3B6DC4;font-weight:700;font-size:1.1rem">{_wi_bench6:.1f}</span></div>'
-                        f'<div><span style="color:#8899BB;font-size:.78rem">WASSCE readiness</span><br>'
-                        f'<span style="color:{"#4CAF50" if _wi_wprob6>=70 else "#FFA726" if _wi_wprob6>=40 else "#EF5350"};font-weight:700;font-size:1.1rem">{_wi_wprob6:.0f}%</span></div>'
-                        f'</div></div>', unsafe_allow_html=True)
+                    )
+                    if _sel_is_12:
+                        _wi_wprob6 = min(100, max(0, (_wi_proj_c - _IBT_ATRISK_C) / (_IBT_WASSCE_C - _IBT_ATRISK_C) * 100))
+                        _wi_info += (
+                            f'<div><span style="color:#8899BB;font-size:.78rem">WASSCE readiness</span><br>'
+                            f'<span style="color:{"#4CAF50" if _wi_wprob6>=70 else "#FFA726" if _wi_wprob6>=40 else "#EF5350"};font-weight:700;font-size:1.1rem">{_wi_wprob6:.0f}%</span></div>'
+                        )
+                    else:
+                        _wi_gap_bench = _wi_proj_c - _wi_bench6
+                        _wi_info += (
+                            f'<div><span style="color:#8899BB;font-size:.78rem">Gap to IBT bench</span><br>'
+                            f'<span style="color:{"#4CAF50" if _wi_gap_bench>=0 else "#FFA726"};font-weight:700;font-size:1.1rem">{_wi_gap_bench:+.1f}</span></div>'
+                        )
+                    st.markdown(
+                        f'<div style="background:#0D1B2A;border:1px solid #1E3A6A;border-radius:10px;padding:12px 16px">'
+                        f'<div style="display:flex;gap:24px;flex-wrap:wrap">{_wi_info}</div></div>',
+                        unsafe_allow_html=True)
                 st.markdown("---")
 
                 # ╔══════════════════════════════════════════════════════════╗
@@ -4869,16 +4921,17 @@ document.getElementById('submit-btn').disabled = true;
                     _ibt_prompt6 = f"""You are an IBT education analyst. Write a structured IBT Intervention Report (sqrt-curved scale).
 
 STUDENT: {_sel6}
+GRADE: {_sel_grade or 'Unknown'} {'— WASSCE exam year' if _sel_is_12 else '— working toward IBT benchmark, not yet WASSCE eligible'}
 {_risk_ctx6}
 
 PERFORMANCE vs IBT CURVED BENCHMARKS (scale: 0–100 curved):
 {chr(10).join(_stu_sum6)}
 
-IBT RESEARCH (curved): Overall avg 64.0 | WASSCE pass 70.7 | At-risk <61.2 | School quality #1 predictor (F=8.60) | Computer access +4.1 pts | No-HS mother: -2.6 pts overall | Without intervention gap widens +5.5 pts/2yrs | With intervention narrows to 2.4 pts
+IBT RESEARCH (curved): Overall avg 64.0 | WASSCE pass 70.7 (12th grade only) | At-risk <61.2 | IBT subject benchmarks are the target for non-12th students | School quality #1 predictor (F=8.60) | Computer access +4.1 pts | Without intervention gap widens +5.5 pts/2yrs | With intervention narrows to 2.4 pts
 
 Write:
 1. RISK PROFILE SUMMARY: Student risk level using curved scores AND home factors.
-2. SUBJECT-BY-SUBJECT ANALYSIS: Each subject curved score vs IBT benchmark and WASSCE readiness.
+2. SUBJECT-BY-SUBJECT ANALYSIS: Each subject curved score vs IBT benchmark.{'  For this 12th-grade student, also state WASSCE readiness.' if _sel_is_12 else '  Note: target is IBT subject benchmark, not WASSCE threshold.'}
 3. TOP 3 INTERVENTIONS (ranked): Specific, offline-doable, with measurable goal and IBT justification.
 4. TEACHER ACTIONS THIS WEEK: 2-3 concrete Monday-morning actions.
 5. PROGNOSIS: Realistic end-of-term outlook if interventions applied.
@@ -4940,10 +4993,11 @@ Be specific, data-driven, and compassionate."""
                         _gen_str = f"Generated: {_idt6.datetime.now().strftime('%B %d, %Y')}  |  Sqrt curve applied: curved = √(raw/100)×100  |  IBT avg: 64.0  |  WASSCE target: 70.7"
                         _t2=_ws_cls.cell(2,1,_gen_str); _t2.font=_F6(color="8899BB",size=9); _t2.fill=_nv6; _t2.alignment=_A6(horizontal="center")
                         _ws_cls.row_dimensions[1].height = 22; _ws_cls.row_dimensions[2].height = 16
-                        _cls_hdrs = ["Subject","Class Raw Avg","Class Curved Avg","IBT Bench","Gap (curved)","Gap to WASSCE","# Scores","Status"]
+                        _cls_hdrs = ["Subject","Class Raw Avg","Class Curved Avg","IBT Bench","Gap (curved)","# Scores","Status"]
+                        if _cls_is_12: _cls_hdrs.insert(5, "Gap to WASSCE")
                         for ci, h in enumerate(_cls_hdrs, 1): _hc6(_ws_cls, 3, ci, h)
-                        _col_ws_cls = ["A","B","C","D","E","F","G","H"]
-                        _col_ws_w   = [18, 16, 18, 12, 14, 16, 10, 16]
+                        _col_ws_cls = [chr(65+i) for i in range(len(_cls_hdrs))]
+                        _col_ws_w   = [18,16,18,12,14,16,10,16][:len(_cls_hdrs)]
                         for col, w in zip(_col_ws_cls, _col_ws_w): _ws_cls.column_dimensions[col].width = w
                         _row = 4
                         for _sub6 in _all_subj6:
@@ -4953,14 +5007,14 @@ Be specific, data-driven, and compassionate."""
                             _cur_a = _class_curved_avg(_sub6)
                             _bench = _IBT_BENCH_C.get(_sub6, _IBT_AVG_C)
                             _gap   = _cur_a - _bench
-                            _gapw  = _cur_a - _IBT_WASSCE_C
-                            _stat, _ = _ibt_status_c(_cur_a, _sub6)
-                            _rfil = _gr6 if _cur_a >= _IBT_WASSCE_C else (_yw6 if _cur_a >= _IBT_ATRISK_C else _rd6)
+                            _stat, _ = _ibt_status_c(_cur_a, _sub6, _cls_grade)
+                            _rfil = _gr6 if _cur_a >= (_IBT_WASSCE_C if _cls_is_12 else _bench) else (_yw6 if _cur_a >= _IBT_ATRISK_C else _rd6)
                             _bg = _PF6("solid", fgColor="1C2340") if _row%2==0 else _nv6
-                            for ci, val in enumerate([_sub6,f"{_raw_a:.1f}",f"{_cur_a:.1f}",f"{_bench:.1f}",
-                                                       f"{_gap:+.1f}",f"{_gapw:+.1f}",len(_raw_scores_all),_stat],1):
-                                _dc6(_ws_cls, _row, ci, val, fill=_rfil if ci in (3,5,6) else _bg,
-                                     bold=(ci==3), color="FFFFFF")
+                            _vals = [_sub6,f"{_raw_a:.1f}",f"{_cur_a:.1f}",f"{_bench:.1f}",f"{_gap:+.1f}"]
+                            if _cls_is_12: _vals.append(f"{_cur_a-_IBT_WASSCE_C:+.1f}")
+                            _vals += [len(_raw_scores_all), _stat]
+                            for ci, val in enumerate(_vals, 1):
+                                _dc6(_ws_cls, _row, ci, val, fill=_rfil if ci==3 else _bg, bold=(ci==3), color="FFFFFF")
                             _row += 1
 
                         # Sheet 2 — Student Rankings
@@ -4969,33 +5023,41 @@ Be specific, data-driven, and compassionate."""
                         _t3=_ws_stu.cell(1,1,"IBT CURVED REPORT — ALL STUDENTS RANKED"); _t3.font=_F6(bold=True,color="D4A843",size=13); _t3.fill=_nv6; _t3.alignment=_A6(horizontal="center")
                         _ws_stu.row_dimensions[1].height = 22
                         _all_subj_list = list(_all_subj6)
-                        _stu_hdrs = ["Rank","Student","Curved Avg","vs IBT (64.0)","vs WASSCE (70.7)","Status"] + [s[:10] for s in _all_subj_list]
+                        _stu_hdrs = ["Rank","Student","Grade","Curved Avg","vs IBT (64.0)","vs WASSCE*","Status"] + [s[:10] for s in _all_subj_list]
                         for ci, h in enumerate(_stu_hdrs, 1): _hc6(_ws_stu, 2, ci, h)
                         _ws_stu.column_dimensions["A"].width = 6
                         _ws_stu.column_dimensions["B"].width = 22
-                        for _c_idx in range(3, len(_stu_hdrs)+2): _ws_stu.column_dimensions[chr(64+_c_idx)].width = 13
+                        _ws_stu.column_dimensions["C"].width = 14
+                        for _c_idx in range(4, len(_stu_hdrs)+2): _ws_stu.column_dimensions[chr(64+_c_idx)].width = 13
                         _stu_ranked = []
                         for _sn6 in _all_stu6:
+                            _sn_grades2 = [g.get("grade_level","") for g in _gh6 if g["student"]==_sn6]
+                            _sn_grade2  = next((g for g in _sn_grades2 if g), _cls_grade)
                             _sv6 = [_sqrt_curve(sc) for sub in _all_subj6 for sc in _gmap6.get(_sn6,{}).get(sub,[])]
                             _sa6 = sum(_sv6)/len(_sv6) if _sv6 else 0
-                            _stu_ranked.append((_sn6, _sa6))
+                            _stu_ranked.append((_sn6, _sa6, _sn_grade2))
                         _stu_ranked.sort(key=lambda x: x[1], reverse=True)
-                        for _rank, (_sn6, _sa6) in enumerate(_stu_ranked, 1):
+                        for _rank, (_sn6, _sa6, _sn_gr2) in enumerate(_stu_ranked, 1):
                             _rrow = _rank + 2
                             _bg = _PF6("solid", fgColor="1C2340") if _rrow%2==0 else _nv6
-                            _rfil = _gr6 if _sa6 >= _IBT_WASSCE_C else (_yw6 if _sa6 >= _IBT_ATRISK_C else _rd6)
+                            _rfil = _gr6 if _sa6 >= (_IBT_WASSCE_C if _is_12th(_sn_gr2) else _IBT_EXCELLENT_C) else (_yw6 if _sa6 >= _IBT_ATRISK_C else _rd6)
                             _dc6(_ws_stu, _rrow, 1, _rank, fill=_bg)
                             _dc6(_ws_stu, _rrow, 2, _sn6, fill=_bg)
-                            _dc6(_ws_stu, _rrow, 3, round(_sa6,1), fill=_rfil, bold=True)
-                            _dc6(_ws_stu, _rrow, 4, f"{_sa6-_IBT_AVG_C:+.1f}", fill=_bg,
+                            _dc6(_ws_stu, _rrow, 3, _sn_gr2 or "—", fill=_bg)
+                            _dc6(_ws_stu, _rrow, 4, round(_sa6,1), fill=_rfil, bold=True)
+                            _dc6(_ws_stu, _rrow, 5, f"{_sa6-_IBT_AVG_C:+.1f}", fill=_bg,
                                  color="4CAF50" if _sa6>=_IBT_AVG_C else "EF5350")
-                            _dc6(_ws_stu, _rrow, 5, f"{_sa6-_IBT_WASSCE_C:+.1f}", fill=_bg,
-                                 color="4CAF50" if _sa6>=_IBT_WASSCE_C else "EF5350")
-                            _dc6(_ws_stu, _rrow, 6, _ibt_status_c(_sa6)[0], fill=_bg)
-                            for _c6i, _sub6 in enumerate(_all_subj_list, 7):
+                            _wassce_cell = f"{_sa6-_IBT_WASSCE_C:+.1f}" if _is_12th(_sn_gr2) else "N/A"
+                            _dc6(_ws_stu, _rrow, 6, _wassce_cell, fill=_bg,
+                                 color="4CAF50" if _is_12th(_sn_gr2) and _sa6>=_IBT_WASSCE_C else "8899BB")
+                            _dc6(_ws_stu, _rrow, 7, _ibt_status_c(_sa6, grade=_sn_gr2)[0], fill=_bg)
+                            for _c6i, _sub6 in enumerate(_all_subj_list, 8):
                                 _sv6s = [_sqrt_curve(sc) for sc in _gmap6.get(_sn6,{}).get(_sub6,[])]
                                 _sav = sum(_sv6s)/len(_sv6s) if _sv6s else None
                                 _dc6(_ws_stu, _rrow, _c6i, round(_sav,1) if _sav else "—", fill=_bg)
+                        # Footnote
+                        _fn_row = len(_stu_ranked) + 4
+                        _ws_stu.cell(_fn_row, 1, "* vs WASSCE column only applies to 12th grade students. All other grades target IBT subject benchmarks.").font = _F6(italic=True, color="8899BB", size=9)
 
                         # Sheet 3 — IBT Benchmarks Reference
                         _ws_ref = _wb6.create_sheet("IBT Curved Benchmarks")
