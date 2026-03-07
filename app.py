@@ -3215,7 +3215,26 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                         _IBT_SUBJ_SHEETS=["Mathematics","English Grammar","Literature",
                                           "Physics","Chemistry","Biology","Economics","French"]
                         _ibt_tracker="Roster" in _xf.sheet_names
+                        _sheet_grade_level = ""   # will be populated from sheet if found
                         if _ibt_tracker:
+                            # Try to extract grade level from Roster sheet header rows (rows 1-2)
+                            _rdf_raw = pd.read_excel(_xf, sheet_name="Roster", header=None)
+                            for _hrow in range(min(4, len(_rdf_raw))):
+                                for _hcell in _rdf_raw.iloc[_hrow].dropna().astype(str):
+                                    _hcell_l = _hcell.lower()
+                                    for _gkw in ["9th","10th","11th","12th","grade 9","grade 10","grade 11","grade 12","wassce"]:
+                                        if _gkw in _hcell_l:
+                                            # Extract the grade string cleanly
+                                            import re as _reimp
+                                            _gm = _reimp.search(r'(9th|10th|11th|12th)\s*grade(\s*\(wassce\s*prep\))?', _hcell, _reimp.IGNORECASE)
+                                            if _gm:
+                                                _sheet_grade_level = _gm.group(0).title().strip()
+                                            elif "wassce" in _hcell_l:
+                                                _sheet_grade_level = "12th Grade (WASSCE Prep)"
+                                            else:
+                                                _sheet_grade_level = _hcell.strip()
+                                            break
+                                if _sheet_grade_level: break
                             _rdf=pd.read_excel(_xf,sheet_name="Roster",header=2)
                             _rdf.dropna(how="all",inplace=True)
                             if _name_col(_rdf) is not None:
@@ -3328,25 +3347,32 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                                     nt_v=str(row.get("Notes","")).strip()
                                     if nt_v in ("nan","None","nan"): nt_v=""
                                     # IBT Tracker extra fields (grade level, gender, student_id)
-                                    _grade_from_sheet=str(row.get("grade","")).strip()
-                                    if _grade_from_sheet and _grade_from_sheet.lower() not in ("nan","none",""):
+                                    _grade_from_sheet = str(row.get("grade", row.get("grade_level", ""))).strip()
+                                    if _grade_from_sheet.lower() in ("nan","none",""): _grade_from_sheet = ""
+                                    # Priority: per-row grade → sheet header grade → app config
+                                    _resolved_grade = _grade_from_sheet or _sheet_grade_level or _grade_en
+                                    if _grade_from_sheet:
                                         nt_v=(f"Grade: {_grade_from_sheet}. "+nt_v).strip(". ").strip()
-                                    st.session_state.students.append(dict(name=name,sib=sib_v,mom=mom_v,sm=sm_v,wk=wk_v,cp=cp_v,nt=nt_v))
+                                    st.session_state.students.append(dict(name=name,sib=sib_v,mom=mom_v,sm=sm_v,wk=wk_v,cp=cp_v,nt=nt_v,grade_level=_resolved_grade))
                                     imported+=1
                                 # If IBT tracker had grades, auto-populate grade_history
                                 _gh_added=0
                                 if st.session_state.get("_ibt_has_grades") and st.session_state.get("_ar_subject_data"):
                                     import datetime as _idt
                                     _existing_gh={(g["student"],g["subject"],g["topic"]) for g in st.session_state.grade_history}
+                                    # Build per-student grade level lookup from imported students
+                                    _stu_grade_map = {s["name"]: s.get("grade_level", _sheet_grade_level or _grade_en)
+                                                      for s in st.session_state.students}
                                     for _subj,_sdata in st.session_state["_ar_subject_data"].items():
                                         for _stn,_scores in _sdata.items():
                                             for _sem,_key in [("Semester 1","s1_avg"),("Semester 2","s2_avg")]:
                                                 _sc=_scores.get(_key)
                                                 if _sc is not None and (_stn,_subj,_sem) not in _existing_gh:
+                                                    _gl = _stu_grade_map.get(_stn, _sheet_grade_level or _grade_en)
                                                     st.session_state.grade_history.append({
                                                         "student":_stn,"subject":_subj,"topic":_sem,
                                                         "score":_sc,"date":_idt.datetime.now().isoformat(),
-                                                        "grade_level":_grade_en,"model":"IBT Tracker"
+                                                        "grade_level":_gl,"model":"IBT Tracker"
                                                     })
                                                     _gh_added+=1
                                 if _gh_added:
