@@ -3823,23 +3823,99 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
             with _ma3: st.metric("Total Records", _n_records)
             with _ma4: st.metric("Need Intervention", f"{_below50} student{'s' if _below50!=1 else ''}", delta=f"{_at_risk_pct:.0f}% of class", delta_color="inverse")
 
-            # ── Per-student summary table ──────────────────────────────────
-            st.markdown(f'<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin-bottom:6px">📋 Student Performance Summary</div>', unsafe_allow_html=True)
-            _stu_summary = []
-            for _sname in sorted(_df["student"].unique()):
-                _sd = _df[_df["student"]==_sname].sort_values("date")
-                _savg = _sd["score"].mean()
-                _slast = _sd["score"].iloc[-1]
-                _strend_d = _sd["score"].iloc[-1] - _sd["score"].iloc[0] if len(_sd) > 1 else 0
-                _strend = "📈" if _strend_d > 2 else ("📉" if _strend_d < -2 else "➡️")
-                _subs = ", ".join(sorted(_sd["subject"].unique()))
-                _status = "🔴 Intervention" if _savg < 50 else ("🟡 Monitor" if _savg < 65 else "🟢 On Track")
-                _stu_summary.append({
-                    "Student": _sname, "Avg Score": f"{_savg:.0f}/100",
-                    "Latest": f"{_slast}/100", "Trend": _strend,
-                    "Subjects": _subs, "Status": _status
-                })
-            st.dataframe(pd.DataFrame(_stu_summary), use_container_width=True, hide_index=True)
+            # ── Visual summaries: Pie + Bar charts ────────────────────────
+            _chart_col1, _chart_col2 = st.columns(2)
+
+            # ── Pie chart: Subject performance distribution ────────────────
+            with _chart_col1:
+                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin-bottom:6px">🥧 Performance by Subject</div>', unsafe_allow_html=True)
+                try:
+                    import plotly.graph_objects as _pgo
+                    _pie_labels, _pie_vals, _pie_colors = [], [], []
+                    _pie_color_map = {
+                        "🟢 On Track":    "#2ECC71",
+                        "🟡 Monitor":     "#F1C40F",
+                        "🔴 Intervention":"#E74C3C",
+                    }
+                    for _ps in sorted(_df["subject"].unique()):
+                        _ps_avg = _df[_df["subject"]==_ps]["score"].mean()
+                        _ps_status = ("🔴 Intervention" if _ps_avg < 50
+                                      else ("🟡 Monitor" if _ps_avg < 65 else "🟢 On Track"))
+                        _pie_labels.append(f"{_ps}<br>{_ps_avg:.1f}/100")
+                        _pie_vals.append(round(_ps_avg, 1))
+                        _pie_colors.append(_pie_color_map[_ps_status])
+                    _pie_fig = _pgo.Figure(data=[_pgo.Pie(
+                        labels=_pie_labels,
+                        values=_pie_vals,
+                        marker=dict(colors=_pie_colors, line=dict(color="#1A1A2E", width=1.5)),
+                        textinfo="label+percent",
+                        hovertemplate="%{label}<extra></extra>",
+                        hole=0.35,
+                    )])
+                    _pie_fig.update_layout(
+                        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                        font=dict(color="#D0D8E8", size=11),
+                        margin=dict(t=10, b=10, l=10, r=10),
+                        legend=dict(font=dict(size=10), bgcolor="rgba(0,0,0,0)"),
+                        showlegend=False, height=300,
+                    )
+                    st.plotly_chart(_pie_fig, use_container_width=True)
+                except Exception as _pe:
+                    # Fallback: simple bar via st.bar_chart
+                    _sb = {s: _df[_df["subject"]==s]["score"].mean()
+                           for s in _df["subject"].unique()}
+                    st.bar_chart(pd.Series(_sb, name="Avg Score"))
+
+            # ── Bar chart: Performance by mom's education & ≤4 kids ───────
+            with _chart_col2:
+                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin-bottom:6px">📊 Score by Mom Education &amp; Family Size (≤4 siblings)</div>', unsafe_allow_html=True)
+                try:
+                    import plotly.graph_objects as _pgo2
+                    # Build lookup: student → {mom, sib} from session_state.students
+                    _stu_profile = {s["name"]: s for s in (st.session_state.students or [])}
+                    # Filter to students with ≤4 siblings (sib == "0-4")
+                    _bar_data = {}   # mom_edu → list of avg scores
+                    for _sname2 in _df["student"].unique():
+                        _prof = _stu_profile.get(_sname2, {})
+                        _sib_v  = _prof.get("sib", "")
+                        _mom_v  = _prof.get("mom", "Unknown") or "Unknown"
+                        if _sib_v not in ("0-4", "0–4", "≤4", ""):
+                            continue  # skip students with 5+ siblings
+                        _avg_v = _df[_df["student"]==_sname2]["score"].mean()
+                        _bar_data.setdefault(_mom_v, []).append(_avg_v)
+                    if _bar_data:
+                        _bar_cats    = sorted(_bar_data.keys())
+                        _bar_avgs    = [sum(_bar_data[c])/len(_bar_data[c]) for c in _bar_cats]
+                        _bar_counts  = [len(_bar_data[c]) for c in _bar_cats]
+                        _bar_clrs    = []
+                        for _ba in _bar_avgs:
+                            _bar_clrs.append("#2ECC71" if _ba >= 65 else
+                                             ("#F1C40F" if _ba >= 50 else "#E74C3C"))
+                        _bar_fig = _pgo2.Figure(data=[_pgo2.Bar(
+                            x=_bar_cats,
+                            y=_bar_avgs,
+                            text=[f"{v:.1f}" for v in _bar_avgs],
+                            textposition="outside",
+                            marker_color=_bar_clrs,
+                            marker_line=dict(color="#1A1A2E", width=1),
+                            customdata=_bar_counts,
+                            hovertemplate="<b>%{x}</b><br>Avg: %{y:.1f}/100<br>Students: %{customdata}<extra></extra>",
+                        )])
+                        _bar_fig.update_layout(
+                            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                            font=dict(color="#D0D8E8", size=11),
+                            xaxis=dict(title="Mother's Education", color="#D0D8E8",
+                                       gridcolor="rgba(255,255,255,.07)"),
+                            yaxis=dict(title="Avg Score", range=[0, 105], color="#D0D8E8",
+                                       gridcolor="rgba(255,255,255,.1)"),
+                            margin=dict(t=20, b=10, l=10, r=10),
+                            height=300,
+                        )
+                        st.plotly_chart(_bar_fig, use_container_width=True)
+                    else:
+                        st.caption("No student profile data available for this chart. Add students with family details in the Students tab.")
+                except Exception as _be:
+                    st.caption(f"Chart unavailable: {_be}")
 
             # ── Per-subject breakdown ──────────────────────────────────────
             if _n_subjects > 1:
