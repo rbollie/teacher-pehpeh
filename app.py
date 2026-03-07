@@ -484,10 +484,24 @@ def clean_parent_output(text):
     result = re.sub(r'^(\s*---\s*\n?)+', '', result).strip()
     return result
 
+def strip_markdown_for_voice(text):
+    """Strip markdown formatting so TTS speaks clean text, not symbols."""
+    import re
+    text = re.sub(r'\*{1,3}([^*]+)\*{1,3}', r'\1', text)
+    text = re.sub(r'_{1,2}([^_]+)_{1,2}', r'\1', text)
+    text = re.sub(r'#{1,6}\s*', '', text)
+    text = re.sub(r'`+([^`]*)`+', r'\1', text)
+    text = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', text)
+    text = re.sub(r'^\s*[-*>]\s+', '', text, flags=re.MULTILINE)
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    return text.strip()
+
 def tts_player(text, key_suffix):
     """Simple 'Hear Results' button — one click, plays audio."""
     audio_key = f"tts_audio_{key_suffix}"
-    if not ELEVENLABS_API_KEY: return
+    if not ELEVENLABS_API_KEY:
+        st.warning("🔇 Voice audio unavailable — add `ELEVENLABS_API_KEY` to Streamlit Secrets to enable.", icon="🔑")
+        return
     if audio_key in st.session_state and st.session_state[audio_key]:
         aud = st.session_state[audio_key]
         audio_data = base64.b64decode(aud["b64"])
@@ -3076,7 +3090,23 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     st.write("Preparing sensitive, culturally appropriate message...")
                     _plx_r,_plx_m,_plx_allr=best_all(build_free_chat(),_plx_prompt,[])
                     _plx_status.update(label="✉️ Communication ready!",state="complete",expanded=False)
+                st.session_state["plx_comm_result"] = {"text": _plx_r, "delivery": _plx_delivery}
+                st.rerun()
+            if st.session_state.get("plx_comm_result"):
+                _plx_saved = st.session_state["plx_comm_result"]
+                _plx_r = strip_markdown_for_voice(_plx_saved["text"])
+                _plx_saved_delivery = _plx_saved["delivery"]
                 st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:10px;padding:14px 18px;margin:8px 0;white-space:pre-wrap;color:#D0D8E8;line-height:1.7">{_plx_r}</div>',unsafe_allow_html=True)
+                if "🔊" in _plx_saved_delivery:
+                    tts_player(_plx_r, "plx_voice")
+                elif "📱" in _plx_saved_delivery:
+                    st.code(_plx_r, language=None)
+                else:
+                    st.download_button("📥 Download Letter", data=_plx_r, file_name="parent_letter.txt", key="plx_dl_letter")
+                    tts_player(_plx_r, "plx_email")
+                if st.button("🗑️ Clear", key="plx_clear_result"):
+                    del st.session_state["plx_comm_result"]
+                    st.rerun()
 
         with st.expander({"en":"➕ Add Profile","fr":"➕ Ajouter un profil","sw":"➕ Ongeza Wasifu"}.get(_lang_key(),"➕ Add Profile"),expanded=not st.session_state.students):
             c1,c2=st.columns(2)
