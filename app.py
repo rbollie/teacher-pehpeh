@@ -3313,11 +3313,21 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                                  "works":"Works","works_after_school":"Works","working":"Works",
                                  "computer":"Computer","computer_access":"Computer","comp":"Computer",
                                  "notes":"Notes","note":"Notes","comments":"Notes",
-                                 # IBT Grade Tracker Roster native columns (not remapped but kept)
-                                 "grade":"grade","gender":"gender","age":"age",
-                                 "student_id":"student_id","active":"active"}
+                                 # grade level aliases — all map to Grade_Level
+                                 "grade":"Grade_Level","grade_level":"Grade_Level","gradelevel":"Grade_Level",
+                                 "class":"Grade_Level","class_level":"Grade_Level","year":"Grade_Level",
+                                 # IBT Grade Tracker Roster native columns
+                                 "gender":"gender","age":"age","student_id":"student_id","active":"active"}
                         df.columns=[col_map.get(c.lower(),c) for c in df.columns]
                         df.dropna(how="all",inplace=True)
+                        # ── Derive sheet grade level from column data if not already found ──
+                        if not _sheet_grade_level and "Grade_Level" in df.columns:
+                            _gl_vals = df["Grade_Level"].dropna().astype(str).str.strip()
+                            _gl_vals = _gl_vals[~_gl_vals.str.lower().isin(["","nan","none"])]
+                            if not _gl_vals.empty:
+                                # Use most common grade value
+                                _most_common_gl = _gl_vals.value_counts().idxmax()
+                                _sheet_grade_level = _most_common_gl
                         if "Name" in df.columns:
                             df=df[df["Name"].notna()]
                             df=df[~df["Name"].astype(str).str.strip().str.lower().isin(["","nan","none"])]
@@ -3348,10 +3358,9 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                                     if cp_v not in ["Never","Rarely","Sometimes","Often"]: cp_v="Never"
                                     nt_v=str(row.get("Notes","")).strip()
                                     if nt_v in ("nan","None","nan"): nt_v=""
-                                    # IBT Tracker extra fields (grade level, gender, student_id)
-                                    _grade_from_sheet = str(row.get("grade", row.get("grade_level", ""))).strip()
+                                    # Grade level: per-row column → sheet header → app config
+                                    _grade_from_sheet = str(row.get("Grade_Level", "")).strip()
                                     if _grade_from_sheet.lower() in ("nan","none",""): _grade_from_sheet = ""
-                                    # Priority: per-row grade → sheet header grade → app config
                                     _resolved_grade = _grade_from_sheet or _sheet_grade_level or _grade_en
                                     if _grade_from_sheet:
                                         nt_v=(f"Grade: {_grade_from_sheet}. "+nt_v).strip(". ").strip()
@@ -3382,18 +3391,16 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                                 else:
                                     st.success(f"✅ Imported {imported} student(s). Enter grades below via text or 📸 photo grading.")
                                 # ── Sync classroom config grade to sheet grade ──────────────
-                                _cfg_grade_to_set = _sheet_grade_level.strip() if _sheet_grade_level else ""
-                                if _cfg_grade_to_set:
-                                    # Match to closest GRADES entry (exact first, then partial)
+                                if _sheet_grade_level.strip():
                                     _matched_grade = None
                                     for _g in GRADES:
-                                        if _g.lower() == _cfg_grade_to_set.lower():
+                                        if _g.lower() == _sheet_grade_level.strip().lower():
                                             _matched_grade = _g; break
                                     if not _matched_grade:
                                         for _g in GRADES:
-                                            if _cfg_grade_to_set[:4].lower() in _g.lower():
+                                            if _sheet_grade_level.strip()[:4].lower() in _g.lower():
                                                 _matched_grade = _g; break
-                                if _matched_grade:
+                                    if _matched_grade:
                                         st.session_state["_pending_grade_from_sheet"] = _matched_grade
                                         st.info(f"📋 Classroom grade updated to **{_matched_grade}** based on uploaded sheet.")
                                 time.sleep(1); st.rerun()
@@ -3728,16 +3735,25 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
   </div>
   <div style="border-top:1px solid rgba(212,168,67,.3);padding-top:10px;display:flex;gap:32px;flex-wrap:wrap">
     <div><span style="color:#8899aa;font-size:.8rem">SCHOOL</span><br><span style="color:#fff;font-weight:700">{_school_label}</span></div>
-    <div><span style="color:#8899aa;font-size:.8rem">GRADE LEVEL</span><br><span style="color:#fff;font-weight:700">{_grade_en}</span></div>
+    <div><span style="color:#8899aa;font-size:.8rem">GRADE LEVEL</span><br><span style="color:#fff;font-weight:700">{_effective_grade}</span></div>
     <div><span style="color:#8899aa;font-size:.8rem">GENERATED</span><br><span style="color:#fff;font-weight:700">{_ardt.datetime.now().strftime("%B %d, %Y")}</span></div>
     <div><span style="color:#8899aa;font-size:.8rem">STUDENTS</span><br><span style="color:#fff;font-weight:700">{len(st.session_state.students)}</span></div>
   </div>
 </div>""", unsafe_allow_html=True)
 
         _gh = st.session_state.grade_history
+        # Effective grade: prefer most common grade_level in grade_history over app config
+        if _gh:
+            _gh_grades = [g.get("grade_level","") for g in _gh if g.get("grade_level","").strip()]
+            if _gh_grades:
+                from collections import Counter as _Ctr
+                _effective_grade = _Ctr(_gh_grades).most_common(1)[0][0]
+            else:
+                _effective_grade = _grade_en
+        else:
+            _effective_grade = _grade_en
         if not _gh:
             st.info("📭 No grade data yet. Enter or upload grades in the Students tab to generate the Academic Report.")
-        elif not PD:
             st.warning("⚠️ pandas not available. Cannot generate report.")
         else:
             import re as _arre
@@ -3822,7 +3838,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                     _savg3 = _sd3["score"].mean()
                     _data_for_ai.append(f"  • {_sname}: scores [{_scores_seq}], avg {_savg3:.0f}/100, subjects: {', '.join(_sd3['subject'].unique())}")
 
-                _ar_prompt = f"""You are an expert education analyst writing a formal Academic Performance Report for {_school_label}, Grade {_grade_en}.
+                _ar_prompt = f"""You are an expert education analyst writing a formal Academic Performance Report for {_school_label}, Grade {_effective_grade}.
 
 CLASS DATA:
 {chr(10).join(_data_for_ai)}
@@ -3859,7 +3875,7 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                     from word_report import generate_academic_word_report
                     _word_bytes = generate_academic_word_report(
                         _gh, st.session_state.students,
-                        _school_label, _grade_en,
+                        _school_label, _effective_grade,
                         st.session_state.get(_analysis_key, "")
                     )
                     _word_fname = f"IBT_Academic_Report_{(_school_label or 'class').replace(' ','_')}_{_ardt.datetime.now().strftime('%Y%m%d')}.docx"
@@ -3918,7 +3934,7 @@ Be factual. Do not invent data. Keep each section focused and practical."""
             # ── Email button ──────────────────────────────────────────────
             _ar_email_body = (
                 f"Academic Performance Report — {_school_label}\n"
-                f"Grade: {_grade_en} | Generated: {_ardt.datetime.now().strftime('%B %d, %Y')}\n"
+                f"Grade: {_effective_grade} | Generated: {_ardt.datetime.now().strftime('%B %d, %Y')}\n"
                 f"Class Average: {_avg_all:.1f}/100 | Trend: {_trend_icon} ({_trend_delta:+.1f} pts)\n"
                 f"Students Needing Intervention: {_below50}\n\n"
                 + (st.session_state.get(_analysis_key, "Run 'Generate Full Analysis' to include AI narrative."))
