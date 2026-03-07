@@ -3823,12 +3823,12 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
             with _ma3: st.metric("Total Records", _n_records)
             with _ma4: st.metric("Need Intervention", f"{_below50} student{'s' if _below50!=1 else ''}", delta=f"{_at_risk_pct:.0f}% of class", delta_color="inverse")
 
-            # ── Visual summaries: Subject bar + Mom Edu bar ───────────────
+            # ── Visual summaries: Subject line + Mom×Kids combo bars ────────
             _chart_col1, _chart_col2 = st.columns(2)
 
-            # ── Bar chart: Average score per subject (distinct color per bar) ─
+            # ── Line graph: Score over time per subject ───────────────────
             with _chart_col1:
-                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin-bottom:6px">📊 Avg Score by Subject</div>', unsafe_allow_html=True)
+                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin-bottom:6px">📈 Subject Scores Over Time</div>', unsafe_allow_html=True)
                 try:
                     import altair as _alt
                     _SUBJ_PALETTE = [
@@ -3836,87 +3836,98 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                         "#EDC948","#B07AA1","#FF9DA7","#9C755F","#BAB0AC",
                         "#D4A843","#2ECC71","#E74C3C","#3498DB","#9B59B6",
                     ]
-                    _subj_rows2 = []
-                    for _ii, _ss in enumerate(sorted(_df["subject"].unique())):
-                        _ss_avg = _df[_df["subject"]==_ss]["score"].mean()
-                        _ss_status = ("Intervention" if _ss_avg < 50
-                                      else ("Monitor" if _ss_avg < 65 else "On Track"))
-                        _subj_rows2.append({
-                            "Subject": _ss,
-                            "Avg Score": round(_ss_avg, 1),
-                            "Status": _ss_status,
-                            "Color": _SUBJ_PALETTE[_ii % len(_SUBJ_PALETTE)],
-                        })
-                    _subj_df2 = pd.DataFrame(_subj_rows2)
-                    _color_scale2 = _alt.Scale(
-                        domain=_subj_df2["Subject"].tolist(),
-                        range=_subj_df2["Color"].tolist(),
-                    )
-                    _subj_chart = (
-                        _alt.Chart(_subj_df2)
-                        .mark_bar(cornerRadiusTopLeft=3, cornerRadiusTopRight=3)
-                        .encode(
-                            x=_alt.X("Subject:N", sort="-y", axis=_alt.Axis(labelAngle=-30, labelColor="#D0D8E8", titleColor="#D0D8E8"), title="Subject"),
-                            y=_alt.Y("Avg Score:Q", scale=_alt.Scale(domain=[0, 100]), axis=_alt.Axis(labelColor="#D0D8E8", titleColor="#D0D8E8"), title="Avg Score"),
-                            color=_alt.Color("Subject:N", scale=_color_scale2, legend=None),
-                            tooltip=[_alt.Tooltip("Subject:N"), _alt.Tooltip("Avg Score:Q", format=".1f"), _alt.Tooltip("Status:N")],
+                    # Build time-series: date × subject → avg score
+                    _ts_df = _df.copy()
+                    _ts_df["date"] = pd.to_datetime(_ts_df["date"], errors="coerce")
+                    _ts_df = _ts_df.dropna(subset=["date"])
+                    if not _ts_df.empty:
+                        _ts_agg = (
+                            _ts_df.groupby(["date", "subject"])["score"]
+                            .mean().reset_index()
+                            .rename(columns={"score": "Avg Score"})
                         )
-                        .properties(height=260, background="transparent")
-                        .configure_axis(gridColor="rgba(255,255,255,0.08)", domainColor="#444", tickColor="#444")
-                        .configure_view(strokeWidth=0)
-                    )
-                    st.altair_chart(_subj_chart, use_container_width=True)
+                        _ts_agg["Avg Score"] = _ts_agg["Avg Score"].round(1)
+                        _subj_list = sorted(_ts_agg["subject"].unique())
+                        _subj_colors = [_SUBJ_PALETTE[i % len(_SUBJ_PALETTE)] for i in range(len(_subj_list))]
+                        _line_color_scale = _alt.Scale(domain=_subj_list, range=_subj_colors)
+                        _line_chart = (
+                            _alt.Chart(_ts_agg)
+                            .mark_line(point=True, strokeWidth=2)
+                            .encode(
+                                x=_alt.X("date:T", axis=_alt.Axis(labelAngle=-30, labelColor="#D0D8E8", titleColor="#D0D8E8", format="%b %d"), title="Date"),
+                                y=_alt.Y("Avg Score:Q", scale=_alt.Scale(domain=[0, 100]), axis=_alt.Axis(labelColor="#D0D8E8", titleColor="#D0D8E8"), title="Avg Score"),
+                                color=_alt.Color("subject:N", scale=_line_color_scale,
+                                                 legend=_alt.Legend(labelColor="#D0D8E8", titleColor="#D0D8E8", title="Subject")),
+                                tooltip=[_alt.Tooltip("date:T", format="%b %d %Y"), _alt.Tooltip("subject:N", title="Subject"),
+                                         _alt.Tooltip("Avg Score:Q", format=".1f")],
+                            )
+                            .properties(height=260, background="transparent")
+                            .configure_axis(gridColor="rgba(255,255,255,0.08)", domainColor="#444", tickColor="#444")
+                            .configure_view(strokeWidth=0)
+                            .configure_legend(fillColor="rgba(0,0,0,0)", strokeColor="rgba(0,0,0,0)")
+                        )
+                        st.altair_chart(_line_chart, use_container_width=True)
+                    else:
+                        st.caption("No dated grade records yet — scores will appear here as you add grades with dates.")
                 except Exception as _pe:
-                    _sb = {s: round(_df[_df["subject"]==s]["score"].mean(), 1) for s in sorted(_df["subject"].unique())}
-                    st.bar_chart(pd.Series(_sb, name="Avg Score"))
+                    st.caption(f"Chart unavailable: {_pe}")
 
-            # ── Bar chart: Performance by mom's education ─────────────────
+            # ── Bar chart: Mom's Education × Kids in Home combos ─────────
             with _chart_col2:
-                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin-bottom:6px">📚 Avg Score by Mom\'s Education</div>', unsafe_allow_html=True)
+                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin-bottom:6px">👨‍👩‍👧‍👦 Avg Score by Mom\'s Education &amp; Kids in Home</div>', unsafe_allow_html=True)
                 try:
                     import altair as _alt2
                     _stu_profile2 = {s["name"]: s for s in (st.session_state.students or [])}
-                    _mom_data = {}   # mom_edu → list of avg scores
+                    _combo_data = {}   # (mom_edu, sib_group) → list of avg scores
                     for _sname2 in _df["student"].unique():
                         _prof2 = _stu_profile2.get(_sname2, {})
                         _mom_v = (_prof2.get("mom") or "Unknown").strip() or "Unknown"
+                        _sib_v = (_prof2.get("sib") or "Unknown").strip() or "Unknown"
                         _avg_v2 = _df[_df["student"]==_sname2]["score"].mean()
-                        _mom_data.setdefault(_mom_v, []).append(_avg_v2)
-                    if _mom_data:
-                        # Sort by education progression
+                        _combo_data.setdefault((_mom_v, _sib_v), []).append(_avg_v2)
+                    if _combo_data:
                         _mom_order = ["No HS", "HS Grad", "Unknown"]
-                        _mom_cats = sorted(_mom_data.keys(), key=lambda x: _mom_order.index(x) if x in _mom_order else 99)
-                        _mom_rows = []
-                        for _mc in _mom_cats:
-                            _ma = sum(_mom_data[_mc]) / len(_mom_data[_mc])
-                            _mom_rows.append({
-                                "Education": _mc,
-                                "Avg Score": round(_ma, 1),
-                                "Students": len(_mom_data[_mc]),
-                                "Status": ("Intervention" if _ma < 50 else ("Monitor" if _ma < 65 else "On Track")),
-                                "Color": ("#2ECC71" if _ma >= 65 else ("#F1C40F" if _ma >= 50 else "#E74C3C")),
+                        _sib_order = ["0-4", "5-8", "8+", "Unknown"]
+                        _combo_rows = []
+                        for (_cm, _cs), _cv in _combo_data.items():
+                            _ca = sum(_cv) / len(_cv)
+                            _combo_rows.append({
+                                "Combo": f"{_cm} / {_cs} kids",
+                                "Mom Edu": _cm,
+                                "Kids": _cs,
+                                "Avg Score": round(_ca, 1),
+                                "Students": len(_cv),
+                                "Color": ("#2ECC71" if _ca >= 65 else ("#F1C40F" if _ca >= 50 else "#E74C3C")),
                             })
-                        _mom_df = pd.DataFrame(_mom_rows)
-                        _mom_color_scale = _alt2.Scale(
-                            domain=_mom_df["Education"].tolist(),
-                            range=_mom_df["Color"].tolist(),
+                        _combo_df = pd.DataFrame(_combo_rows)
+                        # Sort combos by mom edu then sib group
+                        _combo_df["_mo"] = _combo_df["Mom Edu"].apply(lambda x: _mom_order.index(x) if x in _mom_order else 99)
+                        _combo_df["_so"] = _combo_df["Kids"].apply(lambda x: _sib_order.index(x) if x in _sib_order else 99)
+                        _combo_df = _combo_df.sort_values(["_mo", "_so"]).drop(columns=["_mo","_so"])
+                        _combo_order = _combo_df["Combo"].tolist()
+                        _combo_color_scale = _alt2.Scale(
+                            domain=_combo_df["Combo"].tolist(),
+                            range=_combo_df["Color"].tolist(),
                         )
-                        _mom_chart = (
-                            _alt2.Chart(_mom_df)
+                        _combo_chart = (
+                            _alt2.Chart(_combo_df)
                             .mark_bar(cornerRadiusTopLeft=3, cornerRadiusTopRight=3)
                             .encode(
-                                x=_alt2.X("Education:N", sort=_mom_cats, axis=_alt2.Axis(labelAngle=-20, labelColor="#D0D8E8", titleColor="#D0D8E8"), title="Mom's Education"),
-                                y=_alt2.Y("Avg Score:Q", scale=_alt2.Scale(domain=[0, 100]), axis=_alt2.Axis(labelColor="#D0D8E8", titleColor="#D0D8E8"), title="Avg Score"),
-                                color=_alt2.Color("Education:N", scale=_mom_color_scale, legend=None),
-                                tooltip=[_alt2.Tooltip("Education:N"), _alt2.Tooltip("Avg Score:Q", format=".1f"), _alt2.Tooltip("Students:Q")],
+                                x=_alt2.X("Combo:N", sort=_combo_order,
+                                           axis=_alt2.Axis(labelAngle=-35, labelColor="#D0D8E8", titleColor="#D0D8E8"), title="Mom Edu / Kids"),
+                                y=_alt2.Y("Avg Score:Q", scale=_alt2.Scale(domain=[0, 100]),
+                                           axis=_alt2.Axis(labelColor="#D0D8E8", titleColor="#D0D8E8"), title="Avg Score"),
+                                color=_alt2.Color("Combo:N", scale=_combo_color_scale, legend=None),
+                                tooltip=[_alt2.Tooltip("Combo:N"), _alt2.Tooltip("Avg Score:Q", format=".1f"),
+                                         _alt2.Tooltip("Students:Q", title="# Students")],
                             )
                             .properties(height=260, background="transparent")
                             .configure_axis(gridColor="rgba(255,255,255,0.08)", domainColor="#444", tickColor="#444")
                             .configure_view(strokeWidth=0)
                         )
-                        st.altair_chart(_mom_chart, use_container_width=True)
+                        st.altair_chart(_combo_chart, use_container_width=True)
                     else:
-                        st.caption("No student profile data yet. Add students with Mom's Education details in the Students tab.")
+                        st.caption("No student profile data yet. Add students with Mom's Education and Kids in Home details in the Students tab.")
                 except Exception as _be:
                     st.caption(f"Chart unavailable: {_be}")
 
