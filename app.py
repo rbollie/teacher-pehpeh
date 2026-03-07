@@ -5265,7 +5265,7 @@ Be specific, data-driven, and compassionate."""
                                 _tbl7.rows[0].cells[ci].text = h
                                 for run in _tbl7.rows[0].cells[ci].paragraphs[0].runs:
                                     run.bold=True; run.font.size=_Pt6(9)
-                            for _rank, (_sn6, _sa6) in enumerate(_stu_ranked, 1):
+                            for _rank, (_sn6, _sa6, _sn_gr_w) in enumerate(_stu_ranked, 1):
                                 _r7 = _tbl7.add_row()
                                 for ci, v in enumerate([str(_rank), _sn6, f"{_sa6:.1f}",
                                                          f"{_sa6-_IBT_AVG_C:+.1f}", _ibt_status_c(_sa6)[0]]):
