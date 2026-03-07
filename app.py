@@ -2176,6 +2176,8 @@ def main():
             if not st.session_state.profile_set:
                 st.markdown('<div style="font-size:.85rem;color:#F0D5D5;margin-bottom:8px">Select your school setting, grade, subject, and preferences below. Save your profile to reuse later!</div>',unsafe_allow_html=True)
             region=st.selectbox(T("setting"),list(_regions().keys()),label_visibility="collapsed",format_func=lambda x: f"📍 Setting: {x}", help="Urban, rural, or remote — shapes the type of content generated",key="cfg_region")
+            if st.session_state.get("_pending_grade_from_sheet"):
+                st.session_state["cfg_grade"] = st.session_state.pop("_pending_grade_from_sheet")
             grade=st.selectbox(T("grade"),_grades(),label_visibility="collapsed",format_func=lambda x: f"🎓 Grade: {x}", help="The class level you are teaching",key="cfg_grade")
             subject=st.selectbox(T("subject"),_subjects(),label_visibility="collapsed",format_func=lambda x: f"📚 Subject: {x}", help="Choose the subject you want content for",key="cfg_subject")
             clsz=st.selectbox(T("class_size"),list(_sizes().keys()),label_visibility="collapsed",format_func=lambda x: f"👥 Class Size: {x}", help="Helps Teacher Pehpeh suggest realistic group sizes and activities",key="cfg_clsz")
@@ -3391,8 +3393,8 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                                         for _g in GRADES:
                                             if _cfg_grade_to_set[:4].lower() in _g.lower():
                                                 _matched_grade = _g; break
-                                    if _matched_grade:
-                                        st.session_state["cfg_grade"] = _matched_grade
+                                if _matched_grade:
+                                        st.session_state["_pending_grade_from_sheet"] = _matched_grade
                                         st.info(f"📋 Classroom grade updated to **{_matched_grade}** based on uploaded sheet.")
                                 time.sleep(1); st.rerun()
                 except Exception as e:
