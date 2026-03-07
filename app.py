@@ -3490,69 +3490,17 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             if s["sib"]=="8+": rsk.append("🟠 8+ siblings")
             if s["wk"]=="Yes": rsk.append("🟠 Works")
             if s["cp"]=="Never": rsk.append("🟡 No computer")
-            st.markdown(f'<div class="sc"><strong style="color:{C_BLUE}">{s["name"]}</strong> — {s["sib"]} sib, Mom:{s["mom"]}<br><span style="font-size:.82rem">{" · ".join(rsk) or "🟢 Lower risk"}</span></div>',unsafe_allow_html=True)
-            info=f'{s["name"]},{s["sib"]}sib,Mom:{s["mom"]},SM:{s["sm"]},Works:{s["wk"]},Comp:{s["cp"]},{s["nt"]}'
-            b1,b2,b3,b4=st.columns([3,3,3,1])
-            with b1:
-                if st.button(T("assignment"),key=f"a{i}"):
-                    with st.spinner(T("creating")):
-                        r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),f"Tailored {_subj_en} assignment. Max 3 problems.")
-                    _by={"en":"by","fr":"par","sw":"na"}.get(_lang_key(),"by"); st.markdown(f'<div class="rb">{highlight_result(r)}<div style="font-size:.65rem;color:#556;margin-top:4px">{_by} {m}</div></div>',unsafe_allow_html=True)
-                    if len(allr)>1:
-                        with st.expander(f"{T('see_all')} {len(allr)} {T('model_responses')}"):
-                            for mn,mr in allr.items():
-                                mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mn,"⚪")
-                                st.markdown(f"**{mico} {mn}{'  ✅' if mn==m else ''}**"); st.markdown(mr); st.markdown("---")
-                    email_result(r, f"Teacher Pehpeh — Assignment for {s['name']} ({subject}, {grade})", f"asn_{i}")
-                    tts_player(r, f"asn_{i}")
-            with b2:
-                if st.button(T("risk"),key=f"r{i}"):
-                    with st.spinner("Analyzing..."):
-                        r,m,allr=best_all(build_stu(_region_val,country,_grade_en,_subj_en,_size_val,_res_val,LANGS[lang],_abl_val,info,school_name),"Risk analysis using IBT data. Compare to 183-student dataset.")
-                    _by={"en":"by","fr":"par","sw":"na"}.get(_lang_key(),"by"); st.markdown(f'<div class="rb">{highlight_result(r)}<div style="font-size:.65rem;color:#556;margin-top:4px">{_by} {m}</div></div>',unsafe_allow_html=True)
-                    if len(allr)>1:
-                        with st.expander(f"{T('see_all')} {len(allr)} {T('model_responses')}"):
-                            for mn,mr in allr.items():
-                                mico={"Claude":"🟣","ChatGPT":"🟢","Gemini":"🔵"}.get(mn,"⚪")
-                                st.markdown(f"**{mico} {mn}{'  ✅' if mn==m else ''}**"); st.markdown(mr); st.markdown("---")
-                    email_result(r, f"Teacher Pehpeh — Risk Analysis for {s['name']} ({subject}, {grade})", f"rsk_{i}")
-                    tts_player(r, f"rsk_{i}")
-            with b3:
-                if st.button("🪪 ID Card",key=f"card{i}"):
-                    st.session_state[f"_show_card_{i}"]=not st.session_state.get(f"_show_card_{i}",False)
-                    st.rerun()
-            with b4:
-                if st.button("🗑️",key=f"d{i}"): st.session_state.students.pop(i); st.rerun()
-            # Student ID Card display with save options
-            if st.session_state.get(f"_show_card_{i}"):
-                with st.container():
-                    card_bytes, card_fname = generate_student_card(s, school_name, _grade_en, _subj_en, country)
-                    if card_bytes:
-                        st.image(card_bytes, caption=f"Student ID — {s['name']}", use_container_width=True)
-                        _save_label={"en":"Save card to...","fr":"Enregistrer la carte...","sw":"Hifadhi kadi..."}.get(_lang_key(),"Save card to...")
-                        _save_dest=st.selectbox(_save_label,["📥 Download to Device","📧 Email Card"],key=f"card_save_{i}",label_visibility="visible")
-                        if _save_dest.startswith("📥"):
-                            st.download_button(
-                                "📥 Download Student Card",
-                                data=card_bytes,
-                                file_name=card_fname,
-                                mime="image/png",
-                                key=f"dl_card_{i}",
-                                use_container_width=True
-                            )
-                        elif _save_dest.startswith("📧"):
-                            _card_b64=base64.b64encode(card_bytes).decode()
-                            email_result(f"Student ID Card for {s['name']}\nSchool: {school_name}\nGrade: {_grade_en}\nSubject: {_subj_en}", f"Teacher Pehpeh — Student Card: {s['name']}", f"card_em_{i}")
-                            st.download_button(
-                                "📥 Also Download Copy",
-                                data=card_bytes,
-                                file_name=card_fname,
-                                mime="image/png",
-                                key=f"dl_card_em_{i}",
-                                use_container_width=True
-                            )
-                    else:
-                        st.warning(f"Could not generate card: {card_fname}")
+            # Name + profile only — actions available in IBT Reports / Academic Reports tabs
+            _del_col, _name_col = st.columns([1, 11])
+            with _name_col:
+                st.markdown(
+                    f'<div class="sc"><strong style="color:{C_BLUE}">{s["name"]}</strong>'
+                    f' — {s["sib"]} sib, Mom:{s["mom"]}'
+                    f'<br><span style="font-size:.82rem">{" · ".join(rsk) or "🟢 Lower risk"}</span></div>',
+                    unsafe_allow_html=True)
+            with _del_col:
+                if st.button("🗑️", key=f"d{i}", help="Remove student"):
+                    st.session_state.students.pop(i); st.rerun()
         if st.session_state.students:
             st.markdown("---")
             _ibt_grades_ready = st.session_state.get("_ibt_has_grades") and bool(st.session_state.grade_history)
@@ -3625,6 +3573,12 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             else:
                 _cam_enabled = True
                 st.session_state["_pg_cam_enabled"] = True
+
+            # Skip photo grading section if grades already loaded via Excel upload
+            _excel_grades_loaded = st.session_state.get("_ibt_has_grades") and bool(st.session_state.grade_history)
+            if _excel_grades_loaded:
+                st.info("✅ Grades loaded from Excel. Use **IBT Reports** or **Academic Reports** tabs to analyse and export.")
+                _cam_enabled = False
 
             if _cam_enabled:
                 st.markdown(f'<div style="background:linear-gradient(135deg,#1565C0,#0D47A1);border-radius:12px;padding:14px 18px;margin-bottom:10px;color:white"><strong>📸 Photo Grading</strong> — Snap or upload photos of handwritten student work</div>',unsafe_allow_html=True)
