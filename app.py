@@ -4854,34 +4854,55 @@ document.getElementById('submit-btn').disabled = true;
                     _wi_bench6 = _IBT_BENCH_C.get(_wi_subj6, _IBT_AVG_C)
                     _s_cur6, _ = _ibt_status_c(_wi_cur_c, _wi_subj6, _sel_grade)
                     _s_proj6, _ = _ibt_status_c(_wi_proj_c, _wi_subj6, _sel_grade)
-                    _wi_gap_bench = _wi_proj_c - _wi_bench6   # positive = above bench, negative = below
-                    _wi_gap_color = "#4CAF50" if _wi_gap_bench >= 0 else "#EF5350"
+                    _wi_gap_cur   = _wi_cur_c  - _wi_bench6   # current curved vs bench
+                    _wi_gap_proj  = _wi_proj_c - _wi_bench6   # projected curved vs bench
                     _wi_info = (
-                        # Current shows RAW score (what the teacher/student actually sees)
-                        f'<div><span style="color:#8899BB;font-size:.78rem">Current (raw)</span><br>'
-                        f'<span style="color:#D4A843;font-weight:700;font-size:1.1rem">{_wi_cur_raw:.1f}</span> '
-                        f'<span style="color:#8899BB;font-size:.72rem">→ {_wi_cur_c:.1f} curved</span></div>'
-                        f'<div><span style="color:#8899BB;font-size:.78rem">→ Projected</span><br>'
-                        f'<span style="color:#4CAF50;font-weight:700;font-size:1.1rem">{_wi_proj_c:.1f}</span> '
-                        f'<span style="font-size:.78rem">{_s_proj6}</span></div>'
-                        f'<div><span style="color:#8899BB;font-size:.78rem">IBT bench</span><br>'
-                        f'<span style="color:#3B6DC4;font-weight:700;font-size:1.1rem">{_wi_bench6:.1f}</span></div>'
-                        # Gap to IBT bench always shown (+ above, − below) for everyone
-                        f'<div><span style="color:#8899BB;font-size:.78rem">Gap to IBT bench</span><br>'
-                        f'<span style="color:{_wi_gap_color};font-weight:700;font-size:1.1rem">{_wi_gap_bench:+.1f}</span></div>'
+                        # ── Left block: Current ──
+                        f'<div style="border-right:1px solid #1E3A6A;padding-right:20px">'
+                        f'<div style="color:#D4A84399;font-size:.7rem;font-weight:700;letter-spacing:.5px;margin-bottom:4px">CURRENT</div>'
+                        f'<div style="display:flex;gap:16px;flex-wrap:wrap">'
+                        f'<div><span style="color:#8899BB;font-size:.75rem">Raw score</span><br>'
+                        f'<span style="color:#D4A843;font-weight:700;font-size:1.15rem">{_wi_cur_raw:.1f}</span></div>'
+                        f'<div><span style="color:#8899BB;font-size:.75rem">Curved</span><br>'
+                        f'<span style="color:#D4A843;font-weight:700;font-size:1.15rem">{_wi_cur_c:.1f}</span> '
+                        f'<span style="font-size:.72rem;color:#8899BB">{_s_cur6}</span></div>'
+                        f'<div><span style="color:#8899BB;font-size:.75rem">Gap to bench</span><br>'
+                        f'<span style="color:{"#4CAF50" if _wi_gap_cur>=0 else "#EF5350"};font-weight:700;font-size:1.15rem">{_wi_gap_cur:+.1f}</span></div>'
+                        f'</div></div>'
+                        # ── Right block: Projected ──
+                        f'<div style="padding-left:4px">'
+                        f'<div style="color:#4CAF5099;font-size:.7rem;font-weight:700;letter-spacing:.5px;margin-bottom:4px">PROJECTED (after target)</div>'
+                        f'<div style="display:flex;gap:16px;flex-wrap:wrap">'
+                        f'<div><span style="color:#8899BB;font-size:.75rem">Curved</span><br>'
+                        f'<span style="color:#4CAF50;font-weight:700;font-size:1.15rem">{_wi_proj_c:.1f}</span> '
+                        f'<span style="font-size:.72rem;color:#8899BB">{_s_proj6}</span></div>'
+                        f'<div><span style="color:#8899BB;font-size:.75rem">IBT bench</span><br>'
+                        f'<span style="color:#3B6DC4;font-weight:700;font-size:1.15rem">{_wi_bench6:.1f}</span></div>'
+                        f'<div><span style="color:#8899BB;font-size:.75rem">Gap to bench</span><br>'
+                        f'<span style="color:{"#4CAF50" if _wi_gap_proj>=0 else "#EF5350"};font-weight:700;font-size:1.15rem">{_wi_gap_proj:+.1f}</span></div>'
+                        f'</div></div>'
                     )
                     if _sel_is_12:
-                        _wi_wprob6 = min(100, max(0, (_wi_proj_c - _IBT_ATRISK_C) / (_IBT_WASSCE_C - _IBT_ATRISK_C) * 100))
-                        _wi_gap_wassce = _wi_proj_c - _IBT_WASSCE_C
+                        _wi_wprob6    = min(100, max(0, (_wi_proj_c - _IBT_ATRISK_C) / (_IBT_WASSCE_C - _IBT_ATRISK_C) * 100))
+                        _wi_gap_cur_w  = _wi_cur_c  - _IBT_WASSCE_C
+                        _wi_gap_proj_w = _wi_proj_c - _IBT_WASSCE_C
                         _wi_info += (
-                            f'<div><span style="color:#8899BB;font-size:.78rem">Gap to WASSCE</span><br>'
-                            f'<span style="color:{"#4CAF50" if _wi_gap_wassce>=0 else "#EF5350"};font-weight:700;font-size:1.1rem">{_wi_gap_wassce:+.1f}</span></div>'
-                            f'<div><span style="color:#8899BB;font-size:.78rem">WASSCE readiness</span><br>'
-                            f'<span style="color:{"#4CAF50" if _wi_wprob6>=70 else "#FFA726" if _wi_wprob6>=40 else "#EF5350"};font-weight:700;font-size:1.1rem">{_wi_wprob6:.0f}%</span></div>'
+                            f'<div style="border-top:1px solid #1E3A6A;margin-top:10px;padding-top:8px;width:100%">'
+                            f'<div style="color:#D4A84399;font-size:.7rem;font-weight:700;letter-spacing:.5px;margin-bottom:4px">WASSCE (12th GRADE)</div>'
+                            f'<div style="display:flex;gap:16px;flex-wrap:wrap">'
+                            f'<div><span style="color:#8899BB;font-size:.75rem">Gap now</span><br>'
+                            f'<span style="color:{"#4CAF50" if _wi_gap_cur_w>=0 else "#EF5350"};font-weight:700;font-size:1.15rem">{_wi_gap_cur_w:+.1f}</span></div>'
+                            f'<div><span style="color:#8899BB;font-size:.75rem">Gap projected</span><br>'
+                            f'<span style="color:{"#4CAF50" if _wi_gap_proj_w>=0 else "#EF5350"};font-weight:700;font-size:1.15rem">{_wi_gap_proj_w:+.1f}</span></div>'
+                            f'<div><span style="color:#8899BB;font-size:.75rem">WASSCE readiness</span><br>'
+                            f'<span style="color:{"#4CAF50" if _wi_wprob6>=70 else "#FFA726" if _wi_wprob6>=40 else "#EF5350"};font-weight:700;font-size:1.15rem">{_wi_wprob6:.0f}%</span></div>'
+                            f'<div><span style="color:#8899BB;font-size:.75rem">Target</span><br>'
+                            f'<span style="color:#3B6DC4;font-weight:700;font-size:1.15rem">{_IBT_WASSCE_C:.1f}</span></div>'
+                            f'</div></div>'
                         )
                     st.markdown(
-                        f'<div style="background:#0D1B2A;border:1px solid #1E3A6A;border-radius:10px;padding:12px 16px">'
-                        f'<div style="display:flex;gap:24px;flex-wrap:wrap">{_wi_info}</div></div>',
+                        f'<div style="background:#0D1B2A;border:1px solid #1E3A6A;border-radius:10px;padding:14px 18px">'
+                        f'<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">{_wi_info}</div></div>',
                         unsafe_allow_html=True)
                 st.markdown("---")
 
