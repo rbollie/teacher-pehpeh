@@ -156,27 +156,10 @@ def generate_academic_word_report(
             _df["score"] = _pd.to_numeric(_df["score"], errors="coerce")
             n_subjs = _df["subject"].dropna().nunique()
 
-        # ── SECTION 1: Class Performance Summary ──────────────────────────
-        if grade_history and _df is not None:
-            by_stu = collections.defaultdict(list)
-            for g in grade_history:
-                by_stu[g["student"]].append(g)
-
-            _heading("1. Class Performance Summary")
-            tbl1 = doc.add_table(rows=1, cols=5); tbl1.style = "Table Grid"
-            _tbl_hdr(tbl1, ["Student", "Subjects", "Overall Avg", "IBT Curved Avg", "Status"])
-            for idx, (sname, records) in enumerate(sorted(by_stu.items())):
-                scores = [r["score"] for r in records]
-                avg    = sum(scores) / len(scores) if scores else 0
-                cavg   = sum(_curved(s) for s in scores) / len(scores) if scores else 0
-                subjs  = len({r.get("subject","") for r in records})
-                _tbl_row(tbl1, [sname, subjs, _fmt(avg), _fmt(cavg), _status(avg)],
-                         alt=(idx % 2 == 1))
-
-        # ── SECTION 2: Subject Breakdown — Class Averages ─────────────────
+        # ── SECTION 1: Subject Breakdown — Class Averages ──────────────────
         if _df is not None and n_subjs > 1:
             _micro()
-            _heading("2. Subject Breakdown — Class Averages")
+            _heading("1. Subject Breakdown — Class Averages")
 
             _sd = subject_data or {}
             _has_sem = any(
@@ -186,9 +169,9 @@ def generate_academic_word_report(
 
             if _has_sem:
                 hdrs2 = ["Subject", "Class Avg", "Sem 1 Cls Avg", "Sem 2 Cls Avg",
-                         "Top Student", "Lowest Score"]
+                         "Lowest Score", "Status"]
             else:
-                hdrs2 = ["Subject", "Class Avg", "# Records", "Top Student", "Lowest Score"]
+                hdrs2 = ["Subject", "Class Avg", "# Records", "Lowest Score", "Status"]
 
             tbl2 = doc.add_table(rows=1, cols=len(hdrs2)); tbl2.style = "Table Grid"
             _tbl_hdr(tbl2, hdrs2)
@@ -208,9 +191,9 @@ def generate_academic_word_report(
                     s1_cls = sum(s1_vals)/len(s1_vals) if s1_vals else None
                     s2_cls = sum(s2_vals)/len(s2_vals) if s2_vals else None
                     row_vals = [subj, _fmt(cls_avg), _fmt(s1_cls), _fmt(s2_cls),
-                                top_stu, _fmt(low_sc)]
+                                _fmt(low_sc), _status(cls_avg)]
                 else:
-                    row_vals = [subj, _fmt(cls_avg), len(_sdf), top_stu, _fmt(low_sc)]
+                    row_vals = [subj, _fmt(cls_avg), len(_sdf), _fmt(low_sc), _status(cls_avg)]
 
                 _tbl_row(tbl2, row_vals, alt=(idx % 2 == 1))
 
@@ -223,7 +206,7 @@ def generate_academic_word_report(
 
         if _has_sem_ind:
             _micro()
-            _heading("3. Individual Averages by Subject & Semester")
+            _heading("2. Individual Averages by Subject & Semester")
             tbl3 = doc.add_table(rows=1, cols=6); tbl3.style = "Table Grid"
             _tbl_hdr(tbl3, ["Student", "Subject", "Semester 1", "Semester 2",
                             "Overall Avg", "Status"])
@@ -246,7 +229,7 @@ def generate_academic_word_report(
         elif _df is not None and n_subjs > 1:
             # Fallback: no semester split available
             _micro()
-            _heading("3. Individual Averages by Subject")
+            _heading("2. Individual Averages by Subject")
             tbl3b = doc.add_table(rows=1, cols=4); tbl3b.style = "Table Grid"
             _tbl_hdr(tbl3b, ["Student", "Subject", "Avg Score", "Status"])
             _row_idx = 0
@@ -261,7 +244,7 @@ def generate_academic_word_report(
 
         # ── SECTION 4: AI Analysis ────────────────────────────────────────
         if analysis_text:
-            _sec_n = 4 if (_df is not None and n_subjs > 1) else (3 if grade_history else 2)
+            _sec_n = 3 if (_df is not None and n_subjs > 1) else (2 if grade_history else 1)
             _micro()
             _heading(f"{_sec_n}. AI Performance Analysis", level=1, color=(13,59,140))
             lines = analysis_text.split("\n")

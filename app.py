@@ -3836,24 +3836,32 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                 _subj_rows = []
                 for _subj in sorted(_df["subject"].unique()):
                     _sd2 = _df[_df["subject"]==_subj]
-                    _top_stu = _sd2.loc[_sd2["score"].idxmax(), "student"]
+                    _cls_avg = _sd2["score"].mean()
                     # Semester averages from IBT subject data if available
                     _sdata = (st.session_state.get("_ar_subject_data") or {}).get(_subj, {})
                     _s1_vals = [v["s1_avg"] for v in _sdata.values() if v.get("s1_avg") is not None]
                     _s2_vals = [v["s2_avg"] for v in _sdata.values() if v.get("s2_avg") is not None]
+                    _cls_status = ("🔴 Intervention" if _cls_avg < 50
+                                   else ("🟡 Monitor" if _cls_avg < 65 else "🟢 On Track"))
                     _row = {
-                        "Subject":      _subj,
-                        "Class Avg":    f"{_sd2['score'].mean():.1f}/100",
-                        "# Students":   _sd2["student"].nunique(),
-                        "Top Student":  _top_stu,
-                        "Lowest":       f"{_sd2['score'].min():.1f}/100",
+                        "Subject":    _subj,
+                        "Class Avg":  f"{_cls_avg:.1f}/100",
+                        "# Students": _sd2["student"].nunique(),
+                        "Lowest":     f"{_sd2['score'].min():.1f}/100",
+                        "Status":     _cls_status,
                     }
                     if _s1_vals:
                         _row["Sem 1 Cls Avg"] = f"{sum(_s1_vals)/len(_s1_vals):.1f}/100"
                     if _s2_vals:
                         _row["Sem 2 Cls Avg"] = f"{sum(_s2_vals)/len(_s2_vals):.1f}/100"
                     _subj_rows.append(_row)
-                st.dataframe(pd.DataFrame(_subj_rows), use_container_width=True, hide_index=True)
+                # Reorder columns for display
+                _col_order = ["Subject","Class Avg"]
+                if any("Sem 1 Cls Avg" in r for r in _subj_rows): _col_order.append("Sem 1 Cls Avg")
+                if any("Sem 2 Cls Avg" in r for r in _subj_rows): _col_order.append("Sem 2 Cls Avg")
+                _col_order += ["# Students","Lowest","Status"]
+                _disp_df = pd.DataFrame(_subj_rows).reindex(columns=[c for c in _col_order if c in pd.DataFrame(_subj_rows).columns])
+                st.dataframe(_disp_df, use_container_width=True, hide_index=True)
 
                 # --- Individual averages per subject per semester ---
                 _sdata_all = st.session_state.get("_ar_subject_data") or {}
