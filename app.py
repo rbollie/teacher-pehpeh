@@ -4552,6 +4552,236 @@ document.getElementById('submit-btn').disabled = true;
             with r2:
                 if st.button(T("wassce_tips"),key="wt"): st.markdown(f'<div style="background:{C_NAVY_L};border:1px solid {C_GOLD};border-radius:12px;padding:16px;color:#D0D8E8;white-space:pre-wrap;line-height:1.7">{WASSCE_TIPS}</div>',unsafe_allow_html=True)
 
+
+    # TAB 6: IBT REPORTS — inline (no external module needed)
+    if t6:
+     with t6:
+        try:
+            # ── IBT constants ──────────────────────────────────────────────────
+            _IBT_BENCH = {
+                "Mathematics":39.1,"Physics":39.9,"Chemistry":49.4,"Biology":44.7,
+                "English Grammar":43.3,"Literature":43.3,"Economics":43.3,"French":43.3,
+            }
+            _IBT_WASSCE=50.0; _IBT_ATRISK=37.5; _IBT_EXCELLENT=62.5; _IBT_AVG=43.3
+            _IBT_RISK_FACTS = [
+                ("School quality","School is the #1 predictor (F=8.60, p<0.001). Best school avg: 51.2 vs worst: 35.4 — a 15.8-point gap."),
+                ("Mother's education","Students with HS-grad mothers avg 44.9 vs 41.8 for no-HS mothers (p=0.031). Physics gap widest: 43.8 vs 36.3 (p=0.0075)."),
+                ("Computer access","58.5% of IBT students never used a computer. Computer access adds +4.1 pts on average."),
+                ("Intervention impact","Without intervention: gap widens +5.5 pts over 2 years. With IBT intervention: narrows to 2.4 pts."),
+                ("WASSCE target","IBT sets WASSCE pass at 50/100. Class avg of 43.3 means most students need targeted support to reach the threshold."),
+                ("Gender parity","No statistically significant gender gap in overall scores in IBT dataset — interventions affect boys and girls equally."),
+            ]
+            def _ibt_status(score, subj=None):
+                bench=_IBT_BENCH.get(subj,_IBT_AVG) if subj else _IBT_AVG
+                if score>=_IBT_EXCELLENT: return "⭐ Excellent","#1B5E20"
+                if score>=_IBT_WASSCE:   return "🟢 On Target","#2E7D32"
+                if score>=bench:         return "🔵 At IBT Avg","#0D47A1"
+                if score>=_IBT_ATRISK:   return "🟡 Monitor","#E65100"
+                return "🔴 Intervention","#8B1A1A"
+            def _ibt_card(col,label,value,benchmark):
+                stat,bg=_ibt_status(value,label); delta=value-benchmark
+                col.markdown(
+                    f'<div style="background:{bg}22;border:1px solid {bg};border-radius:10px;'+
+                    f'padding:10px 14px;text-align:center;margin-bottom:6px">'+
+                    f'<div style="color:#8899BB;font-size:.75rem;margin-bottom:2px">{label[:12]}</div>'+
+                    f'<div style="color:#D4A843;font-size:1.2rem;font-weight:800">{value:.1f}</div>'+
+                    f'<div style="color:#aaa;font-size:.72rem">bench {benchmark:.1f} '+
+                    f'<span style="color:{"#4CAF50" if delta>=0 else "#EF5350"}">({delta:+.1f})</span></div>'+
+                    f'<div style="font-size:.75rem">{stat}</div>'+
+                    f'</div>', unsafe_allow_html=True)
+
+            _gh6=st.session_state.get("grade_history",[])
+            _stu6=st.session_state.get("students",[])
+
+            # ── Banner ─────────────────────────────────────────────────────────
+            st.markdown(
+                '<div style="background:linear-gradient(135deg,#0F2247,#8B1A1A);border-radius:14px;'+
+                'padding:18px 24px 14px;margin-bottom:12px;border:1px solid #D4A84344">'+
+                '<div style="color:#D4A843;font-size:1.1rem;font-weight:800">📈 IBT INTERVENTION ANALYSIS ENGINE</div>'+
+                '<div style="color:#D0D8E8;font-size:.85rem;margin-top:4px">'+
+                'Compares your class data against IBT 183-student, 6-school, 8-year research dataset - '+
+                'WASSCE target: 50 | At-risk threshold: 37.5 | IBT overall avg: 43.3</div>'+
+                '</div>', unsafe_allow_html=True)
+
+            if not _gh6:
+                st.info("📭 No grade data loaded yet. Upload the IBT Grade Tracker Excel or enter grades in the Students tab first.")
+            else:
+                _gmap6={}
+                for _g6 in _gh6:
+                    _gmap6.setdefault(_g6["student"],{}).setdefault(_g6["subject"],[]).append(_g6["score"])
+                _all_stu6=sorted(_gmap6.keys())
+                _all_subj6=sorted({_g6["subject"] for _g6 in _gh6})
+
+                # ── Section 1: Class vs IBT Benchmarks ──────────────────────────
+                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:1rem;margin:8px 0 6px">📊 Class vs IBT Benchmarks</div>', unsafe_allow_html=True)
+                _bench_rows6=[]
+                for _sub6 in list(_IBT_BENCH.keys()):
+                    _sc6=[sc for s in _all_stu6 for sc in _gmap6.get(s,{}).get(_sub6,[])]
+                    _ca6=sum(_sc6)/len(_sc6) if _sc6 else None
+                    _bench_rows6.append((_sub6,_ca6,_IBT_BENCH[_sub6]))
+                _with_data6=[r for r in _bench_rows6 if r[1] is not None]
+                if _with_data6:
+                    _bc6=st.columns(min(4,len(_with_data6)))
+                    for _ci6,(_sub6,_ca6,_be6) in enumerate(_with_data6):
+                        with _bc6[_ci6%len(_bc6)]:
+                            _ibt_card(_bc6[_ci6%len(_bc6)],_sub6,_ca6,_be6)
+                if PD and _with_data6:
+                    _trows6=[{"Subject":s,"Class Avg":f"{ca:.1f}","IBT Bench":f"{be:.1f}",
+                              "Gap":f"{ca-be:+.1f}","Gap to WASSCE":f"{ca-50:+.1f}",
+                              "Status":_ibt_status(ca,s)[0]} for s,ca,be in _with_data6]
+                    st.dataframe(pd.DataFrame(_trows6),use_container_width=True,hide_index=True)
+                st.markdown("---")
+
+                # ── Section 2: Student Deep-Dive ────────────────────────────────
+                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:1rem;margin:4px 0 6px">🎓 Student Deep-Dive</div>', unsafe_allow_html=True)
+                _sel6=st.selectbox("Select student:",_all_stu6,key="ibt_stu_sel6")
+                _sdata6=_gmap6.get(_sel6,{})
+                _sprof6=next((s for s in _stu6 if s.get("name")==_sel6),{})
+                if _sprof6:
+                    _rf6=[]
+                    if _sprof6.get("mom")=="No HS":  _rf6.append("🔴 No HS mother")
+                    if _sprof6.get("sm")=="Yes":      _rf6.append("🔴 Single mother")
+                    if _sprof6.get("sib")=="8+":      _rf6.append("🟠 8+ siblings")
+                    if _sprof6.get("wk")=="Yes":      _rf6.append("🟠 Works after school")
+                    if _sprof6.get("cp")=="Never":    _rf6.append("🟡 No computer access")
+                    _n_rf6=len(_rf6); _rc6="#8B1A1A" if _n_rf6>=3 else ("#E65100" if _n_rf6>=1 else "#1B5E20")
+                    st.markdown(
+                        f'<div style="background:{_rc6}22;border:1px solid {_rc6}55;border-radius:8px;'+
+                        f'padding:8px 14px;margin-bottom:8px;font-size:.83rem">'+
+                        f'<strong style="color:#D4A843">Risk Factors ({_n_rf6}):</strong> '+
+                        f'<span style="color:#D0D8E8">{" · ".join(_rf6) or "🟢 Lower risk profile"}</span></div>',
+                        unsafe_allow_html=True)
+                _stu_subjs6=[s for s in list(_IBT_BENCH.keys()) if s in _sdata6]
+                if _stu_subjs6:
+                    _sc6b=st.columns(min(4,len(_stu_subjs6)))
+                    for _ci6,_sub6 in enumerate(_stu_subjs6):
+                        _avg6=sum(_sdata6[_sub6])/len(_sdata6[_sub6])
+                        with _sc6b[_ci6%len(_sc6b)]:
+                            _ibt_card(_sc6b[_ci6%len(_sc6b)],_sub6,_avg6,_IBT_BENCH.get(_sub6,_IBT_AVG))
+                st.markdown("<div style='height:8px'></div>",unsafe_allow_html=True)
+
+                # ── Section 3: What-If ────────────────────────────────────────
+                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.95rem;margin:4px 0 4px">🔮 What-If Scenario</div>', unsafe_allow_html=True)
+                st.caption("Adjust target score to see projected IBT status and WASSCE readiness")
+                _wi_subj6=st.selectbox("Subject:",_stu_subjs6 or list(_IBT_BENCH.keys())[:1],key="ibt_wi_subj6")
+                _wi_scores6=_sdata6.get(_wi_subj6,[])
+                _wi_cur6=sum(_wi_scores6)/len(_wi_scores6) if _wi_scores6 else 0
+                _wc1,_wc2=st.columns([2,3])
+                with _wc1:
+                    _wi_tgt6=st.slider("Target for next assessment:",0,100,min(100,int(_wi_cur6)+8),key="ibt_wi_sl6")
+                with _wc2:
+                    _wi_proj6=(_wi_cur6*max(1,len(_wi_scores6))+_wi_tgt6)/(max(1,len(_wi_scores6))+1)
+                    _wi_bench6=_IBT_BENCH.get(_wi_subj6,_IBT_AVG)
+                    _wi_wprob6=min(100,max(0,(_wi_proj6-_IBT_ATRISK)/(_IBT_WASSCE-_IBT_ATRISK)*100)) if _wi_proj6>_IBT_ATRISK else 0
+                    _s_cur6,_=_ibt_status(_wi_cur6,_wi_subj6); _s_proj6,_=_ibt_status(_wi_proj6,_wi_subj6)
+                    st.markdown(
+                        f'<div style="background:#0D1B2A;border:1px solid #1E3A6A;border-radius:10px;padding:12px 16px">'+
+                        f'<div style="display:flex;gap:24px;flex-wrap:wrap">'+
+                        f'<div><span style="color:#8899BB;font-size:.78rem">Current avg</span><br>'+
+                        f'<span style="color:#D4A843;font-weight:700;font-size:1.1rem">{_wi_cur6:.1f}</span> <span style="font-size:.78rem">{_s_cur6}</span></div>'+
+                        f'<div><span style="color:#8899BB;font-size:.78rem">→ Projected</span><br>'+
+                        f'<span style="color:#4CAF50;font-weight:700;font-size:1.1rem">{_wi_proj6:.1f}</span> <span style="font-size:.78rem">{_s_proj6}</span></div>'+
+                        f'<div><span style="color:#8899BB;font-size:.78rem">IBT bench</span><br>'+
+                        f'<span style="color:#3B6DC4;font-weight:700;font-size:1.1rem">{_wi_bench6:.1f}</span></div>'+
+                        f'<div><span style="color:#8899BB;font-size:.78rem">WASSCE readiness</span><br>'+
+                        f'<span style="color:{"#4CAF50" if _wi_wprob6>=70 else "#FFA726" if _wi_wprob6>=40 else "#EF5350"};font-weight:700;font-size:1.1rem">{_wi_wprob6:.0f}%</span></div>'+
+                        f'</div></div>', unsafe_allow_html=True)
+                st.markdown("---")
+
+                # ── Section 4: IBT Research Context ─────────────────────────
+                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.95rem;margin:4px 0 6px">📚 IBT Research Context (183 students · 6 schools · 8 years)</div>', unsafe_allow_html=True)
+                _rf_cols6=st.columns(2)
+                for _ri6,(_rtitle6,_rtext6) in enumerate(_IBT_RISK_FACTS):
+                    with _rf_cols6[_ri6%2]:
+                        st.markdown(
+                            f'<div style="background:#0D1B2A;border-left:3px solid #D4A843;border-radius:6px;'+
+                            f'padding:8px 12px;margin-bottom:8px">'+
+                            f'<div style="color:#D4A843;font-weight:700;font-size:.8rem;margin-bottom:2px">{_rtitle6}</div>'+
+                            f'<div style="color:#C0C8D8;font-size:.78rem;line-height:1.5">{_rtext6}</div></div>',
+                            unsafe_allow_html=True)
+                st.markdown("---")
+
+                # ── Section 5: AI Intervention Plan ─────────────────────────
+                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.95rem;margin:4px 0 6px">🤖 AI Intervention Plan</div>', unsafe_allow_html=True)
+                _ibt_ai_key6=f"ibt_ai_{_sel6}"
+                if st.button("⚡ Generate IBT Intervention Plan", key="ibt_gen_ai6", type="primary"):
+                    _stu_sum6=[]
+                    for _sub6 in _stu_subjs6:
+                        _avg6=sum(_sdata6[_sub6])/len(_sdata6[_sub6])
+                        _gap6=_avg6-_IBT_BENCH.get(_sub6,_IBT_AVG)
+                        _stu_sum6.append(f"  {_sub6}: avg {_avg6:.1f} (IBT bench {_IBT_BENCH.get(_sub6,_IBT_AVG):.1f}, gap {_gap6:+.1f})")
+                    _risk_ctx6=""
+                    if _sprof6:
+                        _rf6b=[]
+                        if _sprof6.get("mom")=="No HS": _rf6b.append("mother has no HS education (IBT: -3.1 pts avg, Physics -7.5 pts)")
+                        if _sprof6.get("sm")=="Yes":    _rf6b.append("single-mother household")
+                        if _sprof6.get("wk")=="Yes":    _rf6b.append("works after school")
+                        if _sprof6.get("cp")=="Never":  _rf6b.append("no computer access (IBT: -4.1 pts)")
+                        if _sprof6.get("sib") in ["5-8","8+"]: _rf6b.append(f"{_sprof6['sib']} siblings")
+                        if _rf6b: _risk_ctx6="RISK FACTORS: "+"; ".join(_rf6b)
+                    _ibt_prompt6=f"""You are an IBT education analyst. Write a structured IBT Intervention Report.
+
+STUDENT: {_sel6}
+{_risk_ctx6}
+
+PERFORMANCE vs IBT BENCHMARKS:
+{chr(10).join(_stu_sum6)}
+
+IBT RESEARCH: Overall avg 43.3 | WASSCE pass 50 | At-risk 37.5 | School quality #1 predictor (F=8.60) | Computer access +4.1 pts | No-HS mother: -3.1 pts overall | Without intervention gap widens +5.5 pts/2yrs | With intervention narrows to 2.4 pts
+
+Write:
+1. RISK PROFILE SUMMARY: Student risk level using scores AND home factors.
+2. SUBJECT-BY-SUBJECT ANALYSIS: Each subject score vs IBT benchmark and WASSCE readiness.
+3. TOP 3 INTERVENTIONS (ranked): Specific, offline-doable, with measurable goal and IBT justification.
+4. TEACHER ACTIONS THIS WEEK: 2-3 concrete Monday-morning actions.
+5. PROGNOSIS: Realistic end-of-term outlook if interventions applied.
+
+Be specific, data-driven, and compassionate."""
+                    with st.spinner("Generating IBT intervention analysis..."):
+                        try:
+                            _ibt_r6,_ibt_m6,_=best_all(build_free_chat(),_ibt_prompt6,[])
+                            st.session_state[_ibt_ai_key6]=_ibt_r6
+                        except Exception as _ae6:
+                            st.error(f"AI error: {_ae6}")
+                if st.session_state.get(_ibt_ai_key6):
+                    st.markdown(
+                        f'<div style="background:#0D1B2A;border:1px solid #1E3A6A;border-radius:10px;'+
+                        f'padding:18px 22px;color:#D0D8E8;font-size:.87rem;line-height:1.8;white-space:pre-wrap;margin-top:8px">'+
+                        f'{st.session_state[_ibt_ai_key6]}</div>', unsafe_allow_html=True)
+                st.markdown("---")
+
+                # ── Section 6: Downloads ─────────────────────────────────────
+                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.95rem;margin:4px 0 6px">📥 Download Reports</div>', unsafe_allow_html=True)
+                _idl1,_idl2=st.columns(2)
+                with _idl1:
+                    try:
+                        from word_report import generate_academic_word_report
+                        _ibt_word6=generate_academic_word_report(
+                            _gh6,_stu6,
+                            st.session_state.get("_classroom_label",school_name or "IBT School"),
+                            _grade_en,
+                            st.session_state.get("ar_analysis_text","")
+                        )
+                        st.download_button("📄 Download Word Report",data=_ibt_word6,
+                            file_name=f"IBT_Report_{datetime.datetime.now().strftime('%Y%m%d')}.docx",
+                            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                            key="ibt6_dl_word",type="primary",use_container_width=True)
+                    except Exception as _we6:
+                        st.warning(f"Word export: {_we6}")
+                with _idl2:
+                    if PD and _gh6:
+                        _ibt_csv6=pd.DataFrame(_gh6).to_csv(index=False)
+                        st.download_button("📊 Download CSV",data=_ibt_csv6,
+                            file_name=f"IBT_Grades_{datetime.datetime.now().strftime('%Y%m%d')}.csv",
+                            mime="text/csv",key="ibt6_dl_csv",use_container_width=True)
+        except Exception as _t6_err:
+            st.error(f"IBT Reports error: {_t6_err}")
+            import traceback; st.code(traceback.format_exc())
+
+
+
+
+
     st.markdown(f'<div class="ft">{ico(16)} <strong>Teacher Pehpeh by IBT</strong><br>Built by <strong>Rodney L. Bollie, PhD</strong> · <a href="https://www.institutebasictechnology.org">Institute of Basic Technology</a><br><a href="https://www.institutebasictechnology.org/index.php" style="color:{C_BLUE}">Visit our website →</a></div>',unsafe_allow_html=True)
 
 
@@ -4781,234 +5011,6 @@ def wassce_shading_modal():
                 f'<div style="color:#D0D8E8;font-size:.83rem;margin-top:3px;line-height:1.5">{body}</div></div></div>',
                 unsafe_allow_html=True
             )
-
-
-    # TAB 6: IBT REPORTS — inline (no external module needed)
-    if t6:
-     with t6:
-        try:
-            # ── IBT constants ──────────────────────────────────────────────────
-            _IBT_BENCH = {
-                "Mathematics":39.1,"Physics":39.9,"Chemistry":49.4,"Biology":44.7,
-                "English Grammar":43.3,"Literature":43.3,"Economics":43.3,"French":43.3,
-            }
-            _IBT_WASSCE=50.0; _IBT_ATRISK=37.5; _IBT_EXCELLENT=62.5; _IBT_AVG=43.3
-            _IBT_RISK_FACTS = [
-                ("School quality","School is the #1 predictor (F=8.60, p<0.001). Best school avg: 51.2 vs worst: 35.4 — a 15.8-point gap."),
-                ("Mother's education","Students with HS-grad mothers avg 44.9 vs 41.8 for no-HS mothers (p=0.031). Physics gap widest: 43.8 vs 36.3 (p=0.0075)."),
-                ("Computer access","58.5% of IBT students never used a computer. Computer access adds +4.1 pts on average."),
-                ("Intervention impact","Without intervention: gap widens +5.5 pts over 2 years. With IBT intervention: narrows to 2.4 pts."),
-                ("WASSCE target","IBT sets WASSCE pass at 50/100. Class avg of 43.3 means most students need targeted support to reach the threshold."),
-                ("Gender parity","No statistically significant gender gap in overall scores in IBT dataset — interventions affect boys and girls equally."),
-            ]
-            def _ibt_status(score, subj=None):
-                bench=_IBT_BENCH.get(subj,_IBT_AVG) if subj else _IBT_AVG
-                if score>=_IBT_EXCELLENT: return "⭐ Excellent","#1B5E20"
-                if score>=_IBT_WASSCE:   return "🟢 On Target","#2E7D32"
-                if score>=bench:         return "🔵 At IBT Avg","#0D47A1"
-                if score>=_IBT_ATRISK:   return "🟡 Monitor","#E65100"
-                return "🔴 Intervention","#8B1A1A"
-            def _ibt_card(col,label,value,benchmark):
-                stat,bg=_ibt_status(value,label); delta=value-benchmark
-                col.markdown(
-                    f'<div style="background:{bg}22;border:1px solid {bg};border-radius:10px;'+
-                    f'padding:10px 14px;text-align:center;margin-bottom:6px">'+
-                    f'<div style="color:#8899BB;font-size:.75rem;margin-bottom:2px">{label[:12]}</div>'+
-                    f'<div style="color:#D4A843;font-size:1.2rem;font-weight:800">{value:.1f}</div>'+
-                    f'<div style="color:#aaa;font-size:.72rem">bench {benchmark:.1f} '+
-                    f'<span style="color:{"#4CAF50" if delta>=0 else "#EF5350"}">({delta:+.1f})</span></div>'+
-                    f'<div style="font-size:.75rem">{stat}</div>'+
-                    f'</div>', unsafe_allow_html=True)
-
-            _gh6=st.session_state.get("grade_history",[])
-            _stu6=st.session_state.get("students",[])
-
-            # ── Banner ─────────────────────────────────────────────────────────
-            st.markdown(
-                '<div style="background:linear-gradient(135deg,#0F2247,#8B1A1A);border-radius:14px;'+
-                'padding:18px 24px 14px;margin-bottom:12px;border:1px solid #D4A84344">'+
-                '<div style="color:#D4A843;font-size:1.1rem;font-weight:800">📈 IBT INTERVENTION ANALYSIS ENGINE</div>'+
-                '<div style="color:#D0D8E8;font-size:.85rem;margin-top:4px">'+
-                'Compares your class data against IBT 183-student, 6-school, 8-year research dataset - '+
-                'WASSCE target: 50 | At-risk threshold: 37.5 | IBT overall avg: 43.3</div>'+
-                '</div>', unsafe_allow_html=True)
-
-            if not _gh6:
-                st.info("📭 No grade data loaded yet. Upload the IBT Grade Tracker Excel or enter grades in the Students tab first.")
-            else:
-                _gmap6={}
-                for _g6 in _gh6:
-                    _gmap6.setdefault(_g6["student"],{}).setdefault(_g6["subject"],[]).append(_g6["score"])
-                _all_stu6=sorted(_gmap6.keys())
-                _all_subj6=sorted({_g6["subject"] for _g6 in _gh6})
-
-                # ── Section 1: Class vs IBT Benchmarks ──────────────────────────
-                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:1rem;margin:8px 0 6px">📊 Class vs IBT Benchmarks</div>', unsafe_allow_html=True)
-                _bench_rows6=[]
-                for _sub6 in list(_IBT_BENCH.keys()):
-                    _sc6=[sc for s in _all_stu6 for sc in _gmap6.get(s,{}).get(_sub6,[])]
-                    _ca6=sum(_sc6)/len(_sc6) if _sc6 else None
-                    _bench_rows6.append((_sub6,_ca6,_IBT_BENCH[_sub6]))
-                _with_data6=[r for r in _bench_rows6 if r[1] is not None]
-                if _with_data6:
-                    _bc6=st.columns(min(4,len(_with_data6)))
-                    for _ci6,(_sub6,_ca6,_be6) in enumerate(_with_data6):
-                        with _bc6[_ci6%len(_bc6)]:
-                            _ibt_card(_bc6[_ci6%len(_bc6)],_sub6,_ca6,_be6)
-                if PD and _with_data6:
-                    _trows6=[{"Subject":s,"Class Avg":f"{ca:.1f}","IBT Bench":f"{be:.1f}",
-                              "Gap":f"{ca-be:+.1f}","Gap to WASSCE":f"{ca-50:+.1f}",
-                              "Status":_ibt_status(ca,s)[0]} for s,ca,be in _with_data6]
-                    st.dataframe(pd.DataFrame(_trows6),use_container_width=True,hide_index=True)
-                st.markdown("---")
-
-                # ── Section 2: Student Deep-Dive ────────────────────────────────
-                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:1rem;margin:4px 0 6px">🎓 Student Deep-Dive</div>', unsafe_allow_html=True)
-                _sel6=st.selectbox("Select student:",_all_stu6,key="ibt_stu_sel6")
-                _sdata6=_gmap6.get(_sel6,{})
-                _sprof6=next((s for s in _stu6 if s.get("name")==_sel6),{})
-                if _sprof6:
-                    _rf6=[]
-                    if _sprof6.get("mom")=="No HS":  _rf6.append("🔴 No HS mother")
-                    if _sprof6.get("sm")=="Yes":      _rf6.append("🔴 Single mother")
-                    if _sprof6.get("sib")=="8+":      _rf6.append("🟠 8+ siblings")
-                    if _sprof6.get("wk")=="Yes":      _rf6.append("🟠 Works after school")
-                    if _sprof6.get("cp")=="Never":    _rf6.append("🟡 No computer access")
-                    _n_rf6=len(_rf6); _rc6="#8B1A1A" if _n_rf6>=3 else ("#E65100" if _n_rf6>=1 else "#1B5E20")
-                    st.markdown(
-                        f'<div style="background:{_rc6}22;border:1px solid {_rc6}55;border-radius:8px;'+
-                        f'padding:8px 14px;margin-bottom:8px;font-size:.83rem">'+
-                        f'<strong style="color:#D4A843">Risk Factors ({_n_rf6}):</strong> '+
-                        f'<span style="color:#D0D8E8">{" · ".join(_rf6) or "🟢 Lower risk profile"}</span></div>',
-                        unsafe_allow_html=True)
-                _stu_subjs6=[s for s in list(_IBT_BENCH.keys()) if s in _sdata6]
-                if _stu_subjs6:
-                    _sc6b=st.columns(min(4,len(_stu_subjs6)))
-                    for _ci6,_sub6 in enumerate(_stu_subjs6):
-                        _avg6=sum(_sdata6[_sub6])/len(_sdata6[_sub6])
-                        with _sc6b[_ci6%len(_sc6b)]:
-                            _ibt_card(_sc6b[_ci6%len(_sc6b)],_sub6,_avg6,_IBT_BENCH.get(_sub6,_IBT_AVG))
-                st.markdown("<div style='height:8px'></div>",unsafe_allow_html=True)
-
-                # ── Section 3: What-If ────────────────────────────────────────
-                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.95rem;margin:4px 0 4px">🔮 What-If Scenario</div>', unsafe_allow_html=True)
-                st.caption("Adjust target score to see projected IBT status and WASSCE readiness")
-                _wi_subj6=st.selectbox("Subject:",_stu_subjs6 or list(_IBT_BENCH.keys())[:1],key="ibt_wi_subj6")
-                _wi_scores6=_sdata6.get(_wi_subj6,[])
-                _wi_cur6=sum(_wi_scores6)/len(_wi_scores6) if _wi_scores6 else 0
-                _wc1,_wc2=st.columns([2,3])
-                with _wc1:
-                    _wi_tgt6=st.slider("Target for next assessment:",0,100,min(100,int(_wi_cur6)+8),key="ibt_wi_sl6")
-                with _wc2:
-                    _wi_proj6=(_wi_cur6*max(1,len(_wi_scores6))+_wi_tgt6)/(max(1,len(_wi_scores6))+1)
-                    _wi_bench6=_IBT_BENCH.get(_wi_subj6,_IBT_AVG)
-                    _wi_wprob6=min(100,max(0,(_wi_proj6-_IBT_ATRISK)/(_IBT_WASSCE-_IBT_ATRISK)*100)) if _wi_proj6>_IBT_ATRISK else 0
-                    _s_cur6,_=_ibt_status(_wi_cur6,_wi_subj6); _s_proj6,_=_ibt_status(_wi_proj6,_wi_subj6)
-                    st.markdown(
-                        f'<div style="background:#0D1B2A;border:1px solid #1E3A6A;border-radius:10px;padding:12px 16px">'+
-                        f'<div style="display:flex;gap:24px;flex-wrap:wrap">'+
-                        f'<div><span style="color:#8899BB;font-size:.78rem">Current avg</span><br>'+
-                        f'<span style="color:#D4A843;font-weight:700;font-size:1.1rem">{_wi_cur6:.1f}</span> <span style="font-size:.78rem">{_s_cur6}</span></div>'+
-                        f'<div><span style="color:#8899BB;font-size:.78rem">→ Projected</span><br>'+
-                        f'<span style="color:#4CAF50;font-weight:700;font-size:1.1rem">{_wi_proj6:.1f}</span> <span style="font-size:.78rem">{_s_proj6}</span></div>'+
-                        f'<div><span style="color:#8899BB;font-size:.78rem">IBT bench</span><br>'+
-                        f'<span style="color:#3B6DC4;font-weight:700;font-size:1.1rem">{_wi_bench6:.1f}</span></div>'+
-                        f'<div><span style="color:#8899BB;font-size:.78rem">WASSCE readiness</span><br>'+
-                        f'<span style="color:{"#4CAF50" if _wi_wprob6>=70 else "#FFA726" if _wi_wprob6>=40 else "#EF5350"};font-weight:700;font-size:1.1rem">{_wi_wprob6:.0f}%</span></div>'+
-                        f'</div></div>', unsafe_allow_html=True)
-                st.markdown("---")
-
-                # ── Section 4: IBT Research Context ─────────────────────────
-                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.95rem;margin:4px 0 6px">📚 IBT Research Context (183 students · 6 schools · 8 years)</div>', unsafe_allow_html=True)
-                _rf_cols6=st.columns(2)
-                for _ri6,(_rtitle6,_rtext6) in enumerate(_IBT_RISK_FACTS):
-                    with _rf_cols6[_ri6%2]:
-                        st.markdown(
-                            f'<div style="background:#0D1B2A;border-left:3px solid #D4A843;border-radius:6px;'+
-                            f'padding:8px 12px;margin-bottom:8px">'+
-                            f'<div style="color:#D4A843;font-weight:700;font-size:.8rem;margin-bottom:2px">{_rtitle6}</div>'+
-                            f'<div style="color:#C0C8D8;font-size:.78rem;line-height:1.5">{_rtext6}</div></div>',
-                            unsafe_allow_html=True)
-                st.markdown("---")
-
-                # ── Section 5: AI Intervention Plan ─────────────────────────
-                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.95rem;margin:4px 0 6px">🤖 AI Intervention Plan</div>', unsafe_allow_html=True)
-                _ibt_ai_key6=f"ibt_ai_{_sel6}"
-                if st.button("⚡ Generate IBT Intervention Plan", key="ibt_gen_ai6", type="primary"):
-                    _stu_sum6=[]
-                    for _sub6 in _stu_subjs6:
-                        _avg6=sum(_sdata6[_sub6])/len(_sdata6[_sub6])
-                        _gap6=_avg6-_IBT_BENCH.get(_sub6,_IBT_AVG)
-                        _stu_sum6.append(f"  {_sub6}: avg {_avg6:.1f} (IBT bench {_IBT_BENCH.get(_sub6,_IBT_AVG):.1f}, gap {_gap6:+.1f})")
-                    _risk_ctx6=""
-                    if _sprof6:
-                        _rf6b=[]
-                        if _sprof6.get("mom")=="No HS": _rf6b.append("mother has no HS education (IBT: -3.1 pts avg, Physics -7.5 pts)")
-                        if _sprof6.get("sm")=="Yes":    _rf6b.append("single-mother household")
-                        if _sprof6.get("wk")=="Yes":    _rf6b.append("works after school")
-                        if _sprof6.get("cp")=="Never":  _rf6b.append("no computer access (IBT: -4.1 pts)")
-                        if _sprof6.get("sib") in ["5-8","8+"]: _rf6b.append(f"{_sprof6['sib']} siblings")
-                        if _rf6b: _risk_ctx6="RISK FACTORS: "+"; ".join(_rf6b)
-                    _ibt_prompt6=f"""You are an IBT education analyst. Write a structured IBT Intervention Report.
-
-STUDENT: {_sel6}
-{_risk_ctx6}
-
-PERFORMANCE vs IBT BENCHMARKS:
-{chr(10).join(_stu_sum6)}
-
-IBT RESEARCH: Overall avg 43.3 | WASSCE pass 50 | At-risk 37.5 | School quality #1 predictor (F=8.60) | Computer access +4.1 pts | No-HS mother: -3.1 pts overall | Without intervention gap widens +5.5 pts/2yrs | With intervention narrows to 2.4 pts
-
-Write:
-1. RISK PROFILE SUMMARY: Student risk level using scores AND home factors.
-2. SUBJECT-BY-SUBJECT ANALYSIS: Each subject score vs IBT benchmark and WASSCE readiness.
-3. TOP 3 INTERVENTIONS (ranked): Specific, offline-doable, with measurable goal and IBT justification.
-4. TEACHER ACTIONS THIS WEEK: 2-3 concrete Monday-morning actions.
-5. PROGNOSIS: Realistic end-of-term outlook if interventions applied.
-
-Be specific, data-driven, and compassionate."""
-                    with st.spinner("Generating IBT intervention analysis..."):
-                        try:
-                            _ibt_r6,_ibt_m6,_=best_all(build_free_chat(),_ibt_prompt6,[])
-                            st.session_state[_ibt_ai_key6]=_ibt_r6
-                        except Exception as _ae6:
-                            st.error(f"AI error: {_ae6}")
-                if st.session_state.get(_ibt_ai_key6):
-                    st.markdown(
-                        f'<div style="background:#0D1B2A;border:1px solid #1E3A6A;border-radius:10px;'+
-                        f'padding:18px 22px;color:#D0D8E8;font-size:.87rem;line-height:1.8;white-space:pre-wrap;margin-top:8px">'+
-                        f'{st.session_state[_ibt_ai_key6]}</div>', unsafe_allow_html=True)
-                st.markdown("---")
-
-                # ── Section 6: Downloads ─────────────────────────────────────
-                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.95rem;margin:4px 0 6px">📥 Download Reports</div>', unsafe_allow_html=True)
-                _idl1,_idl2=st.columns(2)
-                with _idl1:
-                    try:
-                        from word_report import generate_academic_word_report
-                        _ibt_word6=generate_academic_word_report(
-                            _gh6,_stu6,
-                            st.session_state.get("_classroom_label",school_name or "IBT School"),
-                            _grade_en,
-                            st.session_state.get("ar_analysis_text","")
-                        )
-                        st.download_button("📄 Download Word Report",data=_ibt_word6,
-                            file_name=f"IBT_Report_{datetime.datetime.now().strftime('%Y%m%d')}.docx",
-                            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                            key="ibt6_dl_word",type="primary",use_container_width=True)
-                    except Exception as _we6:
-                        st.warning(f"Word export: {_we6}")
-                with _idl2:
-                    if PD and _gh6:
-                        _ibt_csv6=pd.DataFrame(_gh6).to_csv(index=False)
-                        st.download_button("📊 Download CSV",data=_ibt_csv6,
-                            file_name=f"IBT_Grades_{datetime.datetime.now().strftime('%Y%m%d')}.csv",
-                            mime="text/csv",key="ibt6_dl_csv",use_container_width=True)
-        except Exception as _t6_err:
-            st.error(f"IBT Reports error: {_t6_err}")
-            import traceback; st.code(traceback.format_exc())
-
-
 
 
 if __name__=="__main__": main()
