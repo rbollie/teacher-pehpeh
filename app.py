@@ -3829,7 +3829,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
             with _ma4: st.metric("Need Intervention", f"{_below50} student{'s' if _below50!=1 else ''}", delta=f"{_at_risk_pct:.0f}% of class", delta_color="inverse")
 
             # ── Visual summaries: Two charts side-by-side ────────────────────
-            st.markdown("<div style='margin-top:72px'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-top:110px'></div>", unsafe_allow_html=True)
             _vcol1, _vgap, _vcol2 = st.columns([10, 1, 10])
 
             # ── LEFT: HW & Quiz per Semester, grouped like the reference chart ──
@@ -3888,10 +3888,10 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                             _hq_base
                             .facet(
                                 column=_alt_hq.Column("Semester:N", sort=["Semester 1","Semester 2"],
-                                                      header=_alt_hq.Header(labelColor="#D0D8E8", titleColor="#D0D8E8",
+                                                      title=None,
+                                                      header=_alt_hq.Header(labelColor="#D0D8E8", titleColor="transparent",
                                                                             labelFontSize=13, labelFontWeight="bold",
-                                                                            labelPadding=10, labelOrient="bottom",
-                                                                            titleOrient="bottom")),
+                                                                            labelPadding=10, labelOrient="bottom")),
                                 spacing=20,
                             )
                             .properties(background="transparent")
@@ -3940,7 +3940,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                         _combo_df = _combo_df.sort_values(["_mo","_so"]).drop(columns=["_mo","_so"])
                         _combo_order = _combo_df["Combo"].tolist()
                         _combo_color_scale = _alt2.Scale(domain=_combo_df["Combo"].tolist(), range=_combo_df["Color"].tolist())
-                        _combo_chart = (
+                        _combo_bars = (
                             _alt2.Chart(_combo_df)
                             .mark_bar(cornerRadiusTopLeft=3, cornerRadiusTopRight=3)
                             .encode(
@@ -3952,6 +3952,18 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                                 tooltip=[_alt2.Tooltip("Combo:N"), _alt2.Tooltip("Avg Score:Q", format=".1f"),
                                          _alt2.Tooltip("Students:Q", title="# Students")],
                             )
+                        )
+                        _combo_labels = (
+                            _alt2.Chart(_combo_df)
+                            .mark_text(dy=-6, fontSize=10, fontWeight="bold", color="#D0D8E8")
+                            .encode(
+                                x=_alt2.X("Combo:N", sort=_combo_order),
+                                y=_alt2.Y("Avg Score:Q", scale=_alt2.Scale(domain=[0,100])),
+                                text=_alt2.Text("Avg Score:Q", format=".1f"),
+                            )
+                        )
+                        _combo_chart = (
+                            (_combo_bars + _combo_labels)
                             .properties(height=260, background="transparent")
                             .configure_axis(gridColor="rgba(255,255,255,0.08)", domainColor="#444", tickColor="#444")
                             .configure_view(strokeWidth=0)
