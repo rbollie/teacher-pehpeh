@@ -3828,151 +3828,142 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
             with _ma3: st.metric("Total Records", _n_records)
             with _ma4: st.metric("Need Intervention", f"{_below50} student{'s' if _below50!=1 else ''}", delta=f"{_at_risk_pct:.0f}% of class", delta_color="inverse")
 
-            # ── Visual summaries: Two charts side-by-side ────────────────────
-            st.markdown("<div style='margin-top:110px'></div>", unsafe_allow_html=True)
-            _vcol1, _vgap, _vcol2 = st.columns([8, 5, 10])
+            # ── Visual summaries: Mom's Education (top) then HW/Quiz (below) ──
 
-            # ── LEFT: HW & Quiz per Semester, grouped like the reference chart ──
-            with _vcol1:
-                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin-bottom:6px">&#128203; Homework &amp; Quizzes per Semester</div>', unsafe_allow_html=True)
-                try:
-                    import altair as _alt_hq, pandas as _pd_hq
-                    _sdata_hq = st.session_state.get("_ar_subject_data") or {}
-                    _hq_rows = []
-                    # One color per subject (like series in the reference chart)
-                    _SUBJ_PALETTE_HQ = [
-                        "#4E79A7","#F28E2B","#E15759","#76B7B2","#59A14F",
-                        "#EDC948","#B07AA1","#FF9DA7","#9C755F","#BAB0AC",
-                        "#D4A843","#2ECC71","#E74C3C","#3498DB","#9B59B6",
-                    ]
-                    _subj_list_hq = sorted(_sdata_hq.keys())
-                    _subj_color_map = {s: _SUBJ_PALETTE_HQ[i % len(_SUBJ_PALETTE_HQ)] for i, s in enumerate(_subj_list_hq)}
-                    for _hqs in _subj_list_hq:
-                        _hqsd = _sdata_hq[_hqs]
-                        _hw1c = max((_hqd.get("hw1_count") or 0) for _hqd in _hqsd.values()) if _hqsd else 0
-                        _qz1c = max((_hqd.get("qz1_count") or 0) for _hqd in _hqsd.values()) if _hqsd else 0
-                        _hw2c = max((_hqd.get("hw2_count") or 0) for _hqd in _hqsd.values()) if _hqsd else 0
-                        _qz2c = max((_hqd.get("qz2_count") or 0) for _hqd in _hqsd.values()) if _hqsd else 0
-                        if _hw1c: _hq_rows.append({"Semester":"S1","Assignment":"Homework","Subject":_hqs,"Count":_hw1c})
-                        if _qz1c: _hq_rows.append({"Semester":"S1","Assignment":"Quiz",    "Subject":_hqs,"Count":_qz1c})
-                        if _hw2c: _hq_rows.append({"Semester":"S2","Assignment":"Homework","Subject":_hqs,"Count":_hw2c})
-                        if _qz2c: _hq_rows.append({"Semester":"S2","Assignment":"Quiz",    "Subject":_hqs,"Count":_qz2c})
-                    if _hq_rows:
-                        _hq_df = _pd_hq.DataFrame(_hq_rows)
-                        _hq_color_scale = _alt_hq.Scale(
-                            domain=_subj_list_hq,
-                            range=[_subj_color_map[s] for s in _subj_list_hq],
+            # ── TOP: Mom's Education × Kids in Home ───────────────────────
+            st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin-bottom:6px">&#128106; Avg Score by Mom&#39;s Education &amp; Kids in Home</div>', unsafe_allow_html=True)
+            try:
+                import altair as _alt2, pandas as _pd_combo
+                _stu_profile2 = {s["name"]: s for s in (st.session_state.students or [])}
+                _combo_data = {}
+                for _sname2 in _df["student"].unique():
+                    _prof2 = _stu_profile2.get(_sname2, {})
+                    _mom_v = (_prof2.get("mom") or "Unknown").strip() or "Unknown"
+                    _sib_v = (_prof2.get("sib") or "Unknown").strip() or "Unknown"
+                    _avg_v2 = _df[_df["student"]==_sname2]["score"].mean()
+                    _combo_data.setdefault((_mom_v, _sib_v), []).append(_avg_v2)
+                if _combo_data:
+                    _mom_order = ["No HS", "HS Grad", "Unknown"]
+                    _sib_order = ["0-4", "5-8", "8+", "Unknown"]
+                    _combo_rows = []
+                    for (_cm, _cs), _cv in _combo_data.items():
+                        _ca = sum(_cv) / len(_cv)
+                        _combo_rows.append({
+                            "Combo": f"{_cm} / {_cs} kids",
+                            "Mom Edu": _cm, "Kids": _cs,
+                            "Avg Score": round(_ca, 1), "Students": len(_cv),
+                            "Color": ("#2ECC71" if _ca >= 65 else ("#F1C40F" if _ca >= 50 else "#E74C3C")),
+                        })
+                    _combo_df = _pd_combo.DataFrame(_combo_rows)
+                    _combo_df["_mo"] = _combo_df["Mom Edu"].apply(lambda x: _mom_order.index(x) if x in _mom_order else 99)
+                    _combo_df["_so"] = _combo_df["Kids"].apply(lambda x: _sib_order.index(x) if x in _sib_order else 99)
+                    _combo_df = _combo_df.sort_values(["_mo","_so"]).drop(columns=["_mo","_so"])
+                    _combo_order = _combo_df["Combo"].tolist()
+                    _combo_color_scale = _alt2.Scale(domain=_combo_df["Combo"].tolist(), range=_combo_df["Color"].tolist())
+                    _combo_bars = (
+                        _alt2.Chart(_combo_df)
+                        .mark_bar(cornerRadiusTopLeft=3, cornerRadiusTopRight=3)
+                        .encode(
+                            x=_alt2.X("Combo:N", sort=_combo_order,
+                                       axis=_alt2.Axis(labelAngle=-45, labelColor="#D0D8E8", titleColor="#D0D8E8", labelFontSize=9), title="Mom Edu / Kids"),
+                            y=_alt2.Y("Avg Score:Q", scale=_alt2.Scale(domain=[0,100]),
+                                       axis=_alt2.Axis(labelColor="#D0D8E8", titleColor="#D0D8E8"), title="Avg Score"),
+                            color=_alt2.Color("Combo:N", scale=_combo_color_scale, legend=None),
+                            tooltip=[_alt2.Tooltip("Combo:N"), _alt2.Tooltip("Avg Score:Q", format=".1f"),
+                                     _alt2.Tooltip("Students:Q", title="# Students")],
                         )
-                        # X = Assignment (Homework | Quiz), xOffset = Subject, facet column = Semester
-                        _hq_base = (
-                            _alt_hq.Chart(_hq_df)
-                            .mark_bar(cornerRadiusTopLeft=3, cornerRadiusTopRight=3)
-                            .encode(
-                                x=_alt_hq.X("Assignment:N", sort=["Homework","Quiz"],
-                                             axis=_alt_hq.Axis(labelColor="#D0D8E8", titleColor="#D0D8E8",
-                                                               labelAngle=0), title=None),
-                                y=_alt_hq.Y("Count:Q",
-                                             axis=_alt_hq.Axis(labelColor="#D0D8E8", titleColor="#D0D8E8"),
-                                             title="# Assignments"),
-                                xOffset=_alt_hq.XOffset("Subject:N", sort=_subj_list_hq),
-                                color=_alt_hq.Color("Subject:N", scale=_hq_color_scale,
-                                                    legend=_alt_hq.Legend(labelColor="#D0D8E8", titleColor="#D0D8E8",
-                                                                          title="Subject", orient="bottom")),
-                                tooltip=[_alt_hq.Tooltip("Semester:N"), _alt_hq.Tooltip("Assignment:N"),
-                                         _alt_hq.Tooltip("Subject:N"), _alt_hq.Tooltip("Count:Q", title="Count")],
-                            )
-                            .properties(height=240, width=_alt_hq.Step(22))
+                    )
+                    _combo_labels = (
+                        _alt2.Chart(_combo_df)
+                        .mark_text(dy=-6, fontSize=10, fontWeight="bold", color="#D0D8E8")
+                        .encode(
+                            x=_alt2.X("Combo:N", sort=_combo_order),
+                            y=_alt2.Y("Avg Score:Q", scale=_alt2.Scale(domain=[0,100])),
+                            text=_alt2.Text("Avg Score:Q", format=".1f"),
                         )
-                        _hq_df["Semester"] = _hq_df["Semester"].map({"S1":"Semester 1","S2":"Semester 2"})
-                        _hq_chart = (
-                            _hq_base
-                            .facet(
-                                column=_alt_hq.Column("Semester:N", sort=["Semester 1","Semester 2"],
-                                                      title=None,
-                                                      header=_alt_hq.Header(labelColor="#D0D8E8", titleColor="transparent",
-                                                                            labelFontSize=13, labelFontWeight="bold",
-                                                                            labelPadding=10, labelOrient="bottom")),
-                                spacing=8,
-                            )
-                            .properties(background="transparent")
-                            .configure_axis(gridColor="rgba(255,255,255,0.08)", domainColor="#444", tickColor="#444")
-                            .configure_view(strokeWidth=0, stroke="transparent")
-                            .configure_legend(fillColor="rgba(0,0,0,0)", strokeColor="rgba(0,0,0,0)")
-                            .configure_header(labelColor="#D0D8E8", titleColor="#D0D8E8")
-                        )
-                        st.altair_chart(_hq_chart, use_container_width=True)
-                    else:
-                        st.caption("Upload an IBT Grade Tracker Excel to see homework and quiz counts per semester.")
-                except Exception as _hqe:
-                    st.caption(f"Chart unavailable: {_hqe}")
+                    )
+                    _combo_chart = (
+                        (_combo_bars + _combo_labels)
+                        .properties(height=240, background="transparent")
+                        .configure_axis(gridColor="rgba(255,255,255,0.08)", domainColor="#444", tickColor="#444")
+                        .configure_view(strokeWidth=0)
+                    )
+                    st.altair_chart(_combo_chart, use_container_width=True)
+                else:
+                    st.caption("No student profile data yet. Add students with Mom's Education and Kids in Home details in the Students tab.")
+            except Exception as _be:
+                st.caption(f"Chart unavailable: {_be}")
 
-            with _vgap:
-                st.empty()
-
-            # ── RIGHT: Mom's Education × Kids in Home combo bars ──────────
-            with _vcol2:
-                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin-bottom:6px">&#128106; Avg Score by Mom&#39;s Education &amp; Kids in Home</div>', unsafe_allow_html=True)
-                try:
-                    import altair as _alt2, pandas as _pd_combo
-                    _stu_profile2 = {s["name"]: s for s in (st.session_state.students or [])}
-                    _combo_data = {}
-                    for _sname2 in _df["student"].unique():
-                        _prof2 = _stu_profile2.get(_sname2, {})
-                        _mom_v = (_prof2.get("mom") or "Unknown").strip() or "Unknown"
-                        _sib_v = (_prof2.get("sib") or "Unknown").strip() or "Unknown"
-                        _avg_v2 = _df[_df["student"]==_sname2]["score"].mean()
-                        _combo_data.setdefault((_mom_v, _sib_v), []).append(_avg_v2)
-                    if _combo_data:
-                        _mom_order = ["No HS", "HS Grad", "Unknown"]
-                        _sib_order = ["0-4", "5-8", "8+", "Unknown"]
-                        _combo_rows = []
-                        for (_cm, _cs), _cv in _combo_data.items():
-                            _ca = sum(_cv) / len(_cv)
-                            _combo_rows.append({
-                                "Combo": f"{_cm} / {_cs} kids",
-                                "Mom Edu": _cm, "Kids": _cs,
-                                "Avg Score": round(_ca, 1), "Students": len(_cv),
-                                "Color": ("#2ECC71" if _ca >= 65 else ("#F1C40F" if _ca >= 50 else "#E74C3C")),
-                            })
-                        _combo_df = _pd_combo.DataFrame(_combo_rows)
-                        _combo_df["_mo"] = _combo_df["Mom Edu"].apply(lambda x: _mom_order.index(x) if x in _mom_order else 99)
-                        _combo_df["_so"] = _combo_df["Kids"].apply(lambda x: _sib_order.index(x) if x in _sib_order else 99)
-                        _combo_df = _combo_df.sort_values(["_mo","_so"]).drop(columns=["_mo","_so"])
-                        _combo_order = _combo_df["Combo"].tolist()
-                        _combo_color_scale = _alt2.Scale(domain=_combo_df["Combo"].tolist(), range=_combo_df["Color"].tolist())
-                        _combo_bars = (
-                            _alt2.Chart(_combo_df)
-                            .mark_bar(cornerRadiusTopLeft=3, cornerRadiusTopRight=3)
-                            .encode(
-                                x=_alt2.X("Combo:N", sort=_combo_order,
-                                           axis=_alt2.Axis(labelAngle=-45, labelColor="#D0D8E8", titleColor="#D0D8E8", labelFontSize=9), title="Mom Edu / Kids"),
-                                y=_alt2.Y("Avg Score:Q", scale=_alt2.Scale(domain=[0,100]),
-                                           axis=_alt2.Axis(labelColor="#D0D8E8", titleColor="#D0D8E8"), title="Avg Score"),
-                                color=_alt2.Color("Combo:N", scale=_combo_color_scale, legend=None),
-                                tooltip=[_alt2.Tooltip("Combo:N"), _alt2.Tooltip("Avg Score:Q", format=".1f"),
-                                         _alt2.Tooltip("Students:Q", title="# Students")],
-                            )
+            # ── BOTTOM: HW & Quiz per Semester ────────────────────────────
+            st.markdown("<div style='margin-top:18px'></div>", unsafe_allow_html=True)
+            st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin-bottom:6px">&#128203; Homework &amp; Quizzes per Semester</div>', unsafe_allow_html=True)
+            try:
+                import altair as _alt_hq, pandas as _pd_hq
+                _sdata_hq = st.session_state.get("_ar_subject_data") or {}
+                _hq_rows = []
+                _SUBJ_PALETTE_HQ = [
+                    "#4E79A7","#F28E2B","#E15759","#76B7B2","#59A14F",
+                    "#EDC948","#B07AA1","#FF9DA7","#9C755F","#BAB0AC",
+                    "#D4A843","#2ECC71","#E74C3C","#3498DB","#9B59B6",
+                ]
+                _subj_list_hq = sorted(_sdata_hq.keys())
+                _subj_color_map = {s: _SUBJ_PALETTE_HQ[i % len(_SUBJ_PALETTE_HQ)] for i, s in enumerate(_subj_list_hq)}
+                for _hqs in _subj_list_hq:
+                    _hqsd = _sdata_hq[_hqs]
+                    _hw1c = max((_hqd.get("hw1_count") or 0) for _hqd in _hqsd.values()) if _hqsd else 0
+                    _qz1c = max((_hqd.get("qz1_count") or 0) for _hqd in _hqsd.values()) if _hqsd else 0
+                    _hw2c = max((_hqd.get("hw2_count") or 0) for _hqd in _hqsd.values()) if _hqsd else 0
+                    _qz2c = max((_hqd.get("qz2_count") or 0) for _hqd in _hqsd.values()) if _hqsd else 0
+                    if _hw1c: _hq_rows.append({"Semester":"Semester 1","Assignment":"Homework","Subject":_hqs,"Count":_hw1c})
+                    if _qz1c: _hq_rows.append({"Semester":"Semester 1","Assignment":"Quiz",    "Subject":_hqs,"Count":_qz1c})
+                    if _hw2c: _hq_rows.append({"Semester":"Semester 2","Assignment":"Homework","Subject":_hqs,"Count":_hw2c})
+                    if _qz2c: _hq_rows.append({"Semester":"Semester 2","Assignment":"Quiz",    "Subject":_hqs,"Count":_qz2c})
+                if _hq_rows:
+                    _hq_df = _pd_hq.DataFrame(_hq_rows)
+                    _hq_color_scale = _alt_hq.Scale(
+                        domain=_subj_list_hq,
+                        range=[_subj_color_map[s] for s in _subj_list_hq],
+                    )
+                    _hq_base = (
+                        _alt_hq.Chart(_hq_df)
+                        .mark_bar(cornerRadiusTopLeft=3, cornerRadiusTopRight=3)
+                        .encode(
+                            x=_alt_hq.X("Assignment:N", sort=["Homework","Quiz"],
+                                         axis=_alt_hq.Axis(labelColor="#D0D8E8", titleColor="#D0D8E8",
+                                                           labelAngle=0), title=None),
+                            y=_alt_hq.Y("Count:Q",
+                                         axis=_alt_hq.Axis(labelColor="#D0D8E8", titleColor="#D0D8E8"),
+                                         title="# Assignments"),
+                            xOffset=_alt_hq.XOffset("Subject:N", sort=_subj_list_hq),
+                            color=_alt_hq.Color("Subject:N", scale=_hq_color_scale,
+                                                legend=_alt_hq.Legend(labelColor="#D0D8E8", titleColor="#D0D8E8",
+                                                                      title="Subject", orient="bottom")),
+                            tooltip=[_alt_hq.Tooltip("Semester:N"), _alt_hq.Tooltip("Assignment:N"),
+                                     _alt_hq.Tooltip("Subject:N"), _alt_hq.Tooltip("Count:Q", title="Count")],
                         )
-                        _combo_labels = (
-                            _alt2.Chart(_combo_df)
-                            .mark_text(dy=-6, fontSize=10, fontWeight="bold", color="#D0D8E8")
-                            .encode(
-                                x=_alt2.X("Combo:N", sort=_combo_order),
-                                y=_alt2.Y("Avg Score:Q", scale=_alt2.Scale(domain=[0,100])),
-                                text=_alt2.Text("Avg Score:Q", format=".1f"),
-                            )
+                        .properties(height=240, width=_alt_hq.Step(22))
+                    )
+                    _hq_chart = (
+                        _hq_base
+                        .facet(
+                            column=_alt_hq.Column("Semester:N", sort=["Semester 1","Semester 2"],
+                                                  title=None,
+                                                  header=_alt_hq.Header(labelColor="#D0D8E8", titleColor="transparent",
+                                                                        labelFontSize=13, labelFontWeight="bold",
+                                                                        labelPadding=10, labelOrient="bottom")),
+                            spacing=8,
                         )
-                        _combo_chart = (
-                            (_combo_bars + _combo_labels)
-                            .properties(height=260, background="transparent")
-                            .configure_axis(gridColor="rgba(255,255,255,0.08)", domainColor="#444", tickColor="#444")
-                            .configure_view(strokeWidth=0)
-                        )
-                        st.altair_chart(_combo_chart, use_container_width=True)
-                    else:
-                        st.caption("No student profile data yet. Add students with Mom's Education and Kids in Home details in the Students tab.")
-                except Exception as _be:
-                    st.caption(f"Chart unavailable: {_be}")
+                        .properties(background="transparent")
+                        .configure_axis(gridColor="rgba(255,255,255,0.08)", domainColor="#444", tickColor="#444")
+                        .configure_view(strokeWidth=0, stroke="transparent")
+                        .configure_legend(fillColor="rgba(0,0,0,0)", strokeColor="rgba(0,0,0,0)")
+                        .configure_header(labelColor="#D0D8E8", titleColor="#D0D8E8")
+                    )
+                    st.altair_chart(_hq_chart, use_container_width=True)
+                else:
+                    st.caption("Upload an IBT Grade Tracker Excel to see homework and quiz counts per semester.")
+            except Exception as _hqe:
+                st.caption(f"Chart unavailable: {_hqe}")
 
             # ── Per-subject breakdown ──────────────────────────────────────
             if _n_subjects > 1:
