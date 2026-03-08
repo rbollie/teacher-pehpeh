@@ -2231,9 +2231,9 @@ def main():
     :root {{
         --bg-main: {C_NAVY};
         --bg-card: {C_NAVY_L};
-        --text-primary: #D0D8E8;
-        --text-secondary: #9CA3AF;
-        --text-muted: #667788;
+        --text-primary: #E4EAF4;
+        --text-secondary: #C0CEDF;
+        --text-muted: #A0B2C8;
         --border-color: #2a3a5a;
         --chat-user-bg: rgba(43,125,233,.08);
         --chat-user-border: rgba(43,125,233,.3);
@@ -2300,7 +2300,7 @@ def main():
     .qno {{background:rgba(239,83,80,.1);border:2px solid #EF5350;border-radius:12px;padding:14px;margin:8px 0;color:var(--text-primary)}}
     .qsc {{background:rgba(212,168,67,.1);border:1px solid {C_GOLD};border-radius:10px;padding:10px 16px;display:inline-block;color:{C_GOLD}}}
     .qtip {{background:rgba(43,125,233,.08);border-left:4px solid {C_BLUE};border-radius:0 8px 8px 0;padding:10px 14px;margin:8px 0;font-size:.88rem;color:var(--text-secondary)}}
-    .sc {{background:var(--bg-card);border:1px solid var(--border-color);border-radius:10px;padding:12px 16px;margin:6px 0;color:var(--text-primary)}}
+    .sc {{background:#0E1E38;border:1.5px solid #2A3F62;border-radius:10px;padding:12px 16px;margin:6px 0;color:#E4EAF4}}
     .ft {{text-align:center;color:var(--text-muted);font-size:.8rem;padding:1.5rem 0 1rem;border-top:1px solid var(--border-color);margin-top:2rem}}
     .ft a {{color:{C_GOLD};text-decoration:none}}
 
@@ -3316,7 +3316,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                         st.markdown(mresp)
             elif len(valid_rs)==1:
                 nm=list(valid_rs.keys())[0]
-                st.markdown(f'<div style="font-size:.75rem;color:#667;margin-top:4px">Response by {nm} (only model available)</div>',unsafe_allow_html=True)
+                st.markdown(f'<div style="font-size:.8rem;color:#8899BB;margin-top:4px">Response by {nm} (only model available)</div>',unsafe_allow_html=True)
             # === DELIVERY HANDLING ===
             if gr.get("is_parent_letter") and gr.get("pl_delivery"):
                 # Let teacher pick which response to send
@@ -3825,9 +3825,10 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             _del_col, _name_col = st.columns([1, 11])
             with _name_col:
                 st.markdown(
-                    f'<div class="sc"><strong style="color:{C_BLUE}">{s["name"]}</strong>'
-                    f' — {s["sib"]} sib, Mom:{s["mom"]}'
-                    f'<br><span style="font-size:.82rem">{" · ".join(rsk) or "🟢 Lower risk"}</span></div>',
+                    f'<div class="sc">'
+                    f'<strong style="color:#FFFFFF;font-size:1.02rem;letter-spacing:.2px">{s["name"]}</strong>'
+                    f'<span style="color:#A0B8D0;font-size:.88rem;margin-left:8px">— {s["sib"]} sib · Mom: {s["mom"]}</span>'
+                    f'<br><span style="font-size:.84rem;margin-top:3px;display:inline-block">{" · ".join(rsk) or "<span style=\'color:#81C784\'>🟢 Lower risk</span>"}</span></div>',
                     unsafe_allow_html=True)
             with _del_col:
                 if st.button("🗑️", key=f"d{i}", help="Remove student"):
@@ -3863,7 +3864,7 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     f'<div style="color:#81C784;font-weight:700;font-size:.95rem;margin-bottom:4px">'+
                     f'✅ Grades loaded from IBT Grade Tracker — {_n_stus} students · {_n_subjs} subjects · {_n_records} records</div>'+
                     f'<div style="color:#A5D6A7;font-size:.84rem">→ <strong>📊 Academic Report</strong> and <strong>📈 IBT Reports</strong> tabs are ready with full analysis.</div>'+
-                    f'<div style="color:#556;font-size:.78rem;margin-top:5px">You can still add or supplement grades below.</div>'+
+                    f'<div style="color:#8899BB;font-size:.82rem;margin-top:5px">You can still add or supplement grades below.</div>'+
                     f'</div>', unsafe_allow_html=True)
             elif _names_only:
                 _nc = len(st.session_state.students)
@@ -4141,13 +4142,13 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
     <img src="data:image/png;base64,{_PEHPEH_LOGO_B64}" style="height:52px;width:auto;border-radius:6px;flex-shrink:0">
   </div>
   <div style="border-top:1px solid rgba(212,168,67,.3);padding-top:8px;display:flex;gap:28px;flex-wrap:wrap;align-items:flex-end">
-    <div><span style="color:#8899aa;font-size:.75rem">SCHOOL</span><br><span style="color:#fff;font-weight:700">{_school_label}</span></div>
-    <div><span style="color:#8899aa;font-size:.75rem">GRADE LEVEL</span><br><span style="color:#fff;font-weight:700">{_effective_grade}</span></div>
-    <div><span style="color:#8899aa;font-size:.75rem">GENERATED</span><br><span style="color:#fff;font-weight:700">{_ardt.datetime.now().strftime("%B %d, %Y")}</span></div>
-    <div><span style="color:#8899aa;font-size:.75rem">STUDENTS</span><br><span style="color:#fff;font-weight:700">{len(st.session_state.students)}</span></div>
-    <div style="margin-left:auto;text-align:right;font-size:.7rem;color:#6677AA">
-      📞 {_IBT_PHONE}<br>✉ <a href="mailto:{_IBT_EMAIL}" style="color:#6677AA">{_IBT_EMAIL}</a><br>
-      🌐 <a href="{_IBT_URL}" target="_blank" style="color:#6677AA">www.institutebasictechnology.org</a>
+    <div><span style="color:#A0B4CC;font-size:.75rem">SCHOOL</span><br><span style="color:#fff;font-weight:700">{_school_label}</span></div>
+    <div><span style="color:#A0B4CC;font-size:.75rem">GRADE LEVEL</span><br><span style="color:#fff;font-weight:700">{_effective_grade}</span></div>
+    <div><span style="color:#A0B4CC;font-size:.75rem">GENERATED</span><br><span style="color:#fff;font-weight:700">{_ardt.datetime.now().strftime("%B %d, %Y")}</span></div>
+    <div><span style="color:#A0B4CC;font-size:.75rem">STUDENTS</span><br><span style="color:#fff;font-weight:700">{len(st.session_state.students)}</span></div>
+    <div style="margin-left:auto;text-align:right;font-size:.72rem;color:#8BAAD0">
+      📞 {_IBT_PHONE}<br>✉ <a href="mailto:{_IBT_EMAIL}" style="color:#8BAAD0">{_IBT_EMAIL}</a><br>
+      🌐 <a href="{_IBT_URL}" target="_blank" style="color:#8BAAD0">www.institutebasictechnology.org</a>
     </div>
   </div>
 </div>""", unsafe_allow_html=True)
@@ -4837,6 +4838,184 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                                 _fc3.font = Font(color="FFFFFF", bold=(_ci3v==4), size=10)
                                 _fc3.fill = _fscore_fill if _ci3v in (4,5) else _fbg3
                                 _fc3.border = _bdr
+                    except Exception: pass
+
+                    # ── Sheet 6: Intervention Plans ───────────────────────
+                    try:
+                        _ws_iv = _rpt_wb.create_sheet("Intervention Plans")
+                        _add_xl_logo_hdr(_ws_iv, 6)
+                        _ws_iv.merge_cells("A2:F2")
+                        _ivh = _ws_iv.cell(2, 1, "Student Intervention Plans — Generated by Teacher Pehpeh")
+                        _ivh.font = Font(bold=True, color="FFFFFF", size=12)
+                        _ivh.fill = PatternFill("solid", fgColor="8B0000")
+                        _ivh.alignment = Alignment(horizontal="center", vertical="center")
+                        for _ivc, _ivw in zip(["A","B","C","D","E","F"], [24, 14, 18, 14, 36, 34]):
+                            _ws_iv.column_dimensions[_ivc].width = _ivw
+
+                        # Column headers
+                        _iv_hdrs = ["Student", "Avg Score", "Urgency", "Risk Factors", "Intervention Strategy", "Recommended Action"]
+                        for _ci_iv, _ih_iv in enumerate(_iv_hdrs, 1):
+                            _hdr_cell(_ws_iv, 3, _ci_iv, _ih_iv)
+
+                        # Build student list: below 50 avg OR 2+ risk factors
+                        _iv_stu_map = {s["name"]: s for s in (st.session_state.students or [])}
+                        _iv_stu_avgs = _df.groupby("student")["score"].mean().to_dict()
+
+                        # Include students tracked in grade history + any roster-only with 2+ risk factors
+                        _iv_all_names = set(_iv_stu_avgs.keys())
+                        for _s in (st.session_state.students or []):
+                            _rf_cnt = sum([
+                                _s.get("mom")=="No HS", _s.get("sm")=="Yes",
+                                _s.get("sib") in ("5-8","8+"), _s.get("wk")=="Yes",
+                                _s.get("cp")=="Never",
+                            ])
+                            if _rf_cnt >= 2:
+                                _iv_all_names.add(_s["name"])
+
+                        _iv_candidates = sorted([
+                            n for n in _iv_all_names
+                            if (_iv_stu_avgs.get(n, 100) < 50) or
+                               sum([_iv_stu_map.get(n,{}).get("mom")=="No HS",
+                                    _iv_stu_map.get(n,{}).get("sm")=="Yes",
+                                    _iv_stu_map.get(n,{}).get("sib") in ("5-8","8+"),
+                                    _iv_stu_map.get(n,{}).get("wk")=="Yes",
+                                    _iv_stu_map.get(n,{}).get("cp")=="Never"]) >= 2
+                        ], key=lambda n: _iv_stu_avgs.get(n, 99))
+
+                        _urgency_fill = {
+                            "URGENT":   PatternFill("solid", fgColor="8B0000"),
+                            "HIGH":     PatternFill("solid", fgColor="7B3800"),
+                            "WATCH":    PatternFill("solid", fgColor="3D4000"),
+                        }
+                        _urgency_color = {"URGENT": "FF6B6B", "HIGH": "FFA726", "WATCH": "FFD54F"}
+
+                        # Each student gets one row per strategy
+                        _iv_row = 4
+                        for _iv_name in _iv_candidates:
+                            _iv_p = _iv_stu_map.get(_iv_name, {})
+                            _iv_avg = _iv_stu_avgs.get(_iv_name)
+                            _iv_mom = _iv_p.get("mom","Unknown")
+                            _iv_sm  = _iv_p.get("sm","Unknown")
+                            _iv_sib = _iv_p.get("sib","0-4")
+                            _iv_wk  = _iv_p.get("wk","Unknown")
+                            _iv_cp  = _iv_p.get("cp","Unknown")
+
+                            _iv_rf_list = []
+                            if _iv_mom == "No HS":       _iv_rf_list.append("Mother — no HS education")
+                            if _iv_sm  == "Yes":         _iv_rf_list.append("Single-mother household")
+                            if _iv_sib in ("5-8","8+"): _iv_rf_list.append(f"{_iv_sib} siblings at home")
+                            if _iv_wk  == "Yes":         _iv_rf_list.append("Works after school")
+                            if _iv_cp  == "Never":       _iv_rf_list.append("No computer access")
+                            _iv_rf_str = "; ".join(_iv_rf_list) if _iv_rf_list else "No flags"
+
+                            _iv_grade_flag = _iv_avg is not None and _iv_avg < 50
+                            _iv_rf_cnt = len(_iv_rf_list)
+                            if _iv_grade_flag and _iv_rf_cnt >= 3:
+                                _iv_urg = "URGENT"
+                            elif _iv_grade_flag or _iv_rf_cnt >= 2:
+                                _iv_urg = "HIGH"
+                            else:
+                                _iv_urg = "WATCH"
+
+                            _iv_score_str = f"{_iv_avg:.0f}/100" if _iv_avg is not None else "No grades yet"
+
+                            # Strategy rows
+                            _iv_strategies = [
+                                ("Contact Parent/Guardian",
+                                 "Send voice message or home visit" if _iv_mom == "No HS" else "Send letter or SMS",
+                                 "Generate Parent Letter in Students tab"),
+                            ]
+                            if _iv_wk == "Yes" or _iv_sib in ("5-8","8+"):
+                                _load = []
+                                if _iv_wk == "Yes": _load.append("works after school")
+                                if _iv_sib in ("5-8","8+"): _load.append(f"has {_iv_sib} siblings")
+                                _iv_strategies.append((
+                                    "Tailor Study Time",
+                                    f"Student {' and '.join(_load)}. Schedule 15-20 min morning study windows instead of long evening sessions.",
+                                    "Generate Homework (Low-Resource Home) in Generate tab"
+                                ))
+                            _iv_strategies.append((
+                                "Peer Pairing",
+                                "Pair with a stronger peer in the same subject who lives nearby for after-school study.",
+                                "Generate Group Activity in Generate tab"
+                            ))
+                            _iv_strategies.append((
+                                "Direct Encouragement",
+                                "Publicly acknowledge one specific thing this student did well. Reduces shame-based disengagement.",
+                                "Ask Teacher Pehpeh for encouragement scripts in Chat tab"
+                            ))
+                            if _iv_cp == "Never":
+                                _iv_strategies.append((
+                                    "No-Tech Resources",
+                                    "No computer/internet at home. Provide printable revision cards, illustrated notes, offline worksheets.",
+                                    "Generate Print-Ready Study Notes in Generate tab"
+                                ))
+                            if _iv_mom == "No HS" and _iv_sm == "Yes":
+                                _iv_strategies.append((
+                                    "IBT Risk Profile Review",
+                                    "Single-mother + No HS = highest-risk combination in IBT 183-student study (Physics avg D grade). Escalate support.",
+                                    "Open IBT Reports tab for full trajectory forecast"
+                                ))
+
+                            _uf = _urgency_fill[_iv_urg]
+                            _uc = _urgency_color[_iv_urg]
+                            _n_strats = len(_iv_strategies)
+
+                            for _si, (_strat_title, _strat_desc, _strat_action) in enumerate(_iv_strategies):
+                                _iv_bg = PatternFill("solid", fgColor="1C2340") if _iv_row%2==0 else _navy_fill
+                                _iv_row_h = 36
+
+                                # Col A — Student name (only on first row, spans all strategy rows)
+                                _nc_iv = _ws_iv.cell(_iv_row, 1, _iv_name if _si==0 else "")
+                                _nc_iv.font = Font(color="FFFFFF", bold=True, size=11)
+                                _nc_iv.fill = _iv_bg; _nc_iv.border = _bdr
+                                _nc_iv.alignment = Alignment(vertical="center", horizontal="left", wrap_text=False)
+
+                                # Col B — Avg score (first row only)
+                                _sc_iv = _ws_iv.cell(_iv_row, 2, _iv_score_str if _si==0 else "")
+                                _sc_iv.font = Font(color=_uc, bold=True, size=10)
+                                _sc_iv.fill = _uf if _si==0 else _iv_bg; _sc_iv.border = _bdr
+                                _sc_iv.alignment = Alignment(horizontal="center", vertical="center")
+
+                                # Col C — Urgency (first row only)
+                                _uc_iv = _ws_iv.cell(_iv_row, 3, _iv_urg if _si==0 else "")
+                                _uc_iv.font = Font(color=_uc, bold=True, size=10)
+                                _uc_iv.fill = _uf if _si==0 else _iv_bg; _uc_iv.border = _bdr
+                                _uc_iv.alignment = Alignment(horizontal="center", vertical="center")
+
+                                # Col D — Risk factors (first row only)
+                                _rf_iv = _ws_iv.cell(_iv_row, 4, _iv_rf_str if _si==0 else "")
+                                _rf_iv.font = Font(color="FFCCCC" if _si==0 else "FFFFFF", size=9)
+                                _rf_iv.fill = _iv_bg; _rf_iv.border = _bdr
+                                _rf_iv.alignment = Alignment(vertical="top", wrap_text=True, horizontal="left")
+
+                                # Col E — Strategy title + description
+                                _st_iv = _ws_iv.cell(_iv_row, 5, f"{_strat_title}: {_strat_desc}")
+                                _st_iv.font = Font(color="E8F0FF", size=10)
+                                _st_iv.fill = _iv_bg; _st_iv.border = _bdr
+                                _st_iv.alignment = Alignment(vertical="top", wrap_text=True, horizontal="left")
+
+                                # Col F — Recommended action
+                                _ra_iv = _ws_iv.cell(_iv_row, 6, _strat_action)
+                                _ra_iv.font = Font(color="81C784", bold=True, size=10)
+                                _ra_iv.fill = _iv_bg; _ra_iv.border = _bdr
+                                _ra_iv.alignment = Alignment(vertical="top", wrap_text=True, horizontal="left")
+
+                                _ws_iv.row_dimensions[_iv_row].height = _iv_row_h
+                                _iv_row += 1
+
+                            # Blank separator row between students
+                            for _c in range(1, 7):
+                                _sep = _ws_iv.cell(_iv_row, _c, "")
+                                _sep.fill = PatternFill("solid", fgColor="060D1A")
+                                _sep.border = _bdr
+                            _ws_iv.row_dimensions[_iv_row].height = 6
+                            _iv_row += 1
+
+                        if not _iv_candidates:
+                            _no_iv = _ws_iv.cell(4, 1, "No students currently flagged for intervention — great news!")
+                            _no_iv.font = Font(color="81C784", bold=True, size=11, italic=True)
+                            _no_iv.alignment = Alignment(horizontal="center")
                     except Exception: pass
 
                     _rpt_buf = io.BytesIO(); _rpt_wb.save(_rpt_buf); _rpt_buf.seek(0)
