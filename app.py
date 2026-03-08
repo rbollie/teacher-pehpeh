@@ -4003,32 +4003,32 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                     for sd in _sdata_all.values() for v in sd.values()
                 )
                 if _has_sem_data:
-                    st.markdown('''<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin:14px 0 6px">👤 Individual Averages by Subject &amp; Semester</div>''', unsafe_allow_html=True)
-                    # Build rows: one row per student, columns = Subject · Sem1 · Sem2 · Overall
-                    _all_students = sorted({stu for sd in _sdata_all.values() for stu in sd})
-                    _all_subjs    = sorted(_sdata_all.keys())
-                    _ind_rows = []
-                    for _stu in _all_students:
-                        for _subj2 in _all_subjs:
-                            _sval = _sdata_all.get(_subj2, {}).get(_stu, {})
-                            _s1 = _sval.get("s1_avg")
-                            _s2 = _sval.get("s2_avg")
-                            if _s1 is None and _s2 is None:
-                                continue
-                            _vals = [v for v in [_s1, _s2] if v is not None]
-                            _overall = round(sum(_vals)/len(_vals), 1)
-                            _status = "🔴 Intervention" if _overall < 50 else ("🟡 Monitor" if _overall < 65 else "🟢 On Track")
-                            _ind_rows.append({
-                                "Student":  _stu,
-                                "Subject":  _subj2,
-                                "Sem 1":    f"{_s1:.1f}/100" if _s1 is not None else "—",
-                                "Sem 2":    f"{_s2:.1f}/100" if _s2 is not None else "—",
-                                "Overall":  f"{_overall:.1f}/100",
-                                "Status":   _status,
-                            })
-                    if _ind_rows:
-                        # Render with merged student name cell
-                        _ind_html = '''<table style="width:100%;border-collapse:collapse;font-size:.85rem;color:#D0D8E8">
+                    with st.expander("👤 Individual Averages by Subject & Semester", expanded=False):
+                        # Build rows: one row per student, columns = Subject · Sem1 · Sem2 · Overall
+                        _all_students = sorted({stu for sd in _sdata_all.values() for stu in sd})
+                        _all_subjs    = sorted(_sdata_all.keys())
+                        _ind_rows = []
+                        for _stu in _all_students:
+                            for _subj2 in _all_subjs:
+                                _sval = _sdata_all.get(_subj2, {}).get(_stu, {})
+                                _s1 = _sval.get("s1_avg")
+                                _s2 = _sval.get("s2_avg")
+                                if _s1 is None and _s2 is None:
+                                    continue
+                                _vals = [v for v in [_s1, _s2] if v is not None]
+                                _overall = round(sum(_vals)/len(_vals), 1)
+                                _status = "🔴 Intervention" if _overall < 50 else ("🟡 Monitor" if _overall < 65 else "🟢 On Track")
+                                _ind_rows.append({
+                                    "Student":  _stu,
+                                    "Subject":  _subj2,
+                                    "Sem 1":    f"{_s1:.1f}/100" if _s1 is not None else "—",
+                                    "Sem 2":    f"{_s2:.1f}/100" if _s2 is not None else "—",
+                                    "Overall":  f"{_overall:.1f}/100",
+                                    "Status":   _status,
+                                })
+                        if _ind_rows:
+                            # Render with merged student name cell
+                            _ind_html = '''<table style="width:100%;border-collapse:collapse;font-size:.85rem;color:#D0D8E8">
 <thead><tr>
   <th style="background:#1E3A6A;color:#D4A843;padding:7px 12px;text-align:left;border-bottom:2px solid #D4A843">Student</th>
   <th style="background:#1E3A6A;color:#D4A843;padding:7px 12px;text-align:left;border-bottom:2px solid #D4A843">Subject</th>
@@ -4068,19 +4068,19 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                         st.markdown(_ind_html, unsafe_allow_html=True)
                 elif _n_subjects > 1:
                     # Fallback: individual subject avgs from grade_history (no semester split)
-                    st.markdown('''<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin:14px 0 6px">👤 Individual Averages by Subject</div>''', unsafe_allow_html=True)
-                    _ind_rows2 = []
-                    for _stu in sorted(_df["student"].unique()):
-                        for _subj2 in sorted(_df["subject"].unique()):
-                            _sdf = _df[(_df["student"]==_stu) & (_df["subject"]==_subj2)]
-                            if _sdf.empty: continue
-                            _savg2 = _sdf["score"].mean()
-                            _status2 = "🔴 Intervention" if _savg2 < 50 else ("🟡 Monitor" if _savg2 < 65 else "🟢 On Track")
-                            _ind_rows2.append({"Student": _stu, "Subject": _subj2,
-                                               "Avg Score": f"{_savg2:.1f}/100", "Status": _status2})
-                    if _ind_rows2:
-                        # Render with merged student name cell
-                        _fb_html = '''<table style="width:100%;border-collapse:collapse;font-size:.85rem;color:#D0D8E8">
+                    with st.expander("👤 Individual Averages by Subject", expanded=False):
+                        _ind_rows2 = []
+                        for _stu in sorted(_df["student"].unique()):
+                            for _subj2 in sorted(_df["subject"].unique()):
+                                _sdf = _df[(_df["student"]==_stu) & (_df["subject"]==_subj2)]
+                                if _sdf.empty: continue
+                                _savg2 = _sdf["score"].mean()
+                                _status2 = "🔴 Intervention" if _savg2 < 50 else ("🟡 Monitor" if _savg2 < 65 else "🟢 On Track")
+                                _ind_rows2.append({"Student": _stu, "Subject": _subj2,
+                                                   "Avg Score": f"{_savg2:.1f}/100", "Status": _status2})
+                        if _ind_rows2:
+                            # Render with merged student name cell
+                            _fb_html = '''<table style="width:100%;border-collapse:collapse;font-size:.85rem;color:#D0D8E8">
 <thead><tr>
   <th style="background:#1E3A6A;color:#D4A843;padding:7px 12px;text-align:left;border-bottom:2px solid #D4A843">Student</th>
   <th style="background:#1E3A6A;color:#D4A843;padding:7px 12px;text-align:left;border-bottom:2px solid #D4A843">Subject</th>
@@ -4111,21 +4111,6 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
 </tr>'''
                         _fb_html += "</tbody></table>"
                         st.markdown(_fb_html, unsafe_allow_html=True)
-
-            # ── Line chart ────────────────────────────────────────────────
-            try:
-                import altair as alt
-                _chart_df = _df_sorted[["date","student","score"]].copy()
-                _chart_df["date"] = _chart_df["date"].dt.date
-                _ac = alt.Chart(_chart_df).mark_line(point=True).encode(
-                    x=alt.X("date:T", title="Date"),
-                    y=alt.Y("score:Q", title="Score", scale=alt.Scale(domain=[0,100])),
-                    color="student:N",
-                    tooltip=["student","score","date"]
-                ).properties(height=260, title="Student Score Progression Over Time")
-                st.altair_chart(_ac, use_container_width=True)
-            except Exception:
-                pass
 
             # ── AI Analysis ───────────────────────────────────────────────
             st.markdown("---")
