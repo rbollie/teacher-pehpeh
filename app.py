@@ -2082,12 +2082,14 @@ def main():
     section[data-testid="stSidebar"] .stSelectbox > div > div {{background:#3D0C0C !important;color:#F0D5D5 !important;border-color:#8B3030 !important}}
     section[data-testid="stSidebar"] hr {{border-color:#8B3030 !important}}
     .stStatusWidget {{display:none !important}}
-    .stTabs [data-baseweb="tab-list"] {{background:{C_NAVY_L};border-radius:8px;padding:4px}}
-    .stTabs [aria-selected="true"] {{color:white !important;background:{C_BLUE} !important;border-radius:6px}}
+    .stTabs [data-baseweb="tab-list"] {{background:#111C35;border-radius:10px;padding:5px;gap:3px;border:2px solid #2a3a6a !important}}
+    .stTabs [data-baseweb="tab"] {{border-radius:7px !important;font-weight:600 !important;padding:7px 16px !important;border:1.5px solid transparent !important;transition:all .2s !important;color:#7A90B8 !important;margin:0 1px !important}}
+    .stTabs [data-baseweb="tab"]:not([aria-selected="true"]):hover {{border-color:#2B7DE944 !important;color:#B0C8E8 !important;background:rgba(43,125,233,.1) !important}}
+    .stTabs [aria-selected="true"] {{color:white !important;background:linear-gradient(135deg,{C_BLUE_D},{C_BLUE}) !important;border-color:{C_BLUE} !important;border-radius:7px !important;box-shadow:0 2px 10px rgba(43,125,233,.45) !important;font-weight:700 !important}}
     .stButton > button[kind="primary"] {{background:linear-gradient(135deg,{C_BLUE_D},{C_BLUE}) !important;color:white !important;font-weight:700 !important;border:none !important;border-radius:8px !important;box-shadow:0 3px 10px rgba(43,125,233,.35) !important;padding:8px 20px !important;transition:all .2s !important}}
     .stButton > button[kind="primary"]:hover {{box-shadow:0 5px 20px rgba(43,125,233,.5) !important;transform:translateY(-1px) !important}}
-    .stButton > button[kind="secondary"], .stButton > button:not([kind="primary"]) {{background:var(--bg-card) !important;color:var(--text-primary) !important;font-weight:600 !important;border:2px solid var(--border-color) !important;border-radius:8px !important;box-shadow:0 2px 6px rgba(0,0,0,.12) !important;transition:all .2s !important}}
-    .stButton > button[kind="secondary"]:hover, .stButton > button:not([kind="primary"]):hover {{border-color:{C_BLUE} !important;box-shadow:0 3px 12px rgba(43,125,233,.2) !important;transform:translateY(-1px) !important}}
+    .stButton > button[kind="secondary"], .stButton > button:not([kind="primary"]) {{background:#0D1A30 !important;color:#A8C0DC !important;font-weight:600 !important;border:2px solid #3D5580 !important;border-radius:10px !important;box-shadow:inset 0 1px 4px rgba(0,0,0,.25),0 1px 3px rgba(0,0,0,.15) !important;transition:all .2s !important}}
+    .stButton > button[kind="secondary"]:hover, .stButton > button:not([kind="primary"]):hover {{border-color:{C_BLUE} !important;color:#D4E8FF !important;background:rgba(43,125,233,.12) !important;box-shadow:0 3px 12px rgba(43,125,233,.22) !important;transform:translateY(-1px) !important}}
     /* Status bar: clearly non-interactive */
     .status-bar {{background:transparent !important;border:1px dashed var(--border-color) !important;border-radius:20px;padding:5px 14px;font-size:.78rem;display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:.8rem;opacity:.75;pointer-events:none;user-select:none}}
     .rh {{background:linear-gradient(135deg,{C_RED},{C_RED_L});color:white;padding:1rem;border-radius:10px 10px 0 0;margin-top:1rem}}
@@ -2173,6 +2175,84 @@ def main():
         border-radius:50%;
         flex-shrink:0;
     }}
+
+    /* ══════════════════════════════════════════════════
+       ACCESSIBILITY ENHANCEMENTS — TILES & DROPDOWNS
+       ══════════════════════════════════════════════════ */
+
+    /* CATEGORY TILE BUTTONS — active state: bright blue glow + thick border */
+    [data-testid="baseButton-primary"] {{
+        background: linear-gradient(135deg, {C_BLUE_D}, {C_BLUE}) !important;
+        color: white !important;
+        font-weight: 700 !important;
+        border: 2.5px solid {C_BLUE} !important;
+        border-radius: 10px !important;
+        box-shadow: 0 0 0 3px rgba(43,125,233,.22), 0 3px 14px rgba(43,125,233,.45) !important;
+        padding: 10px 14px !important;
+        letter-spacing: .3px !important;
+    }}
+    /* CATEGORY TILE BUTTONS — inactive: dark + clearly-bounded */
+    [data-testid="baseButton-secondary"] {{
+        background: #0D1A30 !important;
+        color: #A8C0DC !important;
+        font-weight: 600 !important;
+        border: 2px solid #3D5580 !important;
+        border-radius: 10px !important;
+        box-shadow: inset 0 1px 4px rgba(0,0,0,.3) !important;
+        padding: 10px 14px !important;
+        letter-spacing: .2px !important;
+    }}
+    [data-testid="baseButton-secondary"]:hover {{
+        border-color: {C_BLUE} !important;
+        color: #D4E8FF !important;
+        background: rgba(43,125,233,.12) !important;
+        box-shadow: 0 0 0 2px rgba(43,125,233,.18), 0 3px 12px rgba(43,125,233,.22) !important;
+        transform: translateY(-1px) !important;
+    }}
+
+    /* MAIN-AREA SELECTBOXES — fat visible border + clear hover/focus ring */
+    .main .stSelectbox > div > div,
+    [data-testid="stMain"] .stSelectbox > div > div,
+    [data-testid="stMainBlockContainer"] .stSelectbox > div > div {{
+        border: 2px solid #3D5580 !important;
+        border-radius: 9px !important;
+        background: #0D1A30 !important;
+        min-height: 42px !important;
+        transition: border-color .18s, box-shadow .18s !important;
+    }}
+    .main .stSelectbox > div > div:hover,
+    [data-testid="stMain"] .stSelectbox > div > div:hover,
+    [data-testid="stMainBlockContainer"] .stSelectbox > div > div:hover {{
+        border-color: {C_BLUE} !important;
+    }}
+    .main .stSelectbox > div > div:focus-within,
+    [data-testid="stMain"] .stSelectbox > div > div:focus-within,
+    [data-testid="stMainBlockContainer"] .stSelectbox > div > div:focus-within {{
+        border-color: {C_BLUE} !important;
+        box-shadow: 0 0 0 3px rgba(43,125,233,.22) !important;
+    }}
+    /* Selectbox text color in main area */
+    [data-testid="stMainBlockContainer"] .stSelectbox [data-baseweb="select"] span,
+    [data-testid="stMain"] .stSelectbox [data-baseweb="select"] span {{
+        color: #D0E4FF !important;
+        font-weight: 600 !important;
+        font-size: .92rem !important;
+    }}
+
+    /* CLASSROOM CONFIG EXPANDER — standout panel */
+    [data-testid="stMainBlockContainer"] .stExpander > details {{
+        border: 2px solid {C_GOLD}55 !important;
+        border-radius: 12px !important;
+        background: rgba(15,34,71,.7) !important;
+    }}
+    [data-testid="stMainBlockContainer"] .stExpander > details > summary {{
+        color: {C_GOLD_L} !important;
+        font-weight: 700 !important;
+        font-size: .96rem !important;
+        padding: 10px 14px !important;
+        border-radius: 10px !important;
+    }}
+
     </style>""",unsafe_allow_html=True)
 
     # ── Session state defaults (sidebar removed — all UI in main content) ──────
