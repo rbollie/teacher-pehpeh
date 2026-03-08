@@ -3829,74 +3829,84 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
             with _ma4: st.metric("Need Intervention", f"{_below50} student{'s' if _below50!=1 else ''}", delta=f"{_at_risk_pct:.0f}% of class", delta_color="inverse")
 
             # ── Visual summaries: Two charts side-by-side ────────────────────
-            _vcol1, _vcol2 = st.columns(2)
+            _vcol1, _vgap, _vcol2 = st.columns([10, 1, 10])
 
-            # ── LEFT: HW & Quiz counts per semester (two groups: S1 | S2) ────
+            # ── LEFT: HW & Quiz per Semester, grouped like the reference chart ──
             with _vcol1:
-                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin-bottom:6px">📋 Homework &amp; Quizzes per Semester</div>', unsafe_allow_html=True)
+                st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin-bottom:6px">&#128203; Homework &amp; Quizzes per Semester</div>', unsafe_allow_html=True)
                 try:
                     import altair as _alt_hq, pandas as _pd_hq
                     _sdata_hq = st.session_state.get("_ar_subject_data") or {}
                     _hq_rows = []
-                    # Colors: HW blue tones, Quiz orange/red tones — distinct per series
-                    _HQ_COLORS = {
-                        "HW":   "#4E79A7",   # steel blue
-                        "Quiz": "#F28E2B",   # orange
-                    }
-                    _SEM_COLORS_HQ = {
-                        "S1 — HW":   "#4E79A7",
-                        "S1 — Quiz": "#F28E2B",
-                        "S2 — HW":   "#76B7B2",
-                        "S2 — Quiz": "#E15759",
-                    }
-                    for _hqs, _hqsd in _sdata_hq.items():
-                        _hw1c = max((_hqd.get("hw1_count") or 0) for _hqd in _hqsd.values())
-                        _qz1c = max((_hqd.get("qz1_count") or 0) for _hqd in _hqsd.values())
-                        _hw2c = max((_hqd.get("hw2_count") or 0) for _hqd in _hqsd.values())
-                        _qz2c = max((_hqd.get("qz2_count") or 0) for _hqd in _hqsd.values())
-                        if _hw1c: _hq_rows.append({"Subject":_hqs,"Semester":"S1","Type":"HW",  "Series":"S1 — HW",   "Count":_hw1c})
-                        if _qz1c: _hq_rows.append({"Subject":_hqs,"Semester":"S1","Type":"Quiz","Series":"S1 — Quiz", "Count":_qz1c})
-                        if _hw2c: _hq_rows.append({"Subject":_hqs,"Semester":"S2","Type":"HW",  "Series":"S2 — HW",   "Count":_hw2c})
-                        if _qz2c: _hq_rows.append({"Subject":_hqs,"Semester":"S2","Type":"Quiz","Series":"S2 — Quiz", "Count":_qz2c})
+                    # One color per subject (like series in the reference chart)
+                    _SUBJ_PALETTE_HQ = [
+                        "#4E79A7","#F28E2B","#E15759","#76B7B2","#59A14F",
+                        "#EDC948","#B07AA1","#FF9DA7","#9C755F","#BAB0AC",
+                        "#D4A843","#2ECC71","#E74C3C","#3498DB","#9B59B6",
+                    ]
+                    _subj_list_hq = sorted(_sdata_hq.keys())
+                    _subj_color_map = {s: _SUBJ_PALETTE_HQ[i % len(_SUBJ_PALETTE_HQ)] for i, s in enumerate(_subj_list_hq)}
+                    for _hqs in _subj_list_hq:
+                        _hqsd = _sdata_hq[_hqs]
+                        _hw1c = max((_hqd.get("hw1_count") or 0) for _hqd in _hqsd.values()) if _hqsd else 0
+                        _qz1c = max((_hqd.get("qz1_count") or 0) for _hqd in _hqsd.values()) if _hqsd else 0
+                        _hw2c = max((_hqd.get("hw2_count") or 0) for _hqd in _hqsd.values()) if _hqsd else 0
+                        _qz2c = max((_hqd.get("qz2_count") or 0) for _hqd in _hqsd.values()) if _hqsd else 0
+                        if _hw1c: _hq_rows.append({"Semester":"S1","Assignment":"Homework","Subject":_hqs,"Count":_hw1c})
+                        if _qz1c: _hq_rows.append({"Semester":"S1","Assignment":"Quiz",    "Subject":_hqs,"Count":_qz1c})
+                        if _hw2c: _hq_rows.append({"Semester":"S2","Assignment":"Homework","Subject":_hqs,"Count":_hw2c})
+                        if _qz2c: _hq_rows.append({"Semester":"S2","Assignment":"Quiz",    "Subject":_hqs,"Count":_qz2c})
                     if _hq_rows:
                         _hq_df = _pd_hq.DataFrame(_hq_rows)
-                        _series_order = ["S1 — HW","S1 — Quiz","S2 — HW","S2 — Quiz"]
-                        _series_colors = [_SEM_COLORS_HQ[s] for s in _series_order]
-                        _hq_color_scale = _alt_hq.Scale(domain=_series_order, range=_series_colors)
-                        _subj_order_hq = sorted(_hq_df["Subject"].unique())
-                        # Primary grouping = Semester, inner offset = Type
+                        _hq_color_scale = _alt_hq.Scale(
+                            domain=_subj_list_hq,
+                            range=[_subj_color_map[s] for s in _subj_list_hq],
+                        )
+                        # X = Assignment (Homework | Quiz), xOffset = Subject, facet column = Semester
                         _hq_chart = (
                             _alt_hq.Chart(_hq_df)
                             .mark_bar(cornerRadiusTopLeft=3, cornerRadiusTopRight=3)
                             .encode(
-                                x=_alt_hq.X("Semester:N", sort=["S1","S2"],
-                                             axis=_alt_hq.Axis(labelColor="#D0D8E8", titleColor="#D0D8E8"), title=None),
-                                y=_alt_hq.Y("Count:Q", axis=_alt_hq.Axis(labelColor="#D0D8E8", titleColor="#D0D8E8"), title="# Assignments"),
-                                xOffset=_alt_hq.XOffset("Type:N", sort=["HW","Quiz"]),
-                                color=_alt_hq.Color("Series:N", scale=_hq_color_scale,
-                                                    legend=_alt_hq.Legend(labelColor="#D0D8E8", titleColor="#D0D8E8", title="Type")),
-                                column=_alt_hq.Column("Subject:N", sort=_subj_order_hq,
-                                                      header=_alt_hq.Header(labelColor="#D0D8E8", titleColor="#D0D8E8", labelAngle=-20)),
-                                tooltip=[_alt_hq.Tooltip("Subject:N"), _alt_hq.Tooltip("Semester:N"),
-                                         _alt_hq.Tooltip("Type:N"), _alt_hq.Tooltip("Count:Q", title="# Assignments")],
+                                x=_alt_hq.X("Assignment:N", sort=["Homework","Quiz"],
+                                             axis=_alt_hq.Axis(labelColor="#D0D8E8", titleColor="#D0D8E8",
+                                                               labelAngle=0), title=None),
+                                y=_alt_hq.Y("Count:Q",
+                                             axis=_alt_hq.Axis(labelColor="#D0D8E8", titleColor="#D0D8E8"),
+                                             title="# Assignments"),
+                                xOffset=_alt_hq.XOffset("Subject:N", sort=_subj_list_hq),
+                                color=_alt_hq.Color("Subject:N", scale=_hq_color_scale,
+                                                    legend=_alt_hq.Legend(labelColor="#D0D8E8", titleColor="#D0D8E8",
+                                                                          title="Subject", orient="bottom")),
+                                tooltip=[_alt_hq.Tooltip("Semester:N"), _alt_hq.Tooltip("Assignment:N"),
+                                         _alt_hq.Tooltip("Subject:N"), _alt_hq.Tooltip("Count:Q", title="Count")],
                             )
-                            .properties(height=220, width=_alt_hq.Step(28), background="transparent")
+                            .properties(height=240, background="transparent")
+                            .facet(
+                                column=_alt_hq.Column("Semester:N", sort=["S1","S2"],
+                                                      header=_alt_hq.Header(labelColor="#D0D8E8", titleColor="#D0D8E8",
+                                                                            labelFontSize=13, labelFontWeight="bold",
+                                                                            labelPadding=8)),
+                                spacing=20,
+                            )
                             .configure_axis(gridColor="rgba(255,255,255,0.08)", domainColor="#444", tickColor="#444")
                             .configure_view(strokeWidth=0, stroke="transparent")
                             .configure_legend(fillColor="rgba(0,0,0,0)", strokeColor="rgba(0,0,0,0)")
                             .configure_header(labelColor="#D0D8E8", titleColor="#D0D8E8")
                         )
-                        st.altair_chart(_hq_chart, use_container_width=False)
+                        st.altair_chart(_hq_chart, use_container_width=True)
                     else:
                         st.caption("Upload an IBT Grade Tracker Excel to see homework and quiz counts per semester.")
                 except Exception as _hqe:
                     st.caption(f"Chart unavailable: {_hqe}")
 
+            with _vgap:
+                st.empty()
+
             # ── RIGHT: Mom's Education × Kids in Home combo bars ──────────
             with _vcol2:
                 st.markdown('<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin-bottom:6px">&#128106; Avg Score by Mom&#39;s Education &amp; Kids in Home</div>', unsafe_allow_html=True)
                 try:
-                    import altair as _alt2
+                    import altair as _alt2, pandas as _pd_combo
                     _stu_profile2 = {s["name"]: s for s in (st.session_state.students or [])}
                     _combo_data = {}
                     for _sname2 in _df["student"].unique():
@@ -3917,7 +3927,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                                 "Avg Score": round(_ca, 1), "Students": len(_cv),
                                 "Color": ("#2ECC71" if _ca >= 65 else ("#F1C40F" if _ca >= 50 else "#E74C3C")),
                             })
-                        _combo_df = _pd_hq.DataFrame(_combo_rows) if _hq_rows else __import__("pandas").DataFrame(_combo_rows)
+                        _combo_df = _pd_combo.DataFrame(_combo_rows)
                         _combo_df["_mo"] = _combo_df["Mom Edu"].apply(lambda x: _mom_order.index(x) if x in _mom_order else 99)
                         _combo_df["_so"] = _combo_df["Kids"].apply(lambda x: _sib_order.index(x) if x in _sib_order else 99)
                         _combo_df = _combo_df.sort_values(["_mo","_so"]).drop(columns=["_mo","_so"])
