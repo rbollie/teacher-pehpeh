@@ -138,6 +138,48 @@ def _img_from_fig(fig):
     buf.seek(0)
     return buf
 
+
+# ── Explanation box helper ────────────────────────────────────────────────────
+def _add_explanation_box(doc, title, what_text, interpret_text, act_text):
+    """Add a shaded callout box explaining a report section."""
+    p_sp = doc.add_paragraph()
+    p_sp.paragraph_format.space_before = Pt(4)
+    p_sp.paragraph_format.space_after  = Pt(2)
+
+    tbl = doc.add_table(rows=1, cols=1)
+    tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+    tbl.style = "Table Grid"
+    cell = tbl.rows[0].cells[0]
+    _set_cell_bg(cell, RGBColor(0xDA, 0xE8, 0xFC))   # light blue background
+    _set_cell_borders(cell, "ADC6E5")
+
+    # Title line
+    p_t = cell.paragraphs[0]
+    p_t.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    rt = p_t.add_run(f"📘  {title}")
+    rt.bold = True
+    rt.font.size = Pt(9.5)
+    rt.font.color.rgb = IBT_BLUE
+
+    sections = [
+        ("📌 What this shows:", what_text),
+        ("🔍 How to interpret:", interpret_text),
+        ("✅ How to act:", act_text),
+    ]
+    for label, body in sections:
+        p_i = cell.add_paragraph()
+        p_i.paragraph_format.space_before = Pt(2)
+        p_i.paragraph_format.space_after  = Pt(1)
+        r_label = p_i.add_run(f"{label}  ")
+        r_label.bold = True
+        r_label.font.size = Pt(9)
+        r_label.font.color.rgb = IBT_DARK_BLUE
+        r_body = p_i.add_run(body)
+        r_body.font.size = Pt(9)
+        r_body.font.color.rgb = RGBColor(0x22, 0x22, 0x22)
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(6)
+
 # ── Chart generators ──────────────────────────────────────────────────────────
 
 def _chart_subject_avg(df):
@@ -339,6 +381,20 @@ def _table_subject_breakdown(doc, df, subject_data):
             _data_para(cell, val, bold=(col_hdrs[ci]=="Class Avg"),
                        color=fg if is_score else IBT_DARK_BLUE,
                        align=WD_ALIGN_PARAGRAPH.LEFT if ci==0 else WD_ALIGN_PARAGRAPH.CENTER)
+    _add_explanation_box(doc,
+        "Subject Breakdown Table — How to Read This Table",
+        "Each row is one subject. Columns show the class average, semester averages "
+        "(if recorded), total students assessed, the lowest individual score, "
+        "and the overall status (On Track / Monitor / Intervention).",
+        "Compare Sem 1 and Sem 2 averages. A drop of more than 10 points from "
+        "Semester 1 to Semester 2 is a red flag — it often means the second-semester "
+        "content is harder and students did not receive enough reinforcement early. "
+        "The 'Lowest' column identifies the floor — one very low score can mask a "
+        "struggling student who needs individual support.",
+        "Sort your attention by Status colour: address all red rows first. "
+        "For each red subject, identify the specific topics covered in Semester 2 "
+        "and create a targeted revision plan. Share this table with your school head "
+        "as evidence when requesting additional resources.")
     doc.add_paragraph()
 
 
@@ -436,6 +492,19 @@ def _table_individual_averages(doc, df, subject_data):
                        color=IBT_BLUE if is_stu_col else (fg if is_score_col else IBT_DARK_BLUE),
                        align=WD_ALIGN_PARAGRAPH.LEFT if ci <= 1 else WD_ALIGN_PARAGRAPH.CENTER)
 
+    _add_explanation_box(doc,
+        "Individual Averages Table — How to Read This Table",
+        "Every student appears in this table with their score for each subject, "
+        "broken down by semester. Students are grouped by alternating row shading "
+        "to make each individual easy to follow across subjects.",
+        "Look for two patterns: (1) A student who is red across multiple subjects "
+        "needs holistic support — academic, social, or both. (2) A student who is "
+        "red in only one subject may have a specific content gap or learning barrier "
+        "in that subject. The 'Status' column uses the same colour coding as the charts.",
+        "Create a priority list of any student with two or more red subjects. "
+        "Schedule individual feedback sessions and notify parents or guardians. "
+        "For single-subject reds, arrange peer tutoring or targeted revision with "
+        "the subject teacher. Track improvement in the next assessment cycle.")
     doc.add_paragraph()
 
 
@@ -497,6 +566,20 @@ def _table_family_context(doc, df, students):
                        bold=(col_hdrs[ci]=="Avg Score"),
                        color=fg if is_score else IBT_DARK_BLUE,
                        align=WD_ALIGN_PARAGRAPH.LEFT if ci == 0 else WD_ALIGN_PARAGRAPH.CENTER)
+    _add_explanation_box(doc,
+        "Family Context Table — How to Read This Table",
+        "Students are grouped by their mother's highest education level and the "
+        "number of children living at home. Each row shows how many students are "
+        "in that group and their average score and status.",
+        "This table surfaces systemic patterns. Students from larger households "
+        "where the mother did not complete high school statistically face more "
+        "barriers to studying at home: less parental academic support, more domestic "
+        "responsibilities, and fewer study materials. A large score gap between groups "
+        "confirms these barriers are measurable in your classroom.",
+        "Use this as a targeting tool, not a prediction. Identify students in the "
+        "highest-risk groups and prioritise them for IBT support programmes, free "
+        "materials, and community mentorship. Share this data with IBT to access "
+        "the full 8-year research dataset and evidence-based intervention strategies.")
     doc.add_paragraph()
 
 
@@ -550,66 +633,38 @@ def generate_academic_word_report(
     hdr_tbl = doc.add_table(rows=1, cols=3)
     hdr_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
     hdr_tbl.style = "Table Grid"
-    # Remove all borders on the header table
     for _row in hdr_tbl.rows:
         for _cell in _row.cells:
-            _tc = _cell._tc
-            _tcPr = _tc.get_or_add_tcPr()
+            _tc = _cell._tc; _tcPr = _tc.get_or_add_tcPr()
             _tcBorders = OxmlElement("w:tcBorders")
-            for _side in ("top", "left", "bottom", "right", "insideH", "insideV"):
+            for _side in ("top","left","bottom","right","insideH","insideV"):
                 _b = OxmlElement(f"w:{_side}")
-                _b.set(qn("w:val"), "none")
-                _b.set(qn("w:sz"),  "0")
-                _b.set(qn("w:space"), "0")
-                _b.set(qn("w:color"), "auto")
+                _b.set(qn("w:val"), "none"); _b.set(qn("w:sz"), "0")
+                _b.set(qn("w:space"), "0"); _b.set(qn("w:color"), "auto")
                 _tcBorders.append(_b)
             _tcPr.append(_tcBorders)
-
     _c_left, _c_mid, _c_right = hdr_tbl.rows[0].cells
-
-    # Left cell — IBT logo
     _c_left.width = Inches(1.5)
-    _p_left = _c_left.paragraphs[0]
-    _p_left.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    _p_left = _c_left.paragraphs[0]; _p_left.alignment = WD_ALIGN_PARAGRAPH.LEFT
     if _ibt_logo_path.exists():
         _p_left.add_run().add_picture(str(_ibt_logo_path), width=Inches(1.2))
-
-    # Centre cell — address block
     _c_mid.width = Inches(4.2)
-    _p_mid = _c_mid.paragraphs[0]
-    _p_mid.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    _p_mid = _c_mid.paragraphs[0]; _p_mid.alignment = WD_ALIGN_PARAGRAPH.CENTER
     _addr_run1 = _p_mid.add_run("Institute of Basic Technology (IBT)\n")
-    _addr_run1.bold = True
-    _addr_run1.font.size = Pt(10)
-    _addr_run1.font.color.rgb = IBT_BLUE
-    _addr_run2 = _p_mid.add_run(
-        "Thinker's Village, Montserrado, Liberia\n"
-        "Support@institutebasictechnology.org\n"
-        "0777-974-676"
-    )
-    _addr_run2.font.size = Pt(8.5)
-    _addr_run2.font.color.rgb = RGBColor(0x33, 0x33, 0x33)
-
-    # Right cell — Teacher Pehpeh logo
+    _addr_run1.bold = True; _addr_run1.font.size = Pt(10); _addr_run1.font.color.rgb = IBT_BLUE
+    _addr_run2 = _p_mid.add_run("Thinker's Village, Montserrado, Liberia\nSupport@institutebasictechnology.org\n0777-974-676")
+    _addr_run2.font.size = Pt(8.5); _addr_run2.font.color.rgb = RGBColor(0x33, 0x33, 0x33)
     _c_right.width = Inches(1.5)
-    _p_right = _c_right.paragraphs[0]
-    _p_right.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    _p_right = _c_right.paragraphs[0]; _p_right.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     if _pehpeh_logo_path.exists():
         _p_right.add_run().add_picture(str(_pehpeh_logo_path), width=Inches(1.2))
-
-    # Gold divider line
     _div_p = doc.add_paragraph()
-    _div_p.paragraph_format.space_before = Pt(4)
-    _div_p.paragraph_format.space_after  = Pt(8)
-    _div_pPr = _div_p._p.get_or_add_pPr()
-    _div_pBdr = OxmlElement("w:pBdr")
+    _div_p.paragraph_format.space_before = Pt(4); _div_p.paragraph_format.space_after = Pt(8)
+    _div_pPr = _div_p._p.get_or_add_pPr(); _div_pBdr = OxmlElement("w:pBdr")
     _div_bot = OxmlElement("w:bottom")
-    _div_bot.set(qn("w:val"),   "single")
-    _div_bot.set(qn("w:sz"),    "12")
-    _div_bot.set(qn("w:space"), "1")
-    _div_bot.set(qn("w:color"), "D4A843")
-    _div_pBdr.append(_div_bot)
-    _div_pPr.append(_div_pBdr)
+    _div_bot.set(qn("w:val"), "single"); _div_bot.set(qn("w:sz"), "12")
+    _div_bot.set(qn("w:space"), "1"); _div_bot.set(qn("w:color"), "D4A843")
+    _div_pBdr.append(_div_bot); _div_pPr.append(_div_pBdr)
 
     # ── Cover block ───────────────────────────────────────────────────────────
     title_p = doc.add_paragraph()
@@ -672,6 +727,17 @@ def generate_academic_word_report(
         vrun.font.color.rgb = IBT_BLUE
     doc.add_paragraph().paragraph_format.space_after = Pt(4)
 
+    _add_explanation_box(doc,
+        "Reading the Summary Indicators",
+        "These four tiles summarise your entire class in one glance: overall average, "
+        "total students and subjects tracked, and the number flagged for urgent support.",
+        "Class Average below 65% means the majority are not yet on track for WASSCE. "
+        "'Need Intervention' counts students whose personal average is below 50 — "
+        "a score that would result in failure if maintained.",
+        "If Intervention count exceeds 20% of your class, escalate to the school head "
+        "immediately and schedule a teaching-strategy review. Use the tables below to "
+        "identify exactly which students and subjects to prioritise.")
+
     # ── Section 1: Charts ─────────────────────────────────────────────────────
     _add_section_heading(doc, "📊 Performance Charts", level=1)
 
@@ -687,6 +753,17 @@ def generate_academic_word_report(
         cap1.alignment = WD_ALIGN_PARAGRAPH.CENTER
         cap1.runs[0].font.size = Pt(8); cap1.runs[0].font.italic = True
         cap1.runs[0].font.color.rgb = RGBColor(0x66, 0x66, 0x66)
+        _add_explanation_box(doc,
+            "Class Average by Subject — How to Read This Chart",
+            "Each bar shows the class average score for one subject. "
+            "Bar colour instantly signals health: green (on track, ≥65%), "
+            "amber (monitor, 50–64%), red (intervention needed, <50%).",
+            "Start from the leftmost red bar — that is your most urgent subject. "
+            "A single red subject may reflect a curriculum mismatch; "
+            "multiple red subjects suggest a broader capacity or resource challenge.",
+            "For each red subject: review lesson plans, check if the textbook matches "
+            "the MOE syllabus, and schedule a subject-specific catch-up session within "
+            "two weeks. For amber subjects: increase quiz frequency and monitor weekly.")
         doc.add_paragraph()
     except Exception:
         pass
@@ -704,6 +781,19 @@ def generate_academic_word_report(
             cap2.alignment = WD_ALIGN_PARAGRAPH.CENTER
             cap2.runs[0].font.size = Pt(8); cap2.runs[0].font.italic = True
             cap2.runs[0].font.color.rgb = RGBColor(0x66, 0x66, 0x66)
+            _add_explanation_box(doc,
+                "Family Context Chart — How to Read This Chart",
+                "Each bar groups students by their mother's education level and the "
+                "number of children in the household. Bar height is the average score "
+                "for students in that combination.",
+                "Lower bars in the 'No High School / 8+ kids' group are expected — "
+                "these students face greater competing demands at home. "
+                "A very large gap between groups (>20 points) signals that home "
+                "environment is a significant barrier to learning in your class.",
+                "Do not use this chart to lower expectations. Instead, target additional "
+                "support (study groups, tutoring, take-home materials) toward the "
+                "lower-performing groups. Flag individual students in these groups for "
+                "the IBT Intervention Plan.")
             doc.add_paragraph()
     except Exception:
         pass
@@ -721,6 +811,19 @@ def generate_academic_word_report(
             cap3.alignment = WD_ALIGN_PARAGRAPH.CENTER
             cap3.runs[0].font.size = Pt(8); cap3.runs[0].font.italic = True
             cap3.runs[0].font.color.rgb = RGBColor(0x66, 0x66, 0x66)
+            _add_explanation_box(doc,
+                "Homework & Quiz Frequency — How to Read This Chart",
+                "Each group of bars shows how many homework assignments and quizzes "
+                "were recorded per subject in Semester 1 and Semester 2. "
+                "This measures teaching activity, not student performance.",
+                "Low counts (0–2) in a subject that also shows a low average score "
+                "strongly suggests insufficient practice opportunity. "
+                "A sharp drop from Semester 1 to Semester 2 may indicate the teacher "
+                "reduced assessment load as content became harder.",
+                "Aim for at least 3 homeworks and 2 quizzes per subject per semester. "
+                "For any subject with fewer than 2 total, introduce weekly short "
+                "assessments immediately — consistent low-stakes practice is one of "
+                "the strongest predictors of WASSCE readiness.")
             doc.add_paragraph()
     except Exception:
         pass

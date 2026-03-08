@@ -5659,6 +5659,29 @@ Be specific, data-driven, and compassionate."""
                         _isp.paragraph_format.space_after=_IPt(6)
                         _isr=_isp.add_run(f"Grade: {_sel_grade or 'Unknown'}  |  School: {_school_lbl6}  |  {_idt6.datetime.now().strftime('%B %d, %Y')}")
                         _isr.font.size=_IPt(9.5); _isr.font.color.rgb=_IRGB(0,51,102)
+                        # ── Guidance callout ──────────────────────────────────
+                        def _i_guide_box(doc, title, what, interpret, act):
+                            _gt = doc.add_table(rows=1, cols=1); _gt.style = "Table Grid"
+                            from docx.enum.table import WD_TABLE_ALIGNMENT as _WGTAB
+                            _gt.alignment = _WGTAB.CENTER
+                            _gc = _gt.rows[0].cells[0]
+                            _tc = _gc._tc; _tcPr = _tc.get_or_add_tcPr()
+                            _shd = _IOE("w:shd"); _shd.set(_Iqn("w:val"),"clear"); _shd.set(_Iqn("w:color"),"auto"); _shd.set(_Iqn("w:fill"),"DAE8FC"); _tcPr.append(_shd)
+                            _p0 = _gc.paragraphs[0]; _r0 = _p0.add_run(f"📘  {title}"); _r0.bold=True; _r0.font.size=_IPt(9.5); _r0.font.color.rgb=_IRGB(13,59,140)
+                            for _lbl, _txt in [("📌 What this shows:",what),("🔍 How to interpret:",interpret),("✅ How to act:",act)]:
+                                _pi = _gc.add_paragraph(); _pi.paragraph_format.space_before=_IPt(2)
+                                _rl=_pi.add_run(f"{_lbl}  "); _rl.bold=True; _rl.font.size=_IPt(9); _rl.font.color.rgb=_IRGB(0,51,102)
+                                _rb=_pi.add_run(_txt); _rb.font.size=_IPt(9); _rb.font.color.rgb=_IRGB(30,30,30)
+                            doc.add_paragraph().paragraph_format.space_after=_IPt(4)
+                        _i_guide_box(_idoc, "About This Intervention Plan",
+                            "This document contains an AI-generated, data-driven intervention plan tailored "
+                            "to the selected student's performance profile and IBT's 8-year Liberian classroom dataset.",
+                            "Each section identifies a specific performance gap, its likely root cause, and the "
+                            "evidence behind it. Sections are ordered by urgency — address the first section first. "
+                            "Recommendations draw on IBT benchmarks: WASSCE target 70.7%, at-risk threshold <61.2%.",
+                            "Assign a responsible teacher for each action item and set a two-week review date. "
+                            "Document progress in the student's record. If no improvement is seen after two cycles, "
+                            "escalate to the school head and contact IBT for specialist support.")
                         # AI text — parse and render with tight spacing
                         _ai_raw = st.session_state[_ibt_ai_key6]
                         for _iline in _ai_raw.split("\n"):
@@ -5941,6 +5964,33 @@ Be specific, data-driven, and compassionate."""
                             "IBT benchmarks reflect 8-year, 183-student dataset post-curve. WASSCE target: 70.7 | At-risk: <61.2 | Excellent: ≥79.1")
                         _nr.italic=True; _nr.font.size=_Pt6(9); _nr.font.color.rgb=_RGB6(0,51,102)
                         _p6sp=_doc6.add_paragraph(); _p6sp.paragraph_format.space_after=_Pt6(2)
+                        # ── Guidance callout helper ───────────────────────────
+                        def _guide6(doc, title, what, interpret, act):
+                            from docx.enum.table import WD_TABLE_ALIGNMENT as _WG6
+                            from docx.oxml import OxmlElement as _OE6g
+                            from docx.oxml.ns import qn as _qn6g
+                            _gt = doc.add_table(rows=1, cols=1); _gt.style = "Table Grid"; _gt.alignment = _WG6.CENTER
+                            _gc = _gt.rows[0].cells[0]
+                            _shd = _OE6g("w:shd"); _shd.set(_qn6g("w:val"),"clear"); _shd.set(_qn6g("w:color"),"auto"); _shd.set(_qn6g("w:fill"),"DAE8FC")
+                            _gc._tc.get_or_add_tcPr().append(_shd)
+                            _p0 = _gc.paragraphs[0]; _r0 = _p0.add_run(f"📘  {title}"); _r0.bold=True; _r0.font.size=_Pt6(9.5); _r0.font.color.rgb=_RGB6(13,59,140)
+                            for _lbl, _txt in [("📌 What this shows:",what),("🔍 How to interpret:",interpret),("✅ How to act:",act)]:
+                                _pi = _gc.add_paragraph(); _pi.paragraph_format.space_before=_Pt6(2)
+                                _rl=_pi.add_run(f"{_lbl}  "); _rl.bold=True; _rl.font.size=_Pt6(9); _rl.font.color.rgb=_RGB6(0,51,102)
+                                _rb=_pi.add_run(_txt); _rb.font.size=_Pt6(9); _rb.font.color.rgb=_RGB6(30,30,30)
+                            doc.add_paragraph().paragraph_format.space_after=_Pt6(4)
+                        _guide6(_doc6, "About This Intervention Analysis Report",
+                            "This report benchmarks your class against IBT's 8-year, 183-student Liberian dataset "
+                            "using square-root score curving — the same statistical method used to adjust for "
+                            "systemic under-resourcing in West African schools.",
+                            "Curved scores compress the top end and lift the bottom end slightly, giving a more "
+                            "realistic picture of student potential. The WASSCE target (70.7 curved) and at-risk "
+                            "threshold (<61.2 curved) are derived from IBT's historical pass/fail data. "
+                            "A 'Gap to WASSCE' value of -5 means the class needs 5 more curved points to reach "
+                            "the WASSCE readiness threshold.",
+                            "Use Section 1 to identify which subjects need urgent classroom intervention. "
+                            "Use Section 2 to identify the bottom quartile of students for individual support plans. "
+                            "Share this report with your school head and use it to apply for IBT programme support.")
                         # Class summary table
                         _add_heading6(_doc6, "1. Class Performance vs IBT Curved Benchmarks")
                         if _bench_rows6:
@@ -5959,6 +6009,16 @@ Be specific, data-driven, and compassionate."""
                                     for run in _row6.cells[ci].paragraphs[0].runs:
                                         run.font.size = _Pt6(9)
                         _p6sp=_doc6.add_paragraph(); _p6sp.paragraph_format.space_after=_Pt6(2)
+                        _guide6(_doc6, "Section 1 — Class vs IBT Benchmarks",
+                            "Each row compares your class average (after curving) to the IBT benchmark for "
+                            "that subject, drawn from 8 years of Liberian classroom data.",
+                            "'Gap' shows how far your class is above or below the IBT benchmark — a negative "
+                            "gap means below benchmark. 'Gap to WASSCE' shows how far from the minimum score "
+                            "needed for WASSCE readiness. Status: Excellent (≥79.1), On Track (≥70.7), "
+                            "Monitor (61.2–70.6), At Risk (<61.2).",
+                            "Prioritise subjects with negative Gap to WASSCE values. For each, meet with the "
+                            "subject teacher, review pacing against the MOE curriculum timeline, and schedule "
+                            "two targeted revision classes before the next assessment.")
                         # Student ranking table
                         _add_heading6(_doc6, "2. All Students — Curved Score Ranking")
                         if _stu_ranked:
@@ -5976,6 +6036,16 @@ Be specific, data-driven, and compassionate."""
                                     for run in _r7.cells[ci].paragraphs[0].runs:
                                         run.font.size=_Pt6(9)
                         _p6sp=_doc6.add_paragraph(); _p6sp.paragraph_format.space_after=_Pt6(2)
+                        _guide6(_doc6, "Section 2 — Student Ranking",
+                            "All students ranked from highest to lowest curved average, with their score "
+                            "relative to the IBT class average and their intervention status.",
+                            "'vs IBT Avg' shows each student's distance from the typical IBT student. "
+                            "Students ranked in the bottom quartile (At Risk) require individual support plans. "
+                            "Students close to the boundary (within 5 points of Monitor/At Risk) are the "
+                            "highest-leverage targets — a small push can move them to a better tier.",
+                            "For every student marked At Risk: create a named action plan within one week. "
+                            "Include parent/guardian contact, specific subject targets, and a check-in date. "
+                            "For boundary students: assign a peer mentor and increase assessment frequency.")
                         # IBT Research context
                         _add_heading6(_doc6, "3. IBT Research Context")
                         for _rtitle6, _rtext6 in _IBT_RISK_FACTS_C:
