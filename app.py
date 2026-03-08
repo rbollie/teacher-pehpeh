@@ -2463,33 +2463,90 @@ def main():
     if not conn:
         keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
 
-    # ── CLASSROOM CONFIGURATION BAR — always visible above tabs ──────────────
-    st.markdown('<div style="font-size:.72rem;font-weight:700;color:#D4A843;letter-spacing:.08em;margin-bottom:2px;margin-top:4px">⚙️ CLASSROOM CONFIGURATION</div>',unsafe_allow_html=True)
-    _cb0a,_cb0b,_cb1,_cb2,_cb3,_cb4,_cb5=st.columns(7)
-    with _cb0a:
-        _country_sel=st.selectbox(T("country"),COUNTRIES,key="country_sel",label_visibility="collapsed",format_func=lambda x:f"🌍 {x}",help="Your country")
+    # ── CLASSROOM CONFIGURATION BAR — always visible, cross-browser ──────────
+    # Row 1: Country + Language  |  Row 2: Setting + Grade + Subject + Class Size + Level
+    st.markdown(f"""
+<style>
+/* Cross-browser fix: ensure config bar columns always render inline */
+div[data-testid="stHorizontalBlock"] {{
+    display: -webkit-box !important;
+    display: -webkit-flex !important;
+    display: -ms-flexbox !important;
+    display: flex !important;
+    -webkit-flex-direction: row !important;
+    -ms-flex-direction: row !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}}
+div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"],
+div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {{
+    -webkit-box-flex: 1 !important;
+    -webkit-flex: 1 1 0% !important;
+    -ms-flex: 1 1 0% !important;
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+}}
+</style>
+<div style="font-size:.72rem;font-weight:700;color:#D4A843;letter-spacing:.08em;margin-bottom:3px;margin-top:6px">⚙️ CLASSROOM CONFIGURATION</div>
+""", unsafe_allow_html=True)
+    # Row 1 — Country & Language (wider columns, country names can be long)
+    _crow1, _crow2 = st.columns([3, 2])
+    with _crow1:
+        _country_sel = st.selectbox(
+            T("country"), COUNTRIES, key="country_sel",
+            label_visibility="collapsed",
+            format_func=lambda x: f"🌍 {x}",
+            help="Your country"
+        )
         # Auto-detect language from country
-        if "lang_auto_done" not in st.session_state: st.session_state.lang_auto_done=set()
+        if "lang_auto_done" not in st.session_state:
+            st.session_state.lang_auto_done = set()
         if _country_sel not in st.session_state.lang_auto_done:
             st.session_state.lang_auto_done.add(_country_sel)
-            if _country_sel in FRANCOPHONE: st.session_state.lang_sel="Français"
-            elif _country_sel in SWAHILI_COUNTRIES: st.session_state.lang_sel="Kiswahili"
-            else: st.session_state.lang_sel="English"
-    with _cb0b:
-        st.selectbox("Language",list(LANGS.keys()),key="lang_sel",label_visibility="collapsed",format_func=lambda x:f"🗣️ {x}",help="Response language")
+            if _country_sel in FRANCOPHONE: st.session_state.lang_sel = "Français"
+            elif _country_sel in SWAHILI_COUNTRIES: st.session_state.lang_sel = "Kiswahili"
+            else: st.session_state.lang_sel = "English"
+    with _crow2:
+        st.selectbox(
+            "Language", list(LANGS.keys()), key="lang_sel",
+            label_visibility="collapsed",
+            format_func=lambda x: f"🗣️ {x}",
+            help="Response language"
+        )
+    # Row 2 — Classroom settings (5 equal columns)
+    _cb1, _cb2, _cb3, _cb4, _cb5 = st.columns(5)
     with _cb1:
-        st.selectbox(T("setting"),list(_regions().keys()),label_visibility="collapsed",format_func=lambda x:f"📍 {x}",help="Urban, rural, or remote",key="cfg_region")
+        st.selectbox(T("setting"), list(_regions().keys()),
+            label_visibility="collapsed", format_func=lambda x: f"📍 {x}",
+            help="Urban, rural, or remote", key="cfg_region")
     with _cb2:
-        st.selectbox(T("grade"),_grades(),label_visibility="collapsed",format_func=lambda x:f"🎓 {x}",help="Grade level",key="cfg_grade")
+        st.selectbox(T("grade"), _grades(),
+            label_visibility="collapsed", format_func=lambda x: f"🎓 {x}",
+            help="Grade level", key="cfg_grade")
     with _cb3:
-        st.selectbox(T("subject"),_subjects(),label_visibility="collapsed",format_func=lambda x:f"📚 {x}",help="Subject",key="cfg_subject")
+        st.selectbox(T("subject"), _subjects(),
+            label_visibility="collapsed", format_func=lambda x: f"📚 {x}",
+            help="Subject", key="cfg_subject")
     with _cb4:
-        st.selectbox(T("class_size"),list(_sizes().keys()),label_visibility="collapsed",format_func=lambda x:f"👥 {x}",help="Class size",key="cfg_clsz")
+        st.selectbox(T("class_size"), list(_sizes().keys()),
+            label_visibility="collapsed", format_func=lambda x: f"👥 {x}",
+            help="Class size", key="cfg_clsz")
     with _cb5:
-        st.selectbox(T("student_level"),list(_ability().keys()),label_visibility="collapsed",format_func=lambda x:f"📊 {x}",help="Student level",key="cfg_abl")
-    # Update all local vars from session_state
-    country=st.session_state["country_sel"]
-    lang=st.session_state["lang_sel"]
+        st.selectbox(T("student_level"), list(_ability().keys()),
+            label_visibility="collapsed", format_func=lambda x: f"📊 {x}",
+            help="Student level", key="cfg_abl")
+    # Pull all values from session_state into local vars for the rest of the app
+    country  = st.session_state["country_sel"]
+    lang     = st.session_state["lang_sel"]
+    region   = st.session_state["cfg_region"]
+    grade    = st.session_state["cfg_grade"]
+    subject  = st.session_state["cfg_subject"]
+    clsz     = st.session_state["cfg_clsz"]
+    abl      = st.session_state["cfg_abl"]
     _region_val=_regions()[region]
     _grade_en=_to_en_grade(grade)
     _subj_en=_to_en_subj(subject)
