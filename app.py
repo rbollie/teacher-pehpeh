@@ -2188,6 +2188,19 @@ def main():
     if st.session_state.get("_pending_grade_from_sheet"):
         st.session_state["cfg_grade"]=st.session_state.pop("_pending_grade_from_sheet")
     _res_val="standard resources"
+    # Read all config vars early from session_state (widgets will update them later in the run)
+    country  = st.session_state.get("country_sel","Liberia")
+    lang     = st.session_state.get("lang_sel","English")
+    region   = st.session_state.get("cfg_region", list(_regions().keys())[0])
+    grade    = st.session_state.get("cfg_grade", _grades()[0])
+    subject  = st.session_state.get("cfg_subject", _subjects()[0])
+    clsz     = st.session_state.get("cfg_clsz", list(_sizes().keys())[0])
+    abl      = st.session_state.get("cfg_abl", list(_ability().keys())[0])
+    school_name   = st.session_state.get("_school_confirmed","")
+    teacher_name  = st.session_state.get("_teacher_confirmed","")
+    teacher_phone = st.session_state.get("_phone_confirmed","")
+    moe_on   = st.session_state.get("moe_toggle", False)
+    mano_on  = st.session_state.get("mano_toggle", False)
 
     show_logo(country)
     _subtitle={"en":"Curating Personalized Content to Support Underresourced Teachers","fr":"Création de contenu personnalisé pour soutenir les enseignants sous-dotés","sw":"Kuunda Maudhui ya Kibinafsi Kusaidia Walimu Wasio na Rasilimali za Kutosha"}.get(_lang_key(),"Curating Personalized Content to Support Underresourced Teachers")
@@ -2351,6 +2364,8 @@ def main():
             label_visibility="collapsed", format_func=lambda x: f"📊 {x}", help="Student level")
 
     # ── Read all config values from session_state ──────────────────────────
+    # (already set from session_state before show_logo — widgets above update session_state,
+    #  re-read here so local vars reflect any widget changes this run)
     country = st.session_state["country_sel"]
     lang    = st.session_state["lang_sel"]
     region  = st.session_state["cfg_region"]
@@ -2473,12 +2488,12 @@ def main():
                     st.session_state["_login_label"] = ""
                     st.rerun()
 
-    # Ensure moe_on / mano_on / school_name / teacher_name / teacher_phone are always defined
-    if "moe_on" not in locals(): moe_on = False
-    if "mano_on" not in locals(): mano_on = False
-    if "school_name" not in locals(): school_name = st.session_state.get("_school_confirmed","")
-    if "teacher_name" not in locals(): teacher_name = st.session_state.get("_teacher_confirmed","")
-    if "teacher_phone" not in locals(): teacher_phone = st.session_state.get("_phone_confirmed","")
+    # Re-read after widgets (session_state updated by widgets above)
+    moe_on       = st.session_state.get("moe_toggle", False)
+    mano_on      = st.session_state.get("mano_toggle", False)
+    school_name  = st.session_state.get("_school_confirmed","")
+    teacher_name = st.session_state.get("_teacher_confirmed","")
+    teacher_phone= st.session_state.get("_phone_confirmed","")
     _region_val=_regions()[region]
     _grade_en=_to_en_grade(grade)
     _subj_en=_to_en_subj(subject)
