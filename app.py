@@ -1172,6 +1172,204 @@ def best(sp,q,h=None):
     if r and not str(r).startswith("⚠️"): return r,"Gemini"
     return "⚠️ No models responded.",None
 
+# ═══════════════════════════════════════════════════════════
+# INTERVENTION RECOMMENDATION BUBBLE
+# ═══════════════════════════════════════════════════════════
+
+def _render_intervention_bubble(student_name, avg_score=None, profile=None, subject="", key_suffix=""):
+    """
+    Render a contextual intervention recommendation panel.
+    profile dict keys: mom, sm, sib, wk, cp, nt
+    All appearance / UI only — no logic modified.
+    """
+    import streamlit as st
+
+    p = profile or {}
+    mom  = p.get("mom", "Unknown")
+    sm   = p.get("sm", "Unknown")
+    sib  = p.get("sib", "0-4")
+    wk   = p.get("wk", "Unknown")
+    cp   = p.get("cp", "Unknown")
+    nt   = p.get("nt", "")
+
+    # ── Derive urgency level ───────────────────────────────
+    risk_count = sum([
+        mom == "No HS",
+        sm  == "Yes",
+        sib in ("5-8", "8+"),
+        wk  == "Yes",
+        cp  == "Never",
+    ])
+    grade_flag = avg_score is not None and avg_score < 50
+
+    if grade_flag and risk_count >= 3:
+        urgency = "critical"
+        urgency_color = "#EF5350"
+        urgency_bg    = "rgba(139,26,26,.18)"
+        urgency_border= "#EF5350"
+        urgency_label = "🚨 Urgent — Academic + Socioeconomic Risk"
+    elif grade_flag or risk_count >= 2:
+        urgency = "high"
+        urgency_color = "#FFA726"
+        urgency_bg    = "rgba(255,167,38,.10)"
+        urgency_border= "#FFA726"
+        urgency_label = "⚠️ Intervention Recommended"
+    else:
+        urgency = "watch"
+        urgency_color = "#FFD54F"
+        urgency_bg    = "rgba(255,213,79,.08)"
+        urgency_border= "#FFD54F66"
+        urgency_label = "👁️ Worth Watching"
+
+    # ── Build tailored strategies ──────────────────────────
+    strategies = []
+
+    # 1. Parent contact — always first
+    contact_mode = "voice/visit" if mom == "No HS" else "letter/SMS"
+    strategies.append({
+        "icon": "📞",
+        "title": "Contact Parent or Guardian",
+        "desc": (
+            f"A warm <strong>voice message or home visit</strong> works best — "
+            f"{'reading may be difficult for this parent. ' if mom == 'No HS' else ''}"
+            f"Involve the family early before the gap widens."
+        ),
+        "action_label": "✉️ Generate Parent Letter",
+        "action_tab": "students",
+        "color": "#81C784",
+    })
+
+    # 2. Study time tailoring based on work/sibling load
+    if wk == "Yes" or sib in ("5-8", "8+"):
+        _load_reason = []
+        if wk == "Yes": _load_reason.append("works after school")
+        if sib in ("5-8", "8+"): _load_reason.append(f"has {sib} siblings at home")
+        strategies.append({
+            "icon": "⏰",
+            "title": "Tailor Study Time to Their Reality",
+            "desc": (
+                f"This student <strong>{' and '.join(_load_reason)}</strong>. "
+                "Short, focused 15–20 min study windows in the morning before school or during lunch breaks "
+                "are far more realistic than expecting 1–2 hour evening sessions."
+            ),
+            "action_label": "📝 Generate Homework for Low-Resource Home",
+            "action_tab": "generate",
+            "color": "#64B5F6",
+        })
+
+    # 3. Peer pairing
+    strategies.append({
+        "icon": "👥",
+        "title": "Peer Pairing / Study Buddy",
+        "desc": (
+            "Pair this student with a <strong>stronger peer in the same subject</strong>. "
+            "Research shows peer learning can close a half-grade gap in one term. "
+            "Choose a buddy who lives nearby to enable after-school sessions."
+        ),
+        "action_label": "🎯 Generate Group Activity",
+        "action_tab": "generate",
+        "color": "#CE93D8",
+    })
+
+    # 4. Encouragement / motivation
+    strategies.append({
+        "icon": "🌟",
+        "title": "Direct Encouragement in Class",
+        "desc": (
+            "Call out <strong>one specific thing this student did well</strong> in front of peers. "
+            "Students from high-stress homes often disengage due to shame, not ability. "
+            "A single public acknowledgment can shift their classroom identity."
+        ),
+        "action_label": "💬 Ask Teacher Pehpeh for Encouragement Scripts",
+        "action_tab": "chat",
+        "color": "#F48FB1",
+    })
+
+    # 5. Digital/resource gap
+    if cp == "Never":
+        strategies.append({
+            "icon": "📚",
+            "title": "No-Tech Study Resources",
+            "desc": (
+                "This student has <strong>no computer or internet access at home</strong>. "
+                "Generate printable revision cards, illustrated notes, or offline worksheets "
+                "they can take home and study without any device."
+            ),
+            "action_label": "📋 Generate Print-Ready Study Notes",
+            "action_tab": "generate",
+            "color": "#80CBC4",
+        })
+
+    # 6. Socioeconomic context for AI agents
+    if mom == "No HS" and sm == "Yes":
+        strategies.append({
+            "icon": "🔬",
+            "title": "IBT Risk Analysis — Full Profile",
+            "desc": (
+                "Single-mother household with no high school education is the <strong>highest-risk combination "
+                "in IBT's 183-student Liberian study</strong> (Physics avg 0.310, grade D). "
+                "Use IBT Reports for a full trajectory forecast and multi-subject breakdown."
+            ),
+            "action_label": "📈 Open IBT Reports",
+            "action_tab": "ibt",
+            "color": "#FFB74D",
+        })
+
+    # ── Render the bubble ─────────────────────────────────
+    score_line = f" · Avg score <strong style='color:{urgency_color}'>{avg_score:.0f}/100</strong>" if avg_score is not None else ""
+    subj_line  = f" · {subject}" if subject else ""
+
+    st.markdown(f"""
+<div style="
+    background:{urgency_bg};
+    border:2px solid {urgency_border};
+    border-radius:14px;
+    padding:14px 18px 10px;
+    margin:10px 0 14px;
+    animation: ivPulse 2.4s ease-in-out infinite;
+">
+<style>
+  @keyframes ivPulse {{
+    0%,100% {{ box-shadow: 0 0 0 0 {urgency_border}22; }}
+    50%      {{ box-shadow: 0 0 0 6px {urgency_border}00; }}
+  }}
+</style>
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+  <span style="font-size:1.2rem">🎯</span>
+  <span style="color:{urgency_color};font-weight:800;font-size:.97rem">{urgency_label}</span>
+  <span style="color:#8899BB;font-size:.82rem">{student_name}{score_line}{subj_line}</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:7px">
+""", unsafe_allow_html=True)
+
+    for idx, strat in enumerate(strategies):
+        st.markdown(f"""
+<div style="
+    display:flex;align-items:flex-start;gap:10px;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.07);
+    border-left:3px solid {strat['color']};
+    border-radius:8px;padding:9px 12px;
+">
+  <div style="font-size:1.1rem;flex-shrink:0;margin-top:1px">{strat['icon']}</div>
+  <div style="flex:1">
+    <div style="color:{strat['color']};font-weight:700;font-size:.87rem;margin-bottom:2px">{strat['title']}</div>
+    <div style="color:#C0CDE0;font-size:.82rem;line-height:1.5">{strat['desc']}</div>
+  </div>
+  <div style="flex-shrink:0;align-self:center">
+    <span style="
+        display:inline-block;background:rgba(255,255,255,.06);
+        border:1px solid {strat['color']}66;border-radius:20px;
+        padding:3px 10px;font-size:.75rem;color:{strat['color']};
+        white-space:nowrap;font-weight:600
+    ">{strat['action_label']}</span>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+    st.markdown("</div></div>", unsafe_allow_html=True)
+
+
 # === VISION AI — Grade photos of student work ===
 def ask_gpt_vision(sp, prompt, img_b64, mime="image/jpeg"):
     if not OAI or not OPENAI_API_KEY: return None
@@ -3634,6 +3832,23 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             with _del_col:
                 if st.button("🗑️", key=f"d{i}", help="Remove student"):
                     st.session_state.students.pop(i); st.rerun()
+            # Show intervention bubble for students with 2+ socioeconomic risk factors
+            _risk_factor_count = sum([
+                s["mom"]=="No HS", s["sm"]=="Yes",
+                s["sib"] in ("5-8","8+"), s["wk"]=="Yes", s["cp"]=="Never",
+            ])
+            if _risk_factor_count >= 2:
+                # Get this student's grade avg if available
+                _stu_grades = [g["score"] for g in st.session_state.grade_history if g.get("student")==s["name"]]
+                _stu_avg_score = sum(_stu_grades)/len(_stu_grades) if _stu_grades else None
+                with st.expander(f"🎯 Intervention Plan — {s['name']}", expanded=False):
+                    _render_intervention_bubble(
+                        student_name=s["name"],
+                        avg_score=_stu_avg_score,
+                        profile=s,
+                        subject=subject,
+                        key_suffix=f"stu_{i}",
+                    )
         if st.session_state.students:
             st.markdown("---")
             _ibt_grades_ready = st.session_state.get("_ibt_has_grades") and bool(st.session_state.grade_history)
@@ -3863,14 +4078,35 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                     _subj_avg.columns = ["Avg Score", "Assignments"]
                     st.dataframe(_subj_avg, use_container_width=True)
 
-                # At-risk students (below 50 average)
+                # At-risk students (below 50 average) — intervention bubbles
                 _stu_avg = _df.groupby("student")["score"].mean()
                 _at_risk = _stu_avg[_stu_avg < 50].sort_values()
                 if len(_at_risk):
-                    st.markdown(f'<div style="background:rgba(239,83,80,.1);border:2px solid #EF5350;border-radius:10px;padding:12px;margin:8px 0">'
-                                f'<strong style="color:#EF5350">⚠️ Students Needing Intervention ({len(_at_risk)})</strong><br>'
-                                + "<br>".join(f'<span style="color:#F0D5D5">• <strong>{name}</strong>: {score:.0f}/100 avg</span>' for name,score in _at_risk.items())
-                                + '</div>', unsafe_allow_html=True)
+                    # Subject context: most-failed subject per student
+                    _stu_worst_subj = {}
+                    for _sn in _at_risk.index:
+                        _sdf = _df[_df["student"]==_sn]
+                        if len(_sdf):
+                            _worst = _sdf.groupby("subject")["score"].mean().idxmin()
+                            _stu_worst_subj[_sn] = _worst
+
+                    st.markdown(
+                        f'<div style="background:rgba(239,83,80,.08);border:2px solid #EF535066;'
+                        f'border-radius:12px;padding:10px 16px;margin:8px 0 4px">'
+                        f'<strong style="color:#EF5350;font-size:.95rem">⚠️ {len(_at_risk)} Student{"s" if len(_at_risk)!=1 else ""} Below Pass Mark — Intervention Plans Below</strong>'
+                        f'</div>', unsafe_allow_html=True)
+
+                    for _at_name, _at_score in _at_risk.items():
+                        # Look up full profile if available
+                        _at_prof = next((s for s in st.session_state.students if s["name"]==_at_name), {})
+                        _at_subj = _stu_worst_subj.get(_at_name, subject)
+                        _render_intervention_bubble(
+                            student_name=_at_name,
+                            avg_score=_at_score,
+                            profile=_at_prof,
+                            subject=_at_subj,
+                            key_suffix=f"trend_{_at_name}",
+                        )
 
                 # Export grades
                 _exp1, _exp2 = st.columns(2)
@@ -3942,6 +4178,22 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
             with _ma2: st.metric("Grade Trend", f"{_trend_icon} {abs(_trend_delta):.1f} pts", delta=f"+{_trend_delta:.1f}" if _trend_delta > 0 else f"{_trend_delta:.1f}")
             with _ma3: st.metric("Total Records", _n_records)
             with _ma4: st.metric("Need Intervention", f"{_below50} student{'s' if _below50!=1 else ''}", delta=f"{_at_risk_pct:.0f}% of class", delta_color="inverse")
+
+            # ── Intervention bubbles for students below 50 ────────────────
+            if _below50 > 0:
+                _ar_names = _df[_df["score"] < 50]["student"].unique()
+                _ar_avgs  = {n: _df[_df["student"]==n]["score"].mean() for n in _ar_names}
+                _ar_subjs = {n: _df[_df["student"]==n].groupby("subject")["score"].mean().idxmin() for n in _ar_names}
+                with st.expander(f"🎯 Intervention Plans — {_below50} student{'s' if _below50!=1 else ''} need support", expanded=_below50 <= 3):
+                    for _ar_n in sorted(_ar_names, key=lambda n: _ar_avgs[n]):
+                        _ar_prof = next((s for s in st.session_state.students if s["name"]==_ar_n), {})
+                        _render_intervention_bubble(
+                            student_name=_ar_n,
+                            avg_score=_ar_avgs[_ar_n],
+                            profile=_ar_prof,
+                            subject=_ar_subjs.get(_ar_n, ""),
+                            key_suffix=f"ar_{_ar_n}",
+                        )
 
             # ── Visual summaries: Mom's Education (top) then HW/Quiz (below) ──
 
