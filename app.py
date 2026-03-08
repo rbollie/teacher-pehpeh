@@ -4017,7 +4017,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                                 continue
                             _vals = [v for v in [_s1, _s2] if v is not None]
                             _overall = round(sum(_vals)/len(_vals), 1)
-                            _status = "🔴" if _overall < 50 else ("🟡" if _overall < 65 else "🟢")
+                            _status = "🔴 Intervention" if _overall < 50 else ("🟡 Monitor" if _overall < 65 else "🟢 On Track")
                             _ind_rows.append({
                                 "Student":  _stu,
                                 "Subject":  _subj2,
@@ -4075,7 +4075,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                             _sdf = _df[(_df["student"]==_stu) & (_df["subject"]==_subj2)]
                             if _sdf.empty: continue
                             _savg2 = _sdf["score"].mean()
-                            _status2 = "🔴" if _savg2 < 50 else ("🟡" if _savg2 < 65 else "🟢")
+                            _status2 = "🔴 Intervention" if _savg2 < 50 else ("🟡 Monitor" if _savg2 < 65 else "🟢 On Track")
                             _ind_rows2.append({"Student": _stu, "Subject": _subj2,
                                                "Avg Score": f"{_savg2:.1f}/100", "Status": _status2})
                     if _ind_rows2:
