@@ -3863,7 +3863,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                             range=[_subj_color_map[s] for s in _subj_list_hq],
                         )
                         # X = Assignment (Homework | Quiz), xOffset = Subject, facet column = Semester
-                        _hq_chart = (
+                        _hq_base = (
                             _alt_hq.Chart(_hq_df)
                             .mark_bar(cornerRadiusTopLeft=3, cornerRadiusTopRight=3)
                             .encode(
@@ -3880,7 +3880,10 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                                 tooltip=[_alt_hq.Tooltip("Semester:N"), _alt_hq.Tooltip("Assignment:N"),
                                          _alt_hq.Tooltip("Subject:N"), _alt_hq.Tooltip("Count:Q", title="Count")],
                             )
-                            .properties(height=240, background="transparent")
+                            .properties(height=240)
+                        )
+                        _hq_chart = (
+                            _hq_base
                             .facet(
                                 column=_alt_hq.Column("Semester:N", sort=["S1","S2"],
                                                       header=_alt_hq.Header(labelColor="#D0D8E8", titleColor="#D0D8E8",
@@ -3888,6 +3891,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                                                                             labelPadding=8)),
                                 spacing=20,
                             )
+                            .properties(background="transparent")
                             .configure_axis(gridColor="rgba(255,255,255,0.08)", domainColor="#444", tickColor="#444")
                             .configure_view(strokeWidth=0, stroke="transparent")
                             .configure_legend(fillColor="rgba(0,0,0,0)", strokeColor="rgba(0,0,0,0)")
