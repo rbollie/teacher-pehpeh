@@ -11,3 +11,4 @@ python-docx
 lxml
 python-pptx
 altair
+matplotlib
