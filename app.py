@@ -2175,18 +2175,13 @@ def main():
     }}
     </style>""",unsafe_allow_html=True)
 
-    # Sidebar (defined first so country is available for logo flag)
+    # Sidebar (country & language now live in the main config bar — read session_state here)
     with st.sidebar:
-        # Country first - drives auto language
-        country=st.selectbox(T("country"),COUNTRIES,key="country_sel")
-        # Auto-detect language from country (user can still override)
-        if "lang_auto_done" not in st.session_state: st.session_state.lang_auto_done=set()
-        if country not in st.session_state.lang_auto_done:
-            st.session_state.lang_auto_done.add(country)
-            if country in FRANCOPHONE: st.session_state.lang_sel="Français"
-            elif country in SWAHILI_COUNTRIES: st.session_state.lang_sel="Kiswahili"
-            else: st.session_state.lang_sel="English"
-        lang=st.selectbox("🌍 Language / Langue / Lugha",list(LANGS.keys()),key="lang_sel")
+        # Ensure defaults
+        if "country_sel" not in st.session_state: st.session_state.country_sel="Liberia"
+        if "lang_sel" not in st.session_state: st.session_state.lang_sel="English"
+        country=st.session_state["country_sel"]
+        lang=st.session_state["lang_sel"]
         st.markdown("---")
         _cls_word={"en":"Classroom","fr":"Classe","sw":"Darasa"}.get(_lang_key(),"Classroom")
         # Confirmed values + version counters for key-swapping (forces fresh empty widgets)
@@ -2470,7 +2465,18 @@ def main():
 
     # ── CLASSROOM CONFIGURATION BAR — always visible above tabs ──────────────
     st.markdown('<div style="font-size:.72rem;font-weight:700;color:#D4A843;letter-spacing:.08em;margin-bottom:2px;margin-top:4px">⚙️ CLASSROOM CONFIGURATION</div>',unsafe_allow_html=True)
-    _cb1,_cb2,_cb3,_cb4,_cb5=st.columns(5)
+    _cb0a,_cb0b,_cb1,_cb2,_cb3,_cb4,_cb5=st.columns(7)
+    with _cb0a:
+        _country_sel=st.selectbox(T("country"),COUNTRIES,key="country_sel",label_visibility="collapsed",format_func=lambda x:f"🌍 {x}",help="Your country")
+        # Auto-detect language from country
+        if "lang_auto_done" not in st.session_state: st.session_state.lang_auto_done=set()
+        if _country_sel not in st.session_state.lang_auto_done:
+            st.session_state.lang_auto_done.add(_country_sel)
+            if _country_sel in FRANCOPHONE: st.session_state.lang_sel="Français"
+            elif _country_sel in SWAHILI_COUNTRIES: st.session_state.lang_sel="Kiswahili"
+            else: st.session_state.lang_sel="English"
+    with _cb0b:
+        st.selectbox("Language",list(LANGS.keys()),key="lang_sel",label_visibility="collapsed",format_func=lambda x:f"🗣️ {x}",help="Response language")
     with _cb1:
         st.selectbox(T("setting"),list(_regions().keys()),label_visibility="collapsed",format_func=lambda x:f"📍 {x}",help="Urban, rural, or remote",key="cfg_region")
     with _cb2:
@@ -2481,12 +2487,9 @@ def main():
         st.selectbox(T("class_size"),list(_sizes().keys()),label_visibility="collapsed",format_func=lambda x:f"👥 {x}",help="Class size",key="cfg_clsz")
     with _cb5:
         st.selectbox(T("student_level"),list(_ability().keys()),label_visibility="collapsed",format_func=lambda x:f"📊 {x}",help="Student level",key="cfg_abl")
-    # Update local vars from session_state (widgets above write to session_state)
-    region=st.session_state["cfg_region"]
-    grade=st.session_state["cfg_grade"]
-    subject=st.session_state["cfg_subject"]
-    clsz=st.session_state["cfg_clsz"]
-    abl=st.session_state["cfg_abl"]
+    # Update all local vars from session_state
+    country=st.session_state["country_sel"]
+    lang=st.session_state["lang_sel"]
     _region_val=_regions()[region]
     _grade_en=_to_en_grade(grade)
     _subj_en=_to_en_subj(subject)
