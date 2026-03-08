@@ -3830,7 +3830,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
 
             # ── Visual summaries: Two charts side-by-side ────────────────────
             st.markdown("<div style='margin-top:110px'></div>", unsafe_allow_html=True)
-            _vcol1, _vgap, _vcol2 = st.columns([10, 1, 10])
+            _vcol1, _vgap, _vcol2 = st.columns([10, 4, 10])
 
             # ── LEFT: HW & Quiz per Semester, grouped like the reference chart ──
             with _vcol1:
@@ -3945,7 +3945,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                             .mark_bar(cornerRadiusTopLeft=3, cornerRadiusTopRight=3)
                             .encode(
                                 x=_alt2.X("Combo:N", sort=_combo_order,
-                                           axis=_alt2.Axis(labelAngle=-35, labelColor="#D0D8E8", titleColor="#D0D8E8"), title="Mom Edu / Kids"),
+                                           axis=_alt2.Axis(labelAngle=-45, labelColor="#D0D8E8", titleColor="#D0D8E8", labelFontSize=9), title="Mom Edu / Kids"),
                                 y=_alt2.Y("Avg Score:Q", scale=_alt2.Scale(domain=[0,100]),
                                            axis=_alt2.Axis(labelColor="#D0D8E8", titleColor="#D0D8E8"), title="Avg Score"),
                                 color=_alt2.Color("Combo:N", scale=_combo_color_scale, legend=None),
