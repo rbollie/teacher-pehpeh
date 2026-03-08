@@ -3855,6 +3855,11 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                             "Color": ("#2ECC71" if _ca >= 65 else ("#F1C40F" if _ca >= 50 else "#E74C3C")),
                         })
                     _combo_df = _pd_combo.DataFrame(_combo_rows)
+                    # Spell out HS in display labels
+                    _hs_map = {"No HS": "No High School", "HS Grad": "High School Grad"}
+                    _combo_df["Combo"] = _combo_df.apply(lambda r: f"{_hs_map.get(r['Mom Edu'], r['Mom Edu'])} / {r['Kids']} kids", axis=1)
+                    _combo_df["Mom Edu Display"] = _combo_df["Mom Edu"].map(lambda x: _hs_map.get(x, x))
+                    _combo_order = _combo_df["Combo"].tolist()
                     _combo_df["_mo"] = _combo_df["Mom Edu"].apply(lambda x: _mom_order.index(x) if x in _mom_order else 99)
                     _combo_df["_so"] = _combo_df["Kids"].apply(lambda x: _sib_order.index(x) if x in _sib_order else 99)
                     _combo_df = _combo_df.sort_values(["_mo","_so"]).drop(columns=["_mo","_so"])
