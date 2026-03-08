@@ -1180,7 +1180,7 @@ def _render_intervention_bubble(student_name, avg_score=None, profile=None, subj
     """
     Render a contextual intervention recommendation panel.
     profile dict keys: mom, sm, sib, wk, cp, nt
-    All appearance / UI only — no logic modified.
+    Action buttons navigate to the relevant tab and pre-fill context.
     """
     import streamlit as st
 
@@ -1191,6 +1191,9 @@ def _render_intervention_bubble(student_name, avg_score=None, profile=None, subj
     wk   = p.get("wk", "Unknown")
     cp   = p.get("cp", "Unknown")
     nt   = p.get("nt", "")
+
+    # ── Tab indices (must match st.tabs() order: generate,chat,quiz,students,academic,ibt) ──
+    _TAB = {"generate": 0, "chat": 1, "quiz": 2, "students": 3, "academic": 4, "ibt": 5}
 
     # ── Derive urgency level ───────────────────────────────
     risk_count = sum([
@@ -1203,19 +1206,16 @@ def _render_intervention_bubble(student_name, avg_score=None, profile=None, subj
     grade_flag = avg_score is not None and avg_score < 50
 
     if grade_flag and risk_count >= 3:
-        urgency = "critical"
         urgency_color = "#EF5350"
         urgency_bg    = "rgba(139,26,26,.18)"
         urgency_border= "#EF5350"
         urgency_label = "🚨 Urgent — Academic + Socioeconomic Risk"
     elif grade_flag or risk_count >= 2:
-        urgency = "high"
         urgency_color = "#FFA726"
         urgency_bg    = "rgba(255,167,38,.10)"
         urgency_border= "#FFA726"
         urgency_label = "⚠️ Intervention Recommended"
     else:
-        urgency = "watch"
         urgency_color = "#FFD54F"
         urgency_bg    = "rgba(255,213,79,.08)"
         urgency_border= "#FFD54F66"
@@ -1225,7 +1225,6 @@ def _render_intervention_bubble(student_name, avg_score=None, profile=None, subj
     strategies = []
 
     # 1. Parent contact — always first
-    contact_mode = "voice/visit" if mom == "No HS" else "letter/SMS"
     strategies.append({
         "icon": "📞",
         "title": "Contact Parent or Guardian",
@@ -1236,6 +1235,8 @@ def _render_intervention_bubble(student_name, avg_score=None, profile=None, subj
         ),
         "action_label": "✉️ Generate Parent Letter",
         "action_tab": "students",
+        "action_tab_idx": _TAB["students"],
+        "action_pl_student": student_name,   # pre-select in parent letter form
         "color": "#81C784",
     })
 
@@ -1252,8 +1253,11 @@ def _render_intervention_bubble(student_name, avg_score=None, profile=None, subj
                 "Short, focused 15–20 min study windows in the morning before school or during lunch breaks "
                 "are far more realistic than expecting 1–2 hour evening sessions."
             ),
-            "action_label": "📝 Generate Homework for Low-Resource Home",
+            "action_label": "📝 Generate Homework",
             "action_tab": "generate",
+            "action_tab_idx": _TAB["generate"],
+            "action_task_cat": "🎯 Activities",
+            "action_task_en": "Homework",
             "color": "#64B5F6",
         })
 
@@ -1268,10 +1272,18 @@ def _render_intervention_bubble(student_name, avg_score=None, profile=None, subj
         ),
         "action_label": "🎯 Generate Group Activity",
         "action_tab": "generate",
+        "action_tab_idx": _TAB["generate"],
+        "action_task_cat": "🎯 Activities",
+        "action_task_en": "Group Activity",
         "color": "#CE93D8",
     })
 
     # 4. Encouragement / motivation
+    _enc_prompt = (
+        f"Give me 3 encouragement scripts I can say out loud in class for a student named {student_name} "
+        f"who is {'below 50% average and ' if grade_flag else ''}from a high-stress home background. "
+        f"Keep each script to 1-2 sentences, warm and specific, suitable for a Liberian classroom."
+    )
     strategies.append({
         "icon": "🌟",
         "title": "Direct Encouragement in Class",
@@ -1280,8 +1292,10 @@ def _render_intervention_bubble(student_name, avg_score=None, profile=None, subj
             "Students from high-stress homes often disengage due to shame, not ability. "
             "A single public acknowledgment can shift their classroom identity."
         ),
-        "action_label": "💬 Ask Teacher Pehpeh for Encouragement Scripts",
+        "action_label": "💬 Get Encouragement Scripts",
         "action_tab": "chat",
+        "action_tab_idx": _TAB["chat"],
+        "action_chat_prompt": _enc_prompt,
         "color": "#F48FB1",
     })
 
@@ -1295,8 +1309,11 @@ def _render_intervention_bubble(student_name, avg_score=None, profile=None, subj
                 "Generate printable revision cards, illustrated notes, or offline worksheets "
                 "they can take home and study without any device."
             ),
-            "action_label": "📋 Generate Print-Ready Study Notes",
+            "action_label": "📋 Generate Study Notes",
             "action_tab": "generate",
+            "action_tab_idx": _TAB["generate"],
+            "action_task_cat": "📚 Study Support",
+            "action_task_en": "Study Notes",
             "color": "#80CBC4",
         })
 
@@ -1312,62 +1329,77 @@ def _render_intervention_bubble(student_name, avg_score=None, profile=None, subj
             ),
             "action_label": "📈 Open IBT Reports",
             "action_tab": "ibt",
+            "action_tab_idx": _TAB["ibt"],
             "color": "#FFB74D",
         })
 
-    # ── Render the bubble ─────────────────────────────────
+    # ── Render the bubble header ─────────────────────────
     score_line = f" · Avg score <strong style='color:{urgency_color}'>{avg_score:.0f}/100</strong>" if avg_score is not None else ""
     subj_line  = f" · {subject}" if subject else ""
 
     st.markdown(f"""
-<div style="
-    background:{urgency_bg};
-    border:2px solid {urgency_border};
-    border-radius:14px;
-    padding:14px 18px 10px;
-    margin:10px 0 14px;
-    animation: ivPulse 2.4s ease-in-out infinite;
-">
 <style>
   @keyframes ivPulse {{
     0%,100% {{ box-shadow: 0 0 0 0 {urgency_border}22; }}
     50%      {{ box-shadow: 0 0 0 6px {urgency_border}00; }}
   }}
+  .iv-outer-{key_suffix} {{
+    background:{urgency_bg};
+    border:2px solid {urgency_border};
+    border-radius:14px;
+    padding:14px 18px 8px;
+    margin:10px 0 6px;
+    animation: ivPulse 2.4s ease-in-out infinite;
+  }}
 </style>
+<div class="iv-outer-{key_suffix}">
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
   <span style="font-size:1.2rem">🎯</span>
   <span style="color:{urgency_color};font-weight:800;font-size:.97rem">{urgency_label}</span>
-  <span style="color:#8899BB;font-size:.82rem">{student_name}{score_line}{subj_line}</span>
+  <span style="color:#A0B4CC;font-size:.84rem">{student_name}{score_line}{subj_line}</span>
 </div>
-<div style="display:flex;flex-direction:column;gap:7px">
+</div>
 """, unsafe_allow_html=True)
 
+    # ── Render each strategy card + wired action button ──
     for idx, strat in enumerate(strategies):
-        st.markdown(f"""
+        _card_col, _btn_col = st.columns([7, 3])
+        with _card_col:
+            st.markdown(f"""
 <div style="
     display:flex;align-items:flex-start;gap:10px;
     background:rgba(255,255,255,.04);
     border:1px solid rgba(255,255,255,.07);
     border-left:3px solid {strat['color']};
-    border-radius:8px;padding:9px 12px;
+    border-radius:8px;padding:9px 12px;margin-bottom:2px;
 ">
-  <div style="font-size:1.1rem;flex-shrink:0;margin-top:1px">{strat['icon']}</div>
+  <div style="font-size:1.1rem;flex-shrink:0;margin-top:2px">{strat['icon']}</div>
   <div style="flex:1">
-    <div style="color:{strat['color']};font-weight:700;font-size:.87rem;margin-bottom:2px">{strat['title']}</div>
+    <div style="color:{strat['color']};font-weight:700;font-size:.87rem;margin-bottom:3px">{strat['title']}</div>
     <div style="color:#C0CDE0;font-size:.82rem;line-height:1.5">{strat['desc']}</div>
-  </div>
-  <div style="flex-shrink:0;align-self:center">
-    <span style="
-        display:inline-block;background:rgba(255,255,255,.06);
-        border:1px solid {strat['color']}66;border-radius:20px;
-        padding:3px 10px;font-size:.75rem;color:{strat['color']};
-        white-space:nowrap;font-weight:600
-    ">{strat['action_label']}</span>
   </div>
 </div>
 """, unsafe_allow_html=True)
-
-    st.markdown("</div></div>", unsafe_allow_html=True)
+        with _btn_col:
+            # Vertical center — match card height
+            st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+            _btn_key = f"iv_act_{key_suffix}_{idx}"
+            if st.button(strat["action_label"], key=_btn_key, use_container_width=True,
+                         help=f"Go to {strat['action_tab'].title()} tab"):
+                # ── Store navigation intent ──
+                st.session_state["_nav_tab"] = strat["action_tab_idx"]
+                # Task pre-fill (Generate tab)
+                if strat.get("action_task_cat"):
+                    st.session_state["_nav_task_cat"] = strat["action_task_cat"]
+                if strat.get("action_task_en"):
+                    st.session_state["_nav_task_en"] = strat["action_task_en"]
+                # Parent letter pre-select (Students tab)
+                if strat.get("action_pl_student"):
+                    st.session_state["_nav_pl_student"] = strat["action_pl_student"]
+                # Chat prompt pre-fill
+                if strat.get("action_chat_prompt"):
+                    st.session_state["_nav_chat_prompt"] = strat["action_chat_prompt"]
+                st.rerun()
 
 
 # === VISION AI — Grade photos of student work ===
@@ -2854,12 +2886,35 @@ def main():
         t1,t3,t4,t2,t5,t6=st.tabs([T("generate"),T("chat"),T("quiz"),T("students"),"📊 Academic Report","📈 IBT Reports"])
         t5=t5  # Academic Report tab
         t6=t6  # IBT Reports tab
+
+        # ── Intervention action button navigation ──────────────────────────
+        _nav_tab_idx = st.session_state.pop("_nav_tab", None)
+        if _nav_tab_idx is not None:
+            import streamlit.components.v1 as _nav_comp
+            _nav_comp.html(f"""<script>
+setTimeout(function() {{
+  var tabs = window.parent.document.querySelectorAll('[data-baseweb="tab"]');
+  if (tabs && tabs[{_nav_tab_idx}]) {{ tabs[{_nav_tab_idx}].click(); }}
+}}, 180);
+</script>""", height=0)
     else: t1=t2=t3=None; t4=st.container(); t5=None; t6=None
 
     # TAB 1: GENERATE
     if t1:
      with t1:
         # ── Task category selector → filters task list ──
+        # Handle navigation preset from intervention action buttons
+        if st.session_state.get("_nav_task_cat"):
+            st.session_state["task_cat"] = st.session_state.pop("_nav_task_cat")
+            st.session_state.pop("task_sel", None)
+        if st.session_state.get("_nav_task_en"):
+            _nav_en = st.session_state.pop("_nav_task_en")
+            _target_val = TASKS.get(_nav_en)
+            if _target_val:
+                for _dk, _dv in _tasks().items():
+                    if _dv == _target_val:
+                        st.session_state["task_sel"] = _dk
+                        break
         _TASK_CATEGORIES = {
             "📋 Planning":     ["Lesson Plan","Weekly Scheme","Term Scheme","Strategy Guide"],
             "📝 Assessment":   ["Quiz (10 Q)","Quiz (20 Q)","WASSCE MCQ (50)","WASSCE Theory","BECE Exam","Rubric"],
@@ -3413,7 +3468,12 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
         st.markdown(f'<div style="background:var(--bg-card);border:1px solid {C_BLUE};border-radius:12px;padding:14px 18px;margin-bottom:10px">{ico(20)} <strong style="color:{C_BLUE}">{stu_label}</strong></div>',unsafe_allow_html=True)
 
         # ── Parent Letter (moved here from Generate tab) ──
-        with st.expander("✉️ Parent Letter / Communication", expanded=bool(st.session_state.get("plx_comm_result"))):
+        # Handle navigation preset from intervention action buttons
+        if st.session_state.get("_nav_pl_student"):
+            _npl = st.session_state.pop("_nav_pl_student")
+            if any(s["name"] == _npl for s in st.session_state.students):
+                st.session_state["plx_stu"] = _npl
+        with st.expander("✉️ Parent Letter / Communication", expanded=bool(st.session_state.get("plx_comm_result") or st.session_state.get("plx_stu") not in (None, "--Select--", ""))):
             st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:10px;padding:10px 14px;margin-bottom:10px"><strong style="color:{C_GOLD}">✉️ Parent Communication</strong> <span style="font-size:.83rem;color:var(--text-secondary)"> — Adapts to each parent: audio for low-literacy, SMS or email for others</span></div>',unsafe_allow_html=True)
             _plx1,_plx2=st.columns(2)
             with _plx1:
@@ -5314,6 +5374,9 @@ Be factual. Do not invent data. Keep each section focused and practical."""
         </style>""", unsafe_allow_html=True)
 
         uq = st.chat_input(f"{T('ask_about')} {subject}... {T('draw_hint')}")
+        # Intervention action pre-fill — auto-send encouragement script request
+        if not uq and st.session_state.get("_nav_chat_prompt"):
+            uq = st.session_state.pop("_nav_chat_prompt")
         # Voice input takes priority
         if voice_text:
             uq = voice_text
