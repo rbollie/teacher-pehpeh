@@ -2326,61 +2326,59 @@ def main():
         keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
 
     # ══════════════════════════════════════════════════════════════════════════
-    # CLASSROOM CONFIGURATION — fully in main content, no sidebar dependency
+    # CLASSROOM CONFIGURATION — single collapsible panel, no sidebar
     # ══════════════════════════════════════════════════════════════════════════
-    st.markdown('<div style="font-size:.72rem;font-weight:700;color:#D4A843;letter-spacing:.08em;margin:8px 0 4px">⚙️ CLASSROOM CONFIGURATION</div>', unsafe_allow_html=True)
-
-    # ── Row 1: Country + Language ──────────────────────────────────────────
-    _crow1, _crow2 = st.columns([3, 2])
-    with _crow1:
-        _country_sel = st.selectbox(T("country"), COUNTRIES, key="country_sel",
-            label_visibility="collapsed", format_func=lambda x: f"🌍 {x}", help="Your country")
-        if "lang_auto_done" not in st.session_state: st.session_state.lang_auto_done = set()
-        if _country_sel not in st.session_state.lang_auto_done:
-            st.session_state.lang_auto_done.add(_country_sel)
-            if _country_sel in FRANCOPHONE: st.session_state.lang_sel = "Français"
-            elif _country_sel in SWAHILI_COUNTRIES: st.session_state.lang_sel = "Kiswahili"
-            else: st.session_state.lang_sel = "English"
-    with _crow2:
-        st.selectbox("Language", list(LANGS.keys()), key="lang_sel",
-            label_visibility="collapsed", format_func=lambda x: f"🗣️ {x}", help="Response language")
-
-    # ── Row 2: Classroom dropdowns ────────────────────────────────────────
-    _cb1, _cb2, _cb3, _cb4, _cb5 = st.columns(5)
-    with _cb1:
-        st.selectbox(T("setting"), list(_regions().keys()), key="cfg_region",
-            label_visibility="collapsed", format_func=lambda x: f"📍 {x}", help="Urban, rural, or remote")
-    with _cb2:
-        st.selectbox(T("grade"), _grades(), key="cfg_grade",
-            label_visibility="collapsed", format_func=lambda x: f"🎓 {x}", help="Grade level")
-    with _cb3:
-        st.selectbox(T("subject"), _subjects(), key="cfg_subject",
-            label_visibility="collapsed", format_func=lambda x: f"📚 {x}", help="Subject")
-    with _cb4:
-        st.selectbox(T("class_size"), list(_sizes().keys()), key="cfg_clsz",
-            label_visibility="collapsed", format_func=lambda x: f"👥 {x}", help="Class size")
-    with _cb5:
-        st.selectbox(T("student_level"), list(_ability().keys()), key="cfg_abl",
-            label_visibility="collapsed", format_func=lambda x: f"📊 {x}", help="Student level")
-
-    # ── Read all config values from session_state ──────────────────────────
-    # (already set from session_state before show_logo — widgets above update session_state,
-    #  re-read here so local vars reflect any widget changes this run)
-    country = st.session_state["country_sel"]
-    lang    = st.session_state["lang_sel"]
-    region  = st.session_state["cfg_region"]
-    grade   = st.session_state["cfg_grade"]
-    subject = st.session_state["cfg_subject"]
-    clsz    = st.session_state["cfg_clsz"]
-    abl     = st.session_state["cfg_abl"]
-
-    # ── Row 3: School profile + toggles (collapsible) ─────────────────────
     _sn = st.session_state["_school_confirmed"]
     _tn = st.session_state["_teacher_confirmed"]
     _pn = st.session_state["_phone_confirmed"]
-    _profile_label = f"🏫 {_sn}" if _sn.strip() else "🏫 School Profile & Options"
-    with st.expander(_profile_label, expanded=not bool(_sn.strip())):
-        # School / Teacher / Phone inputs
+    # Build a compact summary for the expander label when collapsed
+    _cfg_grade_lbl  = st.session_state.get("cfg_grade",  _grades()[0])
+    _cfg_subj_lbl   = st.session_state.get("cfg_subject", _subjects()[0])
+    _cfg_region_lbl = st.session_state.get("cfg_region",  list(_regions().keys())[0])
+    _cfg_lang_lbl   = st.session_state.get("lang_sel",    "English")
+    _cfg_ctry_lbl   = st.session_state.get("country_sel", "Liberia")
+    _exp_parts = [f"⚙️ {_sn}" if _sn.strip() else "⚙️ Classroom Setup"]
+    if _tn.strip(): _exp_parts.append(_tn)
+    _exp_parts += [_cfg_grade_lbl, _cfg_subj_lbl]
+    _expander_label = "  ·  ".join(_exp_parts)
+
+    with st.expander(_expander_label, expanded=not bool(_sn.strip())):
+        # ── Row 1: Country + Language ──────────────────────────────────────
+        _crow1, _crow2 = st.columns([3, 2])
+        with _crow1:
+            _country_sel = st.selectbox(T("country"), COUNTRIES, key="country_sel",
+                label_visibility="collapsed", format_func=lambda x: f"🌍 {x}", help="Your country")
+            if "lang_auto_done" not in st.session_state: st.session_state.lang_auto_done = set()
+            if _country_sel not in st.session_state.lang_auto_done:
+                st.session_state.lang_auto_done.add(_country_sel)
+                if _country_sel in FRANCOPHONE: st.session_state.lang_sel = "Français"
+                elif _country_sel in SWAHILI_COUNTRIES: st.session_state.lang_sel = "Kiswahili"
+                else: st.session_state.lang_sel = "English"
+        with _crow2:
+            st.selectbox("Language", list(LANGS.keys()), key="lang_sel",
+                label_visibility="collapsed", format_func=lambda x: f"🗣️ {x}", help="Response language")
+
+        # ── Row 2: Classroom dropdowns ────────────────────────────────────
+        _cb1, _cb2, _cb3, _cb4, _cb5 = st.columns(5)
+        with _cb1:
+            st.selectbox(T("setting"), list(_regions().keys()), key="cfg_region",
+                label_visibility="collapsed", format_func=lambda x: f"📍 {x}", help="Urban, rural, or remote")
+        with _cb2:
+            st.selectbox(T("grade"), _grades(), key="cfg_grade",
+                label_visibility="collapsed", format_func=lambda x: f"🎓 {x}", help="Grade level")
+        with _cb3:
+            st.selectbox(T("subject"), _subjects(), key="cfg_subject",
+                label_visibility="collapsed", format_func=lambda x: f"📚 {x}", help="Subject")
+        with _cb4:
+            st.selectbox(T("class_size"), list(_sizes().keys()), key="cfg_clsz",
+                label_visibility="collapsed", format_func=lambda x: f"👥 {x}", help="Class size")
+        with _cb5:
+            st.selectbox(T("student_level"), list(_ability().keys()), key="cfg_abl",
+                label_visibility="collapsed", format_func=lambda x: f"📊 {x}", help="Student level")
+
+        st.markdown('<hr style="margin:6px 0;border-color:#1e2a3a">', unsafe_allow_html=True)
+
+        # ── Row 3: School / Teacher / Phone ───────────────────────────────
         _pc1, _pc2, _pc3 = st.columns([2, 2, 1])
         with _pc1:
             _sv = st.session_state["_school_v"]
@@ -2413,11 +2411,11 @@ def main():
                 st.rerun()
             teacher_phone = st.session_state["_phone_confirmed"]
 
-        # MOE + Mano toggles
+        # ── Row 4: MOE + Mano toggles ─────────────────────────────────────
         _tog1, _tog2 = st.columns(2)
         with _tog1:
-            if CURRICULA and CURRICULUM_AVAILABLE and country == "Liberia":
-                moe_on = st.checkbox("🇱🇷 Align to MOE Curriculum", value=False, key="moe_toggle",
+            if CURRICULA and CURRICULUM_AVAILABLE and st.session_state.get("country_sel","Liberia") == "Liberia":
+                moe_on = st.checkbox("Align to MOE Curriculum", value=False, key="moe_toggle",
                     help="Align lessons to Liberia Ministry of Education standards")
                 if moe_on:
                     curr_subjects = get_available_subjects(CURRICULA)
@@ -2426,18 +2424,26 @@ def main():
                 moe_on = False
         with _tog2:
             mano_on = False
-            if country == "Liberia" and _regions().get(region) == "rural" and MANO_AVAILABLE:
+            _reg_val_now = _regions().get(st.session_state.get("cfg_region", list(_regions().keys())[0]))
+            if st.session_state.get("country_sel","Liberia") == "Liberia" and _reg_val_now == "rural" and MANO_AVAILABLE:
                 mano_on = st.checkbox("🗣️ Mano Language (Bilingual)", value=False, key="mano_toggle",
                     help="Include Mano vocabulary and cultural context for Nimba County")
                 if mano_on:
                     _mano_stats = get_mano_stats()
                     if _mano_stats: st.caption(f"🗣️ {_mano_stats['total']}+ words loaded")
 
-        # Save / Load profile
-        _sf1, _sf2 = st.columns(2)
+        # ── Row 5: Save / Load + subscription + logout ────────────────────
+        _sf1, _sf2, _sf3 = st.columns([2, 2, 1])
         with _sf1:
             if st.button("💾 Save Configuration", use_container_width=True, key="sv_prof"):
-                st.session_state.saved_profile = {"school":school_name,"teacher":teacher_name,"phone":teacher_phone,"country":country,"lang":lang,"region":region,"grade":grade,"subject":subject,"class_size":clsz,"ability":abl,"moe_on":moe_on,"mano_on":mano_on,"task_cat":st.session_state.get("task_cat","📋 Planning"),"task":st.session_state.get("task_sel",""),"agent":st.session_state.get("agent_pick","")}
+                _c = st.session_state.get("country_sel","Liberia")
+                _l = st.session_state.get("lang_sel","English")
+                _r = st.session_state.get("cfg_region", list(_regions().keys())[0])
+                _g = st.session_state.get("cfg_grade", _grades()[0])
+                _s = st.session_state.get("cfg_subject", _subjects()[0])
+                _z = st.session_state.get("cfg_clsz", list(_sizes().keys())[0])
+                _a = st.session_state.get("cfg_abl", list(_ability().keys())[0])
+                st.session_state.saved_profile = {"school":school_name,"teacher":teacher_name,"phone":teacher_phone,"country":_c,"lang":_l,"region":_r,"grade":_g,"subject":_s,"class_size":_z,"ability":_a,"moe_on":moe_on,"mano_on":mano_on,"task_cat":st.session_state.get("task_cat","📋 Planning"),"task":st.session_state.get("task_sel",""),"agent":st.session_state.get("agent_pick","")}
                 st.session_state.profile_set = True
                 st.session_state["_show_save_opts"] = True
                 st.rerun()
@@ -2446,6 +2452,12 @@ def main():
                 st.session_state["_show_load_opts"] = not st.session_state.get("_show_load_opts", False)
                 st.session_state["_show_save_opts"] = False
                 st.rerun()
+        with _sf3:
+            if _login_required() and _is_logged_in():
+                if st.button("Sign out", key="logout_btn", use_container_width=True):
+                    st.session_state["_logged_in"] = False
+                    st.session_state["_login_label"] = ""
+                    st.rerun()
         if st.session_state.get("_show_save_opts") and "saved_profile" in st.session_state:
             st.success("✅ Saved! Download below to reuse next session.")
             _default_name = (school_name.strip().replace(" ","_") or "my_classroom")
@@ -2469,26 +2481,24 @@ def main():
                     st.rerun()
                 except Exception as e:
                     st.error(f"Invalid file: {e}")
+        # Subscription status
+        if SUBSCRIPTION_ACTIVE:
+            _bc = "#27AE60" if _SUB_DAYS_LEFT > 30 else "#F39C12"
+            _bt = f"Active · {_SUB_DAYS_LEFT}d left" if _SUB_DAYS_LEFT <= 60 else "Active"
+            st.caption(f"✅ Subscription: {_bt}")
+        elif _SUB_TIER == "expired":
+            st.caption("⚠️ Subscription expired — AI generation paused")
+        else:
+            st.caption("🆓 Free account — AI generation not active")
 
-        # Subscription status + logout
-        _sub_col, _login_col = st.columns([3, 1])
-        with _sub_col:
-            if SUBSCRIPTION_ACTIVE:
-                _bc = "#27AE60" if _SUB_DAYS_LEFT > 30 else "#F39C12"
-                _bt = f"Active · {_SUB_DAYS_LEFT}d left" if _SUB_DAYS_LEFT <= 60 else "Active"
-                st.markdown(f'<span style="font-size:.75rem;color:{_bc}">✅ Subscription: {_bt}</span>', unsafe_allow_html=True)
-            elif _SUB_TIER == "expired":
-                st.markdown('<span style="font-size:.75rem;color:#E74C3C">⚠️ Subscription expired</span>', unsafe_allow_html=True)
-            else:
-                st.markdown('<span style="font-size:.75rem;color:#8899BB">🆓 Free account</span>', unsafe_allow_html=True)
-        with _login_col:
-            if _login_required() and _is_logged_in():
-                if st.button("Sign out", key="logout_btn", use_container_width=True):
-                    st.session_state["_logged_in"] = False
-                    st.session_state["_login_label"] = ""
-                    st.rerun()
-
-    # Re-read after widgets (session_state updated by widgets above)
+    # ── Re-read all vars from session_state after widgets ─────────────────
+    country      = st.session_state["country_sel"]
+    lang         = st.session_state["lang_sel"]
+    region       = st.session_state["cfg_region"]
+    grade        = st.session_state["cfg_grade"]
+    subject      = st.session_state["cfg_subject"]
+    clsz         = st.session_state["cfg_clsz"]
+    abl          = st.session_state["cfg_abl"]
     moe_on       = st.session_state.get("moe_toggle", False)
     mano_on      = st.session_state.get("mano_toggle", False)
     school_name  = st.session_state.get("_school_confirmed","")
