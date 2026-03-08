@@ -2175,6 +2175,20 @@ def main():
     }}
     </style>""",unsafe_allow_html=True)
 
+    # Force sidebar open on first load of each session (overrides browser localStorage caching)
+    if not st.session_state.get("_sidebar_forced_open"):
+        st.session_state["_sidebar_forced_open"] = True
+        st.markdown("""
+<script>
+(function() {
+    function _openSidebar() {
+        var btn = window.parent.document.querySelector('[data-testid="collapsedControl"]');
+        if (btn) { btn.click(); }
+    }
+    setTimeout(_openSidebar, 400);
+})();
+</script>""", unsafe_allow_html=True)
+
     # Sidebar (defined first so country is available for logo flag)
     with st.sidebar:
         # Country first - drives auto language
