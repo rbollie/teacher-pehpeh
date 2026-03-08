@@ -3878,17 +3878,28 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                                      _alt2.Tooltip("Students:Q", title="# Students")],
                         )
                     )
+                    # Score label above bar
                     _combo_labels = (
                         _alt2.Chart(_combo_df)
-                        .mark_text(dy=-8, fontSize=20, fontWeight="bold", color="#FFFFFF")
+                        .mark_text(dy=-22, fontSize=18, fontWeight="bold", color="#FFFFFF")
                         .encode(
                             x=_alt2.X("Combo:N", sort=_combo_order),
                             y=_alt2.Y("Avg Score:Q", scale=_alt2.Scale(domain=[0,100])),
                             text=_alt2.Text("Avg Score:Q", format=".1f"),
                         )
                     )
+                    # Student count label just below the score
+                    _combo_count_labels = (
+                        _alt2.Chart(_combo_df)
+                        .mark_text(dy=-6, fontSize=13, fontWeight="normal", color="#D0D8E8")
+                        .encode(
+                            x=_alt2.X("Combo:N", sort=_combo_order),
+                            y=_alt2.Y("Avg Score:Q", scale=_alt2.Scale(domain=[0,100])),
+                            text=_alt2.Text("Students:Q", format="d"),
+                        )
+                    )
                     _combo_chart = (
-                        (_combo_bars + _combo_labels)
+                        (_combo_bars + _combo_labels + _combo_count_labels)
                         .properties(height=240, background="transparent")
                         .configure_axis(gridColor="rgba(255,255,255,0.08)", domainColor="#444", tickColor="#444")
                         .configure_view(strokeWidth=0)
