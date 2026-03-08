@@ -4027,7 +4027,45 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                                 "Status":   _status,
                             })
                     if _ind_rows:
-                        st.dataframe(pd.DataFrame(_ind_rows), use_container_width=True, hide_index=True)
+                        # Render with merged student name cell
+                        _ind_html = '''<table style="width:100%;border-collapse:collapse;font-size:.85rem;color:#D0D8E8">
+<thead><tr>
+  <th style="background:#1E3A6A;color:#D4A843;padding:7px 12px;text-align:left;border-bottom:2px solid #D4A843">Student</th>
+  <th style="background:#1E3A6A;color:#D4A843;padding:7px 12px;text-align:left;border-bottom:2px solid #D4A843">Subject</th>
+  <th style="background:#1E3A6A;color:#D4A843;padding:7px 12px;text-align:center;border-bottom:2px solid #D4A843">Sem 1</th>
+  <th style="background:#1E3A6A;color:#D4A843;padding:7px 12px;text-align:center;border-bottom:2px solid #D4A843">Sem 2</th>
+  <th style="background:#1E3A6A;color:#D4A843;padding:7px 12px;text-align:center;border-bottom:2px solid #D4A843">Overall</th>
+  <th style="background:#1E3A6A;color:#D4A843;padding:7px 12px;text-align:center;border-bottom:2px solid #D4A843">Status</th>
+</tr></thead><tbody>'''
+                        from itertools import groupby as _grpby
+                        for _stu_name, _stu_rows in _grpby(_ind_rows, key=lambda r: r["Student"]):
+                            _stu_rows = list(_stu_rows)
+                            _rc = len(_stu_rows)
+                            for _ri, _r in enumerate(_stu_rows):
+                                _bg = "background:#0D1B2A" if _ri % 2 == 0 else "background:#111E30"
+                                _s1_col = "#E74C3C" if _r["Sem 1"] != "—" and float(_r["Sem 1"].split("/")[0]) < 50 else ("#F1C40F" if _r["Sem 1"] != "—" and float(_r["Sem 1"].split("/")[0]) < 65 else "#D0D8E8")
+                                _s2_col = "#E74C3C" if _r["Sem 2"] != "—" and float(_r["Sem 2"].split("/")[0]) < 50 else ("#F1C40F" if _r["Sem 2"] != "—" and float(_r["Sem 2"].split("/")[0]) < 65 else "#D0D8E8")
+                                _ov_col = "#E74C3C" if float(_r["Overall"].split("/")[0]) < 50 else ("#F1C40F" if float(_r["Overall"].split("/")[0]) < 65 else "#2ECC71")
+                                if _ri == 0:
+                                    _ind_html += f'''<tr style="{_bg}">
+  <td rowspan="{_rc}" style="padding:7px 12px;font-weight:700;color:#D4A843;border-right:1px solid #1E3A6A;border-bottom:2px solid #1E3050;vertical-align:middle">{_stu_name}</td>
+  <td style="padding:7px 12px;border-bottom:1px solid #1E3050">{_r["Subject"]}</td>
+  <td style="padding:7px 12px;text-align:center;color:{_s1_col};border-bottom:1px solid #1E3050">{_r["Sem 1"]}</td>
+  <td style="padding:7px 12px;text-align:center;color:{_s2_col};border-bottom:1px solid #1E3050">{_r["Sem 2"]}</td>
+  <td style="padding:7px 12px;text-align:center;color:{_ov_col};font-weight:700;border-bottom:1px solid #1E3050">{_r["Overall"]}</td>
+  <td style="padding:7px 12px;text-align:center;border-bottom:1px solid #1E3050">{_r["Status"]}</td>
+</tr>'''
+                                else:
+                                    _bot = "2px solid #1E3050" if _ri == _rc - 1 else "1px solid #1E3050"
+                                    _ind_html += f'''<tr style="{_bg}">
+  <td style="padding:7px 12px;border-bottom:{_bot}">{_r["Subject"]}</td>
+  <td style="padding:7px 12px;text-align:center;color:{_s1_col};border-bottom:{_bot}">{_r["Sem 1"]}</td>
+  <td style="padding:7px 12px;text-align:center;color:{_s2_col};border-bottom:{_bot}">{_r["Sem 2"]}</td>
+  <td style="padding:7px 12px;text-align:center;color:{_ov_col};font-weight:700;border-bottom:{_bot}">{_r["Overall"]}</td>
+  <td style="padding:7px 12px;text-align:center;border-bottom:{_bot}">{_r["Status"]}</td>
+</tr>'''
+                        _ind_html += "</tbody></table>"
+                        st.markdown(_ind_html, unsafe_allow_html=True)
                 elif _n_subjects > 1:
                     # Fallback: individual subject avgs from grade_history (no semester split)
                     st.markdown('''<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin:14px 0 6px">👤 Individual Averages by Subject</div>''', unsafe_allow_html=True)
@@ -4041,7 +4079,38 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                             _ind_rows2.append({"Student": _stu, "Subject": _subj2,
                                                "Avg Score": f"{_savg2:.1f}/100", "Status": _status2})
                     if _ind_rows2:
-                        st.dataframe(pd.DataFrame(_ind_rows2), use_container_width=True, hide_index=True)
+                        # Render with merged student name cell
+                        _fb_html = '''<table style="width:100%;border-collapse:collapse;font-size:.85rem;color:#D0D8E8">
+<thead><tr>
+  <th style="background:#1E3A6A;color:#D4A843;padding:7px 12px;text-align:left;border-bottom:2px solid #D4A843">Student</th>
+  <th style="background:#1E3A6A;color:#D4A843;padding:7px 12px;text-align:left;border-bottom:2px solid #D4A843">Subject</th>
+  <th style="background:#1E3A6A;color:#D4A843;padding:7px 12px;text-align:center;border-bottom:2px solid #D4A843">Avg Score</th>
+  <th style="background:#1E3A6A;color:#D4A843;padding:7px 12px;text-align:center;border-bottom:2px solid #D4A843">Status</th>
+</tr></thead><tbody>'''
+                        from itertools import groupby as _grpby2
+                        for _stu_name2, _stu_rows2 in _grpby2(_ind_rows2, key=lambda r: r["Student"]):
+                            _stu_rows2 = list(_stu_rows2)
+                            _rc2 = len(_stu_rows2)
+                            for _ri2, _r2 in enumerate(_stu_rows2):
+                                _bg2 = "background:#0D1B2A" if _ri2 % 2 == 0 else "background:#111E30"
+                                _av = float(_r2["Avg Score"].split("/")[0])
+                                _avcol = "#E74C3C" if _av < 50 else ("#F1C40F" if _av < 65 else "#2ECC71")
+                                _bot2 = "2px solid #1E3050" if _ri2 == _rc2 - 1 else "1px solid #1E3050"
+                                if _ri2 == 0:
+                                    _fb_html += f'''<tr style="{_bg2}">
+  <td rowspan="{_rc2}" style="padding:7px 12px;font-weight:700;color:#D4A843;border-right:1px solid #1E3A6A;border-bottom:2px solid #1E3050;vertical-align:middle">{_stu_name2}</td>
+  <td style="padding:7px 12px;border-bottom:{_bot2}">{_r2["Subject"]}</td>
+  <td style="padding:7px 12px;text-align:center;color:{_avcol};font-weight:700;border-bottom:{_bot2}">{_r2["Avg Score"]}</td>
+  <td style="padding:7px 12px;text-align:center;border-bottom:{_bot2}">{_r2["Status"]}</td>
+</tr>'''
+                                else:
+                                    _fb_html += f'''<tr style="{_bg2}">
+  <td style="padding:7px 12px;border-bottom:{_bot2}">{_r2["Subject"]}</td>
+  <td style="padding:7px 12px;text-align:center;color:{_avcol};font-weight:700;border-bottom:{_bot2}">{_r2["Avg Score"]}</td>
+  <td style="padding:7px 12px;text-align:center;border-bottom:{_bot2}">{_r2["Status"]}</td>
+</tr>'''
+                        _fb_html += "</tbody></table>"
+                        st.markdown(_fb_html, unsafe_allow_html=True)
 
             # ── Line chart ────────────────────────────────────────────────
             try:
