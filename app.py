@@ -3830,7 +3830,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
 
             # ── Visual summaries: Two charts side-by-side ────────────────────
             st.markdown("<div style='margin-top:110px'></div>", unsafe_allow_html=True)
-            _vcol1, _vgap, _vcol2 = st.columns([10, 4, 10])
+            _vcol1, _vgap, _vcol2 = st.columns([8, 5, 10])
 
             # ── LEFT: HW & Quiz per Semester, grouped like the reference chart ──
             with _vcol1:
@@ -3881,7 +3881,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                                 tooltip=[_alt_hq.Tooltip("Semester:N"), _alt_hq.Tooltip("Assignment:N"),
                                          _alt_hq.Tooltip("Subject:N"), _alt_hq.Tooltip("Count:Q", title="Count")],
                             )
-                            .properties(height=240)
+                            .properties(height=240, width=_alt_hq.Step(22))
                         )
                         _hq_df["Semester"] = _hq_df["Semester"].map({"S1":"Semester 1","S2":"Semester 2"})
                         _hq_chart = (
@@ -3892,7 +3892,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                                                       header=_alt_hq.Header(labelColor="#D0D8E8", titleColor="transparent",
                                                                             labelFontSize=13, labelFontWeight="bold",
                                                                             labelPadding=10, labelOrient="bottom")),
-                                spacing=20,
+                                spacing=8,
                             )
                             .properties(background="transparent")
                             .configure_axis(gridColor="rgba(255,255,255,0.08)", domainColor="#444", tickColor="#444")
