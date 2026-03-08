@@ -1964,9 +1964,9 @@ def main():
         from PIL import Image as _PILImg
         _icon_b64 = "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"
         _icon_img = _PILImg.open(_io.BytesIO(_b64.b64decode(_icon_b64)))
-        st.set_page_config(page_title="Teacher Pehpeh by IBT",page_icon=_icon_img,layout="wide",initial_sidebar_state="expanded")
+        st.set_page_config(page_title="Teacher Pehpeh by IBT",page_icon=_icon_img,layout="wide",initial_sidebar_state="collapsed")
     except Exception:
-        st.set_page_config(page_title="Teacher Pehpeh by IBT",page_icon="🌶️",layout="wide",initial_sidebar_state="expanded")
+        st.set_page_config(page_title="Teacher Pehpeh by IBT",page_icon="🌶️",layout="wide",initial_sidebar_state="collapsed")
     # Inject favicon via JS — bypasses Streamlit head control
     _fav_js = (
         '<script>(function(){var l=document.querySelector("link[rel~=\'icon\']")'
@@ -2175,20 +2175,6 @@ def main():
     }}
     </style>""",unsafe_allow_html=True)
 
-    # Force sidebar open on first load of each session (overrides browser localStorage caching)
-    if not st.session_state.get("_sidebar_forced_open"):
-        st.session_state["_sidebar_forced_open"] = True
-        st.markdown("""
-<script>
-(function() {
-    function _openSidebar() {
-        var btn = window.parent.document.querySelector('[data-testid="collapsedControl"]');
-        if (btn) { btn.click(); }
-    }
-    setTimeout(_openSidebar, 400);
-})();
-</script>""", unsafe_allow_html=True)
-
     # Sidebar (defined first so country is available for logo flag)
     with st.sidebar:
         # Country first - drives auto language
@@ -2253,22 +2239,18 @@ def main():
             if teacher_phone.strip(): _t_display+=f'<span style="color:#FFFFFF;font-size:1rem;font-weight:700;margin-left:8px">• {teacher_phone.strip()}</span>'
             st.markdown(f'<div style="background:linear-gradient(135deg,#3D0C0C,#5A1515);border:2px solid #D4A843;border-radius:10px;padding:10px 16px;margin:6px 0;box-shadow:0 2px 8px rgba(212,168,67,.2)">👤 {_t_display}</div>',unsafe_allow_html=True)
         if "profile_set" not in st.session_state: st.session_state.profile_set=False
-        # Classroom config — always visible in sidebar (no expander)
-        st.markdown('<div style="font-size:.8rem;color:#D4A843;font-weight:700;letter-spacing:.05em;margin-bottom:4px">⚙️ CONFIGURE YOUR CLASSROOM</div>',unsafe_allow_html=True)
-        region=st.selectbox(T("setting"),list(_regions().keys()),label_visibility="collapsed",format_func=lambda x: f"📍 Setting: {x}", help="Urban, rural, or remote — shapes the type of content generated",key="cfg_region")
+        # Config dropdowns live in the main content bar — read session_state here
+        for _dk,_dv in [("cfg_region",list(_regions().keys())[0]),("cfg_grade",_grades()[0]),("cfg_subject",_subjects()[0]),("cfg_clsz",list(_sizes().keys())[0]),("cfg_abl",list(_ability().keys())[0])]:
+            if _dk not in st.session_state: st.session_state[_dk]=_dv
+        region=st.session_state["cfg_region"]
         if st.session_state.get("_pending_grade_from_sheet"):
-            st.session_state["cfg_grade"] = st.session_state.pop("_pending_grade_from_sheet")
-        grade=st.selectbox(T("grade"),_grades(),label_visibility="collapsed",format_func=lambda x: f"🎓 Grade: {x}", help="The class level you are teaching",key="cfg_grade")
-        subject=st.selectbox(T("subject"),_subjects(),label_visibility="collapsed",format_func=lambda x: f"📚 Subject: {x}", help="Choose the subject you want content for",key="cfg_subject")
-        clsz=st.selectbox(T("class_size"),list(_sizes().keys()),label_visibility="collapsed",format_func=lambda x: f"👥 Class Size: {x}", help="Helps Teacher Pehpeh suggest realistic group sizes and activities",key="cfg_clsz")
-        abl=st.selectbox(T("student_level"),list(_ability().keys()),label_visibility="collapsed",format_func=lambda x: f"📊 Student Level: {x}", help="Mixed, advanced, or struggling — adjusts difficulty and scaffolding",key="cfg_abl")
+            st.session_state["cfg_grade"]=st.session_state.pop("_pending_grade_from_sheet")
+        grade=st.session_state["cfg_grade"]
+        subject=st.session_state["cfg_subject"]
+        clsz=st.session_state["cfg_clsz"]
+        abl=st.session_state["cfg_abl"]
         # Map French display values back to English for AI
-        _region_val=_regions()[region]
-        _grade_en=_to_en_grade(grade)
-        _subj_en=_to_en_subj(subject)
-        _size_val=_sizes()[clsz]
         _res_val="standard resources"   # fixed default — resources config removed
-        _abl_val=_ability()[abl]
         st.markdown("---"); 
         # MOE Curriculum Toggle — Liberia only
         if CURRICULA and CURRICULUM_AVAILABLE and country == "Liberia":
@@ -2483,22 +2465,46 @@ def main():
             st.session_state.conn_checked = False
             st.rerun()
 
-    # Compute general MOE curriculum context for chat (available across tabs)
+    if not conn:
+        keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
+
+    # ── CLASSROOM CONFIGURATION BAR — always visible above tabs ──────────────
+    st.markdown('<div style="font-size:.72rem;font-weight:700;color:#D4A843;letter-spacing:.08em;margin-bottom:2px;margin-top:4px">⚙️ CLASSROOM CONFIGURATION</div>',unsafe_allow_html=True)
+    _cb1,_cb2,_cb3,_cb4,_cb5=st.columns(5)
+    with _cb1:
+        st.selectbox(T("setting"),list(_regions().keys()),label_visibility="collapsed",format_func=lambda x:f"📍 {x}",help="Urban, rural, or remote",key="cfg_region")
+    with _cb2:
+        st.selectbox(T("grade"),_grades(),label_visibility="collapsed",format_func=lambda x:f"🎓 {x}",help="Grade level",key="cfg_grade")
+    with _cb3:
+        st.selectbox(T("subject"),_subjects(),label_visibility="collapsed",format_func=lambda x:f"📚 {x}",help="Subject",key="cfg_subject")
+    with _cb4:
+        st.selectbox(T("class_size"),list(_sizes().keys()),label_visibility="collapsed",format_func=lambda x:f"👥 {x}",help="Class size",key="cfg_clsz")
+    with _cb5:
+        st.selectbox(T("student_level"),list(_ability().keys()),label_visibility="collapsed",format_func=lambda x:f"📊 {x}",help="Student level",key="cfg_abl")
+    # Update local vars from session_state (widgets above write to session_state)
+    region=st.session_state["cfg_region"]
+    grade=st.session_state["cfg_grade"]
+    subject=st.session_state["cfg_subject"]
+    clsz=st.session_state["cfg_clsz"]
+    abl=st.session_state["cfg_abl"]
+    _region_val=_regions()[region]
+    _grade_en=_to_en_grade(grade)
+    _subj_en=_to_en_subj(subject)
+    _size_val=_sizes()[clsz]
+    _abl_val=_ability()[abl]
+    st.markdown('<hr style="margin:4px 0 8px;border-color:#1e2a3a">',unsafe_allow_html=True)
+
+    # Compute general MOE curriculum context for chat (now that _grade_en/_subj_en are defined)
     _chat_curr_ctx = ""
     if moe_on and CURRICULA:
         _grade_num_chat = int(''.join(c for c in _grade_en if c.isdigit()) or "10")
         _chat_curr_ctx = get_curriculum_summary(CURRICULA) if CURRICULUM_AVAILABLE else ""
-        # Also get all topics for this subject/grade to include in chat context
         _chat_topics = get_grade_topics(CURRICULA, _subj_en, _grade_num_chat) if CURRICULUM_AVAILABLE else []
         if _chat_topics:
             _chat_curr_ctx += f"\n\nAvailable MOE topics for {_subj_en} Grade {_grade_num_chat}: {', '.join(_chat_topics)}"
-    # Compute Mano language context for chat
     _chat_mano_ctx = ""
     if mano_on and MANO_AVAILABLE:
         _chat_mano_ctx = build_mano_prompt_context(_subj_en, _subj_en)
-
-    if not conn:
-        keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
 
     # Tabs
     if online and keys:
