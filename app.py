@@ -3875,7 +3875,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                     )
                     _combo_labels = (
                         _alt2.Chart(_combo_df)
-                        .mark_text(dy=-6, fontSize=10, fontWeight="bold", color="#D0D8E8")
+                        .mark_text(dy=-6, fontSize=14, fontWeight="bold", color="#D0D8E8")
                         .encode(
                             x=_alt2.X("Combo:N", sort=_combo_order),
                             y=_alt2.Y("Avg Score:Q", scale=_alt2.Scale(domain=[0,100])),
