@@ -3829,7 +3829,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
             with _ma4: st.metric("Need Intervention", f"{_below50} student{'s' if _below50!=1 else ''}", delta=f"{_at_risk_pct:.0f}% of class", delta_color="inverse")
 
             # ── Visual summaries: Two charts side-by-side ────────────────────
-            st.markdown("<div style='margin-top:38px'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-top:72px'></div>", unsafe_allow_html=True)
             _vcol1, _vgap, _vcol2 = st.columns([10, 1, 10])
 
             # ── LEFT: HW & Quiz per Semester, grouped like the reference chart ──
