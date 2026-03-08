@@ -14,6 +14,7 @@ Generates a .docx with:
 import io
 import datetime
 import collections
+from pathlib import Path
 
 import pandas as pd
 import numpy as np
@@ -540,6 +541,75 @@ def generate_academic_word_report(
         section.bottom_margin = Cm(2.0)
         section.left_margin   = Cm(2.2)
         section.right_margin  = Cm(2.2)
+
+    # ── Logo header: IBT logo | address | Pehpeh logo ─────────────────────────
+    _HERE = Path(__file__).parent
+    _ibt_logo_path    = _HERE / "IBT_Logo_Enhanced.png"
+    _pehpeh_logo_path = _HERE / "Pehpeh_1.png"
+
+    hdr_tbl = doc.add_table(rows=1, cols=3)
+    hdr_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+    hdr_tbl.style = "Table Grid"
+    # Remove all borders on the header table
+    for _row in hdr_tbl.rows:
+        for _cell in _row.cells:
+            _tc = _cell._tc
+            _tcPr = _tc.get_or_add_tcPr()
+            _tcBorders = OxmlElement("w:tcBorders")
+            for _side in ("top", "left", "bottom", "right", "insideH", "insideV"):
+                _b = OxmlElement(f"w:{_side}")
+                _b.set(qn("w:val"), "none")
+                _b.set(qn("w:sz"),  "0")
+                _b.set(qn("w:space"), "0")
+                _b.set(qn("w:color"), "auto")
+                _tcBorders.append(_b)
+            _tcPr.append(_tcBorders)
+
+    _c_left, _c_mid, _c_right = hdr_tbl.rows[0].cells
+
+    # Left cell — IBT logo
+    _c_left.width = Inches(1.5)
+    _p_left = _c_left.paragraphs[0]
+    _p_left.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    if _ibt_logo_path.exists():
+        _p_left.add_run().add_picture(str(_ibt_logo_path), width=Inches(1.2))
+
+    # Centre cell — address block
+    _c_mid.width = Inches(4.2)
+    _p_mid = _c_mid.paragraphs[0]
+    _p_mid.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    _addr_run1 = _p_mid.add_run("Institute of Basic Technology (IBT)\n")
+    _addr_run1.bold = True
+    _addr_run1.font.size = Pt(10)
+    _addr_run1.font.color.rgb = IBT_BLUE
+    _addr_run2 = _p_mid.add_run(
+        "Thinker's Village, Montserrado, Liberia\n"
+        "Support@institutebasictechnology.org\n"
+        "0777-974-676"
+    )
+    _addr_run2.font.size = Pt(8.5)
+    _addr_run2.font.color.rgb = RGBColor(0x33, 0x33, 0x33)
+
+    # Right cell — Teacher Pehpeh logo
+    _c_right.width = Inches(1.5)
+    _p_right = _c_right.paragraphs[0]
+    _p_right.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    if _pehpeh_logo_path.exists():
+        _p_right.add_run().add_picture(str(_pehpeh_logo_path), width=Inches(1.2))
+
+    # Gold divider line
+    _div_p = doc.add_paragraph()
+    _div_p.paragraph_format.space_before = Pt(4)
+    _div_p.paragraph_format.space_after  = Pt(8)
+    _div_pPr = _div_p._p.get_or_add_pPr()
+    _div_pBdr = OxmlElement("w:pBdr")
+    _div_bot = OxmlElement("w:bottom")
+    _div_bot.set(qn("w:val"),   "single")
+    _div_bot.set(qn("w:sz"),    "12")
+    _div_bot.set(qn("w:space"), "1")
+    _div_bot.set(qn("w:color"), "D4A843")
+    _div_pBdr.append(_div_bot)
+    _div_pPr.append(_div_pBdr)
 
     # ── Cover block ───────────────────────────────────────────────────────────
     title_p = doc.add_paragraph()
