@@ -3963,38 +3963,34 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
 
             # ── Per-subject breakdown ──────────────────────────────────────
             if _n_subjects > 1:
-                st.markdown(f'''<div style="color:#D4A843;font-weight:700;font-size:.92rem;margin:10px 0 6px">📚 Subject Breakdown — Class Averages</div>''', unsafe_allow_html=True)
-
-                # --- Class-level averages table ---
-                _subj_rows = []
-                for _subj in sorted(_df["subject"].unique()):
-                    _sd2 = _df[_df["subject"]==_subj]
-                    _cls_avg = _sd2["score"].mean()
-                    # Semester averages from IBT subject data if available
-                    _sdata = (st.session_state.get("_ar_subject_data") or {}).get(_subj, {})
-                    _s1_vals = [v["s1_avg"] for v in _sdata.values() if v.get("s1_avg") is not None]
-                    _s2_vals = [v["s2_avg"] for v in _sdata.values() if v.get("s2_avg") is not None]
-                    _cls_status = ("🔴 Intervention" if _cls_avg < 50
-                                   else ("🟡 Monitor" if _cls_avg < 65 else "🟢 On Track"))
-                    _row = {
-                        "Subject":    _subj,
-                        "Class Avg":  f"{_cls_avg:.1f}/100",
-                        "# Students": _sd2["student"].nunique(),
-                        "Lowest":     f"{_sd2['score'].min():.1f}/100",
-                        "Status":     _cls_status,
-                    }
-                    if _s1_vals:
-                        _row["Sem 1 Cls Avg"] = f"{sum(_s1_vals)/len(_s1_vals):.1f}/100"
-                    if _s2_vals:
-                        _row["Sem 2 Cls Avg"] = f"{sum(_s2_vals)/len(_s2_vals):.1f}/100"
-                    _subj_rows.append(_row)
-                # Reorder columns for display
-                _col_order = ["Subject","Class Avg"]
-                if any("Sem 1 Cls Avg" in r for r in _subj_rows): _col_order.append("Sem 1 Cls Avg")
-                if any("Sem 2 Cls Avg" in r for r in _subj_rows): _col_order.append("Sem 2 Cls Avg")
-                _col_order += ["# Students","Lowest","Status"]
-                _disp_df = pd.DataFrame(_subj_rows).reindex(columns=[c for c in _col_order if c in pd.DataFrame(_subj_rows).columns])
-                st.dataframe(_disp_df, use_container_width=True, hide_index=True)
+                with st.expander("📚 Subject Breakdown — Class Averages", expanded=False):
+                    _subj_rows = []
+                    for _subj in sorted(_df["subject"].unique()):
+                        _sd2 = _df[_df["subject"]==_subj]
+                        _cls_avg = _sd2["score"].mean()
+                        _sdata = (st.session_state.get("_ar_subject_data") or {}).get(_subj, {})
+                        _s1_vals = [v["s1_avg"] for v in _sdata.values() if v.get("s1_avg") is not None]
+                        _s2_vals = [v["s2_avg"] for v in _sdata.values() if v.get("s2_avg") is not None]
+                        _cls_status = ("🔴 Intervention" if _cls_avg < 50
+                                       else ("🟡 Monitor" if _cls_avg < 65 else "🟢 On Track"))
+                        _row = {
+                            "Subject":    _subj,
+                            "Class Avg":  f"{_cls_avg:.1f}/100",
+                            "# Students": _sd2["student"].nunique(),
+                            "Lowest":     f"{_sd2['score'].min():.1f}/100",
+                            "Status":     _cls_status,
+                        }
+                        if _s1_vals:
+                            _row["Sem 1 Cls Avg"] = f"{sum(_s1_vals)/len(_s1_vals):.1f}/100"
+                        if _s2_vals:
+                            _row["Sem 2 Cls Avg"] = f"{sum(_s2_vals)/len(_s2_vals):.1f}/100"
+                        _subj_rows.append(_row)
+                    _col_order = ["Subject","Class Avg"]
+                    if any("Sem 1 Cls Avg" in r for r in _subj_rows): _col_order.append("Sem 1 Cls Avg")
+                    if any("Sem 2 Cls Avg" in r for r in _subj_rows): _col_order.append("Sem 2 Cls Avg")
+                    _col_order += ["# Students","Lowest","Status"]
+                    _disp_df = pd.DataFrame(_subj_rows).reindex(columns=[c for c in _col_order if c in pd.DataFrame(_subj_rows).columns])
+                    st.dataframe(_disp_df, use_container_width=True, hide_index=True)
 
                 # --- Individual averages per subject per semester ---
                 _sdata_all = st.session_state.get("_ar_subject_data") or {}
@@ -4004,7 +4000,6 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                 )
                 if _has_sem_data:
                     with st.expander("👤 Individual Averages by Subject & Semester", expanded=False):
-                        # Build rows: one row per student, columns = Subject · Sem1 · Sem2 · Overall
                         _all_students = sorted({stu for sd in _sdata_all.values() for stu in sd})
                         _all_subjs    = sorted(_sdata_all.keys())
                         _ind_rows = []
@@ -4027,7 +4022,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                                     "Status":   _status,
                                 })
                         if _ind_rows:
-                            # Render with merged student name cell
+                            from itertools import groupby as _grpby
                             _ind_html = '''<table style="width:100%;border-collapse:collapse;font-size:.85rem;color:#D0D8E8">
 <thead><tr>
   <th style="background:#1E3A6A;color:#D4A843;padding:7px 12px;text-align:left;border-bottom:2px solid #D4A843">Student</th>
@@ -4037,17 +4032,16 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
   <th style="background:#1E3A6A;color:#D4A843;padding:7px 12px;text-align:center;border-bottom:2px solid #D4A843">Overall</th>
   <th style="background:#1E3A6A;color:#D4A843;padding:7px 12px;text-align:center;border-bottom:2px solid #D4A843">Status</th>
 </tr></thead><tbody>'''
-                        from itertools import groupby as _grpby
-                        for _stu_name, _stu_rows in _grpby(_ind_rows, key=lambda r: r["Student"]):
-                            _stu_rows = list(_stu_rows)
-                            _rc = len(_stu_rows)
-                            for _ri, _r in enumerate(_stu_rows):
-                                _bg = "background:#0D1B2A" if _ri % 2 == 0 else "background:#111E30"
-                                _s1_col = "#E74C3C" if _r["Sem 1"] != "—" and float(_r["Sem 1"].split("/")[0]) < 50 else ("#F1C40F" if _r["Sem 1"] != "—" and float(_r["Sem 1"].split("/")[0]) < 65 else "#D0D8E8")
-                                _s2_col = "#E74C3C" if _r["Sem 2"] != "—" and float(_r["Sem 2"].split("/")[0]) < 50 else ("#F1C40F" if _r["Sem 2"] != "—" and float(_r["Sem 2"].split("/")[0]) < 65 else "#D0D8E8")
-                                _ov_col = "#E74C3C" if float(_r["Overall"].split("/")[0]) < 50 else ("#F1C40F" if float(_r["Overall"].split("/")[0]) < 65 else "#2ECC71")
-                                if _ri == 0:
-                                    _ind_html += f'''<tr style="{_bg}">
+                            for _stu_name, _stu_rows in _grpby(_ind_rows, key=lambda r: r["Student"]):
+                                _stu_rows = list(_stu_rows)
+                                _rc = len(_stu_rows)
+                                for _ri, _r in enumerate(_stu_rows):
+                                    _bg = "background:#0D1B2A" if _ri % 2 == 0 else "background:#111E30"
+                                    _s1_col = "#E74C3C" if _r["Sem 1"] != "—" and float(_r["Sem 1"].split("/")[0]) < 50 else ("#F1C40F" if _r["Sem 1"] != "—" and float(_r["Sem 1"].split("/")[0]) < 65 else "#D0D8E8")
+                                    _s2_col = "#E74C3C" if _r["Sem 2"] != "—" and float(_r["Sem 2"].split("/")[0]) < 50 else ("#F1C40F" if _r["Sem 2"] != "—" and float(_r["Sem 2"].split("/")[0]) < 65 else "#D0D8E8")
+                                    _ov_col = "#E74C3C" if float(_r["Overall"].split("/")[0]) < 50 else ("#F1C40F" if float(_r["Overall"].split("/")[0]) < 65 else "#2ECC71")
+                                    if _ri == 0:
+                                        _ind_html += f'''<tr style="{_bg}">
   <td rowspan="{_rc}" style="padding:7px 12px;font-weight:700;color:#D4A843;border-right:1px solid #1E3A6A;border-bottom:2px solid #1E3050;vertical-align:middle">{_stu_name}</td>
   <td style="padding:7px 12px;border-bottom:1px solid #1E3050">{_r["Subject"]}</td>
   <td style="padding:7px 12px;text-align:center;color:{_s1_col};border-bottom:1px solid #1E3050">{_r["Sem 1"]}</td>
@@ -4055,19 +4049,18 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
   <td style="padding:7px 12px;text-align:center;color:{_ov_col};font-weight:700;border-bottom:1px solid #1E3050">{_r["Overall"]}</td>
   <td style="padding:7px 12px;text-align:center;border-bottom:1px solid #1E3050">{_r["Status"]}</td>
 </tr>'''
-                                else:
-                                    _bot = "2px solid #1E3050" if _ri == _rc - 1 else "1px solid #1E3050"
-                                    _ind_html += f'''<tr style="{_bg}">
+                                    else:
+                                        _bot = "2px solid #1E3050" if _ri == _rc - 1 else "1px solid #1E3050"
+                                        _ind_html += f'''<tr style="{_bg}">
   <td style="padding:7px 12px;border-bottom:{_bot}">{_r["Subject"]}</td>
   <td style="padding:7px 12px;text-align:center;color:{_s1_col};border-bottom:{_bot}">{_r["Sem 1"]}</td>
   <td style="padding:7px 12px;text-align:center;color:{_s2_col};border-bottom:{_bot}">{_r["Sem 2"]}</td>
   <td style="padding:7px 12px;text-align:center;color:{_ov_col};font-weight:700;border-bottom:{_bot}">{_r["Overall"]}</td>
   <td style="padding:7px 12px;text-align:center;border-bottom:{_bot}">{_r["Status"]}</td>
 </tr>'''
-                        _ind_html += "</tbody></table>"
-                        st.markdown(_ind_html, unsafe_allow_html=True)
+                            _ind_html += "</tbody></table>"
+                            st.markdown(_ind_html, unsafe_allow_html=True)
                 elif _n_subjects > 1:
-                    # Fallback: individual subject avgs from grade_history (no semester split)
                     with st.expander("👤 Individual Averages by Subject", expanded=False):
                         _ind_rows2 = []
                         for _stu in sorted(_df["student"].unique()):
@@ -4079,7 +4072,7 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
                                 _ind_rows2.append({"Student": _stu, "Subject": _subj2,
                                                    "Avg Score": f"{_savg2:.1f}/100", "Status": _status2})
                         if _ind_rows2:
-                            # Render with merged student name cell
+                            from itertools import groupby as _grpby2
                             _fb_html = '''<table style="width:100%;border-collapse:collapse;font-size:.85rem;color:#D0D8E8">
 <thead><tr>
   <th style="background:#1E3A6A;color:#D4A843;padding:7px 12px;text-align:left;border-bottom:2px solid #D4A843">Student</th>
@@ -4087,30 +4080,30 @@ IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100""
   <th style="background:#1E3A6A;color:#D4A843;padding:7px 12px;text-align:center;border-bottom:2px solid #D4A843">Avg Score</th>
   <th style="background:#1E3A6A;color:#D4A843;padding:7px 12px;text-align:center;border-bottom:2px solid #D4A843">Status</th>
 </tr></thead><tbody>'''
-                        from itertools import groupby as _grpby2
-                        for _stu_name2, _stu_rows2 in _grpby2(_ind_rows2, key=lambda r: r["Student"]):
-                            _stu_rows2 = list(_stu_rows2)
-                            _rc2 = len(_stu_rows2)
-                            for _ri2, _r2 in enumerate(_stu_rows2):
-                                _bg2 = "background:#0D1B2A" if _ri2 % 2 == 0 else "background:#111E30"
-                                _av = float(_r2["Avg Score"].split("/")[0])
-                                _avcol = "#E74C3C" if _av < 50 else ("#F1C40F" if _av < 65 else "#2ECC71")
-                                _bot2 = "2px solid #1E3050" if _ri2 == _rc2 - 1 else "1px solid #1E3050"
-                                if _ri2 == 0:
-                                    _fb_html += f'''<tr style="{_bg2}">
+                            for _stu_name2, _stu_rows2 in _grpby2(_ind_rows2, key=lambda r: r["Student"]):
+                                _stu_rows2 = list(_stu_rows2)
+                                _rc2 = len(_stu_rows2)
+                                for _ri2, _r2 in enumerate(_stu_rows2):
+                                    _bg2 = "background:#0D1B2A" if _ri2 % 2 == 0 else "background:#111E30"
+                                    _av = float(_r2["Avg Score"].split("/")[0])
+                                    _avcol = "#E74C3C" if _av < 50 else ("#F1C40F" if _av < 65 else "#2ECC71")
+                                    _bot2 = "2px solid #1E3050" if _ri2 == _rc2 - 1 else "1px solid #1E3050"
+                                    if _ri2 == 0:
+                                        _fb_html += f'''<tr style="{_bg2}">
   <td rowspan="{_rc2}" style="padding:7px 12px;font-weight:700;color:#D4A843;border-right:1px solid #1E3A6A;border-bottom:2px solid #1E3050;vertical-align:middle">{_stu_name2}</td>
   <td style="padding:7px 12px;border-bottom:{_bot2}">{_r2["Subject"]}</td>
   <td style="padding:7px 12px;text-align:center;color:{_avcol};font-weight:700;border-bottom:{_bot2}">{_r2["Avg Score"]}</td>
   <td style="padding:7px 12px;text-align:center;border-bottom:{_bot2}">{_r2["Status"]}</td>
 </tr>'''
-                                else:
-                                    _fb_html += f'''<tr style="{_bg2}">
+                                    else:
+                                        _fb_html += f'''<tr style="{_bg2}">
   <td style="padding:7px 12px;border-bottom:{_bot2}">{_r2["Subject"]}</td>
   <td style="padding:7px 12px;text-align:center;color:{_avcol};font-weight:700;border-bottom:{_bot2}">{_r2["Avg Score"]}</td>
   <td style="padding:7px 12px;text-align:center;border-bottom:{_bot2}">{_r2["Status"]}</td>
 </tr>'''
-                        _fb_html += "</tbody></table>"
-                        st.markdown(_fb_html, unsafe_allow_html=True)
+                            _fb_html += "</tbody></table>"
+                            st.markdown(_fb_html, unsafe_allow_html=True)
+
 
             # ── AI Analysis ───────────────────────────────────────────────
             st.markdown("---")
@@ -4222,19 +4215,31 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
                     from openpyxl.drawing.image import Image as _XlImg2
                     _rpt_wb = openpyxl.Workbook()
-                    _navy_fill = PatternFill("solid", fgColor="0D1B2A")
-                    _gold_fill = PatternFill("solid", fgColor="D4A843")
-                    _red_fill  = PatternFill("solid", fgColor="5C1010")
-                    _grn_fill  = PatternFill("solid", fgColor="0D3B14")
+                    # Accessibility-first palette: high-contrast, WCAG AA compliant
+                    _navy_fill  = PatternFill("solid", fgColor="0A1628")   # near-black bg
+                    _gold_fill  = PatternFill("solid", fgColor="1A3A6A")   # deep blue header
+                    _red_fill   = PatternFill("solid", fgColor="8B0000")   # dark red — Intervention
+                    _grn_fill   = PatternFill("solid", fgColor="1B5E20")   # dark green — On Track
+                    _amber_fill = PatternFill("solid", fgColor="6B4300")   # dark amber — Monitor
+                    _alt_fill   = PatternFill("solid", fgColor="0D1F3C")   # alternate row blue
                     _thin = Side(style="thin", color="1E3050")
                     _bdr  = Border(left=_thin, right=_thin, top=_thin, bottom=_thin)
                     def _hdr_cell(ws, row, col, val, size=11):
                         c = ws.cell(row, col, val)
                         c.font = Font(bold=True, color="FFFFFF", size=size)
-                        c.fill = _gold_fill
+                        c.fill = _gold_fill  # deep blue header
                         c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
                         c.border = _bdr
                         return c
+                    def _status_fill(score):
+                        """Return accessible fill based on score threshold."""
+                        if score < 50: return _red_fill
+                        if score < 65: return _amber_fill
+                        return _grn_fill
+                    def _status_label(score):
+                        if score < 50: return "Intervention"
+                        if score < 65: return "Monitor"
+                        return "On Track"
                     def _add_xl_logo_hdr(ws, ncols):
                         """Row 1: IBT logo | contact | Pehpeh logo. Row 2: title. Row 3: subtitle."""
                         ws.row_dimensions[1].height = 52
@@ -4279,7 +4284,112 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                             _c.font = Font(color="FFFFFF", bold=(ci==4), size=10)
                             _c.fill = _rfill if ci==4 else _bg
                             _c.border = _bdr
-                    # ── Sheet 2: Subject Scores Over Time ─────────────────
+                    # ── Sheet 2: Subject Breakdown — Class Averages ───────
+                    try:
+                        _ws_sb = _rpt_wb.create_sheet("Subject Breakdown")
+                        _add_xl_logo_hdr(_ws_sb, 6)
+                        _ws_sb.merge_cells("A2:F2")
+                        _sbh = _ws_sb.cell(2,1,"Subject Breakdown — Class Averages")
+                        _sbh.font = Font(bold=True, color="FFFFFF", size=12)
+                        _sbh.fill = PatternFill("solid", fgColor="1A3A6A")
+                        _sbh.alignment = Alignment(horizontal="center", vertical="center")
+                        for _sbc, _sbw in zip(["A","B","C","D","E","F"],[26,14,14,12,14,22]):
+                            _ws_sb.column_dimensions[_sbc].width = _sbw
+                        _sb_hdrs = ["Subject","Class Avg","Sem 1 Avg","Sem 2 Avg","# Students","Status"]
+                        for _ci_sb, _sh_sb in enumerate(_sb_hdrs, 1): _hdr_cell(_ws_sb, 3, _ci_sb, _sh_sb)
+                        _sb_subjs = sorted(_df["subject"].unique())
+                        for _ri_sb, _subj_sb in enumerate(_sb_subjs, 4):
+                            _sd_sb = _df[_df["subject"]==_subj_sb]
+                            _avg_sb = round(_sd_sb["score"].mean(), 1)
+                            _sdat_sb = (st.session_state.get("_ar_subject_data") or {}).get(_subj_sb, {})
+                            _s1v_sb = [v["s1_avg"] for v in _sdat_sb.values() if v.get("s1_avg") is not None]
+                            _s2v_sb = [v["s2_avg"] for v in _sdat_sb.values() if v.get("s2_avg") is not None]
+                            _s1a_sb = round(sum(_s1v_sb)/len(_s1v_sb),1) if _s1v_sb else None
+                            _s2a_sb = round(sum(_s2v_sb)/len(_s2v_sb),1) if _s2v_sb else None
+                            _sbg = _alt_fill if _ri_sb%2==0 else _navy_fill
+                            _sfill = _status_fill(_avg_sb)
+                            for _ci_sb2, _sv in enumerate([
+                                _subj_sb, f"{_avg_sb}/100",
+                                f"{_s1a_sb}/100" if _s1a_sb else "—",
+                                f"{_s2a_sb}/100" if _s2a_sb else "—",
+                                _sd_sb["student"].nunique(), _status_label(_avg_sb)
+                            ], 1):
+                                _sc_sb = _ws_sb.cell(_ri_sb, _ci_sb2, _sv)
+                                _sc_sb.font = Font(color="FFFFFF", bold=(_ci_sb2==2), size=10)
+                                _sc_sb.fill = _sfill if _ci_sb2 in (2,6) else _sbg
+                                _sc_sb.border = _bdr
+                    except Exception: pass
+
+                    # ── Sheet 3: Individual Averages ───────────────────────
+                    try:
+                        _sdata_xl = st.session_state.get("_ar_subject_data") or {}
+                        _has_xl_sem = any(v.get("s1_avg") is not None or v.get("s2_avg") is not None
+                                          for sd in _sdata_xl.values() for v in sd.values())
+                        _ws_ind = _rpt_wb.create_sheet("Individual Averages")
+                        _add_xl_logo_hdr(_ws_ind, 6)
+                        _ws_ind.merge_cells("A2:F2")
+                        _indh = _ws_ind.cell(2,1,"Individual Student Averages by Subject & Semester")
+                        _indh.font = Font(bold=True, color="FFFFFF", size=12)
+                        _indh.fill = PatternFill("solid", fgColor="1A3A6A")
+                        _indh.alignment = Alignment(horizontal="center", vertical="center")
+                        for _indc, _indw in zip(["A","B","C","D","E","F"],[22,22,14,14,14,22]):
+                            _ws_ind.column_dimensions[_indc].width = _indw
+                        if _has_xl_sem:
+                            for _ci_ind, _ih in enumerate(["Student","Subject","Sem 1","Sem 2","Overall","Status"], 1):
+                                _hdr_cell(_ws_ind, 3, _ci_ind, _ih)
+                            _xl_stus = sorted({stu for sd in _sdata_xl.values() for stu in sd})
+                            _xl_subjs = sorted(_sdata_xl.keys())
+                            _ind_ri = 4
+                            _prev_stu = None
+                            for _xl_stu in _xl_stus:
+                                _stu_rows_xl = []
+                                for _xl_subj in _xl_subjs:
+                                    _xv = _sdata_xl.get(_xl_subj, {}).get(_xl_stu, {})
+                                    _xs1 = _xv.get("s1_avg"); _xs2 = _xv.get("s2_avg")
+                                    if _xs1 is None and _xs2 is None: continue
+                                    _xvals = [v for v in [_xs1, _xs2] if v is not None]
+                                    _xov = round(sum(_xvals)/len(_xvals), 1)
+                                    _stu_rows_xl.append((_xl_subj, _xs1, _xs2, _xov))
+                                for _xri2, (_xsubj, _xs1, _xs2, _xov) in enumerate(_stu_rows_xl):
+                                    _xbg = _alt_fill if _ind_ri%2==0 else _navy_fill
+                                    _xsfill = _status_fill(_xov)
+                                    # Student name — only on first row for this student
+                                    _nc_ind = _ws_ind.cell(_ind_ri, 1, _xl_stu if _xri2==0 else "")
+                                    _nc_ind.font = Font(color="FFD700", bold=True, size=10)
+                                    _nc_ind.fill = _xbg; _nc_ind.border = _bdr
+                                    for _ci_x, _xval in enumerate([
+                                        _xsubj,
+                                        f"{_xs1:.1f}/100" if _xs1 is not None else "—",
+                                        f"{_xs2:.1f}/100" if _xs2 is not None else "—",
+                                        f"{_xov:.1f}/100", _status_label(_xov)
+                                    ], 2):
+                                        _xc = _ws_ind.cell(_ind_ri, _ci_x, _xval)
+                                        _xc.font = Font(color="FFFFFF", bold=(_ci_x==5), size=10)
+                                        _xc.fill = _xsfill if _ci_x in (5,6) else _xbg
+                                        _xc.border = _bdr
+                                    _ind_ri += 1
+                        else:
+                            for _ci_ind, _ih in enumerate(["Student","Subject","Avg Score","Status"], 1):
+                                _hdr_cell(_ws_ind, 3, _ci_ind, _ih)
+                            _ind_ri2 = 4
+                            for _xl_stu2 in sorted(_df["student"].unique()):
+                                _stu_subjs2 = sorted(_df[_df["student"]==_xl_stu2]["subject"].unique())
+                                for _xri3, _xsubj2 in enumerate(_stu_subjs2):
+                                    _xavg2 = round(_df[(_df["student"]==_xl_stu2)&(_df["subject"]==_xsubj2)]["score"].mean(),1)
+                                    _xbg2 = _alt_fill if _ind_ri2%2==0 else _navy_fill
+                                    _xsfill2 = _status_fill(_xavg2)
+                                    _nc2 = _ws_ind.cell(_ind_ri2, 1, _xl_stu2 if _xri3==0 else "")
+                                    _nc2.font = Font(color="FFD700", bold=True, size=10)
+                                    _nc2.fill = _xbg2; _nc2.border = _bdr
+                                    for _ci_x2, _xval2 in enumerate([_xsubj2, f"{_xavg2}/100", _status_label(_xavg2)], 2):
+                                        _xc2 = _ws_ind.cell(_ind_ri2, _ci_x2, _xval2)
+                                        _xc2.font = Font(color="FFFFFF", bold=(_ci_x2==4), size=10)
+                                        _xc2.fill = _xsfill2 if _ci_x2 in (3,4) else _xbg2
+                                        _xc2.border = _bdr
+                                    _ind_ri2 += 1
+                    except Exception: pass
+
+                    # ── Sheet 4: Subject Scores Over Time ─────────────────
                     try:
                         _ws2 = _rpt_wb.create_sheet("Subject Trend")
                         _add_xl_logo_hdr(_ws2, 6)
@@ -4323,7 +4433,7 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                             _nc.font = Font(color="FFFFFF", italic=True)
                     except Exception: pass
 
-                    # ── Sheet 3: Family Context (Mom's Edu × Kids) ────────
+                    # ── Sheet 5: Family Context (Mom's Edu × Kids) ────────
                     try:
                         _ws3 = _rpt_wb.create_sheet("Family Context")
                         _add_xl_logo_hdr(_ws3, 5)
