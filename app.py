@@ -96,6 +96,36 @@ def _get_credentials():
     # If no credentials configured at all, use a simple open-access mode
     return creds
 
+def _make_session_token(username):
+    """HMAC-style signed token so we can verify without storing password."""
+    import hashlib
+    creds = _get_credentials()
+    # Use the password for that user as the signing secret
+    secret = next((c[1] for c in creds if c[0].lower() == username.lower()), None)
+    if secret is None:
+        secret = "tp_fallback_secret_2025"
+    return hashlib.sha256(f"{username}|{secret}|teacher_pehpeh_ibt".encode()).hexdigest()[:40]
+
+def _restore_session_from_token():
+    """
+    Read st.query_params['_s'] and restore session if valid.
+    Format: username|label|token   (pipe-separated, label may contain spaces but not pipes)
+    Returns True if session was restored.
+    """
+    try:
+        raw = st.query_params.get("_s", "")
+        if not raw or raw.count("|") < 2:
+            return False
+        parts = raw.split("|", 2)
+        username, label, token = parts[0], parts[1], parts[2]
+        if token == _make_session_token(username):
+            st.session_state["_logged_in"] = True
+            st.session_state["_login_label"] = label
+            return True
+    except Exception:
+        pass
+    return False
+
 def _login_required():
     """True if the app has login credentials configured."""
     return len(_get_credentials()) > 0
@@ -127,6 +157,9 @@ def _show_login_screen():
         if match:
             st.session_state["_logged_in"] = True
             st.session_state["_login_label"] = match[2]
+            # Persist login across browser refresh via signed query param token
+            _tok = _make_session_token(match[0])
+            st.query_params["_s"] = f"{match[0]}|{match[2]}|{_tok}"
             st.rerun()
         else:
             st.error("Incorrect username or password. Please contact IBT for access.")
@@ -2209,9 +2242,126 @@ def main():
     # Sidebar starts expanded so users immediately see Configure Your Classroom
     # (throb animation on the toggle button draws attention when collapsed)
     # ── LOGIN GATE ──────────────────────────────────────────────────
+    # Try to restore session from persisted query-param token (survives browser refresh)
+    if _login_required() and not _is_logged_in():
+        _restore_session_from_token()
+
     if _login_required() and not _is_logged_in():
         _show_login_screen()
         st.stop()
+
+    # ── INACTIVITY TIMER (inject once per session into parent DOM) ──
+    # 28 min → warning overlay with countdown; 30 min → auto-logout
+    if _login_required() and _is_logged_in():
+        import streamlit.components.v1 as _iat_comp
+        _iat_comp.html("""
+<script>
+(function() {
+  // Only install once per page-load
+  if (window._tpInactivityInstalled) return;
+  window._tpInactivityInstalled = true;
+
+  var WARN_MS   = 28 * 60 * 1000;   // 28 minutes — show warning
+  var LOGOUT_MS = 30 * 60 * 1000;   // 30 minutes — auto-logout
+  var warnTimer, logoutTimer, countdownTick;
+  var pd = window.parent.document;
+
+  function injectOverlay() {
+    if (pd.getElementById('tp-ia-overlay')) return;
+    var el = pd.createElement('div');
+    el.id = 'tp-ia-overlay';
+    el.innerHTML = [
+      '<div id="tp-ia-box">',
+      '<div id="tp-ia-icon">⏱️</div>',
+      '<div id="tp-ia-title">Still there?</div>',
+      '<div id="tp-ia-msg">You\'ve been inactive for 28 minutes.</div>',
+      '<div id="tp-ia-sub">You\'ll be signed out in <strong id="tp-ia-secs">120</strong> seconds.</div>',
+      '<button id="tp-ia-btn">✅ Keep me signed in</button>',
+      '</div>'
+    ].join('');
+    el.style.cssText = [
+      'position:fixed;top:0;left:0;width:100%;height:100%;',
+      'background:rgba(5,12,28,.82);backdrop-filter:blur(4px);',
+      'display:none;align-items:center;justify-content:center;',
+      'z-index:999999;font-family:system-ui,sans-serif;'
+    ].join('');
+    var box = el.querySelector('#tp-ia-box');
+    box.style.cssText = [
+      'background:linear-gradient(135deg,#0E1E38,#1A3060);',
+      'border:2px solid #FFA726;border-radius:18px;',
+      'padding:32px 40px;text-align:center;max-width:400px;width:90%;',
+      'box-shadow:0 8px 48px rgba(255,167,38,.35);'
+    ].join('');
+    el.querySelector('#tp-ia-icon').style.cssText = 'font-size:2.8rem;margin-bottom:10px';
+    el.querySelector('#tp-ia-title').style.cssText = 'color:#FFA726;font-weight:800;font-size:1.4rem;margin-bottom:8px';
+    el.querySelector('#tp-ia-msg').style.cssText = 'color:#D0D8E8;font-size:.95rem;margin-bottom:6px';
+    el.querySelector('#tp-ia-sub').style.cssText = 'color:#A0B4CC;font-size:.88rem;margin-bottom:22px';
+    el.querySelector('#tp-ia-secs').style.color = '#EF5350';
+    var btn = el.querySelector('#tp-ia-btn');
+    btn.style.cssText = [
+      'background:linear-gradient(135deg,#1565C0,#2B7DE9);',
+      'color:#fff;border:none;border-radius:10px;',
+      'padding:11px 28px;font-size:1rem;font-weight:700;',
+      'cursor:pointer;width:100%;transition:opacity .2s;'
+    ].join('');
+    btn.onmouseenter = function() { btn.style.opacity='.85'; };
+    btn.onmouseleave = function() { btn.style.opacity='1'; };
+    btn.onclick = function() { resetAll(); };
+    pd.body.appendChild(el);
+  }
+
+  function showWarning() {
+    injectOverlay();
+    var overlay = pd.getElementById('tp-ia-overlay');
+    if (overlay) overlay.style.display = 'flex';
+    var secsEl = pd.getElementById('tp-ia-secs');
+    var remaining = 120;
+    if (secsEl) secsEl.textContent = remaining;
+    clearInterval(countdownTick);
+    countdownTick = setInterval(function() {
+      remaining--;
+      if (secsEl) secsEl.textContent = remaining;
+      if (remaining <= 0) { clearInterval(countdownTick); doLogout(); }
+    }, 1000);
+  }
+
+  function hideWarning() {
+    var overlay = pd.getElementById('tp-ia-overlay');
+    if (overlay) overlay.style.display = 'none';
+    clearInterval(countdownTick);
+  }
+
+  function doLogout() {
+    hideWarning();
+    // Remove _s token from URL then reload — Streamlit will see no token and show login
+    try {
+      var url = new URL(window.parent.location.href);
+      url.searchParams.delete('_s');
+      window.parent.location.replace(url.toString());
+    } catch(e) {
+      window.parent.location.reload();
+    }
+  }
+
+  function resetAll() {
+    clearTimeout(warnTimer);
+    clearTimeout(logoutTimer);
+    clearInterval(countdownTick);
+    hideWarning();
+    warnTimer   = setTimeout(showWarning, WARN_MS);
+    logoutTimer = setTimeout(doLogout,    LOGOUT_MS);
+  }
+
+  // Track real user activity in the parent window
+  var events = ['mousemove','mousedown','keydown','touchstart','scroll','click'];
+  events.forEach(function(ev) {
+    pd.addEventListener(ev, resetAll, {passive: true});
+  });
+
+  resetAll();
+})();
+</script>
+""", height=0)
 
     for k in ["chat_messages","students","conn_checked","conn_info","gen_result","grade_history"]:
         if k not in st.session_state: st.session_state[k]=[] if k in ("chat_messages","students","grade_history") else (False if k=="conn_checked" else None)
@@ -2767,6 +2917,9 @@ def main():
                 if st.button("Sign out", key="logout_btn", use_container_width=True):
                     st.session_state["_logged_in"] = False
                     st.session_state["_login_label"] = ""
+                    # Remove persistent token so refresh also logs out
+                    if "_s" in st.query_params:
+                        del st.query_params["_s"]
                     st.rerun()
         if st.session_state.get("_show_save_opts") and "saved_profile" in st.session_state:
             st.success("✅ Saved! Download below to reuse next session.")
