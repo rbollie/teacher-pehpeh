@@ -2175,170 +2175,19 @@ def main():
     }}
     </style>""",unsafe_allow_html=True)
 
-    # Sidebar (country & language now live in the main config bar — read session_state here)
-    with st.sidebar:
-        # Ensure defaults
-        if "country_sel" not in st.session_state: st.session_state.country_sel="Liberia"
-        if "lang_sel" not in st.session_state: st.session_state.lang_sel="English"
-        country=st.session_state["country_sel"]
-        lang=st.session_state["lang_sel"]
-        st.markdown("---")
-        _cls_word={"en":"Classroom","fr":"Classe","sw":"Darasa"}.get(_lang_key(),"Classroom")
-        # Confirmed values + version counters for key-swapping (forces fresh empty widgets)
-        for _ck in ["_school_confirmed","_teacher_confirmed","_phone_confirmed"]:
-            if _ck not in st.session_state: st.session_state[_ck]=""
-        for _vk in ["_school_v","_teacher_v","_phone_v"]:
-            if _vk not in st.session_state: st.session_state[_vk]=0
-
-        _sn = st.session_state["_school_confirmed"]
-        classroom_label=f"{_sn} {_cls_word}" if _sn.strip() else T("my_classroom")
-        _logo_b64=get_b64()
-        if _logo_b64:
-            _logo_html=f'<img src="data:image/png;base64,{_logo_b64}" style="height:36px;width:36px;vertical-align:middle;border-radius:50%;margin-right:8px;filter:drop-shadow(0 2px 6px rgba(212,168,67,.4))">'
-        else:
-            _logo_html=""
-        st.markdown(f'<div style="display:flex;align-items:center;margin:8px 0 4px">{_logo_html}<span style="font-family:Playfair Display,serif;font-size:1.3rem;font-weight:700;color:#F5D998">{classroom_label}</span></div>',unsafe_allow_html=True)
-        # School name — key changes each submit so widget resets blank
-        _sv=st.session_state["_school_v"]
-        _school_raw=st.text_input(T("school_name"),value="",placeholder=T("school_placeholder") if not _sn.strip() else f"✅ {_sn} (type new name to change)",key=f"_si_{_sv}",label_visibility="collapsed")
-        if _school_raw.strip():
-            st.session_state["_school_confirmed"]=_school_raw.strip()
-            st.session_state["_school_v"]=_sv+1
-            st.rerun()
-        school_name=st.session_state["_school_confirmed"]
-        _tn_confirmed=st.session_state["_teacher_confirmed"]
-        _tp_confirmed=st.session_state["_phone_confirmed"]
-        _tn_col,_tp_col=st.columns([3,2])
-        with _tn_col:
-            _tv=st.session_state["_teacher_v"]
-            _teacher_raw=st.text_input("👤 Teacher",value="",placeholder="e.g., Mr. Kollie" if not _tn_confirmed else f"✅ {_tn_confirmed}",key=f"_ti_{_tv}",label_visibility="collapsed")
-            if _teacher_raw.strip():
-                st.session_state["_teacher_confirmed"]=_teacher_raw.strip()
-                st.session_state["_teacher_v"]=_tv+1
-                st.rerun()
-            teacher_name=st.session_state["_teacher_confirmed"]
-        with _tp_col:
-            _pv=st.session_state["_phone_v"]
-            _phone_raw=st.text_input("📞 Phone",value="",placeholder="e.g., 0886-XXX-XXX" if not _tp_confirmed else f"✅ {_tp_confirmed}",key=f"_pi_{_pv}",label_visibility="collapsed")
-            if _phone_raw.strip():
-                st.session_state["_phone_confirmed"]=_phone_raw.strip()
-                st.session_state["_phone_v"]=_pv+1
-                st.rerun()
-            teacher_phone=st.session_state["_phone_confirmed"]
-        if not school_name.strip() and not teacher_name.strip():
-            st.caption("✏️ Enter school & teacher name to personalize")
-        elif not teacher_name.strip():
-            st.caption("✏️ Add your name — parents will see it on letters")
-        else:
-            _t_display=f'<span style="color:#FFFFFF;font-size:1.05rem;font-weight:700">{teacher_name}</span>'
-            if teacher_phone.strip(): _t_display+=f'<span style="color:#FFFFFF;font-size:1rem;font-weight:700;margin-left:8px">• {teacher_phone.strip()}</span>'
-            st.markdown(f'<div style="background:linear-gradient(135deg,#3D0C0C,#5A1515);border:2px solid #D4A843;border-radius:10px;padding:10px 16px;margin:6px 0;box-shadow:0 2px 8px rgba(212,168,67,.2)">👤 {_t_display}</div>',unsafe_allow_html=True)
-        if "profile_set" not in st.session_state: st.session_state.profile_set=False
-        # Config dropdowns live in the main content bar — read session_state here
-        for _dk,_dv in [("cfg_region",list(_regions().keys())[0]),("cfg_grade",_grades()[0]),("cfg_subject",_subjects()[0]),("cfg_clsz",list(_sizes().keys())[0]),("cfg_abl",list(_ability().keys())[0])]:
-            if _dk not in st.session_state: st.session_state[_dk]=_dv
-        region=st.session_state["cfg_region"]
-        if st.session_state.get("_pending_grade_from_sheet"):
-            st.session_state["cfg_grade"]=st.session_state.pop("_pending_grade_from_sheet")
-        grade=st.session_state["cfg_grade"]
-        subject=st.session_state["cfg_subject"]
-        clsz=st.session_state["cfg_clsz"]
-        abl=st.session_state["cfg_abl"]
-        # Map French display values back to English for AI
-        _res_val="standard resources"   # fixed default — resources config removed
-        st.markdown("---"); 
-        # MOE Curriculum Toggle — Liberia only
-        if CURRICULA and CURRICULUM_AVAILABLE and country == "Liberia":
-            moe_on = st.checkbox("🇱🇷 Align to MOE Curriculum", value=False, key="moe_toggle",
-                                 help="When ON, topics and prompts align to Liberia Ministry of Education standards")
-            curr_subjects = get_available_subjects(CURRICULA)
-            if moe_on:
-                st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:8px;'
-                            f'padding:8px 12px;margin:4px 0;font-size:.8rem;color:#F0D5D5">'
-                            f'📘 <strong>Aligned:</strong> {", ".join(curr_subjects)}<br>'
-                            f'<span style="font-size:.72rem;opacity:.8">Lessons will match MOE learning objectives, content outlines, and assessment strategies</span></div>',
-                            unsafe_allow_html=True)
-        else:
-            moe_on = False
-        # Mano Language Toggle — Liberia + Rural only (hidden silently if data not deployed)
-        mano_on = False
-        if country == "Liberia" and _regions()[region] == "rural" and MANO_AVAILABLE:
-            mano_on = st.checkbox("🗣️ Mano Language (Bilingual)", value=False, key="mano_toggle",
-                                  help="When ON, lessons include Mano vocabulary, grammar, and cultural context for Nimba County")
-            _mano_stats = get_mano_stats()
-            if _mano_stats and mano_on:
-                st.markdown(f'<div style="background:rgba(212,168,67,.08);border:1px solid {C_GOLD};border-radius:8px;'
-                            f'padding:8px 12px;margin:4px 0;font-size:.8rem;color:#F0D5D5">'
-                            f'🗣️ <strong>Mano Library:</strong> {_mano_stats["total"]}+ words<br>'
-                            f'<span style="font-size:.72rem;opacity:.8">{", ".join(_mano_stats["categories"][:5])}...</span></div>',
-                            unsafe_allow_html=True)
-        st.markdown("---")
-        # Save / Load Classroom Profile
-        # ── Save configuration ────────────────────────────────────────────
-        _pf1,_pf2=st.columns(2)
-        with _pf1:
-            if st.button("💾 Save Configuration",use_container_width=True,key="sv_prof"):
-                st.session_state.saved_profile={"school":school_name,"teacher":teacher_name,"phone":teacher_phone,"country":country,"lang":lang,"region":region,"grade":grade,"subject":subject,"class_size":clsz,"ability":abl,"moe_on":moe_on,"mano_on":mano_on,"task_cat":st.session_state.get("task_cat","📋 Planning"),"task":st.session_state.get("task_sel",""),"agent":st.session_state.get("agent_pick","")}
-                st.session_state.profile_set=True
-                st.session_state["_show_save_opts"]=True
-                st.rerun()
-        with _pf2:
-            if st.button("📂 Load Configuration",use_container_width=True,key="ld_prof"):
-                st.session_state["_show_load_opts"]=not st.session_state.get("_show_load_opts",False)
-                st.session_state["_show_save_opts"]=False
-                st.rerun()
-        # Save panel — name the file then download
-        if st.session_state.get("_show_save_opts") and "saved_profile" in st.session_state:
-            st.success("✅ Configuration saved to this session!")
-            st.markdown("<small style='color:#aaa'>Give your profile a name and download it to your drive so you can reload it anytime.</small>",unsafe_allow_html=True)
-            _default_name=(school_name.strip().replace(" ","_") or "my_classroom")
-            _prof_name=st.text_input("File name (no spaces):",value=_default_name,key="prof_filename").strip().replace(" ","_")
-            if not _prof_name: _prof_name="teacher_pehpeh_profile"
-            _pj=json.dumps(st.session_state.saved_profile,indent=2)
-            st.download_button("📥 Download to my drive",data=_pj,
-                file_name=f"{_prof_name}.json",mime="application/json",
-                key="dl_prof",use_container_width=True)
-            if st.button("✖ Close",key="close_save_opts",use_container_width=True):
-                st.session_state["_show_save_opts"]=False
-                st.rerun()
-        # Load panel
-        if st.session_state.get("_show_load_opts"):
-            if "saved_profile" in st.session_state:
-                if st.button("↩ Restore last saved profile",use_container_width=True,key="ld_restore"):
-                    st.session_state["_pending_load"]=st.session_state.saved_profile
-                    st.session_state["_show_load_opts"]=False
-                    st.rerun()
-            _up_prof=st.file_uploader("Or load from a saved file:",type=["json"],key="up_prof",label_visibility="visible")
-            if _up_prof:
-                try:
-                    _loaded=json.loads(_up_prof.read().decode("utf-8"))
-                    st.session_state.saved_profile=_loaded
-                    st.session_state["_pending_load"]=_loaded
-                    st.session_state["_show_load_opts"]=False
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"Invalid file: {e}")
-        # ── Subscription status + logout ──────────────────────────
-        if SUBSCRIPTION_ACTIVE:
-            _badge_color = "#27AE60" if _SUB_DAYS_LEFT > 30 else "#F39C12"
-            _badge_text = f"Active · {_SUB_DAYS_LEFT}d left" if _SUB_DAYS_LEFT <= 60 else "Active"
-            st.markdown(f'<div style="text-align:center;padding:4px 0;font-size:.75rem;color:{_badge_color}">✅ Subscription: {_badge_text}</div>',unsafe_allow_html=True)
-        elif _SUB_TIER == "expired":
-            st.markdown('<div style="text-align:center;padding:4px 0;font-size:.75rem;color:#E74C3C">⚠️ Subscription expired — AI generation paused</div>',unsafe_allow_html=True)
-        else:
-            st.markdown('<div style="text-align:center;padding:4px 0;font-size:.75rem;color:#8899BB">🆓 Free account — AI generation not active</div>',unsafe_allow_html=True)
-        if _login_required() and _is_logged_in():
-            _login_lbl = st.session_state.get("_login_label","")
-            _lcol1, _lcol2 = st.columns([2,1])
-            with _lcol1:
-                st.markdown(f'<p style="font-size:.75rem;color:#8899BB;margin:4px 0">👤 {_login_lbl}</p>',unsafe_allow_html=True)
-            with _lcol2:
-                if st.button("Sign out", key="logout_btn", use_container_width=True):
-                    st.session_state["_logged_in"] = False
-                    st.session_state["_login_label"] = ""
-                    st.rerun()
-        st.caption("© 2026 Institute of Basic Technology")
-        st.markdown("[🌐 Visit our website](https://www.institutebasictechnology.org/index.php)")
+    # ── Session state defaults (sidebar removed — all UI in main content) ──────
+    if "country_sel" not in st.session_state: st.session_state.country_sel="Liberia"
+    if "lang_sel" not in st.session_state: st.session_state.lang_sel="English"
+    if "profile_set" not in st.session_state: st.session_state.profile_set=False
+    for _ck in ["_school_confirmed","_teacher_confirmed","_phone_confirmed"]:
+        if _ck not in st.session_state: st.session_state[_ck]=""
+    for _vk in ["_school_v","_teacher_v","_phone_v"]:
+        if _vk not in st.session_state: st.session_state[_vk]=0
+    for _dk,_dv in [("cfg_region",list(_regions().keys())[0]),("cfg_grade",_grades()[0]),("cfg_subject",_subjects()[0]),("cfg_clsz",list(_sizes().keys())[0]),("cfg_abl",list(_ability().keys())[0])]:
+        if _dk not in st.session_state: st.session_state[_dk]=_dv
+    if st.session_state.get("_pending_grade_from_sheet"):
+        st.session_state["cfg_grade"]=st.session_state.pop("_pending_grade_from_sheet")
+    _res_val="standard resources"
 
     show_logo(country)
     _subtitle={"en":"Curating Personalized Content to Support Underresourced Teachers","fr":"Création de contenu personnalisé pour soutenir les enseignants sous-dotés","sw":"Kuunda Maudhui ya Kibinafsi Kusaidia Walimu Wasio na Rasilimali za Kutosha"}.get(_lang_key(),"Curating Personalized Content to Support Underresourced Teachers")
@@ -2456,97 +2305,180 @@ def main():
 }})();
 </script>
 """, height=46, scrolling=False)
-        if st.sidebar.button(T("recheck"), key="recheck_sidebar"):
+        if st.button(T("recheck"), key="recheck_sidebar"):
             st.session_state.conn_checked = False
             st.rerun()
 
     if not conn:
         keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
 
-    # ── CLASSROOM CONFIGURATION BAR — always visible, cross-browser ──────────
-    # Row 1: Country + Language  |  Row 2: Setting + Grade + Subject + Class Size + Level
-    st.markdown(f"""
-<style>
-/* Cross-browser fix: ensure config bar columns always render inline */
-div[data-testid="stHorizontalBlock"] {{
-    display: -webkit-box !important;
-    display: -webkit-flex !important;
-    display: -ms-flexbox !important;
-    display: flex !important;
-    -webkit-flex-direction: row !important;
-    -ms-flex-direction: row !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-}}
-div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"],
-div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {{
-    -webkit-box-flex: 1 !important;
-    -webkit-flex: 1 1 0% !important;
-    -ms-flex: 1 1 0% !important;
-    flex: 1 1 0% !important;
-    min-width: 0 !important;
-    overflow: visible !important;
-    box-sizing: border-box !important;
-}}
-</style>
-<div style="font-size:.72rem;font-weight:700;color:#D4A843;letter-spacing:.08em;margin-bottom:3px;margin-top:6px">⚙️ CLASSROOM CONFIGURATION</div>
-""", unsafe_allow_html=True)
-    # Row 1 — Country & Language (wider columns, country names can be long)
+    # ══════════════════════════════════════════════════════════════════════════
+    # CLASSROOM CONFIGURATION — fully in main content, no sidebar dependency
+    # ══════════════════════════════════════════════════════════════════════════
+    st.markdown('<div style="font-size:.72rem;font-weight:700;color:#D4A843;letter-spacing:.08em;margin:8px 0 4px">⚙️ CLASSROOM CONFIGURATION</div>', unsafe_allow_html=True)
+
+    # ── Row 1: Country + Language ──────────────────────────────────────────
     _crow1, _crow2 = st.columns([3, 2])
     with _crow1:
-        _country_sel = st.selectbox(
-            T("country"), COUNTRIES, key="country_sel",
-            label_visibility="collapsed",
-            format_func=lambda x: f"🌍 {x}",
-            help="Your country"
-        )
-        # Auto-detect language from country
-        if "lang_auto_done" not in st.session_state:
-            st.session_state.lang_auto_done = set()
+        _country_sel = st.selectbox(T("country"), COUNTRIES, key="country_sel",
+            label_visibility="collapsed", format_func=lambda x: f"🌍 {x}", help="Your country")
+        if "lang_auto_done" not in st.session_state: st.session_state.lang_auto_done = set()
         if _country_sel not in st.session_state.lang_auto_done:
             st.session_state.lang_auto_done.add(_country_sel)
             if _country_sel in FRANCOPHONE: st.session_state.lang_sel = "Français"
             elif _country_sel in SWAHILI_COUNTRIES: st.session_state.lang_sel = "Kiswahili"
             else: st.session_state.lang_sel = "English"
     with _crow2:
-        st.selectbox(
-            "Language", list(LANGS.keys()), key="lang_sel",
-            label_visibility="collapsed",
-            format_func=lambda x: f"🗣️ {x}",
-            help="Response language"
-        )
-    # Row 2 — Classroom settings (5 equal columns)
+        st.selectbox("Language", list(LANGS.keys()), key="lang_sel",
+            label_visibility="collapsed", format_func=lambda x: f"🗣️ {x}", help="Response language")
+
+    # ── Row 2: Classroom dropdowns ────────────────────────────────────────
     _cb1, _cb2, _cb3, _cb4, _cb5 = st.columns(5)
     with _cb1:
-        st.selectbox(T("setting"), list(_regions().keys()),
-            label_visibility="collapsed", format_func=lambda x: f"📍 {x}",
-            help="Urban, rural, or remote", key="cfg_region")
+        st.selectbox(T("setting"), list(_regions().keys()), key="cfg_region",
+            label_visibility="collapsed", format_func=lambda x: f"📍 {x}", help="Urban, rural, or remote")
     with _cb2:
-        st.selectbox(T("grade"), _grades(),
-            label_visibility="collapsed", format_func=lambda x: f"🎓 {x}",
-            help="Grade level", key="cfg_grade")
+        st.selectbox(T("grade"), _grades(), key="cfg_grade",
+            label_visibility="collapsed", format_func=lambda x: f"🎓 {x}", help="Grade level")
     with _cb3:
-        st.selectbox(T("subject"), _subjects(),
-            label_visibility="collapsed", format_func=lambda x: f"📚 {x}",
-            help="Subject", key="cfg_subject")
+        st.selectbox(T("subject"), _subjects(), key="cfg_subject",
+            label_visibility="collapsed", format_func=lambda x: f"📚 {x}", help="Subject")
     with _cb4:
-        st.selectbox(T("class_size"), list(_sizes().keys()),
-            label_visibility="collapsed", format_func=lambda x: f"👥 {x}",
-            help="Class size", key="cfg_clsz")
+        st.selectbox(T("class_size"), list(_sizes().keys()), key="cfg_clsz",
+            label_visibility="collapsed", format_func=lambda x: f"👥 {x}", help="Class size")
     with _cb5:
-        st.selectbox(T("student_level"), list(_ability().keys()),
-            label_visibility="collapsed", format_func=lambda x: f"📊 {x}",
-            help="Student level", key="cfg_abl")
-    # Pull all values from session_state into local vars for the rest of the app
-    country  = st.session_state["country_sel"]
-    lang     = st.session_state["lang_sel"]
-    region   = st.session_state["cfg_region"]
-    grade    = st.session_state["cfg_grade"]
-    subject  = st.session_state["cfg_subject"]
-    clsz     = st.session_state["cfg_clsz"]
-    abl      = st.session_state["cfg_abl"]
+        st.selectbox(T("student_level"), list(_ability().keys()), key="cfg_abl",
+            label_visibility="collapsed", format_func=lambda x: f"📊 {x}", help="Student level")
+
+    # ── Read all config values from session_state ──────────────────────────
+    country = st.session_state["country_sel"]
+    lang    = st.session_state["lang_sel"]
+    region  = st.session_state["cfg_region"]
+    grade   = st.session_state["cfg_grade"]
+    subject = st.session_state["cfg_subject"]
+    clsz    = st.session_state["cfg_clsz"]
+    abl     = st.session_state["cfg_abl"]
+
+    # ── Row 3: School profile + toggles (collapsible) ─────────────────────
+    _sn = st.session_state["_school_confirmed"]
+    _tn = st.session_state["_teacher_confirmed"]
+    _pn = st.session_state["_phone_confirmed"]
+    _profile_label = f"🏫 {_sn}" if _sn.strip() else "🏫 School Profile & Options"
+    with st.expander(_profile_label, expanded=not bool(_sn.strip())):
+        # School / Teacher / Phone inputs
+        _pc1, _pc2, _pc3 = st.columns([2, 2, 1])
+        with _pc1:
+            _sv = st.session_state["_school_v"]
+            _school_raw = st.text_input("🏫 School", value="",
+                placeholder=f"✅ {_sn} (type to change)" if _sn.strip() else "e.g., Phebe Community School",
+                key=f"_si_{_sv}", label_visibility="collapsed")
+            if _school_raw.strip():
+                st.session_state["_school_confirmed"] = _school_raw.strip()
+                st.session_state["_school_v"] = _sv + 1
+                st.rerun()
+            school_name = st.session_state["_school_confirmed"]
+        with _pc2:
+            _tv = st.session_state["_teacher_v"]
+            _teacher_raw = st.text_input("👤 Teacher", value="",
+                placeholder=f"✅ {_tn} (type to change)" if _tn.strip() else "e.g., Mr. Kollie",
+                key=f"_ti_{_tv}", label_visibility="collapsed")
+            if _teacher_raw.strip():
+                st.session_state["_teacher_confirmed"] = _teacher_raw.strip()
+                st.session_state["_teacher_v"] = _tv + 1
+                st.rerun()
+            teacher_name = st.session_state["_teacher_confirmed"]
+        with _pc3:
+            _pv = st.session_state["_phone_v"]
+            _phone_raw = st.text_input("📞 Phone", value="",
+                placeholder=f"✅ {_pn}" if _pn.strip() else "0886-XXX-XXX",
+                key=f"_pi_{_pv}", label_visibility="collapsed")
+            if _phone_raw.strip():
+                st.session_state["_phone_confirmed"] = _phone_raw.strip()
+                st.session_state["_phone_v"] = _pv + 1
+                st.rerun()
+            teacher_phone = st.session_state["_phone_confirmed"]
+
+        # MOE + Mano toggles
+        _tog1, _tog2 = st.columns(2)
+        with _tog1:
+            if CURRICULA and CURRICULUM_AVAILABLE and country == "Liberia":
+                moe_on = st.checkbox("🇱🇷 Align to MOE Curriculum", value=False, key="moe_toggle",
+                    help="Align lessons to Liberia Ministry of Education standards")
+                if moe_on:
+                    curr_subjects = get_available_subjects(CURRICULA)
+                    st.caption(f"📘 Aligned: {', '.join(curr_subjects)}")
+            else:
+                moe_on = False
+        with _tog2:
+            mano_on = False
+            if country == "Liberia" and _regions().get(region) == "rural" and MANO_AVAILABLE:
+                mano_on = st.checkbox("🗣️ Mano Language (Bilingual)", value=False, key="mano_toggle",
+                    help="Include Mano vocabulary and cultural context for Nimba County")
+                if mano_on:
+                    _mano_stats = get_mano_stats()
+                    if _mano_stats: st.caption(f"🗣️ {_mano_stats['total']}+ words loaded")
+
+        # Save / Load profile
+        _sf1, _sf2 = st.columns(2)
+        with _sf1:
+            if st.button("💾 Save Configuration", use_container_width=True, key="sv_prof"):
+                st.session_state.saved_profile = {"school":school_name,"teacher":teacher_name,"phone":teacher_phone,"country":country,"lang":lang,"region":region,"grade":grade,"subject":subject,"class_size":clsz,"ability":abl,"moe_on":moe_on,"mano_on":mano_on,"task_cat":st.session_state.get("task_cat","📋 Planning"),"task":st.session_state.get("task_sel",""),"agent":st.session_state.get("agent_pick","")}
+                st.session_state.profile_set = True
+                st.session_state["_show_save_opts"] = True
+                st.rerun()
+        with _sf2:
+            if st.button("📂 Load Configuration", use_container_width=True, key="ld_prof"):
+                st.session_state["_show_load_opts"] = not st.session_state.get("_show_load_opts", False)
+                st.session_state["_show_save_opts"] = False
+                st.rerun()
+        if st.session_state.get("_show_save_opts") and "saved_profile" in st.session_state:
+            st.success("✅ Saved! Download below to reuse next session.")
+            _default_name = (school_name.strip().replace(" ","_") or "my_classroom")
+            _prof_name = st.text_input("File name:", value=_default_name, key="prof_filename").strip().replace(" ","_") or "teacher_pehpeh_profile"
+            st.download_button("📥 Download profile", data=json.dumps(st.session_state.saved_profile, indent=2),
+                file_name=f"{_prof_name}.json", mime="application/json", key="dl_prof", use_container_width=True)
+            if st.button("✖ Close", key="close_save_opts"): st.session_state["_show_save_opts"]=False; st.rerun()
+        if st.session_state.get("_show_load_opts"):
+            if "saved_profile" in st.session_state:
+                if st.button("↩ Restore last saved profile", use_container_width=True, key="ld_restore"):
+                    st.session_state["_pending_load"] = st.session_state.saved_profile
+                    st.session_state["_show_load_opts"] = False
+                    st.rerun()
+            _up_prof = st.file_uploader("Or upload a saved .json file:", type=["json"], key="up_prof")
+            if _up_prof:
+                try:
+                    _loaded = json.loads(_up_prof.read().decode("utf-8"))
+                    st.session_state.saved_profile = _loaded
+                    st.session_state["_pending_load"] = _loaded
+                    st.session_state["_show_load_opts"] = False
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Invalid file: {e}")
+
+        # Subscription status + logout
+        _sub_col, _login_col = st.columns([3, 1])
+        with _sub_col:
+            if SUBSCRIPTION_ACTIVE:
+                _bc = "#27AE60" if _SUB_DAYS_LEFT > 30 else "#F39C12"
+                _bt = f"Active · {_SUB_DAYS_LEFT}d left" if _SUB_DAYS_LEFT <= 60 else "Active"
+                st.markdown(f'<span style="font-size:.75rem;color:{_bc}">✅ Subscription: {_bt}</span>', unsafe_allow_html=True)
+            elif _SUB_TIER == "expired":
+                st.markdown('<span style="font-size:.75rem;color:#E74C3C">⚠️ Subscription expired</span>', unsafe_allow_html=True)
+            else:
+                st.markdown('<span style="font-size:.75rem;color:#8899BB">🆓 Free account</span>', unsafe_allow_html=True)
+        with _login_col:
+            if _login_required() and _is_logged_in():
+                if st.button("Sign out", key="logout_btn", use_container_width=True):
+                    st.session_state["_logged_in"] = False
+                    st.session_state["_login_label"] = ""
+                    st.rerun()
+
+    # Ensure moe_on / mano_on / school_name / teacher_name / teacher_phone are always defined
+    if "moe_on" not in locals(): moe_on = False
+    if "mano_on" not in locals(): mano_on = False
+    if "school_name" not in locals(): school_name = st.session_state.get("_school_confirmed","")
+    if "teacher_name" not in locals(): teacher_name = st.session_state.get("_teacher_confirmed","")
+    if "teacher_phone" not in locals(): teacher_phone = st.session_state.get("_phone_confirmed","")
     _region_val=_regions()[region]
     _grade_en=_to_en_grade(grade)
     _subj_en=_to_en_subj(subject)
