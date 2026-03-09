@@ -3693,8 +3693,7 @@ def main():
                                 st.code(f"{_nm}  →  methods: {', '.join(_mth)}")
                         else:
                             st.warning(f"⚠️ No image or flash models found. Total models on key: {len(_all_models)}")
-                            st.code("
-".join(m.get('name','') for m in _all_models[:30]))
+                            st.code("\n".join(m.get('name','') for m in _all_models[:30]))
                     except _due.HTTPError as _le:
                         _lb=""
                         try: _lb=_le.read().decode()[:400]
