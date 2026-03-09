@@ -419,25 +419,24 @@ def _enhance_image_prompt(raw_prompt, openai_client):
     )
 
 
-def gen_image(prompt):
-    """Try DALL-E-3/gpt-image-1 (ChatGPT) first, then Gemini image generation (Nano Banana)"""
+def gen_image(prompt, agent="Auto"):
+    """Generate image. agent: 'ChatGPT' | 'Nano Banana' | 'Auto' (ChatGPT first, Gemini fallback)"""
     import base64 as _b64
 
     # --- ChatGPT image generation (DALL-E) ---
-    # Mimics what ChatGPT does internally: GPT-4o enhances the prompt first,
-    # then the enriched prompt is sent to DALL-E 3 — that is why ChatGPT images
-    # look better than raw API calls with a simple string.
-    if OAI and OPENAI_API_KEY:
+    if agent in ("ChatGPT", "Auto") and OAI and OPENAI_API_KEY:
         c = openai.OpenAI(api_key=OPENAI_API_KEY)
 
         # Step 1: enhance the prompt via GPT-4o (ChatGPT's internal rewriting step)
         enhanced_prompt = _enhance_image_prompt(prompt, c)
 
-        # Step 2: prepend a hardcoded photorealism anchor so DALL-E 3 cannot drift toward illustration
-        # "natural" style = photorealistic; "vivid" = artistic/illustrated (we never want vivid)
+        # Step 2: prepend a strong photorealism anchor.
+        # "natural" style + photography-specific opening words = DALL-E 3 stays in photo mode.
+        # Key insight: DALL-E 3 reads the FIRST words most strongly — lead with camera/film language.
         _photo_anchor = (
-            "Real documentary photograph taken inside a Liberian school. "
-            "DSLR camera, natural light, photorealistic, editorial photography. "
+            "Photojournalism photograph, 35mm film, Kodak Portra 400, grain, "
+            "National Geographic editorial, documentary, real people, real place. "
+            "West Africa, Liberia, inside a real school. "
         )
         _final_dalle_prompt = _photo_anchor + enhanced_prompt
         try:
@@ -475,7 +474,7 @@ def gen_image(prompt):
     )
 
     # --- Gemini image generation (Nano Banana) ---
-    if GOOGLE_API_KEY:
+    if agent in ("Nano Banana", "Auto") and GOOGLE_API_KEY:
         _img_errs = []
 
         # Attempt 1: gemini-2.0-flash-preview-image-generation via new google-genai SDK
@@ -557,12 +556,10 @@ def gen_image(prompt):
             except Exception as _olde:
                 _img_errs.append(f"old-sdk import: {_olde}")
 
-        # Always show errors so we can debug — stored AND displayed
+        # Store errors for display OUTSIDE gen_image() — st.expander
+        # cannot render reliably inside st.status() context
         if _img_errs:
             st.session_state["_img_gen_errors"] = _img_errs
-            with st.expander("🔴 Nano Banana debug — tap to see errors", expanded=False):
-                for _e in _img_errs:
-                    st.code(_e)
 
     return None, None
 
@@ -4211,7 +4208,30 @@ setTimeout(function() {{
                 exs = [EXTRAS[_ALL_EXTRAS_KEYS.index(k)] for k, lbl in zip(_active_opt_keys, _extras_labels)
                        if st.checkbox(lbl, key=f"x_{k}")]
                 if _show_img:
-                    add_img = st.checkbox(T("include_img"), key="add_img", help=T("img_help"))
+                    _img_col1, _img_col2 = st.columns([2, 3])
+                    with _img_col1:
+                        add_img = st.checkbox(T("include_img"), key="add_img", help=T("img_help"))
+                    if add_img:
+                        with _img_col2:
+                            _img_agent_opts = []
+                            if OPENAI_API_KEY: _img_agent_opts.append("🟢 ChatGPT")
+                            if GOOGLE_API_KEY: _img_agent_opts.append("🔵 Nano Banana")
+                            if len(_img_agent_opts) > 1:
+                                _img_agent_opts.insert(0, "⚡ Auto (best available)")
+                            _img_agent_sel = st.selectbox(
+                                "Image agent:",
+                                _img_agent_opts,
+                                key="img_agent_pick",
+                                label_visibility="collapsed",
+                                help="Choose which AI generates the image. ChatGPT (DALL·E 3) = near-photorealistic. Nano Banana (Gemini/Imagen) = alternative style."
+                            )
+                            # Normalise to gen_image() agent string
+                            if "ChatGPT" in _img_agent_sel: _img_agent_choice = "ChatGPT"
+                            elif "Nano Banana" in _img_agent_sel: _img_agent_choice = "Nano Banana"
+                            else: _img_agent_choice = "Auto"
+                            st.session_state["_img_agent_choice"] = _img_agent_choice
+                    else:
+                        st.session_state.setdefault("_img_agent_choice", "Auto")
         # === AI Agent Selection ===
         _avail_agents=[]
         if OPENAI_API_KEY: _avail_agents.append("ChatGPT")
@@ -4323,7 +4343,13 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             img=None; img_src=None
             if want_img:
                 s+=1; ph.markdown(pprog(s,tot,T("creating_img")),unsafe_allow_html=True)
-                img,img_src=gen_image(f"{_subj_en}: {_topic_en} for {_grade_en} in {country}")
+                _chosen_agent = st.session_state.get("_img_agent_choice", "Auto")
+                img,img_src=gen_image(f"{_subj_en}: {_topic_en} for {_grade_en} in {country}", agent=_chosen_agent)
+                # Show Gemini errors if image came back None
+                if not img and st.session_state.get("_img_gen_errors"):
+                    with st.expander("🔴 Nano Banana image errors — tap to debug", expanded=True):
+                        for _ie in st.session_state["_img_gen_errors"]:
+                            st.code(_ie)
             ph.markdown(pprog(tot,tot,T("done")),unsafe_allow_html=True); time.sleep(.5); ph.empty()
             # Store in session state
             # Clear cached voice audio from previous generation
@@ -6446,17 +6472,30 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                         st.write(f"{T('asking_claude')}")
                         r,m,allr=best_all(_sp_chat,uq,_hist_chat)
                     elif want_chat_img:
-                        # Image generation: use ChatGPT then Gemini — NOT Claude
+                        # Image generation — AI writes a short caption ONLY; the actual image
+                        # is generated separately by gen_image() below. We must override the
+                        # system prompt so the AI does NOT refuse or say it cannot make images.
+                        _caption_sp = (
+                            f"{_sp_chat}\n\n"
+                            "IMAGE CAPTION MODE (active now):\n"
+                            "The app is about to generate a real AI image using DALL-E 3. "
+                            "Your only job is to write ONE short enthusiastic sentence (max 20 words) "
+                            "as a caption confirming what image is being created — like a magazine photo caption. "
+                            "Example: 'Here is your photorealistic diagram of the water cycle, set in Liberia!' "
+                            "Do NOT say you cannot generate images. "
+                            "Do NOT explain, refuse, or add caveats. "
+                            "Just write the caption sentence and nothing else."
+                        )
                         st.write(f"{T('asking_chatgpt')}")
-                        _img_pairs=[(OPENAI_API_KEY,ask_gpt,"ChatGPT"),(GOOGLE_API_KEY,ask_gem,"Gemini")]
+                        _img_pairs=[(OPENAI_API_KEY,ask_gpt,"ChatGPT"),(ANTHROPIC_API_KEY,ask_cl,"Claude"),(GOOGLE_API_KEY,ask_gem,"Gemini")]
                         r,m,allr=None,None,{}
                         for _sk,_sfn,_snm in _img_pairs:
                             if _sk:
-                                _sr=_sfn(_sp_chat,uq,_hist_chat) if _snm!="Gemini" else _sfn(_sp_chat,uq)
+                                _sr=_sfn(_caption_sp,uq,_hist_chat) if _snm!="Gemini" else _sfn(_caption_sp,uq)
                                 if _sr and not str(_sr).startswith("⚠️"):
                                     r,m,allr=_sr,_snm,{_snm:_sr}
                                     break
-                        if not r: r,m,allr="⚠️ No AI responded.",None,{}
+                        if not r: r,m,allr="🎨 Generating your image now...",None,{}
                     elif voice_text:
                         # Audio / voice chat: always use Claude
                         st.write(f"{T('asking_claude')}")
@@ -6489,10 +6528,16 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                     msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
                 if want_chat_img:
                     st.write(T("creating_img"))
-                    img_url,img_model=gen_image(f"{_subj_en}: {uq} for {_grade_en} in {country}")
+                    _chat_agent = st.session_state.get("_chat_img_agent_choice", "Auto")
+                    img_url,img_model=gen_image(f"{_subj_en}: {uq} for {_grade_en} in {country}", agent=_chat_agent)
                     if img_url:
                         msg_data["image"]=img_url
                         msg_data["image_src"]=img_model
+                    elif st.session_state.get("_img_gen_errors"):
+                        # Show Gemini/DALL-E errors inline so we can diagnose
+                        with st.expander("🔴 Image generation errors — tap to debug", expanded=True):
+                            for _ie in st.session_state["_img_gen_errors"]:
+                                st.code(_ie)
                 status.update(label=T("response_ready"),state="complete",expanded=False)
             st.session_state.chat_messages.append(msg_data)
             # Auto-generate TTS when input came from voice — plays once on next render
@@ -6539,7 +6584,28 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                     })
                     st.rerun()
 
-        st.markdown(f'<div style="font-size:.78rem;color:#6677AA;margin:6px 0 4px">💡 Ask anything — explain a concept, get study tips, generate questions, start with <em>draw</em> for images, or 📸 upload a photo and say <em>transcribe</em></div>', unsafe_allow_html=True)
+        # Image agent selector for chat tab — shown compactly below the hint
+        _chat_img_agents = []
+        if OPENAI_API_KEY: _chat_img_agents.append("🟢 ChatGPT (DALL·E)")
+        if GOOGLE_API_KEY: _chat_img_agents.append("🔵 Nano Banana (Gemini)")
+        if len(_chat_img_agents) > 1:
+            _chat_img_agents.insert(0, "⚡ Auto (best available)")
+        _hint_col, _agent_col = st.columns([3, 2])
+        with _hint_col:
+            st.markdown(f'<div style="font-size:.78rem;color:#6677AA;margin:6px 0 4px">💡 Ask anything — start with <em>draw</em> for images, or 📸 upload a photo and say <em>transcribe</em></div>', unsafe_allow_html=True)
+        with _agent_col:
+            if _chat_img_agents:
+                _chat_agent_sel = st.selectbox(
+                    "Image agent:",
+                    _chat_img_agents,
+                    key="chat_img_agent_pick",
+                    label_visibility="collapsed",
+                    help="Which AI to use when you type 'draw ...' in chat. ChatGPT = near-photorealistic. Nano Banana = Gemini/Imagen."
+                )
+                if "ChatGPT" in _chat_agent_sel: _chat_agent_choice = "ChatGPT"
+                elif "Nano Banana" in _chat_agent_sel: _chat_agent_choice = "Nano Banana"
+                else: _chat_agent_choice = "Auto"
+                st.session_state["_chat_img_agent_choice"] = _chat_agent_choice
         st.markdown("---")
 
     # TAB 4: QUIZ (works offline — no internet or API keys needed)
