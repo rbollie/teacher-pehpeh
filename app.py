@@ -552,16 +552,20 @@ def tts_player(text, key_suffix):
     """Simple 'Hear Results' button — one click, plays audio."""
     audio_key = f"tts_audio_{key_suffix}"
     if not ELEVENLABS_API_KEY:
-        st.warning("🔇 Voice audio unavailable — add `ELEVENLABS_API_KEY` to Streamlit Secrets to enable.", icon="🔑")
         return
     if audio_key in st.session_state and st.session_state[audio_key]:
         aud = st.session_state[audio_key]
-        audio_data = base64.b64decode(aud["b64"])
-        # Never autoplay here — autoplay only via _tts_autoplay_idx one-shot flag
-        st.audio(audio_data, format="audio/mp3", autoplay=False)
+        _b64 = aud["b64"]
+        # Use HTML audio — avoids Web Audio API conflict with st.audio_input mic widget
+        st.markdown(
+            f'<audio controls style="width:100%;height:36px;margin:4px 0">'
+            f'<source src="data:audio/mp3;base64,{_b64}" type="audio/mp3">'
+            f'</audio>',
+            unsafe_allow_html=True
+        )
         ac1, ac2 = st.columns([2,1])
         with ac1:
-            st.download_button("📥 Download MP3", data=audio_data, file_name=f"teacher_pehpeh_{key_suffix}.mp3", mime="audio/mp3", key=f"tts_dl_{key_suffix}")
+            st.download_button("📥 Download MP3", data=base64.b64decode(_b64), file_name=f"teacher_pehpeh_{key_suffix}.mp3", mime="audio/mp3", key=f"tts_dl_{key_suffix}")
         with ac2:
             if st.button("🗑️ Clear", key=f"tts_clr_{key_suffix}"):
                 del st.session_state[audio_key]; st.rerun()
@@ -4145,7 +4149,12 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                         _aud=st.session_state[_vk]
                         st.markdown(f'<div style="background:linear-gradient(135deg,#2E7D32,#1B5E20);border-radius:10px;padding:12px 16px;margin:6px 0;color:white"><strong>Voice Message</strong> &mdash; Send this audio to the parent via WhatsApp or play on their phone</div>',unsafe_allow_html=True)
                         _aud_data=base64.b64decode(_aud["b64"])
-                        st.audio(_aud_data, format="audio/mp3", autoplay=True)
+                        st.markdown(
+                            f'<audio controls style="width:100%;height:36px;margin:4px 0">'
+                            f'<source src="data:audio/mp3;base64,{_aud["b64"]}" type="audio/mp3">'
+                            f'</audio>',
+                            unsafe_allow_html=True
+                        )
                         st.download_button("Download MP3 to Send",data=_aud_data,file_name="voice_message_for_parent.mp3",mime="audio/mp3",key="gen_pl_dl_mp3",use_container_width=True)
                     else:
                         st.markdown('<div style="background:linear-gradient(135deg,#2E7D32,#1B5E20);border-radius:10px;padding:12px 16px;margin:6px 0;color:white"><strong>Voice Message</strong> &mdash; Generate audio to send to the parent</div>',unsafe_allow_html=True)
