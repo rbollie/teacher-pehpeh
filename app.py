@@ -557,7 +557,8 @@ def tts_player(text, key_suffix):
     if audio_key in st.session_state and st.session_state[audio_key]:
         aud = st.session_state[audio_key]
         audio_data = base64.b64decode(aud["b64"])
-        st.audio(audio_data, format="audio/mp3", autoplay=True)
+        # Never autoplay here — autoplay only via _tts_autoplay_idx one-shot flag
+        st.audio(audio_data, format="audio/mp3", autoplay=False)
         ac1, ac2 = st.columns([2,1])
         with ac1:
             st.download_button("📥 Download MP3", data=audio_data, file_name=f"teacher_pehpeh_{key_suffix}.mp3", mime="audio/mp3", key=f"tts_dl_{key_suffix}")
@@ -6032,8 +6033,14 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                     audio_key = f"tts_audio_chat_{mi}"
                     if audio_key in st.session_state:
                         aud = st.session_state[audio_key]
-                        audio_data = base64.b64decode(aud["b64"])
-                        st.audio(audio_data, format="audio/mp3", autoplay=True)
+                        # Use inline HTML audio with autoplay — avoids Streamlit rerun that breaks mic widget
+                        _audio_b64 = aud["b64"]
+                        st.markdown(
+                            f'<audio autoplay style="width:100%;margin:4px 0">'
+                            f'<source src="data:audio/mp3;base64,{_audio_b64}" type="audio/mp3">'
+                            f'</audio>',
+                            unsafe_allow_html=True
+                        )
                     else:
                         tts_player(msg["content"], f"chat_{mi}")
                 else:
