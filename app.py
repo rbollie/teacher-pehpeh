@@ -2463,6 +2463,24 @@ def main():
     }}
     .stApp {{font-family:'Source Sans Pro',sans-serif}}
 
+    /* ── GLOBAL: kill Streamlit/Baseweb default green everywhere ─────────── */
+    /* Streamlit's default primary accent is a teal/green — override to red   */
+    :root {{
+        --primary-color: {C_RED} !important;
+        --secondary-color: {C_RED_L} !important;
+    }}
+    /* Any element that Baseweb colours green via its theme */
+    [data-baseweb="button"][kind="primary"],
+    button[data-baseweb="button"] {{
+        background-color: {C_RED} !important;
+        border-color: {C_RED} !important;
+    }}
+    /* Streamlit's own widget focus rings — force to red */
+    *:focus-visible {{
+        outline-color: {C_RED} !important;
+        box-shadow: 0 0 0 3px rgba(139,26,26,.28) !important;
+    }}
+
     section[data-testid="stSidebar"] {{background:linear-gradient(180deg,#4A0E0E 0%,{C_RED} 40%,#7B2020 100%) !important}}
     section[data-testid="stSidebar"] .stMarkdown h2 {{color:{C_GOLD_L} !important;font-family:'Playfair Display',serif}}
     section[data-testid="stSidebar"] .stMarkdown p,section[data-testid="stSidebar"] .stMarkdown li {{color:#F0D5D5}}
@@ -2538,6 +2556,58 @@ def main():
     section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] > p {{ margin-bottom: 0 !important }}
     section[data-testid="stSidebar"] .stExpander {{ margin-bottom: 2px !important }}
 
+    /* ── SIDEBAR BUTTONS — ghost style on red background ────────────────── */
+    /* Target Streamlit's actual button data-testid attributes */
+    section[data-testid="stSidebar"] [data-testid="baseButton-secondary"],
+    section[data-testid="stSidebar"] [data-testid="baseButton-primary"],
+    section[data-testid="stSidebar"] .stButton > button {{
+        background: rgba(255,255,255,.10) !important;
+        color: #FFE8E8 !important;
+        border: 1.5px solid rgba(255,190,190,.40) !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        box-shadow: none !important;
+        transition: background .18s, border-color .18s, color .18s !important;
+    }}
+    section[data-testid="stSidebar"] [data-testid="baseButton-secondary"]:hover,
+    section[data-testid="stSidebar"] [data-testid="baseButton-primary"]:hover,
+    section[data-testid="stSidebar"] .stButton > button:hover {{
+        background: rgba(255,255,255,.22) !important;
+        border-color: rgba(255,210,210,.80) !important;
+        color: #FFFFFF !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }}
+    /* Sign Out — gold-outlined to signal it's destructive/exit */
+    section[data-testid="stSidebar"] [data-testid="logout_btn"],
+    section[data-testid="stSidebar"] button[data-testid="logout_btn"] {{
+        background: rgba(212,168,67,.14) !important;
+        border: 1.5px solid rgba(212,168,67,.55) !important;
+        color: #F5D98E !important;
+    }}
+    section[data-testid="stSidebar"] [data-testid="logout_btn"]:hover,
+    section[data-testid="stSidebar"] button[data-testid="logout_btn"]:hover {{
+        background: rgba(212,168,67,.28) !important;
+        border-color: {C_GOLD} !important;
+        color: #FFE9A0 !important;
+    }}
+    /* Download buttons in sidebar */
+    section[data-testid="stSidebar"] [data-testid="stDownloadButton"] > button,
+    section[data-testid="stSidebar"] .stDownloadButton > button {{
+        background: rgba(255,255,255,.10) !important;
+        color: #FFE8E8 !important;
+        border: 1.5px solid rgba(255,190,190,.40) !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        box-shadow: none !important;
+    }}
+    section[data-testid="stSidebar"] [data-testid="stDownloadButton"] > button:hover,
+    section[data-testid="stSidebar"] .stDownloadButton > button:hover {{
+        background: rgba(255,255,255,.22) !important;
+        border-color: rgba(255,210,210,.80) !important;
+        color: #FFFFFF !important;
+    }}
+
     [data-testid="stSidebar"] .stExpander {{ background:linear-gradient(135deg,#2B7DE9,#1D5CBF) !important;border-radius:10px !important;border:none !important }}
     [data-testid="stSidebar"] .stExpander summary {{ color:white !important;font-weight:700 !important }}
     [data-testid="stSidebar"] .stExpander [data-testid="stExpanderDetails"] {{ background:rgba(0,0,0,.15) !important;border-radius:0 0 10px 10px !important }}
@@ -2598,56 +2668,85 @@ def main():
         transform: translateY(-1px) !important;
     }}
 
-    /* MAIN-AREA SELECTBOXES — IBT red identity */
+    /* MAIN-AREA SELECTBOXES — IBT red identity (deep Baseweb overrides) */
+    /* Outer wrapper */
     .main .stSelectbox > div > div,
     [data-testid="stMain"] .stSelectbox > div > div,
-    [data-testid="stMainBlockContainer"] .stSelectbox > div > div {{
+    [data-testid="stMainBlockContainer"] .stSelectbox > div > div,
+    [data-testid="stMain"] [data-baseweb="select"],
+    [data-testid="stMainBlockContainer"] [data-baseweb="select"] {{
         border: 2px solid {C_RED} !important;
         border-radius: 9px !important;
-        background: rgba(139,26,26,.12) !important;
+        background: rgba(100,10,10,.18) !important;
         min-height: 42px !important;
         transition: border-color .18s, box-shadow .18s, background .18s !important;
     }}
+    /* Baseweb inner control container */
+    [data-testid="stMain"] [data-baseweb="select"] > div,
+    [data-testid="stMainBlockContainer"] [data-baseweb="select"] > div {{
+        background: transparent !important;
+        border: none !important;
+    }}
+    /* Hover */
     .main .stSelectbox > div > div:hover,
     [data-testid="stMain"] .stSelectbox > div > div:hover,
-    [data-testid="stMainBlockContainer"] .stSelectbox > div > div:hover {{
+    [data-testid="stMainBlockContainer"] .stSelectbox > div > div:hover,
+    [data-testid="stMain"] [data-baseweb="select"]:hover,
+    [data-testid="stMainBlockContainer"] [data-baseweb="select"]:hover {{
         border-color: {C_RED_L} !important;
-        background: rgba(139,26,26,.2) !important;
+        background: rgba(139,26,26,.26) !important;
     }}
+    /* Focus */
     .main .stSelectbox > div > div:focus-within,
     [data-testid="stMain"] .stSelectbox > div > div:focus-within,
-    [data-testid="stMainBlockContainer"] .stSelectbox > div > div:focus-within {{
+    [data-testid="stMainBlockContainer"] .stSelectbox > div > div:focus-within,
+    [data-testid="stMain"] [data-baseweb="select"]:focus-within,
+    [data-testid="stMainBlockContainer"] [data-baseweb="select"]:focus-within {{
         border-color: {C_RED_L} !important;
-        box-shadow: 0 0 0 3px rgba(139,26,26,.28) !important;
-        background: rgba(139,26,26,.2) !important;
+        box-shadow: 0 0 0 3px rgba(178,34,52,.28) !important;
+        background: rgba(139,26,26,.26) !important;
     }}
-    /* Selectbox dropdown arrow SVG — red tint */
+    /* Dropdown chevron arrow */
     [data-testid="stMainBlockContainer"] .stSelectbox svg,
-    [data-testid="stMain"] .stSelectbox svg {{
+    [data-testid="stMain"] .stSelectbox svg,
+    [data-testid="stMainBlockContainer"] [data-baseweb="select"] svg,
+    [data-testid="stMain"] [data-baseweb="select"] svg {{
         color: {C_RED_L} !important;
         fill: {C_RED_L} !important;
     }}
-    /* Selectbox text color in main area */
+    /* Selected value text */
     [data-testid="stMainBlockContainer"] .stSelectbox [data-baseweb="select"] span,
-    [data-testid="stMain"] .stSelectbox [data-baseweb="select"] span {{
+    [data-testid="stMain"] .stSelectbox [data-baseweb="select"] span,
+    [data-testid="stMainBlockContainer"] [data-baseweb="select"] [data-baseweb="select-input"],
+    [data-testid="stMain"] [data-baseweb="select"] [data-baseweb="select-input"] {{
         color: #FFD0D0 !important;
         font-weight: 600 !important;
         font-size: .92rem !important;
     }}
     /* Dropdown popover list */
-    [data-baseweb="popover"] [role="listbox"] {{
-        background: #1A0808 !important;
+    [data-baseweb="popover"] [role="listbox"],
+    [data-baseweb="popover"] ul {{
+        background: #200808 !important;
         border: 1.5px solid {C_RED} !important;
         border-radius: 9px !important;
+        box-shadow: 0 8px 24px rgba(0,0,0,.55) !important;
     }}
-    [data-baseweb="popover"] [role="option"] {{
+    [data-baseweb="popover"] [role="option"],
+    [data-baseweb="popover"] li {{
         background: transparent !important;
         color: #FFD0D0 !important;
+        font-weight: 500 !important;
     }}
     [data-baseweb="popover"] [role="option"]:hover,
-    [data-baseweb="popover"] [role="option"][aria-selected="true"] {{
-        background: rgba(139,26,26,.45) !important;
+    [data-baseweb="popover"] li:hover {{
+        background: rgba(139,26,26,.50) !important;
         color: #FFFFFF !important;
+    }}
+    [data-baseweb="popover"] [role="option"][aria-selected="true"],
+    [data-baseweb="popover"] li[aria-selected="true"] {{
+        background: rgba(178,34,52,.60) !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
     }}
 
     /* CLASSROOM CONFIG EXPANDER — standout panel */
@@ -3198,7 +3297,7 @@ def main():
                 st.rerun()
         with _sf3:
             if _login_required() and _is_logged_in():
-                if st.button("Sign out", key="logout_btn", use_container_width=True):
+                if st.button("🚪 Sign Out", key="logout_btn", use_container_width=True, type="secondary"):
                     st.session_state["_logged_in"] = False
                     st.session_state["_login_label"] = ""
                     # Remove persistent token so refresh also logs out
