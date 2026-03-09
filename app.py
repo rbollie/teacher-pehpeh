@@ -375,30 +375,50 @@ def _enhance_image_prompt(raw_prompt, openai_client):
     system = (
         "You are a specialist in writing DALL-E 3 image prompts that produce real photographs, "
         "not illustrations or drawings. Every prompt you write must read like a photography brief.\n\n"
-        "STYLE — these are absolute, never negotiable:\n"
-        "Describe the scene as though a documentary photographer captured it with a DSLR. "
-        "Use concrete photography terms: focal length, camera model, lighting conditions, depth of field. "
-        "Example style suffix: 'Photographed on a Nikon D850, 50mm f/1.8 lens, warm afternoon sunlight, "
-        "shallow depth of field, National Geographic editorial quality.' "
+
+        "STYLE — absolute, never negotiable:\n"
+        "Describe the scene as a documentary photographer would brief their DSLR shot. "
+        "Use concrete photography terms: camera model, focal length, lighting, depth of field. "
+        "Example suffix: 'Nikon D850, 50mm f/1.8, warm afternoon light, shallow depth of field, "
+        "National Geographic editorial quality.' "
         "The output must look indistinguishable from a real photograph. "
-        "Write ONLY about what should be IN the image — never say what should NOT be in it. "
-        "(Negative lists in DALL-E prompts reinforce the forbidden words — avoid them entirely.)\n\n"
-        "CULTURE — Liberia and West Africa, always:\n"
-        "- All people have dark skin tones and African facial features.\n"
-        "- Students wear simple cotton school uniforms (white shirt, dark trousers or skirt) from Liberian public schools.\n"
-        "- Settings: zinc-roof concrete classrooms, red laterite soil, tropical greenery, wooden desks, "
-        "open louvred windows with warm light, concrete chalkboard walls, open-air corridors.\n"
-        "- If the topic involves a diagram, show it hand-drawn in chalk on a concrete chalkboard, "
-        "or written in a paper exercise book held by a student — photographed in situ.\n"
-        "- Atmosphere: warm, community-oriented, aspiring — a real Liberian school captured with pride.\n\n"
-        "OUTPUT: ONE paragraph, under 350 words. No bullet points. No preamble. No quotes. Just the prompt."
+        "Write ONLY about what IS in the image — never list what should NOT be there.\n\n"
+
+        "LOCATION — DEFAULT IS MONROVIA, LIBERIA (capital city), unless the topic explicitly calls for a rural setting:\n"
+        "Monrovia details to draw from naturally, as fits the scene:\n"
+        "- Busy streets with yellow taxis, motorbikes, and traders carrying goods on their heads\n"
+        "- Waterside Market or Red Light Market — colourful stalls, hawkers, stacked produce\n"
+        "- Joe bar (roadside food stall) with benches, a charcoal pot, plastic chairs, pepper soup\n"
+        "- Broad Street or Randall Street storefronts, painted concrete buildings, colourful signage\n"
+        "- Monrovia school buildings: concrete block, zinc or corrugated-iron roofs, painted in faded "
+        "yellow or white, crowded classrooms with wooden desks, chalkboard walls\n"
+        "- Atlantic Ocean coastline or Providence Island visible in background where fitting\n"
+        "- Humid tropical air, overcast rainy-season sky OR brilliant dry-season sunshine\n"
+        "- Liberian flag colours (red, white, blue, single star) appearing on uniforms, walls, or cloth\n"
+        "- Street food: cassava leaf, palm butter, fried plantain, rice bread\n"
+        "- People dressed in lappa (tie-dye wrap cloth), business casual, or school uniforms\n\n"
+
+        "PEOPLE — always:\n"
+        "- All people have dark skin tones and West African / Liberian facial features.\n"
+        "- Students in white-shirt dark-trouser or white-shirt dark-skirt Liberian public school uniforms.\n"
+        "- Teachers and adults in smart-casual West African attire or collared shirts.\n\n"
+
+        "CLASSROOM DETAILS (when relevant):\n"
+        "- Hand-drawn chalk diagram on a concrete chalkboard — photographed in situ.\n"
+        "- Students writing in paper exercise books with blue or black biro.\n"
+        "- Atmosphere: aspiring, communal, proud — real Liberian education captured honestly.\n\n"
+
+        "RURAL EXCEPTION: Only use rural setting (zinc-roof village, laterite paths, farm) "
+        "if the prompt explicitly mentions farm, village, rural, bush, countryside, or equivalent.\n\n"
+
+        "OUTPUT: ONE paragraph, under 400 words. No bullets. No preamble. No quotes. Just the prompt."
     )
     try:
         resp = openai_client.chat.completions.create(
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": system},
-                {"role": "user", "content": f"Write a DALL-E 3 photorealistic prompt for this educational topic in Liberia: {raw_prompt}"}
+                {"role": "user", "content": f"Write a DALL-E 3 photorealistic prompt. Default to Monrovia, Liberia city context unless the topic calls for a rural setting. Topic: {raw_prompt}"}
             ],
             max_tokens=450,
             temperature=0.6,
@@ -407,15 +427,16 @@ def _enhance_image_prompt(raw_prompt, openai_client):
         if enhanced:
             return enhanced
     except: pass
-    # Fallback: hardcoded photorealistic prompt (no cartoon language at all)
+    # Fallback: hardcoded Monrovia-context photorealistic prompt
     return (
-        f"A Liberian school classroom photographed with a Canon EOS R5, 35mm lens, natural daylight. "
-        f"A teacher with dark skin and African features stands at a concrete chalkboard in a zinc-roof "
-        f"classroom, pointing to a hand-drawn chalk diagram about '{raw_prompt}'. "
-        "Liberian students in white-shirt dark-trouser school uniforms sit at worn wooden desks, "
-        "engaged and attentive. Warm tropical light streams through louvred windows. "
-        "Red laterite soil visible outside. Concrete block walls. "
-        "Sharp focus, high resolution, National Geographic editorial photography quality."
+        f"Documentary photograph of a Monrovia, Liberia school lesson on '{raw_prompt}'. "
+        "A teacher with dark skin and West African features stands at a concrete chalkboard "
+        "in a crowded urban classroom — concrete block walls, zinc roof, wooden desks packed "
+        "with Liberian students in white-and-dark school uniforms. "
+        "Through the louvred windows: the busy streets of Monrovia, yellow taxis, "
+        "traders carrying goods, colourful painted storefronts. "
+        "Warm humid tropical light, high resolution, Nikon D850, 35mm lens, "
+        "National Geographic documentary photography quality."
     )
 
 
@@ -436,7 +457,7 @@ def gen_image(prompt, agent="Auto"):
         _photo_anchor = (
             "Photojournalism photograph, 35mm film, Kodak Portra 400, grain, "
             "National Geographic editorial, documentary, real people, real place. "
-            "West Africa, Liberia, inside a real school. "
+            "Monrovia, Liberia — capital city, urban school. "
         )
         _final_dalle_prompt = _photo_anchor + enhanced_prompt
         try:
@@ -461,16 +482,30 @@ def gen_image(prompt, agent="Auto"):
                 return f"data:image/png;base64,{b64}", "ChatGPT"
         except: pass
 
-    # Gemini photorealistic Liberian prompt — built independently, always used
+    # Gemini prompt — Monrovia urban context by default, rural only if topic demands it
+    _rural_keywords = ("farm", "village", "rural", "bush", "countryside", "laterite", "cassava farm")
+    _is_rural = any(kw in prompt.lower() for kw in _rural_keywords)
+    if _is_rural:
+        _location_detail = (
+            "surrounded by tropical vegetation and red laterite paths, "
+            "a zinc-roof village school outside Monrovia"
+        )
+    else:
+        _location_detail = (
+            "in Monrovia, Liberia — concrete block walls, zinc roof, wooden desks. "
+            "Through the open louvred windows: busy Monrovia streets, yellow taxis, "
+            "traders with goods on their heads, colourful painted storefronts, "
+            "a joe bar with plastic chairs and a charcoal pot visible across the street"
+        )
     _gemini_prompt = (
-        f"A real documentary photograph taken inside a Liberian school, illustrating '{prompt}'. "
-        "A teacher with dark skin and African features stands at a concrete chalkboard in a "
-        "zinc-roof classroom. Liberian students in white-shirt dark-trouser school uniforms "
-        "sit at worn wooden desks, engaged and curious. Warm tropical sunlight streams through "
-        "open louvred windows. Red laterite soil and tropical vegetation visible outside. "
-        "Concrete block walls with a hand-drawn chalk diagram on the board. "
-        "Photorealistic, high resolution, National Geographic documentary photography style. "
-        "Shot on a DSLR camera with natural light. Real photograph, not an illustration."
+        f"A real documentary photograph of a school lesson on '{prompt}', "
+        f"{_location_detail}. "
+        "A teacher with dark skin and West African features stands at a concrete chalkboard. "
+        "Liberian students in white-shirt dark-trouser school uniforms sit at worn wooden desks, "
+        "engaged and attentive, writing in paper exercise books with biro. "
+        "Warm tropical light. Chalk diagram visible on the board. "
+        "Photorealistic, high resolution, National Geographic documentary photography. "
+        "Shot on a DSLR with natural light. Real photograph."
     )
 
     # --- Gemini image generation (Nano Banana) ---
