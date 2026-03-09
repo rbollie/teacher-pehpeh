@@ -547,19 +547,22 @@ def gen_image(prompt, agent="Auto"):
             _flash_candidates = [_working_model]
         else:
             _flash_candidates = [
-                # v1 versions (more stable, broader availability)
+                # v1 first — confirmed model exists there (HTTP 400, not 404)
                 ("v1",     "gemini-2.0-flash-preview-image-generation"),
                 ("v1beta", "gemini-2.0-flash-preview-image-generation"),
-                ("v1",     "gemini-2.0-flash-exp"),
-                ("v1beta", "gemini-2.0-flash-exp"),
+                ("v1",     "gemini-2.0-flash-exp-image-generation"),
+                ("v1beta", "gemini-2.0-flash-exp-image-generation"),
                 ("v1",     "gemini-2.5-flash-preview-04-17"),
-                ("v1beta", "gemini-2.5-flash-preview-04-17"),
                 ("v1",     "gemini-2.0-flash"),
                 ("v1beta", "gemini-2.0-flash"),
             ]
+        # v1 uses snake_case, v1beta uses camelCase — send both so either version accepts it
         _payload_flash = {
             "contents": [{"parts": [{"text": _gemini_prompt}]}],
-            "generationConfig": {"responseModalities": ["IMAGE", "TEXT"]}
+            "generationConfig": {
+                "responseModalities": ["IMAGE", "TEXT"],
+                "response_modalities": ["IMAGE", "TEXT"]
+            }
         }
         _got_non_404 = False
         for _fc in _flash_candidates:
@@ -3719,7 +3722,10 @@ def main():
                                     _url = f"https://generativelanguage.googleapis.com/v1beta/{_nm}:generateContent?key={_dkey}"
                                     _payload = {
                                         "contents":[{"parts":[{"text":_test_prompt}]}],
-                                        "generationConfig":{"responseModalities":["IMAGE","TEXT"]}
+                                        "generationConfig":{
+                                            "responseModalities":["IMAGE","TEXT"],
+                                            "response_modalities":["IMAGE","TEXT"]
+                                        }
                                     }
                                 _req = _dur.Request(_url, data=_dj.dumps(_payload).encode(),
                                                     headers={"Content-Type":"application/json"}, method="POST")
