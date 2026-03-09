@@ -2782,52 +2782,148 @@ def main():
 
 
     /* ══════════════════════════════════════════════════════════════
-       RESPONSIVE / MOBILE OPTIMISATION
-       Breakpoints: phone <640px · tablet 640-1024px · desktop >1024px
+       RESPONSIVE / MOBILE OPTIMISATION  (v2 — comprehensive)
+       Breakpoints: phone ≤480px · phablet ≤640px · tablet ≤900px
+                    laptop ≤1280px · desktop >1280px
        ══════════════════════════════════════════════════════════════ */
 
-    /* 1. GLOBAL — ensure nothing overflows horizontally */
-    html, body, [data-testid="stAppViewContainer"] {{
+    /* ── 0. GLOBAL RESETS ────────────────────────────────────────── */
+    html, body {{
+        -webkit-text-size-adjust: 100% !important;   /* stop iOS auto-zoom on inputs */
+        text-size-adjust: 100% !important;
+    }}
+    html, body, [data-testid="stAppViewContainer"],
+    [data-testid="stMain"], .main {{
         max-width: 100vw !important;
         overflow-x: hidden !important;
+        box-sizing: border-box !important;
     }}
-    img {{ max-width: 100% !important; height: auto !important; }}
+    *, *::before, *::after {{ box-sizing: inherit; }}
+    img, video, iframe, svg {{
+        max-width: 100% !important;
+        height: auto !important;
+    }}
+    /* Streamlit wide layout — remove its hard 46rem cap */
+    .block-container {{
+        max-width: 100% !important;
+        width: 100% !important;
+    }}
 
-    /* 2. BLOCK CONTAINER — tighter mobile padding */
-    @media (max-width: 640px) {{
+    /* ── 1. DESKTOP (>1280px) — generous padding, bigger logo ───── */
+    @media (min-width: 1281px) {{
         .block-container {{
-            padding-left: 0.6rem !important;
-            padding-right: 0.6rem !important;
+            padding-left: 3rem !important;
+            padding-right: 3rem !important;
+            padding-top: 0.5rem !important;
+        }}
+    }}
+
+    /* ── 2. LAPTOP (901px – 1280px) ─────────────────────────────── */
+    @media (min-width: 901px) and (max-width: 1280px) {{
+        .block-container {{
+            padding-left: 2rem !important;
+            padding-right: 2rem !important;
+        }}
+    }}
+
+    /* ── 3. TABLET (641px – 900px) ──────────────────────────────── */
+    @media (min-width: 641px) and (max-width: 900px) {{
+        .block-container {{
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }}
+        /* Logo: medium size */
+        .block-container img {{ max-height: 180px !important; }}
+        /* 4-col and 5-col blocks → 2-col wrap */
+        [data-testid="stHorizontalBlock"] {{
+            flex-wrap: wrap !important;
+            gap: 0.5rem !important;
+        }}
+        [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {{
+            min-width: calc(50% - 0.5rem) !important;
+            flex: 1 1 calc(50% - 0.5rem) !important;
+        }}
+        /* 2-col blocks stay side-by-side */
+        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:nth-child(2)):not(:has(> [data-testid="stColumn"]:nth-child(3))) > [data-testid="stColumn"] {{
+            min-width: calc(50% - 0.5rem) !important;
+            flex: 1 1 calc(50% - 0.5rem) !important;
+        }}
+        /* Category dropdowns row (4 cols) → 2×2 */
+        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:nth-child(4)) {{
+            flex-wrap: wrap !important;
+        }}
+        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:nth-child(4)) > [data-testid="stColumn"] {{
+            min-width: calc(50% - 0.3rem) !important;
+            flex: 1 1 calc(50% - 0.3rem) !important;
+        }}
+        /* 5-col classroom config → 3+2 wrap */
+        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:nth-child(5)) > [data-testid="stColumn"] {{
+            min-width: calc(33% - 0.5rem) !important;
+            flex: 1 1 calc(33% - 0.5rem) !important;
+        }}
+        /* Tab font size */
+        .stTabs [data-baseweb="tab"] {{
+            padding: 7px 12px !important;
+            font-size: .80rem !important;
+        }}
+    }}
+
+    /* ── 4. PHABLET (481px – 640px) ─────────────────────────────── */
+    @media (min-width: 481px) and (max-width: 640px) {{
+        .block-container {{
+            padding-left: 0.7rem !important;
+            padding-right: 0.7rem !important;
             padding-top: 0.3rem !important;
-            max-width: 100% !important;
         }}
-        /* Streamlit wide layout: remove fixed width cap */
         [data-testid="stMain"] > div {{ max-width: 100% !important; }}
+        /* Logo */
+        .block-container img {{ max-height: 140px !important; }}
+        /* Columns: 2-col stays 2-col, wider stays 2-col wrapping */
+        [data-testid="stHorizontalBlock"] {{
+            flex-wrap: wrap !important;
+            gap: 0.4rem !important;
+        }}
+        [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {{
+            min-width: calc(50% - 0.4rem) !important;
+            flex: 1 1 calc(50% - 0.4rem) !important;
+        }}
+        h1 {{ font-size: 1.5rem !important; }}
+        h2 {{ font-size: 1.15rem !important; }}
+        h3 {{ font-size: 1rem !important; }}
     }}
-    @media (min-width: 641px) and (max-width: 1024px) {{
+
+    /* ── 5. PHONE (≤480px) — full single-column stack ───────────── */
+    @media (max-width: 480px) {{
         .block-container {{
-            padding-left: 1.2rem !important;
-            padding-right: 1.2rem !important;
+            padding-left: 0.4rem !important;
+            padding-right: 0.4rem !important;
+            padding-top: 0.25rem !important;
+        }}
+        [data-testid="stMain"] > div {{ max-width: 100% !important; }}
+        /* All columns → full width vertical stack */
+        [data-testid="stHorizontalBlock"] {{
+            flex-direction: column !important;
+            gap: 0.4rem !important;
+        }}
+        [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {{
+            width: 100% !important;
+            min-width: 100% !important;
+            flex: 1 1 100% !important;
+        }}
+        /* Logo */
+        .block-container img {{ max-height: 100px !important; }}
+        /* Typography */
+        h1 {{ font-size: 1.3rem !important; }}
+        h2 {{ font-size: 1.05rem !important; }}
+        h3 {{ font-size: .9rem !important; }}
+        p, li, label {{ font-size: .88rem !important; }}
+        .status-bar {{
+            font-size: .68rem !important;
+            padding: 3px 8px !important;
         }}
     }}
 
-    /* 3. LOGO — scale down on small screens */
-    @media (max-width: 640px) {{
-        .block-container img[style*="max-height:280px"] {{
-            max-height: 130px !important;
-        }}
-        /* subtitle text */
-        .block-container p[style*="font-size:.95rem"] {{
-            font-size: .82rem !important;
-        }}
-    }}
-    @media (min-width: 641px) and (max-width: 1024px) {{
-        .block-container img[style*="max-height:280px"] {{
-            max-height: 190px !important;
-        }}
-    }}
-
-    /* 4. TABS — horizontal scroll so all 6 tabs fit on mobile */
+    /* ── 6. TABS — scroll on mobile, readable labels ─────────────── */
     @media (max-width: 768px) {{
         .stTabs [data-baseweb="tab-list"] {{
             overflow-x: auto !important;
@@ -2835,157 +2931,128 @@ def main():
             flex-wrap: nowrap !important;
             -webkit-overflow-scrolling: touch !important;
             scrollbar-width: none !important;
-            padding: 4px 4px !important;
+            padding: 4px 3px !important;
             gap: 2px !important;
         }}
         .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {{ display: none !important; }}
         .stTabs [data-baseweb="tab"] {{
-            padding: 6px 10px !important;
-            font-size: .72rem !important;
+            padding: 6px 9px !important;
+            font-size: .70rem !important;
             white-space: nowrap !important;
             min-width: fit-content !important;
             flex-shrink: 0 !important;
         }}
     }}
 
-    /* 5. STATUS BAR — wrap on small screens, smaller text */
-    @media (max-width: 640px) {{
-        .status-bar {{
-            font-size: .7rem !important;
-            padding: 4px 10px !important;
-            gap: 3px !important;
-        }}
-    }}
-
-    /* 6. STREAMLIT COLUMNS — stack vertically on phone */
-    @media (max-width: 640px) {{
-        /* Force Streamlit's flex columns to stack */
-        [data-testid="stHorizontalBlock"] {{
-            flex-direction: column !important;
-            gap: 0.5rem !important;
-        }}
-        [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {{
-            width: 100% !important;
-            min-width: 100% !important;
-            flex: 1 1 100% !important;
-        }}
-    }}
-    @media (min-width: 641px) and (max-width: 900px) {{
-        /* On tablet: 5-col and 4-col rows become 2-col wrapping */
-        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:nth-child(4)) {{
-            flex-wrap: wrap !important;
-        }}
-        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:nth-child(4)) > [data-testid="stColumn"] {{
-            min-width: 48% !important;
-            flex: 1 1 48% !important;
-        }}
-    }}
-
-    /* 7. BUTTONS — min touch target 44px tall on mobile */
-    @media (max-width: 768px) {{
-        .stButton > button {{
-            min-height: 44px !important;
-            font-size: .85rem !important;
+    /* ── 7. TOUCH TARGETS — 44px minimum (Apple/Google a11y standard) */
+    @media (max-width: 900px) {{
+        .stButton > button,
+        .stDownloadButton > button,
+        [data-testid="baseButton-primary"],
+        [data-testid="baseButton-secondary"] {{
+            min-height: 46px !important;
+            font-size: .88rem !important;
             padding: 10px 14px !important;
         }}
-        .stDownloadButton > button {{
-            min-height: 44px !important;
-        }}
-    }}
-
-    /* 8. SELECTBOXES & TEXT INPUTS — larger touch target on mobile */
-    @media (max-width: 768px) {{
-        .stSelectbox > div > div {{
-            min-height: 46px !important;
+        .stSelectbox > div > div,
+        [data-baseweb="select"] {{
+            min-height: 48px !important;
         }}
         .stTextInput > div > div > input {{
-            min-height: 44px !important;
+            min-height: 46px !important;
             font-size: 1rem !important;
+            padding: 10px 12px !important;
         }}
         .stTextArea > div > div > textarea {{
-            font-size: 1rem !important;
+            font-size: .95rem !important;
+            padding: 10px 12px !important;
         }}
-    }}
-
-    /* 9. RESULT / CHAT CARDS — full width, smaller font on mobile */
-    @media (max-width: 640px) {{
-        .rh, .rb {{ padding: 0.7rem !important; }}
-        .ct, .cp {{ padding: 9px 12px !important; font-size: .85rem !important; }}
-        .qbox {{ padding: 12px !important; }}
-        .sc {{ padding: 9px 12px !important; }}
-    }}
-
-    /* 10. GENERATE tab — category buttons wrap on mobile */
-    @media (max-width: 640px) {{
-        /* Category tile row */
-        [data-testid="stHorizontalBlock"]:has([data-testid="baseButton-secondary"]),
-        [data-testid="stHorizontalBlock"]:has([data-testid="baseButton-primary"]) {{
-            flex-wrap: wrap !important;
-            gap: 6px !important;
-        }}
-        [data-testid="stHorizontalBlock"]:has([data-testid="baseButton-secondary"]) > [data-testid="stColumn"],
-        [data-testid="stHorizontalBlock"]:has([data-testid="baseButton-primary"]) > [data-testid="stColumn"] {{
-            min-width: 48% !important;
-            flex: 1 1 48% !important;
-        }}
-    }}
-
-    /* 11. TABLES — make scrollable on mobile */
-    @media (max-width: 768px) {{
-        .stDataFrame, [data-testid="stTable"] {{
-            overflow-x: auto !important;
-            display: block !important;
-            -webkit-overflow-scrolling: touch !important;
-        }}
-    }}
-
-    /* 12. SIDEBAR — full width overlay on mobile (Streamlit default), ensure readable */
-    @media (max-width: 768px) {{
-        section[data-testid="stSidebar"] {{
-            min-width: 280px !important;
-            max-width: 85vw !important;
-        }}
-        section[data-testid="stSidebar"] .stSelectbox > div > div {{
-            min-height: 46px !important;
-        }}
-    }}
-
-    /* 13. EXPANDERS — full width, easier tap */
-    @media (max-width: 768px) {{
         .stExpander > details > summary {{
-            min-height: 44px !important;
+            min-height: 46px !important;
             display: flex !important;
             align-items: center !important;
         }}
     }}
 
-    /* 14. PAGE TITLE / SUBTITLE — scale gracefully */
-    @media (max-width: 640px) {{
-        h1 {{ font-size: 1.4rem !important; }}
-        h2 {{ font-size: 1.1rem !important; }}
-        h3 {{ font-size: .95rem !important; }}
-    }}
-
-    /* 15. METRIC CARDS (Academic Report) — 2-col grid on phone */
-    @media (max-width: 640px) {{
-        /* Force 4-col metric rows to 2-col */
-        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:nth-child(4)):not(:has([data-testid="baseButton-secondary"])) {{
+    /* ── 8. CATEGORY DROPDOWNS — 4 across on desktop, 2×2 tablet,
+            1-col on phone (already covered by col stacking above)   */
+    @media (min-width: 641px) and (max-width: 900px) {{
+        /* The dd_cat_ row specifically */
+        [data-testid="stHorizontalBlock"]:has(.stSelectbox) {{
             flex-wrap: wrap !important;
+            gap: 0.4rem !important;
         }}
-        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:nth-child(4)):not(:has([data-testid="baseButton-secondary"])) > [data-testid="stColumn"] {{
-            min-width: 48% !important;
-            flex: 1 1 48% !important;
+        [data-testid="stHorizontalBlock"]:has(.stSelectbox) > [data-testid="stColumn"] {{
+            min-width: calc(50% - 0.4rem) !important;
+            flex: 1 1 calc(50% - 0.4rem) !important;
         }}
     }}
 
-    /* 16. PLOTLY / CHART containers — responsive */
-    @media (max-width: 768px) {{
-        [data-testid="stPlotlyChart"] {{
-            width: 100% !important;
+    /* ── 9. RESULT / CHAT / QUIZ CARDS ─────────────────────────── */
+    @media (max-width: 640px) {{
+        .rh {{ padding: 0.65rem 0.8rem !important; }}
+        .rb {{ padding: 0.65rem 0.8rem !important; }}
+        .ct, .cp {{ padding: 8px 11px !important; font-size: .84rem !important; }}
+        .qbox {{ padding: 11px 12px !important; }}
+        .qok, .qno {{ padding: 10px 12px !important; }}
+        .sc  {{ padding: 8px 11px !important; }}
+        .qtip {{ padding: 8px 11px !important; font-size: .82rem !important; }}
+    }}
+
+    /* ── 10. TABLES — horizontal scroll ─────────────────────────── */
+    .stDataFrame, [data-testid="stTable"] {{
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }}
+    @media (max-width: 900px) {{
+        .stDataFrame, [data-testid="stTable"] {{
+            display: block !important;
+            font-size: .82rem !important;
         }}
-        [data-testid="stPlotlyChart"] .js-plotly-plot {{
-            width: 100% !important;
+    }}
+
+    /* ── 11. SIDEBAR ────────────────────────────────────────────── */
+    @media (max-width: 900px) {{
+        section[data-testid="stSidebar"] {{
+            min-width: 270px !important;
+            max-width: 88vw !important;
         }}
+        section[data-testid="stSidebar"] .stSelectbox > div > div {{
+            min-height: 48px !important;
+        }}
+        /* Sidebar toggle arrow — bigger tap area */
+        [data-testid="collapsedControl"] {{
+            width: 40px !important;
+            height: 40px !important;
+        }}
+    }}
+
+    /* ── 12. CHARTS / PLOTLY ────────────────────────────────────── */
+    [data-testid="stPlotlyChart"],
+    [data-testid="stPlotlyChart"] .js-plotly-plot,
+    [data-testid="stPlotlyChart"] .plot-container {{
+        width: 100% !important;
+        min-width: 0 !important;
+    }}
+
+    /* ── 13. METRICS (Academic Report) — 2-col on phone/phablet ── */
+    @media (max-width: 640px) {{
+        [data-testid="stMetric"] {{
+            padding: 6px 8px !important;
+        }}
+        [data-testid="stMetricValue"] {{
+            font-size: 1.4rem !important;
+        }}
+    }}
+
+    /* ── 14. FOOTER ──────────────────────────────────────────────── */
+    @media (max-width: 640px) {{
+        .ft {{ font-size: .72rem !important; padding: 1rem 0 0.6rem !important; }}
+    }}
+
+    /* ── 15. INTERVENTION BUBBLES — full width on mobile ─────────── */
+    @media (max-width: 640px) {{
+        [data-testid="stExpanderDetails"] > div {{ padding: 0.4rem !important; }}
     }}
 
     /* ── Category dropdown styling ─────────────────────────────────────────
@@ -3001,12 +3068,27 @@ def main():
 
     st.markdown("""<script>
 (function(){{
-  if(!document.querySelector('meta[name=viewport]')){{
-    var m=document.createElement('meta');
-    m.name='viewport';
-    m.content='width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes';
-    document.head.appendChild(m);
+  // 1. Viewport meta — critical for mobile scaling
+  var vp = document.querySelector('meta[name=viewport]');
+  if(!vp){{
+    vp = document.createElement('meta');
+    vp.name = 'viewport';
+    document.head.appendChild(vp);
   }}
+  vp.content = 'width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes';
+
+  // 2. Mobile-web-app meta tags
+  ['mobile-web-app-capable','apple-mobile-web-app-capable'].forEach(function(n){{
+    if(!document.querySelector('meta[name="'+n+'"]')){{
+      var m=document.createElement('meta'); m.name=n; m.content='yes';
+      document.head.appendChild(m);
+    }}
+  }});
+
+  // 3. Prevent iOS double-tap zoom on interactive elements
+  var style = document.createElement('style');
+  style.textContent = 'button, a, select, input, textarea, [role="button"] {{ touch-action: manipulation; }}';
+  document.head.appendChild(style);
 }})();
 </script>""", unsafe_allow_html=True)
     # ── Session state defaults (sidebar removed — all UI in main content) ──────
