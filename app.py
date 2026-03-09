@@ -3231,7 +3231,7 @@ def main():
 @media (max-width: 520px) {{
   .tp-bar {{ font-size: .70rem; padding: 4px 8px; gap: 3px; }}
   .tp-div {{ display: none; }}
-  #recheck-btn {{ font-size: .70rem; padding: 2px 7px; }}
+
 }}
 #dev-chip {{
   display:inline-flex; align-items:center; gap:5px;
@@ -3239,14 +3239,7 @@ def main():
   background:rgba(0,0,0,.2); border:1px solid #2a3a5a;
   transition: all .3s;
 }}
-#recheck-btn {{
-  display:inline-flex; align-items:center; gap:5px;
-  padding:3px 10px; border-radius:12px; cursor:pointer;
-  background:rgba(43,125,233,.15); border:1px solid rgba(43,125,233,.4);
-  color:#7BB8F5; font-size:.78rem; font-family:inherit;
-  transition:all .2s;
-}}
-#recheck-btn:hover {{ background:rgba(43,125,233,.3); border-color:rgba(43,125,233,.7); }}
+
 </style>
 <div class="tp-bar">
   <div id="dev-chip" title="Shows whether your device is connected to the internet">
@@ -3255,8 +3248,6 @@ def main():
   </div>
   <span class="tp-div">│</span>
   {_status_bar_html}
-  <span class="tp-div">│</span>
-  <button id="recheck-btn" title="Re-test connection to AI services" onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:true}},'*')">🔄 Re-check</button>
 </div>
 <script>
 (function(){{
@@ -3291,8 +3282,8 @@ def main():
   }});
 }})();
 </script>
-""", height=60, scrolling=False)
-        if st.button(T("recheck"), key="recheck_sidebar"):
+""", height=44, scrolling=False)
+        if st.button("🔄 " + T("recheck"), key="recheck_sidebar", use_container_width=True):
             st.session_state.conn_checked = False
             st.rerun()
 
@@ -3433,10 +3424,10 @@ def main():
                     _mano_stats = get_mano_stats()
                     if _mano_stats: st.caption(f"🗣️ {_mano_stats['total']}+ words loaded")
 
-        # ── Row 5: Save / Load + logout — 2 equal cols + narrow logout ─────
-        _sf1, _sf2, _sf3 = st.columns([3, 3, 2])
+        # ── Row 5a: Save / Load — 2 equal columns ──────────────────────────
+        _sf1, _sf2 = st.columns(2)
         with _sf1:
-            if st.button("💾 Save Configuration", use_container_width=True, key="sv_prof"):
+            if st.button("💾 Save", use_container_width=True, key="sv_prof"):
                 _c = st.session_state.get("country_sel","Liberia")
                 _l = st.session_state.get("lang_sel","English")
                 _r = st.session_state.get("cfg_region", list(_regions().keys())[0])
@@ -3449,19 +3440,19 @@ def main():
                 st.session_state["_show_save_opts"] = True
                 st.rerun()
         with _sf2:
-            if st.button("📂 Load Configuration", use_container_width=True, key="ld_prof"):
+            if st.button("📂 Load", use_container_width=True, key="ld_prof"):
                 st.session_state["_show_load_opts"] = not st.session_state.get("_show_load_opts", False)
                 st.session_state["_show_save_opts"] = False
                 st.rerun()
-        with _sf3:
-            if _login_required() and _is_logged_in():
-                if st.button("🚪 Sign Out", key="logout_btn", use_container_width=True, type="secondary"):
-                    st.session_state["_logged_in"] = False
-                    st.session_state["_login_label"] = ""
-                    # Remove persistent token so refresh also logs out
-                    if "_s" in st.query_params:
-                        del st.query_params["_s"]
-                    st.rerun()
+        # ── Row 5b: Sign Out — full width, only shown when logged in ─────────
+        if _login_required() and _is_logged_in():
+            if st.button("🚪 Sign Out", key="logout_btn", use_container_width=True, type="secondary"):
+                st.session_state["_logged_in"] = False
+                st.session_state["_login_label"] = ""
+                # Remove persistent token so refresh also logs out
+                if "_s" in st.query_params:
+                    del st.query_params["_s"]
+                st.rerun()
         if st.session_state.get("_show_save_opts") and "saved_profile" in st.session_state:
             st.success("✅ Saved! Download below to reuse next session.")
             _default_name = (school_name.strip().replace(" ","_") or "my_classroom")
