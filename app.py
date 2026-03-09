@@ -6000,46 +6000,42 @@ Be factual. Do not invent data. Keep each section focused and practical."""
         # Voice input for chat — recording indicator + AI selector
         voice_col, photo_col, label_col = st.columns([1, 1, 3])
         with voice_col:
-            st.markdown('''<style>
-/* ── Recording state: button turns red + pulses ── */
+            # Inject global CSS for recording state (works via parent document selectors)
+            st.markdown(f"""<style>
 [data-testid="stAudioInput"] > div > button[aria-label*="Stop"],
-[data-testid="stAudioInput"] > div > button[aria-label*="stop"] {
+[data-testid="stAudioInput"] > div > button[aria-label*="stop"] {{
     background-color: #D32F2F !important;
     color: white !important;
     border-color: #D32F2F !important;
     box-shadow: 0 0 12px rgba(211,47,47,.5) !important;
-    animation: pulse-red 1.0s ease-in-out infinite !important;
-}
-@keyframes pulse-red {
-    0%,100% { box-shadow: 0 0 6px rgba(211,47,47,.4); }
-    50%      { box-shadow: 0 0 18px rgba(211,47,47,.8); }
-}
-/* Label below mic auto-updates via JS */
-#mic-status-lbl {
-    font-size: .74rem; font-weight: 700; text-align: center;
-    margin-top: 4px; transition: color .3s;
-}
-</style>
-<div id="mic-status-lbl" style="color:#EF5350">🎤 Tap to record</div>
+    animation: _mic_pulse 1.0s ease-in-out infinite !important;
+}}
+@keyframes _mic_pulse {{
+    0%,100% {{ box-shadow: 0 0 6px rgba(211,47,47,.4); }}
+    50%      {{ box-shadow: 0 0 18px rgba(211,47,47,.8); }}
+}}
+</style>""", unsafe_allow_html=True)
+            chat_audio = st.audio_input("🎤", key="chat_mic", label_visibility="collapsed")
+            # Dynamic label via components.html — runs in its own iframe so uses window.parent.document
+            import streamlit.components.v1 as _mic_comp
+            _mic_comp.html("""<div id="lbl" style="font-size:.74rem;font-weight:700;text-align:center;color:#EF5350;font-family:sans-serif;margin-top:2px">🎤 Tap to record</div>
 <script>
 (function(){
-  function watchMic(){
-    var btn = document.querySelector('[data-testid="stAudioInput"] > div > button');
-    var lbl = document.getElementById('mic-status-lbl');
-    if(!btn || !lbl) return;
-    var obs = new MutationObserver(function(){
-      var label = (btn.getAttribute('aria-label')||"").toLowerCase();
-      var recording = label.indexOf("stop") !== -1;
-      lbl.style.color   = recording ? '#FF1744' : '#EF5350';
-      lbl.textContent   = recording ? '⏹ Stop recording' : '🎤 Tap to record';
-    });
-    obs.observe(btn, {attributes:true, attributeFilter:['aria-label']});
+  var lbl = document.getElementById('lbl');
+  function check(){
+    var pd = window.parent.document;
+    var btn = pd.querySelector('[data-testid="stAudioInput"] button');
+    if(!btn) return;
+    var aria = (btn.getAttribute('aria-label')||'').toLowerCase();
+    var rec = aria.indexOf('stop') !== -1;
+    lbl.textContent = rec ? '⏹ Stop recording' : '🎤 Tap to record';
+    lbl.style.color = rec ? '#FF1744' : '#EF5350';
+    lbl.style.fontWeight = rec ? '900' : '700';
   }
-  // Retry until mic button appears in DOM
-  var _t = setInterval(function(){ if(document.querySelector('[data-testid="stAudioInput"]')){ watchMic(); clearInterval(_t); } }, 200);
+  check();
+  setInterval(check, 300);
 })();
-</script>''', unsafe_allow_html=True)
-            chat_audio = st.audio_input("🎤", key="chat_mic", label_visibility="collapsed")
+</script>""", height=28, scrolling=False)
         with photo_col:
             st.markdown('<div style="text-align:center;padding-top:6px">', unsafe_allow_html=True)
             _show_cam = st.toggle("📸", key="chat_cam_toggle", help=T("photo_hint"))
@@ -6090,10 +6086,20 @@ Be factual. Do not invent data. Keep each section focused and practical."""
 
         voice_text = None
         if chat_audio:
-            with st.spinner(T("transcribing")):
-                voice_text = transcribe_audio(chat_audio.read())
-            if voice_text:
-                st.success(f'{T("heard")}: "{voice_text[:80]}..."' if len(voice_text) > 80 else f'{T("heard")}: "{voice_text}"')
+            import hashlib as _hl
+            _audio_bytes = chat_audio.read()
+            _audio_hash = _hl.md5(_audio_bytes).hexdigest()
+            # Only transcribe if this is a NEW recording (not same audio from prior rerun)
+            if _audio_hash != st.session_state.get("_last_audio_hash"):
+                with st.spinner(T("transcribing")):
+                    voice_text = transcribe_audio(_audio_bytes)
+                if voice_text:
+                    st.session_state["_last_voice_text"] = voice_text
+                    st.session_state["_last_audio_hash"] = _audio_hash
+                    st.success(f'{T("heard")}: "{voice_text[:80]}..."' if len(voice_text) > 80 else f'{T("heard")}: "{voice_text}"')
+            else:
+                # Already transcribed — show result but don't re-submit
+                voice_text = None  # Prevent re-submission on rerun
 
 
         uq = st.chat_input(f"{T('ask_about')} {subject}... {T('draw_hint')}")
@@ -6103,6 +6109,8 @@ Be factual. Do not invent data. Keep each section focused and practical."""
         # Voice input takes priority
         if voice_text:
             uq = voice_text
+            # Clear hash so next recording isn't suppressed
+            st.session_state.pop("_last_audio_hash", None)
         # Photo submission — either with typed question or default prompt
         if chat_photo_b64 and not uq:
             _pq = st.session_state.get("chat_photo_question", "").strip()
