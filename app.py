@@ -508,29 +508,36 @@ def gen_image(prompt, agent="Auto"):
         "Shot on a DSLR with natural light. Real photograph."
     )
 
-    # --- Gemini image generation (Nano Banana) ---
+    # --- Gemini image generation (Nano Banana 2 = Gemini 3 Flash Image) ---
+    # Model name confirmed by Gemini itself: "Gemini 3 Flash Image"
+    # API candidates tried in order — all without break so every name is attempted
     if agent in ("Nano Banana", "Auto") and GOOGLE_API_KEY:
         _img_errs = []
 
-        # Attempt 1: gemini-2.0-flash-preview-image-generation via new google-genai SDK
         try:
             from google import genai as _gai
             from google.genai import types as _gtypes
             _gc = _gai.Client(api_key=GOOGLE_API_KEY)
-            for _flash_model in [
-                "gemini-2.0-flash-preview-image-generation",
-                "gemini-2.0-flash-exp-image-generation",
-                "gemini-2.0-flash-exp",
-            ]:
+
+            # ── Tier 1: generate_content with IMAGE modality ─────────────────
+            # Model names in priority order — Gemini 3 Flash first, then 2.x fallbacks
+            _flash_models = [
+                "gemini-3.0-flash",                          # Gemini 3 Flash Image (Nano Banana 2)
+                "gemini-3.0-flash-image-generation",         # possible explicit image variant
+                "gemini-2.5-flash",                          # Gemini 2.5 Flash
+                "gemini-2.5-flash-preview-05-20",            # versioned preview
+                "gemini-2.0-flash-preview-image-generation", # 2.0 preview
+                "gemini-2.0-flash-exp",                      # 2.0 experimental
+            ]
+            for _fm in _flash_models:
                 try:
                     _resp = _gc.models.generate_content(
-                        model=_flash_model,
+                        model=_fm,
                         contents=_gemini_prompt,
                         config=_gtypes.GenerateContentConfig(
                             response_modalities=["IMAGE", "TEXT"]
                         )
                     )
-                    _found_img = False
                     for _cand in (_resp.candidates or []):
                         for _part in (_cand.content.parts if _cand.content else []):
                             _id = getattr(_part, "inline_data", None)
@@ -538,25 +545,28 @@ def gen_image(prompt, agent="Auto"):
                                 _raw = _id.data
                                 b64 = _raw if isinstance(_raw, str) else _b64.b64encode(_raw).decode()
                                 return f"data:{_id.mime_type};base64,{b64}", "Nano Banana"
-                        _found_img = True  # keep looping candidates
-                    _img_errs.append(f"{_flash_model}: no image part in response")
-                    break  # model found but returned no image — no point retrying other names
+                    _img_errs.append(f"{_fm}: responded but returned no image part")
+                    break  # model is reachable but returned no image — don't try more variants
                 except Exception as _fe:
-                    _img_errs.append(f"{_flash_model}: {_fe}")
-        except Exception as _sdk1e:
-            _img_errs.append(f"google-genai SDK import: {_sdk1e}")
+                    _fe_str = str(_fe)
+                    _img_errs.append(f"{_fm}: {_fe_str}")
+                    # Only skip to next model if error is a 404/not-found; stop on auth/quota errors
+                    if any(x in _fe_str.lower() for x in ("not found", "404", "invalid", "does not exist", "unknown model")):
+                        continue   # try next model name
+                    break          # auth/quota error — retrying won't help
 
-        # Attempt 2: Imagen 3 via new google-genai SDK
-        try:
-            from google import genai as _gai2
-            _gc2 = _gai2.Client(api_key=GOOGLE_API_KEY)
-            for _im3 in ["imagen-3.0-generate-001", "imagen-3.0-generate-002", "imagen-3.0-fast-generate-001"]:
+            # ── Tier 2: generate_images (Imagen 3) ───────────────────────────
+            _imagen_models = [
+                "imagen-3.0-generate-001",
+                "imagen-3.0-generate-002",
+                "imagen-3.0-fast-generate-001",
+            ]
+            for _im in _imagen_models:
                 try:
-                    from google.genai import types as _gt2
-                    _ir = _gc2.models.generate_images(
-                        model=_im3,
+                    _ir = _gc.models.generate_images(
+                        model=_im,
                         prompt=_gemini_prompt,
-                        config=_gt2.GenerateImagesConfig(number_of_images=1)
+                        config=_gtypes.GenerateImagesConfig(number_of_images=1)
                     )
                     _gi = getattr(_ir, "generated_images", None) or getattr(_ir, "images", None)
                     if _gi:
@@ -565,34 +575,19 @@ def gen_image(prompt, agent="Auto"):
                         if _iby:
                             b64 = _b64.b64encode(_iby).decode()
                             return f"data:image/png;base64,{b64}", "Nano Banana"
-                    _img_errs.append(f"{_im3}: no image bytes returned")
+                    _img_errs.append(f"{_im}: no image bytes in response")
                     break
-                except Exception as _im3e:
-                    _img_errs.append(f"{_im3}: {_im3e}")
-        except Exception as _sdk2e:
-            _img_errs.append(f"imagen-3 SDK: {_sdk2e}")
+                except Exception as _ime:
+                    _ime_str = str(_ime)
+                    _img_errs.append(f"{_im}: {_ime_str}")
+                    if any(x in _ime_str.lower() for x in ("not found", "404", "invalid", "does not exist")):
+                        continue
+                    break
 
-        # Attempt 3: old google-generativeai SDK as absolute last resort
-        if GEM:
-            try:
-                import google.generativeai as _old_gai
-                _old_gai.configure(api_key=GOOGLE_API_KEY)
-                for _om in ["imagen-3.0-generate-001", "imagen-3.0-generate-002"]:
-                    try:
-                        _oc = _old_gai.ImageGenerationModel(_om)
-                        _or = _oc.generate_images(prompt=_gemini_prompt, number_of_images=1)
-                        if getattr(_or, "images", None):
-                            b64 = _b64.b64encode(_or.images[0]._image_bytes).decode()
-                            return f"data:image/png;base64,{b64}", "Nano Banana"
-                        _img_errs.append(f"old-sdk/{_om}: empty response")
-                        break
-                    except Exception as _oe:
-                        _img_errs.append(f"old-sdk/{_om}: {_oe}")
-            except Exception as _olde:
-                _img_errs.append(f"old-sdk import: {_olde}")
+        except Exception as _sdk_e:
+            _img_errs.append(f"google-genai SDK init: {_sdk_e}")
 
-        # Store errors for display OUTSIDE gen_image() — st.expander
-        # cannot render reliably inside st.status() context
+        # Store errors — displayed at call sites outside st.status()
         if _img_errs:
             st.session_state["_img_gen_errors"] = _img_errs
 
