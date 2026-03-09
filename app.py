@@ -3295,7 +3295,7 @@ def main():
 }})();
 </script>
 """, height=44, scrolling=False)
-        if st.button("🔄 " + T("recheck"), key="recheck_sidebar", use_container_width=True):
+        if st.button("🔄", key="recheck_sidebar", use_container_width=True):
             st.session_state.conn_checked = False
             st.rerun()
 
@@ -3340,7 +3340,7 @@ def main():
     _cfg_region_lbl = st.session_state.get("cfg_region",  list(_regions().keys())[0])
     _cfg_lang_lbl   = st.session_state.get("lang_sel",    "English")
     _cfg_ctry_lbl   = st.session_state.get("country_sel", "Liberia")
-    _exp_parts = [f"⚙️ {_sn}" if _sn.strip() else "⚙️ Classroom Setup"]
+    _exp_parts = [f"⚙️ {_sn}" if _sn.strip() else "⚙️ Setup"]
     if _tn.strip(): _exp_parts.append(_tn)
     _exp_parts += [_cfg_grade_lbl, _cfg_subj_lbl]
     _expander_label = "  ·  ".join(_exp_parts)
@@ -3439,7 +3439,7 @@ def main():
         # ── Row 5a: Save / Load — 2 equal columns ──────────────────────────
         _sf1, _sf2 = st.columns(2)
         with _sf1:
-            if st.button("💾 Save", use_container_width=True, key="sv_prof"):
+            if st.button("💾", use_container_width=True, key="sv_prof"):
                 _c = st.session_state.get("country_sel","Liberia")
                 _l = st.session_state.get("lang_sel","English")
                 _r = st.session_state.get("cfg_region", list(_regions().keys())[0])
@@ -3452,13 +3452,13 @@ def main():
                 st.session_state["_show_save_opts"] = True
                 st.rerun()
         with _sf2:
-            if st.button("📂 Load", use_container_width=True, key="ld_prof"):
+            if st.button("📂", use_container_width=True, key="ld_prof"):
                 st.session_state["_show_load_opts"] = not st.session_state.get("_show_load_opts", False)
                 st.session_state["_show_save_opts"] = False
                 st.rerun()
         # ── Row 5b: Sign Out — full width, only shown when logged in ─────────
         if _login_required() and _is_logged_in():
-            if st.button("🚪 Sign Out", key="logout_btn", use_container_width=True, type="secondary"):
+            if st.button("🚪", key="logout_btn", use_container_width=True, type="secondary"):
                 st.session_state["_logged_in"] = False
                 st.session_state["_login_label"] = ""
                 # Remove persistent token so refresh also logs out
