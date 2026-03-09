@@ -6012,7 +6012,19 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                 # Find the user question this responds to
                 user_q = st.session_state.chat_messages[mi-1]["content"] if mi>0 else "Chat"
                 email_result(msg["content"], f"Teacher Pehpeh — {user_q[:50]} ({grade}, {subject})", f"chat_{mi}")
-                tts_player(msg["content"], f"chat_{mi}")
+                # Auto-play only for the message flagged after a voice input (one-shot)
+                _autoplay_this = (st.session_state.get("_tts_autoplay_idx") == mi)
+                if _autoplay_this:
+                    st.session_state.pop("_tts_autoplay_idx", None)  # consume the flag
+                    audio_key = f"tts_audio_chat_{mi}"
+                    if audio_key in st.session_state:
+                        aud = st.session_state[audio_key]
+                        audio_data = base64.b64decode(aud["b64"])
+                        st.audio(audio_data, format="audio/mp3", autoplay=True)
+                    else:
+                        tts_player(msg["content"], f"chat_{mi}")
+                else:
+                    tts_player(msg["content"], f"chat_{mi}")
         # Voice input for chat — recording indicator + AI selector
         voice_col, photo_col, label_col = st.columns([1, 1, 3])
         with voice_col:
@@ -6118,8 +6130,8 @@ Be factual. Do not invent data. Keep each section focused and practical."""
         # Voice input takes priority
         if voice_text:
             uq = voice_text
-            # Clear hash so next recording isn't suppressed
-            st.session_state.pop("_last_audio_hash", None)
+            # NOTE: Do NOT clear _last_audio_hash here — it prevents re-submission on rerun.
+            # It gets replaced naturally when the user makes a new recording with a different hash.
         # Photo submission — either with typed question or default prompt
         if chat_photo_b64 and not uq:
             _pq = st.session_state.get("chat_photo_question", "").strip()
@@ -6187,7 +6199,7 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                         msg_data["image_src"]=img_model
                 status.update(label=T("response_ready"),state="complete",expanded=False)
             st.session_state.chat_messages.append(msg_data)
-            # Auto-generate TTS when input came from voice — so audio plays immediately on rerun
+            # Auto-generate TTS when input came from voice — plays once on next render
             if voice_text and ELEVENLABS_API_KEY:
                 _auto_content = msg_data.get("content", "")
                 if _auto_content and not str(_auto_content).startswith("⚠️"):
@@ -6197,6 +6209,8 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                         _b64, _src = speak_elevenlabs(_auto_content[:2000])
                         if _b64:
                             st.session_state[_auto_key] = {"b64": _b64, "src": _src}
+                            # Mark this index for one-shot autoplay — cleared after first render
+                            st.session_state["_tts_autoplay_idx"] = _auto_mi
             st.rerun()
         if st.session_state.chat_messages and st.button(T("clear"),key="cc"): st.session_state.chat_messages=[]; st.rerun()
         st.markdown("---")
