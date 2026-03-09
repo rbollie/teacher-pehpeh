@@ -2853,10 +2853,10 @@ def main():
        Make the header option (category name) look like a section label.
        Highlight whichever dropdown has an active task selected.           */
     /* Active category dropdown — gold accent border */
-    [data-testid="stMainBlockContainer"] .stSelectbox[data-active-cat="true"] > div > div {
-        border-color: #D4A843 !important;
+    [data-testid="stMainBlockContainer"] .stSelectbox[data-active-cat="true"] > div > div {{
+        border-color: {C_GOLD} !important;
         box-shadow: 0 0 0 2px rgba(212,168,67,.18) !important;
-    }
+    }}
     </style>""",unsafe_allow_html=True)
 
 
