@@ -367,7 +367,7 @@ def check_conn():
 
 # === IMAGE GENERATION ===
 def gen_image(prompt):
-    """Try DALL-E-3/gpt-image-1 (Canva) first, then Gemini image generation (Nano Banana)"""
+    """Try DALL-E-3/gpt-image-1 (ChatGPT) first, then Gemini image generation (Nano Banana)"""
     import base64 as _b64
 
     # === Teacher Pehpeh permanent background — always consulted for image generation ===
@@ -391,7 +391,7 @@ def gen_image(prompt):
     )
     full_prompt = f"Educational visual aid for a Liberian school: {prompt}. {img_style}"
 
-    # --- ChatGPT image generation (Canva) ---
+    # --- ChatGPT image generation (DALL·E) ---
     if OAI and OPENAI_API_KEY:
         c = openai.OpenAI(api_key=OPENAI_API_KEY)
         # Primary: DALL-E-3 with HD quality — reduces cartoonish output
@@ -399,14 +399,14 @@ def gen_image(prompt):
             r = c.images.generate(model="dall-e-3", prompt=full_prompt, size="1024x1024", quality="hd", n=1)
             url = r.data[0].url
             if url:
-                return url, "Canva"
+                return url, "ChatGPT"
         except: pass
         # Secondary: gpt-image-1 — newer model, returns b64_json natively
         try:
             r = c.images.generate(model="gpt-image-1", prompt=full_prompt, size="1024x1024", n=1)
             b64 = r.data[0].b64_json
             if b64:
-                return f"data:image/png;base64,{b64}", "Canva"
+                return f"data:image/png;base64,{b64}", "ChatGPT"
         except: pass
 
     # --- Gemini image generation (Nano Banana) ---
@@ -960,7 +960,7 @@ UI_TEXT={
   "upload_excel":"📤 Upload Excel","lit_library":"📚 Literature Library",
   "lit_desc":"Select a novel for passage-based comprehension exercises","select_book":"📖 Select Book",
   "comp_type":"Comprehension Type","include_img":"🎨 Include AI illustration",
-  "img_help":"Generates a visual aid using Canva or Nano Banana",
+  "img_help":"Generates a visual aid using ChatGPT (DALL·E) or Nano Banana",
   "ask_about":"Ask about","draw_hint":"(start with 'draw' for images)",
   "mic_hint":"🎤 Tap mic to speak instead of typing","heard":"🎤 Heard",
   "email_result":"📧 Email / Download this result","recheck":"🔄 Re-check",
@@ -1006,7 +1006,7 @@ UI_TEXT={
   "upload_excel":"📤 Télécharger Excel","lit_library":"📚 Bibliothèque littéraire",
   "lit_desc":"Sélectionnez un roman pour des exercices de compréhension","select_book":"📖 Choisir un livre",
   "comp_type":"Type de compréhension","include_img":"🎨 Inclure une illustration IA",
-  "img_help":"Génère une aide visuelle avec Canva ou Nano Banana",
+  "img_help":"Génère une aide visuelle avec ChatGPT (DALL·E) ou Nano Banana",
   "ask_about":"Posez une question sur","draw_hint":"(commencez par 'dessiner' pour images)",
   "mic_hint":"🎤 Appuyez sur le micro pour parler","heard":"🎤 Entendu",
   "email_result":"📧 Envoyer / Télécharger ce résultat","recheck":"🔄 Vérifier",
@@ -1052,7 +1052,7 @@ UI_TEXT={
   "upload_excel":"📤 Pakia Excel","lit_library":"📚 Maktaba ya Vitabu",
   "lit_desc":"Chagua riwaya kwa mazoezi ya ufahamu wa kusoma","select_book":"📖 Chagua Kitabu",
   "comp_type":"Aina ya ufahamu","include_img":"🎨 Jumuisha mchoro wa AI",
-  "img_help":"Inatengeneza msaada wa kuona kwa Canva au Nano Banana",
+  "img_help":"Inatengeneza msaada wa kuona kwa ChatGPT (DALL·E) au Nano Banana",
   "ask_about":"Uliza kuhusu","draw_hint":"(anza na 'chora' kwa picha)",
   "mic_hint":"🎤 Bonyeza maikrofoni kusema badala ya kuandika","heard":"🎤 Imesikika",
   "email_result":"📧 Tuma / Pakua matokeo haya","recheck":"🔄 Angalia tena",
