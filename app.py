@@ -6270,13 +6270,43 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                     allr = {m: r} if m else {"AI": r}
                     msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
                 else:
-                    st.write(f"{T('asking_claude')}")
                     _sp_chat = build_free_chat()
                     _hist_chat = [{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]]
                     if st.session_state.get("chat_ask_all_ai", False):
+                        st.write(f"{T('asking_claude')}")
                         r,m,allr=best_all(_sp_chat,uq,_hist_chat)
+                    elif want_chat_img:
+                        # Image generation: use ChatGPT then Gemini — NOT Claude
+                        st.write(f"{T('asking_chatgpt')}")
+                        _img_pairs=[(OPENAI_API_KEY,ask_gpt,"ChatGPT"),(GOOGLE_API_KEY,ask_gem,"Gemini")]
+                        r,m,allr=None,None,{}
+                        for _sk,_sfn,_snm in _img_pairs:
+                            if _sk:
+                                _sr=_sfn(_sp_chat,uq,_hist_chat) if _snm!="Gemini" else _sfn(_sp_chat,uq)
+                                if _sr and not str(_sr).startswith("⚠️"):
+                                    r,m,allr=_sr,_snm,{_snm:_sr}
+                                    break
+                        if not r: r,m,allr="⚠️ No AI responded.",None,{}
+                    elif voice_text:
+                        # Audio / voice chat: always use Claude
+                        st.write(f"{T('asking_claude')}")
+                        _vr=ask_cl(_sp_chat,uq,_hist_chat,max_t=400) if ANTHROPIC_API_KEY else None
+                        if _vr and not str(_vr).startswith("⚠️"):
+                            r,m,allr=_vr,"Claude",{"Claude":_vr}
+                        else:
+                            # Fallback to ChatGPT then Gemini if Claude is unavailable
+                            _voice_fallback=[(OPENAI_API_KEY,ask_gpt,"ChatGPT"),(GOOGLE_API_KEY,ask_gem,"Gemini")]
+                            r,m,allr=None,None,{}
+                            for _sk,_sfn,_snm in _voice_fallback:
+                                if _sk:
+                                    _sr=_sfn(_sp_chat,uq,_hist_chat) if _snm!="Gemini" else _sfn(_sp_chat,uq)
+                                    if _sr and not str(_sr).startswith("⚠️"):
+                                        r,m,allr=_sr,_snm,{_snm:_sr}
+                                        break
+                            if not r: r,m,allr="⚠️ No AI responded.",None,{}
                     else:
-                        # Single best AI — try in preferred order, return first success
+                        # Regular text chat: Claude → ChatGPT → Gemini
+                        st.write(f"{T('asking_claude')}")
                         _single_pairs=[(ANTHROPIC_API_KEY,ask_cl,"Claude"),(OPENAI_API_KEY,ask_gpt,"ChatGPT"),(GOOGLE_API_KEY,ask_gem,"Gemini")]
                         r,m,allr=None,None,{}
                         for _sk,_sfn,_snm in _single_pairs:
