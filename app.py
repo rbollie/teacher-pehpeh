@@ -2790,6 +2790,32 @@ def main():
             st.session_state.conn_checked = False
             st.rerun()
 
+        # ── Help menu ──────────────────────────────────────────────────────
+        with st.expander("❓ Help & User Guide", expanded=False):
+            st.markdown(
+                "<div style='font-size:.83rem;color:#A0B8D0;margin-bottom:8px'>"
+                "<b style='color:#D4A843'>Teacher Pehpeh User Guide</b><br>"
+                "Complete reference — all 6 tabs, login, exports, intervention plans, and security."
+                "</div>",
+                unsafe_allow_html=True,
+            )
+            st.download_button(
+                label="📄 Download User Guide (.docx)",
+                data=_get_guide_bytes(),
+                file_name="Teacher_Pehpeh_User_Guide.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                use_container_width=True,
+                key="dl_user_guide",
+            )
+            st.markdown(
+                "<div style='font-size:.75rem;color:#556;margin-top:8px;line-height:1.5'>"
+                "📞 +231-770-625-656<br>"
+                "✉ info@institutebasictechnology.org<br>"
+                "🌐 www.institutebasictechnology.org"
+                "</div>",
+                unsafe_allow_html=True,
+            )
+
     if not conn:
         keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
 
@@ -2899,32 +2925,6 @@ def main():
                 if mano_on:
                     _mano_stats = get_mano_stats()
                     if _mano_stats: st.caption(f"🗣️ {_mano_stats['total']}+ words loaded")
-
-        # ── Help menu ──────────────────────────────────────────────────────
-        with st.expander("❓ Help & User Guide", expanded=False):
-            st.markdown(
-                "<div style='font-size:.83rem;color:#A0B8D0;margin-bottom:8px'>"
-                "<b style='color:#D4A843'>Teacher Pehpeh User Guide</b><br>"
-                "Complete reference — all 6 tabs, login, exports, intervention plans, and security."
-                "</div>",
-                unsafe_allow_html=True,
-            )
-            st.download_button(
-                label="📄 Download User Guide (.docx)",
-                data=_get_guide_bytes(),
-                file_name="Teacher_Pehpeh_User_Guide.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                use_container_width=True,
-                key="dl_user_guide",
-            )
-            st.markdown(
-                "<div style='font-size:.75rem;color:#556;margin-top:8px;line-height:1.5'>"
-                "📞 +231-770-625-656<br>"
-                "✉ info@institutebasictechnology.org<br>"
-                "🌐 www.institutebasictechnology.org"
-                "</div>",
-                unsafe_allow_html=True,
-            )
 
         # ── Row 5: Save / Load + subscription + logout ────────────────────
         _sf1, _sf2, _sf3 = st.columns([2, 2, 1])
