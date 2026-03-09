@@ -373,42 +373,49 @@ def _enhance_image_prompt(raw_prompt, openai_client):
     This is the step a direct API call skips — and why ChatGPT images look better.
     """
     system = (
-        "You are an expert at writing image generation prompts for DALL-E 3. "
-        "Your job is to take a short educational topic and expand it into a single, "
-        "richly detailed, scene-compositional prompt that DALL-E 3 can render beautifully.\n\n"
-        "MANDATORY RULES — never break these:\n"
-        "- The scene must be set in Liberia or West Africa. No Western/American/European settings.\n"
-        "- Any people shown must have dark skin and African features (Liberian society).\n"
-        "- Students wear school uniforms typical of Liberian public schools.\n"
-        "- Environment details: tropical vegetation, red laterite soil, zinc-roof classrooms, "
-        "open-air corridors, West African market stalls, cassava farms — use whichever fits.\n"
-        "- Style: photorealistic OR clean modern flat-design infographic. "
-        "NEVER cartoon, comic-book, anime, watercolor, sketch, or hand-drawn.\n"
-        "- Layout: clear labels, well-spaced diagram elements, professional school-textbook look.\n"
-        "- The prompt must be ONE paragraph, under 400 words, no bullet points.\n"
-        "- Return ONLY the prompt text. No preamble, no explanation, no quotes."
+        "You are a specialist in writing DALL-E 3 image prompts that produce real photographs, "
+        "not illustrations or drawings. Every prompt you write must read like a photography brief.\n\n"
+        "STYLE — these are absolute, never negotiable:\n"
+        "Describe the scene as though a documentary photographer captured it with a DSLR. "
+        "Use concrete photography terms: focal length, camera model, lighting conditions, depth of field. "
+        "Example style suffix: 'Photographed on a Nikon D850, 50mm f/1.8 lens, warm afternoon sunlight, "
+        "shallow depth of field, National Geographic editorial quality.' "
+        "The output must look indistinguishable from a real photograph. "
+        "Write ONLY about what should be IN the image — never say what should NOT be in it. "
+        "(Negative lists in DALL-E prompts reinforce the forbidden words — avoid them entirely.)\n\n"
+        "CULTURE — Liberia and West Africa, always:\n"
+        "- All people have dark skin tones and African facial features.\n"
+        "- Students wear simple cotton school uniforms (white shirt, dark trousers or skirt) from Liberian public schools.\n"
+        "- Settings: zinc-roof concrete classrooms, red laterite soil, tropical greenery, wooden desks, "
+        "open louvred windows with warm light, concrete chalkboard walls, open-air corridors.\n"
+        "- If the topic involves a diagram, show it hand-drawn in chalk on a concrete chalkboard, "
+        "or written in a paper exercise book held by a student — photographed in situ.\n"
+        "- Atmosphere: warm, community-oriented, aspiring — a real Liberian school captured with pride.\n\n"
+        "OUTPUT: ONE paragraph, under 350 words. No bullet points. No preamble. No quotes. Just the prompt."
     )
     try:
         resp = openai_client.chat.completions.create(
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": system},
-                {"role": "user", "content": f"Write a DALL-E 3 prompt for: {raw_prompt}"}
+                {"role": "user", "content": f"Write a DALL-E 3 photorealistic prompt for this educational topic in Liberia: {raw_prompt}"}
             ],
-            max_tokens=400,
-            temperature=0.7,
+            max_tokens=450,
+            temperature=0.6,
         )
         enhanced = resp.choices[0].message.content.strip()
         if enhanced:
             return enhanced
     except: pass
-    # Fallback: return a well-structured version of the raw prompt
+    # Fallback: hardcoded photorealistic prompt (no cartoon language at all)
     return (
-        f"A professional educational diagram illustrating '{raw_prompt}', "
-        "set in a Liberian school. Students with dark skin in school uniforms study in a "
-        "tropical West African classroom with zinc roof and open windows. "
-        "Clean modern flat-design style, bright colours, clear labels, white background. "
-        "No cartoon, no sketch, no chalkboard aesthetic. Photorealistic infographic quality."
+        f"A Liberian school classroom photographed with a Canon EOS R5, 35mm lens, natural daylight. "
+        f"A teacher with dark skin and African features stands at a concrete chalkboard in a zinc-roof "
+        f"classroom, pointing to a hand-drawn chalk diagram about '{raw_prompt}'. "
+        "Liberian students in white-shirt dark-trouser school uniforms sit at worn wooden desks, "
+        "engaged and attentive. Warm tropical light streams through louvred windows. "
+        "Red laterite soil visible outside. Concrete block walls. "
+        "Sharp focus, high resolution, National Geographic editorial photography quality."
     )
 
 
@@ -426,9 +433,22 @@ def gen_image(prompt):
         # Step 1: enhance the prompt via GPT-4o (ChatGPT's internal rewriting step)
         enhanced_prompt = _enhance_image_prompt(prompt, c)
 
-        # Step 2: send enhanced prompt to DALL-E 3 at HD quality
+        # Step 2: prepend a hardcoded photorealism anchor so DALL-E 3 cannot drift toward illustration
+        # "natural" style = photorealistic; "vivid" = artistic/illustrated (we never want vivid)
+        _photo_anchor = (
+            "Real documentary photograph taken inside a Liberian school. "
+            "DSLR camera, natural light, photorealistic, editorial photography. "
+        )
+        _final_dalle_prompt = _photo_anchor + enhanced_prompt
         try:
-            r = c.images.generate(model="dall-e-3", prompt=enhanced_prompt, size="1024x1024", quality="hd", n=1)
+            r = c.images.generate(
+                model="dall-e-3",
+                prompt=_final_dalle_prompt,
+                size="1024x1024",
+                quality="hd",
+                style="natural",
+                n=1
+            )
             url = r.data[0].url
             if url:
                 return url, "ChatGPT"
@@ -436,63 +456,113 @@ def gen_image(prompt):
 
         # Secondary: gpt-image-1 — newer model, returns b64_json natively
         try:
-            r = c.images.generate(model="gpt-image-1", prompt=enhanced_prompt, size="1024x1024", n=1)
+            r = c.images.generate(model="gpt-image-1", prompt=_final_dalle_prompt, size="1024x1024", n=1)
             b64 = r.data[0].b64_json
             if b64:
                 return f"data:image/png;base64,{b64}", "ChatGPT"
         except: pass
 
-    # Build a rich fallback prompt for Gemini (used when OpenAI is unavailable)
+    # Gemini photorealistic Liberian prompt — built independently, always used
     _gemini_prompt = (
-        f"A professional educational diagram illustrating '{prompt}', "
-        "set in a Liberian school. Students with dark skin in school uniforms. "
-        "Tropical West African setting with zinc-roof classroom and open windows. "
-        "Clean modern flat-design infographic style, bright colours, clear labels, white background. "
-        "No cartoon, no sketch, no chalkboard. Photorealistic school-textbook quality."
+        f"A real documentary photograph taken inside a Liberian school, illustrating '{prompt}'. "
+        "A teacher with dark skin and African features stands at a concrete chalkboard in a "
+        "zinc-roof classroom. Liberian students in white-shirt dark-trouser school uniforms "
+        "sit at worn wooden desks, engaged and curious. Warm tropical sunlight streams through "
+        "open louvred windows. Red laterite soil and tropical vegetation visible outside. "
+        "Concrete block walls with a hand-drawn chalk diagram on the board. "
+        "Photorealistic, high resolution, National Geographic documentary photography style. "
+        "Shot on a DSLR camera with natural light. Real photograph, not an illustration."
     )
 
     # --- Gemini image generation (Nano Banana) ---
-    # Uses new google-genai SDK (google.genai) which supports response_modalities
     if GOOGLE_API_KEY:
         _img_errs = []
-        try:
-            from google import genai as _new_genai
-            from google.genai import types as _gtypes
-            _gc = _new_genai.Client(api_key=GOOGLE_API_KEY)
-            _resp = _gc.models.generate_content(
-                model="gemini-2.0-flash-preview-image-generation",
-                contents=_gemini_prompt,
-                config=_gtypes.GenerateContentConfig(response_modalities=["IMAGE", "TEXT"])
-            )
-            for _part in _resp.candidates[0].content.parts:
-                if hasattr(_part, "inline_data") and _part.inline_data and _part.inline_data.mime_type.startswith("image/"):
-                    _idata = _part.inline_data.data
-                    # inline_data.data may already be a base64 string or raw bytes
-                    b64 = _idata if isinstance(_idata, str) else _b64.b64encode(_idata).decode()
-                    return f"data:{_part.inline_data.mime_type};base64,{b64}", "Nano Banana"
-            _img_errs.append("gemini-flash: response contained no image parts")
-        except Exception as _ge:
-            _img_errs.append(f"gemini-flash: {_ge}")
 
-        # Fallback: Imagen 3 via google-generativeai SDK
+        # Attempt 1: gemini-2.0-flash-preview-image-generation via new google-genai SDK
+        try:
+            from google import genai as _gai
+            from google.genai import types as _gtypes
+            _gc = _gai.Client(api_key=GOOGLE_API_KEY)
+            for _flash_model in [
+                "gemini-2.0-flash-preview-image-generation",
+                "gemini-2.0-flash-exp-image-generation",
+                "gemini-2.0-flash-exp",
+            ]:
+                try:
+                    _resp = _gc.models.generate_content(
+                        model=_flash_model,
+                        contents=_gemini_prompt,
+                        config=_gtypes.GenerateContentConfig(
+                            response_modalities=["IMAGE", "TEXT"]
+                        )
+                    )
+                    _found_img = False
+                    for _cand in (_resp.candidates or []):
+                        for _part in (_cand.content.parts if _cand.content else []):
+                            _id = getattr(_part, "inline_data", None)
+                            if _id and getattr(_id, "mime_type", "").startswith("image/"):
+                                _raw = _id.data
+                                b64 = _raw if isinstance(_raw, str) else _b64.b64encode(_raw).decode()
+                                return f"data:{_id.mime_type};base64,{b64}", "Nano Banana"
+                        _found_img = True  # keep looping candidates
+                    _img_errs.append(f"{_flash_model}: no image part in response")
+                    break  # model found but returned no image — no point retrying other names
+                except Exception as _fe:
+                    _img_errs.append(f"{_flash_model}: {_fe}")
+        except Exception as _sdk1e:
+            _img_errs.append(f"google-genai SDK import: {_sdk1e}")
+
+        # Attempt 2: Imagen 3 via new google-genai SDK
+        try:
+            from google import genai as _gai2
+            _gc2 = _gai2.Client(api_key=GOOGLE_API_KEY)
+            for _im3 in ["imagen-3.0-generate-001", "imagen-3.0-generate-002", "imagen-3.0-fast-generate-001"]:
+                try:
+                    from google.genai import types as _gt2
+                    _ir = _gc2.models.generate_images(
+                        model=_im3,
+                        prompt=_gemini_prompt,
+                        config=_gt2.GenerateImagesConfig(number_of_images=1)
+                    )
+                    _gi = getattr(_ir, "generated_images", None) or getattr(_ir, "images", None)
+                    if _gi:
+                        _ib = getattr(_gi[0], "image", _gi[0])
+                        _iby = getattr(_ib, "image_bytes", None) or getattr(_ib, "_image_bytes", None)
+                        if _iby:
+                            b64 = _b64.b64encode(_iby).decode()
+                            return f"data:image/png;base64,{b64}", "Nano Banana"
+                    _img_errs.append(f"{_im3}: no image bytes returned")
+                    break
+                except Exception as _im3e:
+                    _img_errs.append(f"{_im3}: {_im3e}")
+        except Exception as _sdk2e:
+            _img_errs.append(f"imagen-3 SDK: {_sdk2e}")
+
+        # Attempt 3: old google-generativeai SDK as absolute last resort
         if GEM:
             try:
-                import google.generativeai as _gai_img
-                _gai_img.configure(api_key=GOOGLE_API_KEY)
-                _img_client = _gai_img.ImageGenerationModel("imagen-3.0-generate-002")
-                _img_resp = _img_client.generate_images(prompt=_gemini_prompt, number_of_images=1)
-                if _img_resp.images:
-                    b64 = _b64.b64encode(_img_resp.images[0]._image_bytes).decode()
-                    return f"data:image/png;base64,{b64}", "Nano Banana"
-                _img_errs.append("imagen-3: no images returned in response")
-            except Exception as _ie:
-                _img_errs.append(f"imagen-3: {_ie}")
+                import google.generativeai as _old_gai
+                _old_gai.configure(api_key=GOOGLE_API_KEY)
+                for _om in ["imagen-3.0-generate-001", "imagen-3.0-generate-002"]:
+                    try:
+                        _oc = _old_gai.ImageGenerationModel(_om)
+                        _or = _oc.generate_images(prompt=_gemini_prompt, number_of_images=1)
+                        if getattr(_or, "images", None):
+                            b64 = _b64.b64encode(_or.images[0]._image_bytes).decode()
+                            return f"data:image/png;base64,{b64}", "Nano Banana"
+                        _img_errs.append(f"old-sdk/{_om}: empty response")
+                        break
+                    except Exception as _oe:
+                        _img_errs.append(f"old-sdk/{_om}: {_oe}")
+            except Exception as _olde:
+                _img_errs.append(f"old-sdk import: {_olde}")
 
-        # Surface errors in session state for debugging
+        # Always show errors so we can debug — stored AND displayed
         if _img_errs:
-            try:
-                st.session_state["_img_gen_errors"] = _img_errs
-            except: pass
+            st.session_state["_img_gen_errors"] = _img_errs
+            with st.expander("🔴 Nano Banana debug — tap to see errors", expanded=False):
+                for _e in _img_errs:
+                    st.code(_e)
 
     return None, None
 
