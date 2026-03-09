@@ -443,6 +443,8 @@ def _enhance_image_prompt(raw_prompt, openai_client):
 def gen_image(prompt, agent="Auto"):
     """Generate image. agent: 'ChatGPT' | 'Nano Banana' | 'Auto' (ChatGPT first, Gemini fallback)"""
     import base64 as _b64
+    # Always clear stale errors from previous runs
+    st.session_state.pop("_img_gen_errors", None)
 
     # --- ChatGPT image generation (DALL-E) ---
     if agent in ("ChatGPT", "Auto") and OAI and OPENAI_API_KEY:
@@ -508,86 +510,105 @@ def gen_image(prompt, agent="Auto"):
         "Shot on a DSLR with natural light. Real photograph."
     )
 
-    # --- Gemini image generation (Nano Banana 2 = Gemini 3 Flash Image) ---
-    # Model name confirmed by Gemini itself: "Gemini 3 Flash Image"
-    # API candidates tried in order — all without break so every name is attempted
+    # --- Gemini / Nano Banana image generation ---
+    # Uses direct HTTP REST API — no SDK dependency, works on any server.
+    # Models tried: Gemini 3 Flash Image first, then Imagen 3 variants.
     if agent in ("Nano Banana", "Auto") and GOOGLE_API_KEY:
+        import json as _json
+        import urllib.request as _ur
+        import urllib.error as _ue
         _img_errs = []
+        _base = "https://generativelanguage.googleapis.com/v1beta/models"
+        _key  = f"?key={GOOGLE_API_KEY}"
 
-        try:
-            from google import genai as _gai
-            from google.genai import types as _gtypes
-            _gc = _gai.Client(api_key=GOOGLE_API_KEY)
+        def _http_post(url, payload):
+            """POST JSON, return parsed response or raise."""
+            _req = _ur.Request(
+                url,
+                data=_json.dumps(payload).encode(),
+                headers={"Content-Type": "application/json"},
+                method="POST"
+            )
+            with _ur.urlopen(_req, timeout=60) as _r:
+                return _json.loads(_r.read().decode())
 
-            # ── Tier 1: generate_content with IMAGE modality ─────────────────
-            # Model names in priority order — Gemini 3 Flash first, then 2.x fallbacks
-            _flash_models = [
-                "gemini-3.0-flash",                          # Gemini 3 Flash Image (Nano Banana 2)
-                "gemini-3.0-flash-image-generation",         # possible explicit image variant
-                "gemini-2.5-flash",                          # Gemini 2.5 Flash
-                "gemini-2.5-flash-preview-05-20",            # versioned preview
-                "gemini-2.0-flash-preview-image-generation", # 2.0 preview
-                "gemini-2.0-flash-exp",                      # 2.0 experimental
-            ]
-            for _fm in _flash_models:
-                try:
-                    _resp = _gc.models.generate_content(
-                        model=_fm,
-                        contents=_gemini_prompt,
-                        config=_gtypes.GenerateContentConfig(
-                            response_modalities=["IMAGE", "TEXT"]
-                        )
+        def _extract_b64_from_response(resp_json):
+            """Pull the first image/... inline_data base64 out of a generateContent response."""
+            for cand in resp_json.get("candidates", []):
+                for part in cand.get("content", {}).get("parts", []):
+                    idata = part.get("inlineData") or part.get("inline_data")
+                    if idata and idata.get("mimeType", "").startswith("image/"):
+                        return idata["data"], idata["mimeType"]
+            return None, None
+
+        # ── Tier 1: generateContent with IMAGE modality (Gemini Flash models) ──
+        _flash_models = [
+            "gemini-2.0-flash-preview-image-generation",
+            "gemini-2.0-flash-exp",
+            "gemini-2.5-flash-preview-05-20",
+            "gemini-2.5-flash",
+        ]
+        _payload_flash = {
+            "contents": [{"parts": [{"text": _gemini_prompt}]}],
+            "generationConfig": {"responseModalities": ["IMAGE", "TEXT"]}
+        }
+        for _fm in _flash_models:
+            try:
+                _url = f"{_base}/{_fm}:generateContent{_key}"
+                _resp_j = _http_post(_url, _payload_flash)
+                _b64_data, _mime = _extract_b64_from_response(_resp_j)
+                if _b64_data:
+                    return f"data:{_mime};base64,{_b64_data}", "Nano Banana"
+                # Model responded but no image — log and stop trying flash models
+                _img_errs.append(f"{_fm}: no image in response — {str(_resp_j)[:300]}")
+                break
+            except _ue.HTTPError as _he:
+                _body = ""
+                try: _body = _he.read().decode()[:300]
+                except: pass
+                _img_errs.append(f"{_fm}: HTTP {_he.code} — {_body}")
+                if _he.code in (400, 401, 403, 429):
+                    break   # auth/quota/bad-request — stop immediately
+                # 404 = wrong model name, try next
+            except Exception as _e:
+                _img_errs.append(f"{_fm}: {_e}")
+                break
+
+        # ── Tier 2: predict endpoint (Imagen 3) ──────────────────────────────
+        _imagen_models = [
+            "imagen-3.0-generate-001",
+            "imagen-3.0-generate-002",
+            "imagen-3.0-fast-generate-001",
+        ]
+        _payload_imagen = {
+            "instances": [{"prompt": _gemini_prompt}],
+            "parameters": {"sampleCount": 1}
+        }
+        for _im in _imagen_models:
+            try:
+                _url = f"{_base}/{_im}:predict{_key}"
+                _resp_j = _http_post(_url, _payload_imagen)
+                _preds = _resp_j.get("predictions", [])
+                if _preds:
+                    _img_b64 = (
+                        _preds[0].get("bytesBase64Encoded") or
+                        _preds[0].get("image", {}).get("bytesBase64Encoded")
                     )
-                    for _cand in (_resp.candidates or []):
-                        for _part in (_cand.content.parts if _cand.content else []):
-                            _id = getattr(_part, "inline_data", None)
-                            if _id and getattr(_id, "mime_type", "").startswith("image/"):
-                                _raw = _id.data
-                                b64 = _raw if isinstance(_raw, str) else _b64.b64encode(_raw).decode()
-                                return f"data:{_id.mime_type};base64,{b64}", "Nano Banana"
-                    _img_errs.append(f"{_fm}: responded but returned no image part")
-                    break  # model is reachable but returned no image — don't try more variants
-                except Exception as _fe:
-                    _fe_str = str(_fe)
-                    _img_errs.append(f"{_fm}: {_fe_str}")
-                    # Only skip to next model if error is a 404/not-found; stop on auth/quota errors
-                    if any(x in _fe_str.lower() for x in ("not found", "404", "invalid", "does not exist", "unknown model")):
-                        continue   # try next model name
-                    break          # auth/quota error — retrying won't help
-
-            # ── Tier 2: generate_images (Imagen 3) ───────────────────────────
-            _imagen_models = [
-                "imagen-3.0-generate-001",
-                "imagen-3.0-generate-002",
-                "imagen-3.0-fast-generate-001",
-            ]
-            for _im in _imagen_models:
-                try:
-                    _ir = _gc.models.generate_images(
-                        model=_im,
-                        prompt=_gemini_prompt,
-                        config=_gtypes.GenerateImagesConfig(number_of_images=1)
-                    )
-                    _gi = getattr(_ir, "generated_images", None) or getattr(_ir, "images", None)
-                    if _gi:
-                        _ib = getattr(_gi[0], "image", _gi[0])
-                        _iby = getattr(_ib, "image_bytes", None) or getattr(_ib, "_image_bytes", None)
-                        if _iby:
-                            b64 = _b64.b64encode(_iby).decode()
-                            return f"data:image/png;base64,{b64}", "Nano Banana"
-                    _img_errs.append(f"{_im}: no image bytes in response")
+                    if _img_b64:
+                        return f"data:image/png;base64,{_img_b64}", "Nano Banana"
+                _img_errs.append(f"{_im}: no image in response — {str(_resp_j)[:300]}")
+                break
+            except _ue.HTTPError as _he:
+                _body = ""
+                try: _body = _he.read().decode()[:300]
+                except: pass
+                _img_errs.append(f"{_im}: HTTP {_he.code} — {_body}")
+                if _he.code in (400, 401, 403, 429):
                     break
-                except Exception as _ime:
-                    _ime_str = str(_ime)
-                    _img_errs.append(f"{_im}: {_ime_str}")
-                    if any(x in _ime_str.lower() for x in ("not found", "404", "invalid", "does not exist")):
-                        continue
-                    break
+            except Exception as _e:
+                _img_errs.append(f"{_im}: {_e}")
+                break
 
-        except Exception as _sdk_e:
-            _img_errs.append(f"google-genai SDK init: {_sdk_e}")
-
-        # Store errors — displayed at call sites outside st.status()
         if _img_errs:
             st.session_state["_img_gen_errors"] = _img_errs
 
@@ -3623,6 +3644,63 @@ def main():
                 unsafe_allow_html=True,
             )
 
+        # ── Nano Banana API diagnostic ─────────────────────────────────────
+        with st.expander("🧪 Test Nano Banana (Gemini)", expanded=False):
+            st.markdown("<div style='font-size:.8rem;color:#A0B8D0'>Tap to run a live API test and see exactly what Google returns.</div>", unsafe_allow_html=True)
+            if st.button("▶ Run Gemini Image Test", key="gemini_diag_btn", use_container_width=True):
+                import json as _dj, urllib.request as _dur, urllib.error as _due
+                _dkey = GOOGLE_API_KEY
+                if not _dkey:
+                    st.error("❌ GOOGLE_API_KEY is not set in Streamlit secrets.")
+                else:
+                    st.info(f"✅ GOOGLE_API_KEY found (ends …{_dkey[-6:]})")
+                    _test_prompt = "A photo of a student writing in a classroom in Monrovia Liberia"
+                    _test_models = [
+                        "gemini-2.0-flash-preview-image-generation",
+                        "gemini-2.0-flash-exp",
+                        "gemini-2.5-flash-preview-05-20",
+                        "imagen-3.0-generate-001",
+                    ]
+                    for _tm in _test_models:
+                        st.write(f"Testing **{_tm}**…")
+                        try:
+                            if "imagen" in _tm:
+                                _url = f"https://generativelanguage.googleapis.com/v1beta/models/{_tm}:predict?key={_dkey}"
+                                _payload = {"instances":[{"prompt":_test_prompt}],"parameters":{"sampleCount":1}}
+                            else:
+                                _url = f"https://generativelanguage.googleapis.com/v1beta/models/{_tm}:generateContent?key={_dkey}"
+                                _payload = {
+                                    "contents":[{"parts":[{"text":_test_prompt}]}],
+                                    "generationConfig":{"responseModalities":["IMAGE","TEXT"]}
+                                }
+                            _req = _dur.Request(_url, data=_dj.dumps(_payload).encode(),
+                                                headers={"Content-Type":"application/json"}, method="POST")
+                            with _dur.urlopen(_req, timeout=30) as _r:
+                                _rbody = _dj.loads(_r.read().decode())
+                            # Look for image
+                            _found = False
+                            for _c in _rbody.get("candidates",[]):
+                                for _p in _c.get("content",{}).get("parts",[]):
+                                    _id = _p.get("inlineData") or _p.get("inline_data")
+                                    if _id and "image" in _id.get("mimeType",""):
+                                        st.success(f"✅ {_tm} → IMAGE returned! ({_id['mimeType']})")
+                                        _found = True
+                            for _pred in _rbody.get("predictions",[]):
+                                if _pred.get("bytesBase64Encoded"):
+                                    st.success(f"✅ {_tm} → IMAGE returned (Imagen)!")
+                                    _found = True
+                            if not _found:
+                                st.warning(f"⚠️ {_tm} responded but no image. Response:")
+                                st.code(_dj.dumps(_rbody, indent=2)[:1000], language="json")
+                        except _due.HTTPError as _he:
+                            _hbody=""
+                            try: _hbody=_he.read().decode()[:600]
+                            except: pass
+                            st.error(f"❌ {_tm}: HTTP {_he.code}")
+                            st.code(_hbody, language="json")
+                        except Exception as _ex:
+                            st.error(f"❌ {_tm}: {_ex}")
+
     if not conn:
         keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
 
@@ -4375,11 +4453,9 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                 s+=1; ph.markdown(pprog(s,tot,T("creating_img")),unsafe_allow_html=True)
                 _chosen_agent = st.session_state.get("_img_agent_choice", "Auto")
                 img,img_src=gen_image(f"{_subj_en}: {_topic_en} for {_grade_en} in {country}", agent=_chosen_agent)
-                # Show Gemini errors if image came back None
+                # Flag for display in results section (more reliable render location)
                 if not img and st.session_state.get("_img_gen_errors"):
-                    with st.expander("🔴 Nano Banana image errors — tap to debug", expanded=True):
-                        for _ie in st.session_state["_img_gen_errors"]:
-                            st.code(_ie)
+                    st.session_state["_gen_img_debug"] = True
             ph.markdown(pprog(tot,tot,T("done")),unsafe_allow_html=True); time.sleep(.5); ph.empty()
             # Store in session state
             # Clear cached voice audio from previous generation
@@ -4393,7 +4469,16 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             moe_tag=" · ✅ MOE Aligned" if gr.get('moe_aligned') else ""
             mano_tag=" · 🗣️ Mano" if gr.get('mano_aligned') else ""
             st.markdown(f'<div class="rh"><h3>{ico(20)} {gr["task"]} — {gr["topic"]}{lit_tag}{moe_tag}{mano_tag}</h3></div>',unsafe_allow_html=True)
-            if gr.get("img"): st.image(gr["img"],caption=f"{gr['topic']} — Generated by {gr.get('img_src','')}",use_container_width=True)
+            if gr.get("img"):
+                st.image(gr["img"],caption=f"{gr['topic']} — Generated by {gr.get('img_src','')}",use_container_width=True)
+            elif want_img or (not gr.get("img") and st.session_state.pop("_gen_img_debug", False)):
+                _g_errs = st.session_state.get("_img_gen_errors", [])
+                if _g_errs:
+                    with st.expander("🔴 Image generation failed — tap to see why", expanded=True):
+                        st.markdown("**Google API errors:**")
+                        for _ie in _g_errs:
+                            st.code(_ie, language="text")
+                        st.info("💡 HTTP 403 = API key lacks image permission. HTTP 404 = model unavailable on your tier.")
             valid_rs={k:v for k,v in gr["rs"].items() if v and not str(v).startswith("⚠️")}
             if len(valid_rs)>1:
                 _synth={"en":"Synthesized Response","fr":"Réponse synthétisée","sw":"Jibu lililochanganywa"}.get(_lang_key(),"Synthesized Response")
@@ -6587,11 +6672,9 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                     if img_url:
                         msg_data["image"]=img_url
                         msg_data["image_src"]=img_model
-                    elif st.session_state.get("_img_gen_errors"):
-                        # Show Gemini/DALL-E errors inline so we can diagnose
-                        with st.expander("🔴 Image generation errors — tap to debug", expanded=True):
-                            for _ie in st.session_state["_img_gen_errors"]:
-                                st.code(_ie)
+                    else:
+                        # Flag errors for display OUTSIDE st.status (status swallows widgets)
+                        st.session_state["_show_img_debug"] = True
                 status.update(label=T("response_ready"),state="complete",expanded=False)
             st.session_state.chat_messages.append(msg_data)
             # Auto-generate TTS when input came from voice — plays once on next render
@@ -6607,6 +6690,17 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                             # Mark this index for one-shot autoplay — cleared after first render
                             st.session_state["_tts_autoplay_idx"] = _auto_mi
             st.rerun()
+        # Show image generation debug errors from previous run (outside st.status)
+        _debug_flag = st.session_state.pop("_show_img_debug", False)
+        if _debug_flag:
+            _ierrs = st.session_state.get("_img_gen_errors", [])
+            if _ierrs:
+                st.error("🔴 **Nano Banana image generation failed** — error details below:")
+                for _ie in _ierrs:
+                    st.code(_ie, language="text")
+                st.info("💡 **HTTP 403** = Google API key lacks image generation permission. **HTTP 404** = model name unavailable on your tier. Open ❓ Help → 🧪 Test Nano Banana for a full diagnostic.")
+            else:
+                st.error("🔴 **Nano Banana returned nothing.** No error was captured — your GOOGLE_API_KEY may not be set, or the request timed out. Open ❓ Help → 🧪 Test Nano Banana to diagnose.")
         if st.session_state.chat_messages and st.button(T("clear"),key="cc"): st.session_state.chat_messages=[]; st.rerun()
         st.markdown("---")
         _hdr_col, _shuf_col = st.columns([5, 1])
