@@ -366,48 +366,90 @@ def check_conn():
     return r
 
 # === IMAGE GENERATION ===
+def _enhance_image_prompt(raw_prompt, openai_client):
+    """
+    Mimic ChatGPT's internal behaviour: use GPT-4o to rewrite the raw topic
+    into a rich, detailed, culturally-accurate DALL-E 3 prompt.
+    This is the step a direct API call skips — and why ChatGPT images look better.
+    """
+    system = (
+        "You are an expert at writing image generation prompts for DALL-E 3. "
+        "Your job is to take a short educational topic and expand it into a single, "
+        "richly detailed, scene-compositional prompt that DALL-E 3 can render beautifully.\n\n"
+        "MANDATORY RULES — never break these:\n"
+        "- The scene must be set in Liberia or West Africa. No Western/American/European settings.\n"
+        "- Any people shown must have dark skin and African features (Liberian society).\n"
+        "- Students wear school uniforms typical of Liberian public schools.\n"
+        "- Environment details: tropical vegetation, red laterite soil, zinc-roof classrooms, "
+        "open-air corridors, West African market stalls, cassava farms — use whichever fits.\n"
+        "- Style: photorealistic OR clean modern flat-design infographic. "
+        "NEVER cartoon, comic-book, anime, watercolor, sketch, or hand-drawn.\n"
+        "- Layout: clear labels, well-spaced diagram elements, professional school-textbook look.\n"
+        "- The prompt must be ONE paragraph, under 400 words, no bullet points.\n"
+        "- Return ONLY the prompt text. No preamble, no explanation, no quotes."
+    )
+    try:
+        resp = openai_client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": f"Write a DALL-E 3 prompt for: {raw_prompt}"}
+            ],
+            max_tokens=400,
+            temperature=0.7,
+        )
+        enhanced = resp.choices[0].message.content.strip()
+        if enhanced:
+            return enhanced
+    except: pass
+    # Fallback: return a well-structured version of the raw prompt
+    return (
+        f"A professional educational diagram illustrating '{raw_prompt}', "
+        "set in a Liberian school. Students with dark skin in school uniforms study in a "
+        "tropical West African classroom with zinc roof and open windows. "
+        "Clean modern flat-design style, bright colours, clear labels, white background. "
+        "No cartoon, no sketch, no chalkboard aesthetic. Photorealistic infographic quality."
+    )
+
+
 def gen_image(prompt):
     """Try DALL-E-3/gpt-image-1 (ChatGPT) first, then Gemini image generation (Nano Banana)"""
     import base64 as _b64
 
-    # === Teacher Pehpeh permanent background — always consulted for image generation ===
-    tp_context = (
-        "The image is for Liberian students and teachers in West Africa. "
-        "Show culturally authentic details: African students in school uniforms, "
-        "West African/Liberian settings such as local classrooms, tropical landscapes, market scenes, farms. "
-        "People depicted must have dark skin and African features reflecting Liberian society. "
-        "Avoid Western, American, or European settings and faces. "
-        "IBT (Institute of Basic Technology) built this tool to serve underresourced Liberian schools — "
-        "the image must feel like it comes from someone who knows Liberia from the inside."
-    )
-
-    img_style = (
-        "Clean, professional educational diagram or infographic. "
-        "Modern flat design with bright, clear colors on a white background. "
-        "NO cartoon style. NO comic-book style. NO anime. NO watercolor painting. NO illustration art. "
-        "NO chalkboard. NO hand-drawn or sketch look. NO chalk-style text. "
-        "Use clear labels, well-spaced diagrams, and a professional school-textbook aesthetic. "
-        f"{tp_context}"
-    )
-    full_prompt = f"Educational visual aid for a Liberian school: {prompt}. {img_style}"
-
-    # --- ChatGPT image generation (DALL·E) ---
+    # --- ChatGPT image generation (DALL-E) ---
+    # Mimics what ChatGPT does internally: GPT-4o enhances the prompt first,
+    # then the enriched prompt is sent to DALL-E 3 — that is why ChatGPT images
+    # look better than raw API calls with a simple string.
     if OAI and OPENAI_API_KEY:
         c = openai.OpenAI(api_key=OPENAI_API_KEY)
-        # Primary: DALL-E-3 with HD quality — reduces cartoonish output
+
+        # Step 1: enhance the prompt via GPT-4o (ChatGPT's internal rewriting step)
+        enhanced_prompt = _enhance_image_prompt(prompt, c)
+
+        # Step 2: send enhanced prompt to DALL-E 3 at HD quality
         try:
-            r = c.images.generate(model="dall-e-3", prompt=full_prompt, size="1024x1024", quality="hd", n=1)
+            r = c.images.generate(model="dall-e-3", prompt=enhanced_prompt, size="1024x1024", quality="hd", n=1)
             url = r.data[0].url
             if url:
                 return url, "ChatGPT"
         except: pass
+
         # Secondary: gpt-image-1 — newer model, returns b64_json natively
         try:
-            r = c.images.generate(model="gpt-image-1", prompt=full_prompt, size="1024x1024", n=1)
+            r = c.images.generate(model="gpt-image-1", prompt=enhanced_prompt, size="1024x1024", n=1)
             b64 = r.data[0].b64_json
             if b64:
                 return f"data:image/png;base64,{b64}", "ChatGPT"
         except: pass
+
+    # Build a rich fallback prompt for Gemini (used when OpenAI is unavailable)
+    _gemini_prompt = (
+        f"A professional educational diagram illustrating '{prompt}', "
+        "set in a Liberian school. Students with dark skin in school uniforms. "
+        "Tropical West African setting with zinc-roof classroom and open windows. "
+        "Clean modern flat-design infographic style, bright colours, clear labels, white background. "
+        "No cartoon, no sketch, no chalkboard. Photorealistic school-textbook quality."
+    )
 
     # --- Gemini image generation (Nano Banana) ---
     # Uses new google-genai SDK (google.genai) which supports response_modalities
@@ -419,7 +461,7 @@ def gen_image(prompt):
             _gc = _new_genai.Client(api_key=GOOGLE_API_KEY)
             _resp = _gc.models.generate_content(
                 model="gemini-2.0-flash-preview-image-generation",
-                contents=full_prompt,
+                contents=_gemini_prompt,
                 config=_gtypes.GenerateContentConfig(response_modalities=["IMAGE", "TEXT"])
             )
             for _part in _resp.candidates[0].content.parts:
@@ -438,7 +480,7 @@ def gen_image(prompt):
                 import google.generativeai as _gai_img
                 _gai_img.configure(api_key=GOOGLE_API_KEY)
                 _img_client = _gai_img.ImageGenerationModel("imagen-3.0-generate-002")
-                _img_resp = _img_client.generate_images(prompt=full_prompt, number_of_images=1)
+                _img_resp = _img_client.generate_images(prompt=_gemini_prompt, number_of_images=1)
                 if _img_resp.images:
                     b64 = _b64.b64encode(_img_resp.images[0]._image_bytes).decode()
                     return f"data:image/png;base64,{b64}", "Nano Banana"
