@@ -449,6 +449,17 @@ def speak_elevenlabs(text, voice_id="VU4qoZUtDRUWXB09nrAd", model_id="eleven_fla
                 return None, f"Voice error: HTTP {he.code}"
         audio_bytes = b"".join(chunks)
         if len(audio_bytes) < 100: return None, "Empty audio response"
+        # Validate it's actually MP3/audio, not a JSON error body
+        _magic = audio_bytes[:3]
+        if _magic not in (b'\xff\xfb', b'\xff\xf3', b'\xff\xf2', b'ID3') and not audio_bytes[:2] in (b'\xff\xfb', b'\xff\xf3', b'\xff\xf2'):
+            # Try to surface the actual error message from the response body
+            try:
+                _err = jlib.loads(audio_bytes.decode("utf-8", errors="ignore"))
+                _msg = _err.get("detail", {})
+                if isinstance(_msg, dict): _msg = _msg.get("message", str(_err))
+                return None, f"Voice error: {_msg}"
+            except Exception:
+                return None, "Voice error: unexpected non-audio response from ElevenLabs"
         b64 = base64.b64encode(audio_bytes).decode()
         return b64, "Teacher Pehpeh Voice"
     except Exception as e:
@@ -1189,13 +1200,13 @@ def ask_gpt(sp,q,h=None):
         return openai.OpenAI(api_key=OPENAI_API_KEY).chat.completions.create(model="gpt-4o-mini",messages=m,max_tokens=3000,temperature=.7).choices[0].message.content
     except Exception as e: return f"⚠️ {e}"
 
-def ask_cl(sp,q,h=None):
+def ask_cl(sp,q,h=None,max_t=3000):
     blocked = _sub_blocked()
     if blocked: return blocked
     if not ANT or not ANTHROPIC_API_KEY: return None
     try:
         m=list(h or [])+[{"role":"user","content":q}]
-        return anthropic.Anthropic(api_key=ANTHROPIC_API_KEY).messages.create(model="claude-haiku-4-5-20251001",max_tokens=3000,system=sp,messages=m).content[0].text
+        return anthropic.Anthropic(api_key=ANTHROPIC_API_KEY).messages.create(model="claude-haiku-4-5-20251001",max_tokens=max_t,system=sp,messages=m).content[0].text
     except Exception as e: return f"⚠️ {e}"
 
 def ask_gem(sp,q):
@@ -6185,7 +6196,7 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                         r,m,allr=None,None,{}
                         for _sk,_sfn,_snm in _single_pairs:
                             if _sk:
-                                _sr=_sfn(_sp_chat,uq,_hist_chat) if _snm!="Gemini" else _sfn(_sp_chat,uq)
+                                _sr=_sfn(_sp_chat,uq,_hist_chat,max_t=400) if _snm=="Claude" else (_sfn(_sp_chat,uq,_hist_chat) if _snm!="Gemini" else _sfn(_sp_chat,uq))
                                 if _sr and not str(_sr).startswith("⚠️"):
                                     r,m,allr=_sr,_snm,{_snm:_sr}
                                     break
