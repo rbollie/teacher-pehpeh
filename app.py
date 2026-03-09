@@ -2556,16 +2556,20 @@ def main():
     section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] > p {{ margin-bottom: 0 !important }}
     section[data-testid="stSidebar"] .stExpander {{ margin-bottom: 2px !important }}
 
-    /* ── SIDEBAR BUTTONS — ghost style on red background ────────────────── */
-    /* Target Streamlit's actual button data-testid attributes */
+    /* ── SIDEBAR BUTTONS — compact ghost style on red background ───────── */
     section[data-testid="stSidebar"] [data-testid="baseButton-secondary"],
     section[data-testid="stSidebar"] [data-testid="baseButton-primary"],
     section[data-testid="stSidebar"] .stButton > button {{
         background: rgba(255,255,255,.10) !important;
         color: #FFE8E8 !important;
         border: 1.5px solid rgba(255,190,190,.40) !important;
-        border-radius: 8px !important;
+        border-radius: 7px !important;
         font-weight: 600 !important;
+        font-size: .72rem !important;
+        padding: 2px 8px !important;
+        min-height: 24px !important;
+        height: 24px !important;
+        line-height: 1.1 !important;
         box-shadow: none !important;
         transition: background .18s, border-color .18s, color .18s !important;
     }}
@@ -2578,12 +2582,16 @@ def main():
         transform: none !important;
         box-shadow: none !important;
     }}
-    /* Sign Out — gold-outlined to signal it's destructive/exit */
+    /* Sign Out — compact gold-outlined */
     section[data-testid="stSidebar"] [data-testid="logout_btn"],
     section[data-testid="stSidebar"] button[data-testid="logout_btn"] {{
         background: rgba(212,168,67,.14) !important;
         border: 1.5px solid rgba(212,168,67,.55) !important;
         color: #F5D98E !important;
+        font-size: .72rem !important;
+        padding: 2px 8px !important;
+        min-height: 24px !important;
+        height: 24px !important;
     }}
     section[data-testid="stSidebar"] [data-testid="logout_btn"]:hover,
     section[data-testid="stSidebar"] button[data-testid="logout_btn"]:hover {{
@@ -2591,14 +2599,18 @@ def main():
         border-color: {C_GOLD} !important;
         color: #FFE9A0 !important;
     }}
-    /* Download buttons in sidebar */
+    /* Download buttons in sidebar — same compact size */
     section[data-testid="stSidebar"] [data-testid="stDownloadButton"] > button,
     section[data-testid="stSidebar"] .stDownloadButton > button {{
         background: rgba(255,255,255,.10) !important;
         color: #FFE8E8 !important;
         border: 1.5px solid rgba(255,190,190,.40) !important;
-        border-radius: 8px !important;
+        border-radius: 7px !important;
         font-weight: 600 !important;
+        font-size: .72rem !important;
+        padding: 2px 8px !important;
+        min-height: 24px !important;
+        height: 24px !important;
         box-shadow: none !important;
     }}
     section[data-testid="stSidebar"] [data-testid="stDownloadButton"] > button:hover,
@@ -2782,52 +2794,148 @@ def main():
 
 
     /* ══════════════════════════════════════════════════════════════
-       RESPONSIVE / MOBILE OPTIMISATION
-       Breakpoints: phone <640px · tablet 640-1024px · desktop >1024px
+       RESPONSIVE / MOBILE OPTIMISATION  (v2 — comprehensive)
+       Breakpoints: phone ≤480px · phablet ≤640px · tablet ≤900px
+                    laptop ≤1280px · desktop >1280px
        ══════════════════════════════════════════════════════════════ */
 
-    /* 1. GLOBAL — ensure nothing overflows horizontally */
-    html, body, [data-testid="stAppViewContainer"] {{
+    /* ── 0. GLOBAL RESETS ────────────────────────────────────────── */
+    html, body {{
+        -webkit-text-size-adjust: 100% !important;   /* stop iOS auto-zoom on inputs */
+        text-size-adjust: 100% !important;
+    }}
+    html, body, [data-testid="stAppViewContainer"],
+    [data-testid="stMain"], .main {{
         max-width: 100vw !important;
         overflow-x: hidden !important;
+        box-sizing: border-box !important;
     }}
-    img {{ max-width: 100% !important; height: auto !important; }}
+    *, *::before, *::after {{ box-sizing: inherit; }}
+    img, video, iframe, svg {{
+        max-width: 100% !important;
+        height: auto !important;
+    }}
+    /* Streamlit wide layout — remove its hard 46rem cap */
+    .block-container {{
+        max-width: 100% !important;
+        width: 100% !important;
+    }}
 
-    /* 2. BLOCK CONTAINER — tighter mobile padding */
-    @media (max-width: 640px) {{
+    /* ── 1. DESKTOP (>1280px) — generous padding, bigger logo ───── */
+    @media (min-width: 1281px) {{
         .block-container {{
-            padding-left: 0.6rem !important;
-            padding-right: 0.6rem !important;
+            padding-left: 3rem !important;
+            padding-right: 3rem !important;
+            padding-top: 0.5rem !important;
+        }}
+    }}
+
+    /* ── 2. LAPTOP (901px – 1280px) ─────────────────────────────── */
+    @media (min-width: 901px) and (max-width: 1280px) {{
+        .block-container {{
+            padding-left: 2rem !important;
+            padding-right: 2rem !important;
+        }}
+    }}
+
+    /* ── 3. TABLET (641px – 900px) ──────────────────────────────── */
+    @media (min-width: 641px) and (max-width: 900px) {{
+        .block-container {{
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }}
+        /* Logo: medium size */
+        .block-container img {{ max-height: 180px !important; }}
+        /* 4-col and 5-col blocks → 2-col wrap */
+        [data-testid="stHorizontalBlock"] {{
+            flex-wrap: wrap !important;
+            gap: 0.5rem !important;
+        }}
+        [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {{
+            min-width: calc(50% - 0.5rem) !important;
+            flex: 1 1 calc(50% - 0.5rem) !important;
+        }}
+        /* 2-col blocks stay side-by-side */
+        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:nth-child(2)):not(:has(> [data-testid="stColumn"]:nth-child(3))) > [data-testid="stColumn"] {{
+            min-width: calc(50% - 0.5rem) !important;
+            flex: 1 1 calc(50% - 0.5rem) !important;
+        }}
+        /* Category dropdowns row (4 cols) → 2×2 */
+        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:nth-child(4)) {{
+            flex-wrap: wrap !important;
+        }}
+        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:nth-child(4)) > [data-testid="stColumn"] {{
+            min-width: calc(50% - 0.3rem) !important;
+            flex: 1 1 calc(50% - 0.3rem) !important;
+        }}
+        /* 5-col classroom config → 3+2 wrap */
+        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:nth-child(5)) > [data-testid="stColumn"] {{
+            min-width: calc(33% - 0.5rem) !important;
+            flex: 1 1 calc(33% - 0.5rem) !important;
+        }}
+        /* Tab font size */
+        .stTabs [data-baseweb="tab"] {{
+            padding: 7px 12px !important;
+            font-size: .80rem !important;
+        }}
+    }}
+
+    /* ── 4. PHABLET (481px – 640px) ─────────────────────────────── */
+    @media (min-width: 481px) and (max-width: 640px) {{
+        .block-container {{
+            padding-left: 0.7rem !important;
+            padding-right: 0.7rem !important;
             padding-top: 0.3rem !important;
-            max-width: 100% !important;
         }}
-        /* Streamlit wide layout: remove fixed width cap */
         [data-testid="stMain"] > div {{ max-width: 100% !important; }}
+        /* Logo */
+        .block-container img {{ max-height: 140px !important; }}
+        /* Columns: 2-col stays 2-col, wider stays 2-col wrapping */
+        [data-testid="stHorizontalBlock"] {{
+            flex-wrap: wrap !important;
+            gap: 0.4rem !important;
+        }}
+        [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {{
+            min-width: calc(50% - 0.4rem) !important;
+            flex: 1 1 calc(50% - 0.4rem) !important;
+        }}
+        h1 {{ font-size: 1.5rem !important; }}
+        h2 {{ font-size: 1.15rem !important; }}
+        h3 {{ font-size: 1rem !important; }}
     }}
-    @media (min-width: 641px) and (max-width: 1024px) {{
+
+    /* ── 5. PHONE (≤480px) — full single-column stack ───────────── */
+    @media (max-width: 480px) {{
         .block-container {{
-            padding-left: 1.2rem !important;
-            padding-right: 1.2rem !important;
+            padding-left: 0.4rem !important;
+            padding-right: 0.4rem !important;
+            padding-top: 0.25rem !important;
+        }}
+        [data-testid="stMain"] > div {{ max-width: 100% !important; }}
+        /* All columns → full width vertical stack */
+        [data-testid="stHorizontalBlock"] {{
+            flex-direction: column !important;
+            gap: 0.4rem !important;
+        }}
+        [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {{
+            width: 100% !important;
+            min-width: 100% !important;
+            flex: 1 1 100% !important;
+        }}
+        /* Logo */
+        .block-container img {{ max-height: 100px !important; }}
+        /* Typography */
+        h1 {{ font-size: 1.3rem !important; }}
+        h2 {{ font-size: 1.05rem !important; }}
+        h3 {{ font-size: .9rem !important; }}
+        p, li, label {{ font-size: .88rem !important; }}
+        .status-bar {{
+            font-size: .68rem !important;
+            padding: 3px 8px !important;
         }}
     }}
 
-    /* 3. LOGO — scale down on small screens */
-    @media (max-width: 640px) {{
-        .block-container img[style*="max-height:280px"] {{
-            max-height: 130px !important;
-        }}
-        /* subtitle text */
-        .block-container p[style*="font-size:.95rem"] {{
-            font-size: .82rem !important;
-        }}
-    }}
-    @media (min-width: 641px) and (max-width: 1024px) {{
-        .block-container img[style*="max-height:280px"] {{
-            max-height: 190px !important;
-        }}
-    }}
-
-    /* 4. TABS — horizontal scroll so all 6 tabs fit on mobile */
+    /* ── 6. TABS — scroll on mobile, readable labels ─────────────── */
     @media (max-width: 768px) {{
         .stTabs [data-baseweb="tab-list"] {{
             overflow-x: auto !important;
@@ -2835,157 +2943,128 @@ def main():
             flex-wrap: nowrap !important;
             -webkit-overflow-scrolling: touch !important;
             scrollbar-width: none !important;
-            padding: 4px 4px !important;
+            padding: 4px 3px !important;
             gap: 2px !important;
         }}
         .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {{ display: none !important; }}
         .stTabs [data-baseweb="tab"] {{
-            padding: 6px 10px !important;
-            font-size: .72rem !important;
+            padding: 6px 9px !important;
+            font-size: .70rem !important;
             white-space: nowrap !important;
             min-width: fit-content !important;
             flex-shrink: 0 !important;
         }}
     }}
 
-    /* 5. STATUS BAR — wrap on small screens, smaller text */
-    @media (max-width: 640px) {{
-        .status-bar {{
-            font-size: .7rem !important;
-            padding: 4px 10px !important;
-            gap: 3px !important;
-        }}
-    }}
-
-    /* 6. STREAMLIT COLUMNS — stack vertically on phone */
-    @media (max-width: 640px) {{
-        /* Force Streamlit's flex columns to stack */
-        [data-testid="stHorizontalBlock"] {{
-            flex-direction: column !important;
-            gap: 0.5rem !important;
-        }}
-        [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {{
-            width: 100% !important;
-            min-width: 100% !important;
-            flex: 1 1 100% !important;
-        }}
-    }}
-    @media (min-width: 641px) and (max-width: 900px) {{
-        /* On tablet: 5-col and 4-col rows become 2-col wrapping */
-        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:nth-child(4)) {{
-            flex-wrap: wrap !important;
-        }}
-        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:nth-child(4)) > [data-testid="stColumn"] {{
-            min-width: 48% !important;
-            flex: 1 1 48% !important;
-        }}
-    }}
-
-    /* 7. BUTTONS — min touch target 44px tall on mobile */
-    @media (max-width: 768px) {{
-        .stButton > button {{
-            min-height: 44px !important;
-            font-size: .85rem !important;
+    /* ── 7. TOUCH TARGETS — 44px minimum (Apple/Google a11y standard) */
+    @media (max-width: 900px) {{
+        .stButton > button,
+        .stDownloadButton > button,
+        [data-testid="baseButton-primary"],
+        [data-testid="baseButton-secondary"] {{
+            min-height: 46px !important;
+            font-size: .88rem !important;
             padding: 10px 14px !important;
         }}
-        .stDownloadButton > button {{
-            min-height: 44px !important;
-        }}
-    }}
-
-    /* 8. SELECTBOXES & TEXT INPUTS — larger touch target on mobile */
-    @media (max-width: 768px) {{
-        .stSelectbox > div > div {{
-            min-height: 46px !important;
+        .stSelectbox > div > div,
+        [data-baseweb="select"] {{
+            min-height: 48px !important;
         }}
         .stTextInput > div > div > input {{
-            min-height: 44px !important;
+            min-height: 46px !important;
             font-size: 1rem !important;
+            padding: 10px 12px !important;
         }}
         .stTextArea > div > div > textarea {{
-            font-size: 1rem !important;
+            font-size: .95rem !important;
+            padding: 10px 12px !important;
         }}
-    }}
-
-    /* 9. RESULT / CHAT CARDS — full width, smaller font on mobile */
-    @media (max-width: 640px) {{
-        .rh, .rb {{ padding: 0.7rem !important; }}
-        .ct, .cp {{ padding: 9px 12px !important; font-size: .85rem !important; }}
-        .qbox {{ padding: 12px !important; }}
-        .sc {{ padding: 9px 12px !important; }}
-    }}
-
-    /* 10. GENERATE tab — category buttons wrap on mobile */
-    @media (max-width: 640px) {{
-        /* Category tile row */
-        [data-testid="stHorizontalBlock"]:has([data-testid="baseButton-secondary"]),
-        [data-testid="stHorizontalBlock"]:has([data-testid="baseButton-primary"]) {{
-            flex-wrap: wrap !important;
-            gap: 6px !important;
-        }}
-        [data-testid="stHorizontalBlock"]:has([data-testid="baseButton-secondary"]) > [data-testid="stColumn"],
-        [data-testid="stHorizontalBlock"]:has([data-testid="baseButton-primary"]) > [data-testid="stColumn"] {{
-            min-width: 48% !important;
-            flex: 1 1 48% !important;
-        }}
-    }}
-
-    /* 11. TABLES — make scrollable on mobile */
-    @media (max-width: 768px) {{
-        .stDataFrame, [data-testid="stTable"] {{
-            overflow-x: auto !important;
-            display: block !important;
-            -webkit-overflow-scrolling: touch !important;
-        }}
-    }}
-
-    /* 12. SIDEBAR — full width overlay on mobile (Streamlit default), ensure readable */
-    @media (max-width: 768px) {{
-        section[data-testid="stSidebar"] {{
-            min-width: 280px !important;
-            max-width: 85vw !important;
-        }}
-        section[data-testid="stSidebar"] .stSelectbox > div > div {{
-            min-height: 46px !important;
-        }}
-    }}
-
-    /* 13. EXPANDERS — full width, easier tap */
-    @media (max-width: 768px) {{
         .stExpander > details > summary {{
-            min-height: 44px !important;
+            min-height: 46px !important;
             display: flex !important;
             align-items: center !important;
         }}
     }}
 
-    /* 14. PAGE TITLE / SUBTITLE — scale gracefully */
-    @media (max-width: 640px) {{
-        h1 {{ font-size: 1.4rem !important; }}
-        h2 {{ font-size: 1.1rem !important; }}
-        h3 {{ font-size: .95rem !important; }}
-    }}
-
-    /* 15. METRIC CARDS (Academic Report) — 2-col grid on phone */
-    @media (max-width: 640px) {{
-        /* Force 4-col metric rows to 2-col */
-        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:nth-child(4)):not(:has([data-testid="baseButton-secondary"])) {{
+    /* ── 8. CATEGORY DROPDOWNS — 4 across on desktop, 2×2 tablet,
+            1-col on phone (already covered by col stacking above)   */
+    @media (min-width: 641px) and (max-width: 900px) {{
+        /* The dd_cat_ row specifically */
+        [data-testid="stHorizontalBlock"]:has(.stSelectbox) {{
             flex-wrap: wrap !important;
+            gap: 0.4rem !important;
         }}
-        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:nth-child(4)):not(:has([data-testid="baseButton-secondary"])) > [data-testid="stColumn"] {{
-            min-width: 48% !important;
-            flex: 1 1 48% !important;
+        [data-testid="stHorizontalBlock"]:has(.stSelectbox) > [data-testid="stColumn"] {{
+            min-width: calc(50% - 0.4rem) !important;
+            flex: 1 1 calc(50% - 0.4rem) !important;
         }}
     }}
 
-    /* 16. PLOTLY / CHART containers — responsive */
-    @media (max-width: 768px) {{
-        [data-testid="stPlotlyChart"] {{
-            width: 100% !important;
+    /* ── 9. RESULT / CHAT / QUIZ CARDS ─────────────────────────── */
+    @media (max-width: 640px) {{
+        .rh {{ padding: 0.65rem 0.8rem !important; }}
+        .rb {{ padding: 0.65rem 0.8rem !important; }}
+        .ct, .cp {{ padding: 8px 11px !important; font-size: .84rem !important; }}
+        .qbox {{ padding: 11px 12px !important; }}
+        .qok, .qno {{ padding: 10px 12px !important; }}
+        .sc  {{ padding: 8px 11px !important; }}
+        .qtip {{ padding: 8px 11px !important; font-size: .82rem !important; }}
+    }}
+
+    /* ── 10. TABLES — horizontal scroll ─────────────────────────── */
+    .stDataFrame, [data-testid="stTable"] {{
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }}
+    @media (max-width: 900px) {{
+        .stDataFrame, [data-testid="stTable"] {{
+            display: block !important;
+            font-size: .82rem !important;
         }}
-        [data-testid="stPlotlyChart"] .js-plotly-plot {{
-            width: 100% !important;
+    }}
+
+    /* ── 11. SIDEBAR ────────────────────────────────────────────── */
+    @media (max-width: 900px) {{
+        section[data-testid="stSidebar"] {{
+            min-width: 270px !important;
+            max-width: 88vw !important;
         }}
+        section[data-testid="stSidebar"] .stSelectbox > div > div {{
+            min-height: 48px !important;
+        }}
+        /* Sidebar toggle arrow — bigger tap area */
+        [data-testid="collapsedControl"] {{
+            width: 40px !important;
+            height: 40px !important;
+        }}
+    }}
+
+    /* ── 12. CHARTS / PLOTLY ────────────────────────────────────── */
+    [data-testid="stPlotlyChart"],
+    [data-testid="stPlotlyChart"] .js-plotly-plot,
+    [data-testid="stPlotlyChart"] .plot-container {{
+        width: 100% !important;
+        min-width: 0 !important;
+    }}
+
+    /* ── 13. METRICS (Academic Report) — 2-col on phone/phablet ── */
+    @media (max-width: 640px) {{
+        [data-testid="stMetric"] {{
+            padding: 6px 8px !important;
+        }}
+        [data-testid="stMetricValue"] {{
+            font-size: 1.4rem !important;
+        }}
+    }}
+
+    /* ── 14. FOOTER ──────────────────────────────────────────────── */
+    @media (max-width: 640px) {{
+        .ft {{ font-size: .72rem !important; padding: 1rem 0 0.6rem !important; }}
+    }}
+
+    /* ── 15. INTERVENTION BUBBLES — full width on mobile ─────────── */
+    @media (max-width: 640px) {{
+        [data-testid="stExpanderDetails"] > div {{ padding: 0.4rem !important; }}
     }}
 
     /* ── Category dropdown styling ─────────────────────────────────────────
@@ -3001,12 +3080,80 @@ def main():
 
     st.markdown("""<script>
 (function(){{
-  if(!document.querySelector('meta[name=viewport]')){{
-    var m=document.createElement('meta');
-    m.name='viewport';
-    m.content='width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes';
-    document.head.appendChild(m);
+  /* ── 1. Viewport meta ── */
+  var vp = document.querySelector('meta[name=viewport]');
+  if(!vp){{ vp=document.createElement('meta'); vp.name='viewport'; document.head.appendChild(vp); }}
+  vp.content = 'width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes';
+
+  /* ── 2. Apple / Android web-app meta tags ── */
+  ['mobile-web-app-capable','apple-mobile-web-app-capable'].forEach(function(n){{
+    if(!document.querySelector('meta[name="'+n+'"]')){{
+      var m=document.createElement('meta'); m.name=n; m.content='yes';
+      document.head.appendChild(m);
+    }}
+  }});
+
+  /* ── 3. Touch-action: kill double-tap zoom on interactive elements ── */
+  var ts = document.createElement('style');
+  ts.textContent = [
+    'button,a,select,input,textarea,[role="button"],',
+    '[data-testid="baseButton-primary"],[data-testid="baseButton-secondary"]',
+    '{{ touch-action:manipulation !important; }}'
+  ].join('');
+  document.head.appendChild(ts);
+
+  /* ── 4. Strip Streamlit inline column widths on mobile so CSS can stack ── */
+  function fixColumns(){{
+    var w = window.innerWidth || document.documentElement.clientWidth;
+    var isMobile  = w <= 640;
+    var isTablet  = w > 640 && w <= 900;
+    var cols = document.querySelectorAll('[data-testid="stColumn"]');
+    cols.forEach(function(col){{
+      if(isMobile){{
+        col.style.removeProperty('width');
+        col.style.removeProperty('flex');
+        col.style.removeProperty('min-width');
+        col.style.width = '100%';
+        col.style.minWidth = '100%';
+        col.style.flex = '1 1 100%';
+      }} else if(isTablet){{
+        col.style.removeProperty('width');
+        col.style.removeProperty('flex');
+        col.style.removeProperty('min-width');
+        /* Let CSS handle tablet layout */
+      }} else {{
+        /* Desktop: restore natural flex */
+        col.style.removeProperty('width');
+        col.style.removeProperty('min-width');
+        col.style.removeProperty('flex');
+      }}
+    }});
+    /* Make all horizontal blocks flex-wrap on mobile */
+    var blocks = document.querySelectorAll('[data-testid="stHorizontalBlock"]');
+    blocks.forEach(function(b){{
+      if(isMobile){{
+        b.style.flexDirection = 'column';
+        b.style.gap = '0.4rem';
+      }} else if(isTablet){{
+        b.style.flexWrap = 'wrap';
+        b.style.flexDirection = '';
+      }} else {{
+        b.style.flexDirection = '';
+        b.style.flexWrap = '';
+      }}
+    }});
   }}
+
+  /* Run on load and on every Streamlit re-render (MutationObserver) */
+  fixColumns();
+  window.addEventListener('resize', fixColumns);
+  var _obs = new MutationObserver(function(muts){{
+    var relevant = muts.some(function(m){{
+      return m.addedNodes.length > 0;
+    }});
+    if(relevant) fixColumns();
+  }});
+  _obs.observe(document.body, {{childList:true, subtree:true}});
 }})();
 </script>""", unsafe_allow_html=True)
     # ── Session state defaults (sidebar removed — all UI in main content) ──────
@@ -3087,26 +3234,24 @@ def main():
   font-family: "Source Sans Pro", sans-serif;
   font-size: .78rem;
   display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
-  padding: 6px 16px; border-radius: 20px;
+  padding: 5px 10px; border-radius: 16px;
   border: 1px dashed #2a3a5a; opacity: .85;
-  margin-bottom: .3rem;
+  margin-bottom: .3rem; box-sizing: border-box; width: 100%;
 }}
 .tp-bar span {{ white-space: nowrap; }}
-.tp-div {{ color: #3a4a6a; margin: 0 8px; font-size: 1.1rem; }}
+.tp-div {{ color: #3a4a6a; margin: 0 4px; font-size: 1.1rem; }}
+@media (max-width: 520px) {{
+  .tp-bar {{ font-size: .70rem; padding: 4px 8px; gap: 3px; }}
+  .tp-div {{ display: none; }}
+
+}}
 #dev-chip {{
   display:inline-flex; align-items:center; gap:5px;
   padding:2px 8px; border-radius:12px;
   background:rgba(0,0,0,.2); border:1px solid #2a3a5a;
   transition: all .3s;
 }}
-#recheck-btn {{
-  display:inline-flex; align-items:center; gap:5px;
-  padding:3px 10px; border-radius:12px; cursor:pointer;
-  background:rgba(43,125,233,.15); border:1px solid rgba(43,125,233,.4);
-  color:#7BB8F5; font-size:.78rem; font-family:inherit;
-  transition:all .2s;
-}}
-#recheck-btn:hover {{ background:rgba(43,125,233,.3); border-color:rgba(43,125,233,.7); }}
+
 </style>
 <div class="tp-bar">
   <div id="dev-chip" title="Shows whether your device is connected to the internet">
@@ -3115,8 +3260,6 @@ def main():
   </div>
   <span class="tp-div">│</span>
   {_status_bar_html}
-  <span class="tp-div">│</span>
-  <button id="recheck-btn" title="Re-test connection to AI services" onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:true}},'*')">🔄 Re-check</button>
 </div>
 <script>
 (function(){{
@@ -3151,8 +3294,8 @@ def main():
   }});
 }})();
 </script>
-""", height=46, scrolling=False)
-        if st.button(T("recheck"), key="recheck_sidebar"):
+""", height=44, scrolling=False)
+        if st.button("🔄", key="recheck_sidebar", use_container_width=True):
             st.session_state.conn_checked = False
             st.rerun()
 
@@ -3197,7 +3340,7 @@ def main():
     _cfg_region_lbl = st.session_state.get("cfg_region",  list(_regions().keys())[0])
     _cfg_lang_lbl   = st.session_state.get("lang_sel",    "English")
     _cfg_ctry_lbl   = st.session_state.get("country_sel", "Liberia")
-    _exp_parts = [f"⚙️ {_sn}" if _sn.strip() else "⚙️ Classroom Setup"]
+    _exp_parts = [f"⚙️ {_sn}" if _sn.strip() else "⚙️ Setup"]
     if _tn.strip(): _exp_parts.append(_tn)
     _exp_parts += [_cfg_grade_lbl, _cfg_subj_lbl]
     _expander_label = "  ·  ".join(_exp_parts)
@@ -3218,8 +3361,8 @@ def main():
             st.selectbox("Language", list(LANGS.keys()), key="lang_sel",
                 label_visibility="collapsed", format_func=lambda x: f"🗣️ {x}", help="Response language")
 
-        # ── Row 2: Classroom dropdowns ────────────────────────────────────
-        _cb1, _cb2, _cb3, _cb4, _cb5 = st.columns(5)
+        # ── Row 2: Classroom dropdowns — 3-col + 2-col rows (mobile-friendly) ──
+        _cb1, _cb2, _cb3 = st.columns(3)
         with _cb1:
             st.selectbox(T("setting"), list(_regions().keys()), key="cfg_region",
                 label_visibility="collapsed", format_func=lambda x: f"📍 {x}", help="Urban, rural, or remote")
@@ -3229,6 +3372,7 @@ def main():
         with _cb3:
             st.selectbox(T("subject"), _subjects(), key="cfg_subject",
                 label_visibility="collapsed", format_func=lambda x: f"📚 {x}", help="Subject")
+        _cb4, _cb5 = st.columns(2)
         with _cb4:
             st.selectbox(T("class_size"), list(_sizes().keys()), key="cfg_clsz",
                 label_visibility="collapsed", format_func=lambda x: f"👥 {x}", help="Class size")
@@ -3292,10 +3436,10 @@ def main():
                     _mano_stats = get_mano_stats()
                     if _mano_stats: st.caption(f"🗣️ {_mano_stats['total']}+ words loaded")
 
-        # ── Row 5: Save / Load + subscription + logout ────────────────────
-        _sf1, _sf2, _sf3 = st.columns([2, 2, 1])
+        # ── Row 5a: Save / Load — 2 equal columns ──────────────────────────
+        _sf1, _sf2 = st.columns(2)
         with _sf1:
-            if st.button("💾 Save Configuration", use_container_width=True, key="sv_prof"):
+            if st.button("💾", use_container_width=True, key="sv_prof"):
                 _c = st.session_state.get("country_sel","Liberia")
                 _l = st.session_state.get("lang_sel","English")
                 _r = st.session_state.get("cfg_region", list(_regions().keys())[0])
@@ -3308,19 +3452,19 @@ def main():
                 st.session_state["_show_save_opts"] = True
                 st.rerun()
         with _sf2:
-            if st.button("📂 Load Configuration", use_container_width=True, key="ld_prof"):
+            if st.button("📂", use_container_width=True, key="ld_prof"):
                 st.session_state["_show_load_opts"] = not st.session_state.get("_show_load_opts", False)
                 st.session_state["_show_save_opts"] = False
                 st.rerun()
-        with _sf3:
-            if _login_required() and _is_logged_in():
-                if st.button("🚪 Sign Out", key="logout_btn", use_container_width=True, type="secondary"):
-                    st.session_state["_logged_in"] = False
-                    st.session_state["_login_label"] = ""
-                    # Remove persistent token so refresh also logs out
-                    if "_s" in st.query_params:
-                        del st.query_params["_s"]
-                    st.rerun()
+        # ── Row 5b: Sign Out — full width, only shown when logged in ─────────
+        if _login_required() and _is_logged_in():
+            if st.button("🚪", key="logout_btn", use_container_width=True, type="secondary"):
+                st.session_state["_logged_in"] = False
+                st.session_state["_login_label"] = ""
+                # Remove persistent token so refresh also logs out
+                if "_s" in st.query_params:
+                    del st.query_params["_s"]
+                st.rerun()
         if st.session_state.get("_show_save_opts") and "saved_profile" in st.session_state:
             st.success("✅ Saved! Download below to reuse next session.")
             _default_name = (school_name.strip().replace(" ","_") or "my_classroom")
@@ -3499,7 +3643,10 @@ setTimeout(function() {{
 
         # Build per-category display list with sentinel header option
         _cat_list   = list(_TASK_CATEGORIES.keys())   # ["📋 Planning", "📝 Assessment", ...]
-        _dd_cols    = st.columns(len(_cat_list))
+        # 2×2 layout: first row = first two categories, second row = last two
+        _dd_row1 = st.columns(2)
+        _dd_row2 = st.columns(2)
+        _dd_cols = [_dd_row1[0], _dd_row1[1], _dd_row2[0], _dd_row2[1]]
         _active_cat = st.session_state.task_cat
 
         for _ci, _cname in enumerate(_cat_list):
@@ -5795,37 +5942,6 @@ Be factual. Do not invent data. Keep each section focused and practical."""
             st.session_state.spark_order = _rnd.sample(range(len(_AFRICA_SPARKS)), min(6, len(_AFRICA_SPARKS)))
         _todays_sparks = [_AFRICA_SPARKS[i] for i in st.session_state.spark_order]
 
-        _hdr_col, _shuf_col = st.columns([5, 1])
-        with _hdr_col:
-            st.markdown(
-                f'<div style="color:{C_GOLD};font-size:.82rem;font-weight:700;margin-bottom:4px">' +
-                f'🌍 Did You Know? &nbsp;<span style="color:#8899aa;font-size:.76rem;font-weight:400">— Click to discover something amazing about Africa</span></div>',
-                unsafe_allow_html=True
-            )
-        with _shuf_col:
-            if st.button("🔀", key="spark_shuffle", help="Shuffle topics", use_container_width=True):
-                import random as _rnd2
-                st.session_state.spark_order = _rnd2.sample(range(len(_AFRICA_SPARKS)), min(6, len(_AFRICA_SPARKS)))
-                st.rerun()
-        _spark_cols = st.columns(6)
-        for _sbi, (_slabel, _shook, _sprompt) in enumerate(_todays_sparks):
-            with _spark_cols[_sbi]:
-                if st.button(_slabel, key=f"spark_{_sbi}", use_container_width=True, help=_shook):
-                    _spark_user_msg = f"🌍 {_shook}"
-                    st.session_state.chat_messages.append({"role":"user","content":_spark_user_msg})
-                    with st.status("🌍 Discovering...", expanded=False) as _ss:
-                        _sr, _sm, _sallr = best_all(build_free_chat(), _sprompt,
-                                                     [{"role":x["role"],"content":x["content"]}
-                                                      for x in st.session_state.chat_messages[:-1]])
-                        _ss.update(label="✨ Here it is!", state="complete", expanded=False)
-                    st.session_state.chat_messages.append({
-                        "role":"assistant","content":_sr,"model":_sm,"all_responses":_sallr,
-                        "is_africa_spark": True
-                    })
-                    st.rerun()
-
-        st.markdown(f'<div style="font-size:.78rem;color:#6677AA;margin:6px 0 4px">💡 Ask anything — explain a concept, get study tips, generate questions, start with <em>draw</em> for images, or 📸 upload a photo and say <em>transcribe</em></div>', unsafe_allow_html=True)
-        st.markdown("---")
         for mi,msg in enumerate(st.session_state.chat_messages):
             _you_label={"en":"🧑‍🏫 You","fr":"🧑‍🏫 Vous","sw":"🧑‍🏫 Wewe"}.get(_lang_key(),"🧑‍🏫 You")
             _by_label={"en":"by","fr":"par","sw":"na"}.get(_lang_key(),"by")
@@ -6012,6 +6128,38 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                 status.update(label=T("response_ready"),state="complete",expanded=False)
             st.session_state.chat_messages.append(msg_data); st.rerun()
         if st.session_state.chat_messages and st.button(T("clear"),key="cc"): st.session_state.chat_messages=[]; st.rerun()
+        st.markdown("---")
+        _hdr_col, _shuf_col = st.columns([5, 1])
+        with _hdr_col:
+            st.markdown(
+                f'<div style="color:{C_GOLD};font-size:.82rem;font-weight:700;margin-bottom:4px">' +
+                f'🌍 Did You Know? &nbsp;<span style="color:#8899aa;font-size:.76rem;font-weight:400">— Click to discover something amazing about Africa</span></div>',
+                unsafe_allow_html=True
+            )
+        with _shuf_col:
+            if st.button("🔀", key="spark_shuffle", help="Shuffle topics", use_container_width=True):
+                import random as _rnd2
+                st.session_state.spark_order = _rnd2.sample(range(len(_AFRICA_SPARKS)), min(6, len(_AFRICA_SPARKS)))
+                st.rerun()
+        _spark_cols = st.columns(6)
+        for _sbi, (_slabel, _shook, _sprompt) in enumerate(_todays_sparks):
+            with _spark_cols[_sbi]:
+                if st.button(_slabel, key=f"spark_{_sbi}", use_container_width=True, help=_shook):
+                    _spark_user_msg = f"🌍 {_shook}"
+                    st.session_state.chat_messages.append({"role":"user","content":_spark_user_msg})
+                    with st.status("🌍 Discovering...", expanded=False) as _ss:
+                        _sr, _sm, _sallr = best_all(build_free_chat(), _sprompt,
+                                                     [{"role":x["role"],"content":x["content"]}
+                                                      for x in st.session_state.chat_messages[:-1]])
+                        _ss.update(label="✨ Here it is!", state="complete", expanded=False)
+                    st.session_state.chat_messages.append({
+                        "role":"assistant","content":_sr,"model":_sm,"all_responses":_sallr,
+                        "is_africa_spark": True
+                    })
+                    st.rerun()
+
+        st.markdown(f'<div style="font-size:.78rem;color:#6677AA;margin:6px 0 4px">💡 Ask anything — explain a concept, get study tips, generate questions, start with <em>draw</em> for images, or 📸 upload a photo and say <em>transcribe</em></div>', unsafe_allow_html=True)
+        st.markdown("---")
 
     # TAB 4: QUIZ (works offline — no internet or API keys needed)
     with t4:
