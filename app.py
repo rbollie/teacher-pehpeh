@@ -368,30 +368,26 @@ def check_conn():
 # === IMAGE GENERATION ===
 def gen_image(prompt):
     """Try gpt-image-1 (Canva) first, then Google Imagen (Nano Banana) as fallback"""
+    import base64 as _b64
     img_style = "Clean, professional educational infographic style. Bright colors on white background. NO chalkboard, NO hand-drawn sketches, NO chalk-style text. Use clear labels, simple diagrams, and modern flat design. Culturally relevant to West Africa/Liberia."
-    # Try gpt-image-1 (Canva)
+    # Try gpt-image-1 (Canva) — returns b64_json, not a URL
     if OAI and OPENAI_API_KEY:
         try:
             c=openai.OpenAI(api_key=OPENAI_API_KEY)
-            r=c.images.generate(model="gpt-image-1",prompt=f"Educational visual aid: {prompt}. {img_style}",size="1024x1024",quality="standard",n=1)
-            return r.data[0].url,"Canva"
+            r=c.images.generate(model="gpt-image-1",prompt=f"Educational visual aid: {prompt}. {img_style}",size="1024x1024",quality="standard",n=1,response_format="b64_json")
+            b64=r.data[0].b64_json
+            if b64:
+                return f"data:image/png;base64,{b64}","Canva"
         except: pass
-    # Try Google Imagen
+    # Try Google Imagen (Nano Banana)
     if GEM and GOOGLE_API_KEY:
         try:
             genai.configure(api_key=GOOGLE_API_KEY)
-            from google.generativeai import types as gtypes
-            img_model=genai.GenerativeModel("gemini-2.5-flash")
-            r=img_model.generate_content(
-                f"Generate an educational visual aid: {prompt}. {img_style}",
-                generation_config=genai.types.GenerationConfig(response_mime_type="text/plain")
-            )
             client=genai.ImageGenerationModel("imagen-3.0-generate-002")
             response=client.generate_images(prompt=f"Educational visual aid: {prompt}. {img_style}",number_of_images=1)
             if response.images:
-                import base64
                 img_bytes=response.images[0]._image_bytes
-                b64=base64.b64encode(img_bytes).decode()
+                b64=_b64.b64encode(img_bytes).decode()
                 return f"data:image/png;base64,{b64}","Nano Banana"
         except: pass
     return None,None
