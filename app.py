@@ -2723,30 +2723,44 @@ def main():
         font-weight: 600 !important;
         font-size: .92rem !important;
     }}
-    /* Dropdown popover list */
+    /* Dropdown popover list — dark container, no fill until hover */
     [data-baseweb="popover"] [role="listbox"],
     [data-baseweb="popover"] ul {{
-        background: #200808 !important;
+        background: #140404 !important;
         border: 1.5px solid {C_RED} !important;
         border-radius: 9px !important;
         box-shadow: 0 8px 24px rgba(0,0,0,.55) !important;
+        padding: 4px !important;
     }}
+    /* All options start with no fill */
     [data-baseweb="popover"] [role="option"],
     [data-baseweb="popover"] li {{
         background: transparent !important;
-        color: #FFD0D0 !important;
+        color: #E8C8C8 !important;
         font-weight: 500 !important;
+        border-radius: 6px !important;
+        transition: background .12s, color .12s !important;
     }}
+    /* Only fill on cursor hover */
     [data-baseweb="popover"] [role="option"]:hover,
     [data-baseweb="popover"] li:hover {{
-        background: rgba(139,26,26,.50) !important;
+        background: rgba(178,34,52,.45) !important;
         color: #FFFFFF !important;
     }}
+    /* Currently-selected item: just a subtle left accent, no fill */
     [data-baseweb="popover"] [role="option"][aria-selected="true"],
     [data-baseweb="popover"] li[aria-selected="true"] {{
-        background: rgba(178,34,52,.60) !important;
-        color: #FFFFFF !important;
+        background: transparent !important;
+        color: #FFB0B0 !important;
         font-weight: 700 !important;
+        border-left: 3px solid {C_RED_L} !important;
+        padding-left: 10px !important;
+    }}
+    /* Selected item hover — still fills on hover */
+    [data-baseweb="popover"] [role="option"][aria-selected="true"]:hover,
+    [data-baseweb="popover"] li[aria-selected="true"]:hover {{
+        background: rgba(178,34,52,.45) !important;
+        color: #FFFFFF !important;
     }}
 
     /* CLASSROOM CONFIG EXPANDER — standout panel */
