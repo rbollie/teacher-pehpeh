@@ -2797,19 +2797,18 @@ def main():
     /* ── GLOBAL: kill Streamlit/Baseweb default green everywhere ─────────── */
     /* Streamlit's default primary accent is a teal/green — override to red   */
     :root {{
-        --primary-color: {C_RED} !important;
-        --secondary-color: {C_RED_L} !important;
+        --primary-color: {C_BLUE} !important;
+        --secondary-color: {C_BLUE_D} !important;
     }}
-    /* Any element that Baseweb colours green via its theme */
     [data-baseweb="button"][kind="primary"],
     button[data-baseweb="button"] {{
-        background-color: {C_RED} !important;
-        border-color: {C_RED} !important;
+        background-color: {C_BLUE} !important;
+        border-color: {C_BLUE} !important;
     }}
-    /* Streamlit's own widget focus rings — force to red */
+    /* Streamlit widget focus rings — accessible blue (WCAG 2.1 AA) */
     *:focus-visible {{
-        outline-color: {C_RED} !important;
-        box-shadow: 0 0 0 3px rgba(139,26,26,.28) !important;
+        outline-color: {C_BLUE} !important;
+        box-shadow: 0 0 0 3px rgba(43,125,233,.38) !important;
     }}
 
     section[data-testid="stSidebar"] {{background:linear-gradient(180deg,#4A0E0E 0%,{C_RED} 40%,#7B2020 100%) !important}}
@@ -2843,6 +2842,43 @@ def main():
     .ft {{text-align:center;color:var(--text-muted);font-size:.8rem;padding:1.5rem 0 1rem;border-top:1px solid var(--border-color);margin-top:2rem}}
     .ft a {{color:{C_GOLD};text-decoration:none}}
 
+    /* Main content expanders — dark blue header, clearly visible arrow */
+    [data-testid="stMain"] .stExpander,
+    [data-testid="stMainBlockContainer"] .stExpander {{
+        border: 2px solid {C_BLUE_D} !important;
+        border-radius: 10px !important;
+        background: #0D1A30 !important;
+        overflow: hidden !important;
+    }}
+    [data-testid="stMain"] .stExpander summary,
+    [data-testid="stMainBlockContainer"] .stExpander summary {{
+        background: linear-gradient(135deg, {C_BLUE_D}, {C_BLUE}) !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+        padding: 10px 14px !important;
+        border-radius: 8px 8px 0 0 !important;
+    }}
+    [data-testid="stMain"] .stExpander summary:hover,
+    [data-testid="stMainBlockContainer"] .stExpander summary:hover {{
+        background: linear-gradient(135deg, {C_BLUE}, #4090F0) !important;
+    }}
+    /* Expander chevron arrow — large, fully white, always visible */
+    [data-testid="stMain"] .stExpander summary svg,
+    [data-testid="stMainBlockContainer"] .stExpander summary svg {{
+        color: #FFFFFF !important;
+        fill: #FFFFFF !important;
+        opacity: 1 !important;
+        width: 22px !important;
+        height: 22px !important;
+        filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)) !important;
+        flex-shrink: 0 !important;
+    }}
+    [data-testid="stMain"] .stExpander [data-testid="stExpanderDetails"],
+    [data-testid="stMainBlockContainer"] .stExpander [data-testid="stExpanderDetails"] {{
+        background: #0D1A30 !important;
+        border-top: 1px solid rgba(43,125,233,.25) !important;
+        padding: 12px 14px !important;
+    }}
     /* Solid blue Configure expander */
     /* Mic recording styles — visible on dark backgrounds */
     .mic-wrapper {{ text-align:center }}
@@ -3024,98 +3060,108 @@ def main():
         transform: translateY(-1px) !important;
     }}
 
-    /* MAIN-AREA SELECTBOXES — solid IBT red gradient (matches Generate tab energy) */
-    /* Outer wrapper — bright solid fill */
+    /* MAIN-AREA SELECTBOXES — IBT blue (accessible, high-contrast) */
     .main .stSelectbox > div > div,
     [data-testid="stMain"] .stSelectbox > div > div,
     [data-testid="stMainBlockContainer"] .stSelectbox > div > div,
     [data-testid="stMain"] [data-baseweb="select"],
     [data-testid="stMainBlockContainer"] [data-baseweb="select"] {{
-        border: 2px solid {C_RED_L} !important;
+        border: 2px solid {C_BLUE} !important;
         border-radius: 9px !important;
-        background: linear-gradient(135deg, {C_RED}, {C_RED_L}) !important;
+        background: linear-gradient(135deg, {C_BLUE_D}, {C_BLUE}) !important;
         min-height: 44px !important;
-        box-shadow: 0 3px 10px rgba(139,26,26,.40) !important;
+        box-shadow: 0 3px 10px rgba(43,125,233,.35) !important;
         transition: border-color .18s, box-shadow .18s, background .18s !important;
     }}
-    /* Baseweb inner control container — keep transparent so gradient shows */
+    /* Baseweb inner container — transparent so gradient shows through */
     [data-testid="stMain"] [data-baseweb="select"] > div,
     [data-testid="stMainBlockContainer"] [data-baseweb="select"] > div {{
         background: transparent !important;
         border: none !important;
     }}
-    /* Hover — brighten slightly */
+    /* Hover — brighten */
     .main .stSelectbox > div > div:hover,
     [data-testid="stMain"] .stSelectbox > div > div:hover,
     [data-testid="stMainBlockContainer"] .stSelectbox > div > div:hover,
     [data-testid="stMain"] [data-baseweb="select"]:hover,
     [data-testid="stMainBlockContainer"] [data-baseweb="select"]:hover {{
-        border-color: #D04050 !important;
-        box-shadow: 0 5px 18px rgba(178,34,52,.55) !important;
-        background: linear-gradient(135deg, {C_RED_L}, #C83050) !important;
+        border-color: #5B9FFF !important;
+        box-shadow: 0 5px 18px rgba(43,125,233,.55) !important;
+        background: linear-gradient(135deg, {C_BLUE}, #4090F0) !important;
     }}
-    /* Focus — glow ring */
+    /* Focus — accessible blue glow ring (WCAG 2.1 AA visible) */
     .main .stSelectbox > div > div:focus-within,
     [data-testid="stMain"] .stSelectbox > div > div:focus-within,
     [data-testid="stMainBlockContainer"] .stSelectbox > div > div:focus-within,
     [data-testid="stMain"] [data-baseweb="select"]:focus-within,
     [data-testid="stMainBlockContainer"] [data-baseweb="select"]:focus-within {{
-        border-color: #E05060 !important;
-        box-shadow: 0 0 0 3px rgba(178,34,52,.38), 0 4px 14px rgba(139,26,26,.45) !important;
+        border-color: #80BFFF !important;
+        box-shadow: 0 0 0 3px rgba(43,125,233,.45), 0 4px 14px rgba(29,92,191,.45) !important;
+        outline: 2px solid #80BFFF !important;
+        outline-offset: 1px !important;
     }}
-    /* Dropdown chevron arrow — white on red bg */
+    /* Chevron arrow — large, fully opaque, white — clearly visible on blue */
     [data-testid="stMainBlockContainer"] .stSelectbox svg,
     [data-testid="stMain"] .stSelectbox svg,
     [data-testid="stMainBlockContainer"] [data-baseweb="select"] svg,
     [data-testid="stMain"] [data-baseweb="select"] svg {{
         color: #FFFFFF !important;
         fill: #FFFFFF !important;
-        opacity: .85 !important;
+        opacity: 1 !important;
+        width: 20px !important;
+        height: 20px !important;
+        filter: drop-shadow(0 1px 2px rgba(0,0,0,.4)) !important;
     }}
-    /* Selected value text — bright white on red gradient */
+    /* Selected value text — white, bold, readable */
     [data-testid="stMainBlockContainer"] .stSelectbox [data-baseweb="select"] span,
     [data-testid="stMain"] .stSelectbox [data-baseweb="select"] span,
     [data-testid="stMainBlockContainer"] [data-baseweb="select"] [data-baseweb="select-input"],
     [data-testid="stMain"] [data-baseweb="select"] [data-baseweb="select-input"] {{
         color: #FFFFFF !important;
         font-weight: 700 !important;
-        font-size: .92rem !important;
-        text-shadow: 0 1px 3px rgba(0,0,0,.3) !important;
+        font-size: .93rem !important;
+        text-shadow: 0 1px 3px rgba(0,0,0,.35) !important;
+        letter-spacing: .01em !important;
     }}
-    /* Dropdown popover list — dark container, no fill until hover */
+    /* Dropdown popover — dark blue container */
     [data-baseweb="popover"] [role="listbox"],
     [data-baseweb="popover"] ul {{
-        background: #140404 !important;
-        border: 1.5px solid {C_RED} !important;
-        border-radius: 9px !important;
-        box-shadow: 0 8px 24px rgba(0,0,0,.55) !important;
-        padding: 4px !important;
+        background: #0A1628 !important;
+        border: 2px solid {C_BLUE} !important;
+        border-radius: 10px !important;
+        box-shadow: 0 8px 28px rgba(0,0,0,.65), 0 0 0 1px rgba(43,125,233,.2) !important;
+        padding: 5px !important;
     }}
-    /* All options start with no fill */
+    /* Options — no fill, accessible light text */
     [data-baseweb="popover"] [role="option"],
     [data-baseweb="popover"] li {{
         background: transparent !important;
-        color: #E8C8C8 !important;
+        color: #C8DDF5 !important;
         font-weight: 500 !important;
-        border-radius: 6px !important;
+        border-radius: 7px !important;
+        padding: 8px 12px !important;
         transition: background .12s, color .12s !important;
+        min-height: 38px !important;
+        display: flex !important;
+        align-items: center !important;
     }}
-    /* Only fill on cursor hover */
+    /* Hover — blue fill, white text (WCAG AA contrast ≥ 4.5:1) */
     [data-baseweb="popover"] [role="option"]:hover,
     [data-baseweb="popover"] li:hover {{
-        background: rgba(178,34,52,.45) !important;
+        background: rgba(43,125,233,.5) !important;
         color: #FFFFFF !important;
+        font-weight: 600 !important;
     }}
-    /* Currently-selected item: just a subtle left accent, no fill */
+    /* Currently-selected — bright blue left accent + slightly lighter bg */
     [data-baseweb="popover"] [role="option"][aria-selected="true"],
     [data-baseweb="popover"] li[aria-selected="true"] {{
-        background: transparent !important;
-        color: #FFB0B0 !important;
+        background: rgba(43,125,233,.18) !important;
+        color: #A8D4FF !important;
         font-weight: 700 !important;
-        border-left: 3px solid {C_RED_L} !important;
+        border-left: 3px solid {C_BLUE} !important;
         padding-left: 10px !important;
     }}
-    /* Selected item hover — still fills on hover */
+    /* Selected item hover */
     [data-baseweb="popover"] [role="option"][aria-selected="true"]:hover,
     [data-baseweb="popover"] li[aria-selected="true"]:hover {{
         background: rgba(178,34,52,.45) !important;
@@ -3668,111 +3714,6 @@ def main():
                 "</div>",
                 unsafe_allow_html=True,
             )
-
-        # ── Nano Banana API diagnostic ─────────────────────────────────────
-        with st.expander("🧪 Test Nano Banana (Gemini)", expanded=False):
-            st.markdown("<div style='font-size:.8rem;color:#A0B8D0'>Lists every model your API key can actually see, then tests image generation on the right ones.</div>", unsafe_allow_html=True)
-            if st.button("▶ List Available Models + Test Images", key="gemini_diag_btn", use_container_width=True):
-                import json as _dj, urllib.request as _dur, urllib.error as _due
-                _dkey = GOOGLE_API_KEY
-                if not _dkey:
-                    st.error("❌ GOOGLE_API_KEY is not set in Streamlit secrets.")
-                else:
-                    st.info(f"✅ GOOGLE_API_KEY found (ends …{_dkey[-6:]})")
-                    # ── Step 1: List all models available on this key ──────────
-                    st.markdown("**Step 1 — Fetching your available models from Google…**")
-                    _all_models = []
-                    _img_capable = []
-                    try:
-                        _lurl = f"https://generativelanguage.googleapis.com/v1beta/models?key={_dkey}&pageSize=200"
-                        with _dur.urlopen(_lurl, timeout=15) as _lr:
-                            _lraw = _lr.read().decode()
-                        _lbody = _dj.loads(_lraw)
-                        # Response may be {"models":[...]} or a bare list
-                        if isinstance(_lbody, list):
-                            _all_models = _lbody
-                        elif isinstance(_lbody, dict):
-                            _all_models = _lbody.get("models", [])
-                            if not _all_models:
-                                st.code(_lraw[:800], language="json")
-                        else:
-                            st.code(f"Unexpected type {type(_lbody)}: {_lraw[:400]}")
-                            _all_models = []
-                        # Filter to models that support generateContent or predict AND involve image
-                        # Only keep models that are clearly image-capable:
-                        # - name contains "image" or "imagen" (image generation models)
-                        # - uses "predict" method (Imagen series)
-                        # Exclude generic flash/text models to avoid wasting quota
-                        _gen_models = []
-                        for _m in _all_models:
-                            _nm = _m.get("name","")
-                            _raw_methods = _m.get("supportedGenerationMethods", [])
-                            _methods = [x if isinstance(x, str) else x.get("name","") for x in _raw_methods]
-                            _is_img = any(x in _nm.lower() for x in ("imagen","image"))
-                            _is_pred = "predict" in _methods
-                            if _is_img or _is_pred:
-                                _gen_models.append((_nm, _methods))
-                        if _gen_models:
-                            st.success(f"✅ Found {len(_gen_models)} potentially useful models:")
-                            for _nm, _mth in _gen_models:
-                                st.code(f"{_nm}  →  methods: {', '.join(_mth)}")
-                        else:
-                            st.warning(f"⚠️ No image or flash models found. Total models on key: {len(_all_models)}")
-                            st.code("\n".join(m.get('name','') for m in _all_models[:30]))
-                    except _due.HTTPError as _le:
-                        _lb=""
-                        try: _lb=_le.read().decode()[:400]
-                        except: pass
-                        st.error(f"❌ ListModels failed: HTTP {_le.code} — {_lb}")
-                        _gen_models = []
-                    except Exception as _lex:
-                        st.error(f"❌ ListModels error: {_lex}")
-                        _gen_models = []
-
-                    # ── Step 2: Test image generation on each candidate ────────
-                    if _gen_models:
-                        st.markdown("**Step 2 — Testing image generation on each candidate…**")
-                        _test_prompt = "A photo of a student writing in a classroom in Monrovia Liberia"
-                        for _nm, _mth in _gen_models:
-                            _short = _nm.replace("models/","")
-                            st.write(f"Testing **{_short}**…")
-                            try:
-                                if "predict" in _mth:
-                                    _url = f"https://generativelanguage.googleapis.com/v1beta/{_nm}:predict?key={_dkey}"
-                                    _payload = {"instances":[{"prompt":_test_prompt}],"parameters":{"sampleCount":1}}
-                                else:
-                                    _url = f"https://generativelanguage.googleapis.com/v1beta/{_nm}:generateContent?key={_dkey}"
-                                    _payload = {
-                                        "contents":[{"parts":[{"text":_test_prompt}]}],
-                                        "generationConfig":{
-                                            "responseModalities":["IMAGE","TEXT"],
-                                            "response_modalities":["IMAGE","TEXT"]
-                                        }
-                                    }
-                                _req = _dur.Request(_url, data=_dj.dumps(_payload).encode(),
-                                                    headers={"Content-Type":"application/json"}, method="POST")
-                                with _dur.urlopen(_req, timeout=45) as _r:
-                                    _rbody = _dj.loads(_r.read().decode())
-                                _found = False
-                                for _c in _rbody.get("candidates",[]):
-                                    for _p in _c.get("content",{}).get("parts",[]):
-                                        _id = _p.get("inlineData") or _p.get("inline_data")
-                                        if _id and "image" in _id.get("mimeType",""):
-                                            st.success(f"🎉 **{_short} WORKS!** Image returned ({_id['mimeType']}) — use this model name!")
-                                            _found = True
-                                for _pred in _rbody.get("predictions",[]):
-                                    if _pred.get("bytesBase64Encoded"):
-                                        st.success(f"🎉 **{_short} WORKS!** (Imagen format) — use this model name!")
-                                        _found = True
-                                if not _found:
-                                    st.warning(f"⚠️ {_short}: responded, no image. Sample: {str(_rbody)[:200]}")
-                            except _due.HTTPError as _he:
-                                _hb=""
-                                try: _hb=_he.read().decode()[:300]
-                                except: pass
-                                st.error(f"❌ {_short}: HTTP {_he.code} — {_hb[:200]}")
-                            except Exception as _ex:
-                                st.error(f"❌ {_short}: {_ex}")
 
     if not conn:
         keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
@@ -4544,14 +4485,15 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             st.markdown(f'<div class="rh"><h3>{ico(20)} {gr["task"]} — {gr["topic"]}{lit_tag}{moe_tag}{mano_tag}</h3></div>',unsafe_allow_html=True)
             if gr.get("img"):
                 st.image(gr["img"],caption=f"{gr['topic']} — Generated by {gr.get('img_src','')}",use_container_width=True)
-            elif want_img or (not gr.get("img") and st.session_state.pop("_gen_img_debug", False)):
+            elif not gr.get("img") and st.session_state.pop("_gen_img_debug", False):
                 _g_errs = st.session_state.get("_img_gen_errors", [])
-                if _g_errs:
-                    with st.expander("🔴 Image generation failed — tap to see why", expanded=True):
-                        st.markdown("**Google API errors:**")
-                        for _ie in _g_errs:
-                            st.code(_ie, language="text")
-                        st.info("💡 HTTP 403 = API key lacks image permission. HTTP 404 = model unavailable on your tier.")
+                _g_str = " ".join(_g_errs)
+                if "paid plans" in _g_str or "upgrade" in _g_str.lower():
+                    st.warning("🔵 **Nano Banana requires a paid Google AI plan.** Upgrade at [ai.dev/projects](https://ai.dev/projects) to enable Imagen 4.")
+                elif "429" in _g_str or "quota" in _g_str.lower() or "Too Many" in _g_str:
+                    st.warning("🔵 **Nano Banana quota reached** — try again in a few minutes or switch to 🟢 ChatGPT.")
+                elif _g_errs:
+                    st.error("🔴 **Nano Banana failed.** Open ❓ Help → 🧪 Test Nano Banana for details.")
             valid_rs={k:v for k,v in gr["rs"].items() if v and not str(v).startswith("⚠️")}
             if len(valid_rs)>1:
                 _synth={"en":"Synthesized Response","fr":"Réponse synthétisée","sw":"Jibu lililochanganywa"}.get(_lang_key(),"Synthesized Response")
@@ -6767,13 +6709,15 @@ Be factual. Do not invent data. Keep each section focused and practical."""
         _debug_flag = st.session_state.pop("_show_img_debug", False)
         if _debug_flag:
             _ierrs = st.session_state.get("_img_gen_errors", [])
-            if _ierrs:
-                st.error("🔴 **Nano Banana image generation failed** — error details below:")
-                for _ie in _ierrs:
-                    st.code(_ie, language="text")
-                st.info("💡 **HTTP 403** = Google API key lacks image generation permission. **HTTP 404** = model name unavailable on your tier. Open ❓ Help → 🧪 Test Nano Banana for a full diagnostic.")
+            _all_errs_str = " ".join(_ierrs)
+            if "paid plans" in _all_errs_str or "upgrade" in _all_errs_str.lower():
+                st.warning("🔵 **Nano Banana requires a paid Google AI plan.** Imagen 4 is not available on the free tier. To enable it, upgrade at [ai.dev/projects](https://ai.dev/projects) then add billing to your Google AI key.")
+            elif "429" in _all_errs_str or "quota" in _all_errs_str.lower() or "Too Many" in _all_errs_str:
+                st.warning("🔵 **Nano Banana is resting** — Google's free tier image quota is used up for now. Try again in a few minutes, or switch to 🟢 ChatGPT for images.")
+            elif _ierrs:
+                st.error("🔴 **Nano Banana failed.** Open ❓ Help → 🧪 Test Nano Banana for details.")
             else:
-                st.error("🔴 **Nano Banana returned nothing.** No error was captured — your GOOGLE_API_KEY may not be set, or the request timed out. Open ❓ Help → 🧪 Test Nano Banana to diagnose.")
+                st.warning("🔵 **Nano Banana returned nothing.** Your GOOGLE_API_KEY may not be set correctly.")
         if st.session_state.chat_messages and st.button(T("clear"),key="cc"): st.session_state.chat_messages=[]; st.rerun()
         st.markdown("---")
         _hdr_col, _shuf_col = st.columns([5, 1])
