@@ -5997,13 +5997,49 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                 user_q = st.session_state.chat_messages[mi-1]["content"] if mi>0 else "Chat"
                 email_result(msg["content"], f"Teacher Pehpeh — {user_q[:50]} ({grade}, {subject})", f"chat_{mi}")
                 tts_player(msg["content"], f"chat_{mi}")
-        # Voice input for chat — with red recording indicator
+        # Voice input for chat — recording indicator + AI selector
         voice_col, photo_col, label_col = st.columns([1, 1, 3])
         with voice_col:
-            st.markdown('<div class="mic-wrapper">', unsafe_allow_html=True)
+            st.markdown('''<style>
+/* ── Recording state: button turns red + pulses ── */
+[data-testid="stAudioInput"] > div > button[aria-label*="Stop"],
+[data-testid="stAudioInput"] > div > button[aria-label*="stop"] {
+    background-color: #D32F2F !important;
+    color: white !important;
+    border-color: #D32F2F !important;
+    box-shadow: 0 0 12px rgba(211,47,47,.5) !important;
+    animation: pulse-red 1.0s ease-in-out infinite !important;
+}
+@keyframes pulse-red {
+    0%,100% { box-shadow: 0 0 6px rgba(211,47,47,.4); }
+    50%      { box-shadow: 0 0 18px rgba(211,47,47,.8); }
+}
+/* Label below mic auto-updates via JS */
+#mic-status-lbl {
+    font-size: .74rem; font-weight: 700; text-align: center;
+    margin-top: 4px; transition: color .3s;
+}
+</style>
+<div id="mic-status-lbl" style="color:#EF5350">🎤 Tap to record</div>
+<script>
+(function(){
+  function watchMic(){
+    var btn = document.querySelector('[data-testid="stAudioInput"] > div > button');
+    var lbl = document.getElementById('mic-status-lbl');
+    if(!btn || !lbl) return;
+    var obs = new MutationObserver(function(){
+      var label = (btn.getAttribute('aria-label')||"").toLowerCase();
+      var recording = label.indexOf("stop") !== -1;
+      lbl.style.color   = recording ? '#FF1744' : '#EF5350';
+      lbl.textContent   = recording ? '⏹ Stop recording' : '🎤 Tap to record';
+    });
+    obs.observe(btn, {attributes:true, attributeFilter:['aria-label']});
+  }
+  // Retry until mic button appears in DOM
+  var _t = setInterval(function(){ if(document.querySelector('[data-testid="stAudioInput"]')){ watchMic(); clearInterval(_t); } }, 200);
+})();
+</script>''', unsafe_allow_html=True)
             chat_audio = st.audio_input("🎤", key="chat_mic", label_visibility="collapsed")
-            st.markdown(f'<div style="font-size:.75rem;color:#EF5350;font-weight:700;text-align:center;margin-top:4px">🎤 {T("start_recording")}</div>', unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
         with photo_col:
             st.markdown('<div style="text-align:center;padding-top:6px">', unsafe_allow_html=True)
             _show_cam = st.toggle("📸", key="chat_cam_toggle", help=T("photo_hint"))
@@ -6012,7 +6048,18 @@ Be factual. Do not invent data. Keep each section focused and practical."""
             st.markdown(f'<div style="font-size:.75rem;color:{_cam_color};font-weight:700;text-align:center;margin-top:2px">{_cam_label}</div>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
         with label_col:
-            st.markdown(f'<div style="background:rgba(43,125,233,.08);border:1px solid rgba(43,125,233,.2);border-radius:10px;padding:10px 14px;margin-top:4px"><span style="font-size:.82rem;color:#7BB8F5;line-height:1.6">🎤 {T("mic_hint")}<br>📸 {T("photo_hint")}</span></div>', unsafe_allow_html=True)
+            # AI selector — default single best, option to query all three
+            _ask_all_ai = st.checkbox(
+                "🤖 Ask all 3 AIs", key="chat_ask_all_ai",
+                value=st.session_state.get("chat_ask_all_ai", False),
+                help="By default Teacher Pehpeh picks the best AI for you. Tick to compare all three responses."
+            )
+            _avail_ais = [n for k,n in [(OPENAI_API_KEY,"ChatGPT"),(ANTHROPIC_API_KEY,"Claude"),(GOOGLE_API_KEY,"Gemini")] if k]
+            if _ask_all_ai:
+                st.markdown(f'<div style="background:rgba(43,125,233,.12);border:1px solid rgba(43,125,233,.3);border-radius:8px;padding:6px 10px;margin-top:4px"><span style="font-size:.78rem;color:#7BB8F5">Querying: {", ".join(_avail_ais)}</span></div>', unsafe_allow_html=True)
+            else:
+                _default_ai = next(iter(_avail_ais), "AI")
+                st.markdown(f'<div style="background:rgba(43,125,233,.08);border:1px solid rgba(43,125,233,.2);border-radius:8px;padding:6px 10px;margin-top:4px"><span style="font-size:.78rem;color:#7BB8F5">Best response from: {_default_ai}</span></div>', unsafe_allow_html=True)
 
         # Photo upload / camera area (shown when toggled on)
         chat_photo_b64 = None
@@ -6048,24 +6095,6 @@ Be factual. Do not invent data. Keep each section focused and practical."""
             if voice_text:
                 st.success(f'{T("heard")}: "{voice_text[:80]}..."' if len(voice_text) > 80 else f'{T("heard")}: "{voice_text}"')
 
-        # Inject CSS to make mic red while recording
-        st.markdown("""<style>
-        /* Make ALL mic buttons red while recording (Streamlit changes aria-label to Stop) */
-        [data-testid="stAudioInput"] > div > button[aria-label*="Stop"],
-        [data-testid="stAudioInput"] > div > button[aria-label*="stop"],
-        [data-testid="baseButton-minimal"][aria-label*="Stop"],
-        [data-testid="baseButton-minimal"][aria-label*="stop"] {
-            background-color: #D32F2F !important;
-            color: white !important;
-            border-color: #D32F2F !important;
-            box-shadow: 0 0 12px rgba(211,47,47,.5) !important;
-            animation: pulse-red 1.2s ease-in-out infinite !important;
-        }
-        @keyframes pulse-red {
-            0%, 100% { box-shadow: 0 0 8px rgba(211,47,47,.4); }
-            50% { box-shadow: 0 0 20px rgba(211,47,47,.7); }
-        }
-        </style>""", unsafe_allow_html=True)
 
         uq = st.chat_input(f"{T('ask_about')} {subject}... {T('draw_hint')}")
         # Intervention action pre-fill — auto-send encouragement script request
@@ -6117,7 +6146,21 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                     msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
                 else:
                     st.write(f"{T('asking_claude')} {T('asking_chatgpt')} {T('asking_gemini')}")
-                    r,m,allr=best_all(build_free_chat(),uq,[{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]])
+                    _sp_chat = build_free_chat()
+                    _hist_chat = [{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]]
+                    if st.session_state.get("chat_ask_all_ai", False):
+                        r,m,allr=best_all(_sp_chat,uq,_hist_chat)
+                    else:
+                        # Single best AI — try in preferred order, return first success
+                        _single_pairs=[(ANTHROPIC_API_KEY,ask_cl,"Claude"),(OPENAI_API_KEY,ask_gpt,"ChatGPT"),(GOOGLE_API_KEY,ask_gem,"Gemini")]
+                        r,m,allr=None,None,{}
+                        for _sk,_sfn,_snm in _single_pairs:
+                            if _sk:
+                                _sr=_sfn(_sp_chat,uq,_hist_chat) if _snm!="Gemini" else _sfn(_sp_chat,uq)
+                                if _sr and not str(_sr).startswith("⚠️"):
+                                    r,m,allr=_sr,_snm,{_snm:_sr}
+                                    break
+                        if not r: r,m,allr="⚠️ No AI responded.",None,{}
                     msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
                 if want_chat_img:
                     st.write(T("creating_img"))
