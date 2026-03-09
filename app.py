@@ -2668,60 +2668,63 @@ def main():
         transform: translateY(-1px) !important;
     }}
 
-    /* MAIN-AREA SELECTBOXES — IBT red identity (deep Baseweb overrides) */
-    /* Outer wrapper */
+    /* MAIN-AREA SELECTBOXES — solid IBT red gradient (matches Generate tab energy) */
+    /* Outer wrapper — bright solid fill */
     .main .stSelectbox > div > div,
     [data-testid="stMain"] .stSelectbox > div > div,
     [data-testid="stMainBlockContainer"] .stSelectbox > div > div,
     [data-testid="stMain"] [data-baseweb="select"],
     [data-testid="stMainBlockContainer"] [data-baseweb="select"] {{
-        border: 2px solid {C_RED} !important;
+        border: 2px solid {C_RED_L} !important;
         border-radius: 9px !important;
-        background: rgba(100,10,10,.18) !important;
-        min-height: 42px !important;
+        background: linear-gradient(135deg, {C_RED}, {C_RED_L}) !important;
+        min-height: 44px !important;
+        box-shadow: 0 3px 10px rgba(139,26,26,.40) !important;
         transition: border-color .18s, box-shadow .18s, background .18s !important;
     }}
-    /* Baseweb inner control container */
+    /* Baseweb inner control container — keep transparent so gradient shows */
     [data-testid="stMain"] [data-baseweb="select"] > div,
     [data-testid="stMainBlockContainer"] [data-baseweb="select"] > div {{
         background: transparent !important;
         border: none !important;
     }}
-    /* Hover */
+    /* Hover — brighten slightly */
     .main .stSelectbox > div > div:hover,
     [data-testid="stMain"] .stSelectbox > div > div:hover,
     [data-testid="stMainBlockContainer"] .stSelectbox > div > div:hover,
     [data-testid="stMain"] [data-baseweb="select"]:hover,
     [data-testid="stMainBlockContainer"] [data-baseweb="select"]:hover {{
-        border-color: {C_RED_L} !important;
-        background: rgba(139,26,26,.26) !important;
+        border-color: #D04050 !important;
+        box-shadow: 0 5px 18px rgba(178,34,52,.55) !important;
+        background: linear-gradient(135deg, {C_RED_L}, #C83050) !important;
     }}
-    /* Focus */
+    /* Focus — glow ring */
     .main .stSelectbox > div > div:focus-within,
     [data-testid="stMain"] .stSelectbox > div > div:focus-within,
     [data-testid="stMainBlockContainer"] .stSelectbox > div > div:focus-within,
     [data-testid="stMain"] [data-baseweb="select"]:focus-within,
     [data-testid="stMainBlockContainer"] [data-baseweb="select"]:focus-within {{
-        border-color: {C_RED_L} !important;
-        box-shadow: 0 0 0 3px rgba(178,34,52,.28) !important;
-        background: rgba(139,26,26,.26) !important;
+        border-color: #E05060 !important;
+        box-shadow: 0 0 0 3px rgba(178,34,52,.38), 0 4px 14px rgba(139,26,26,.45) !important;
     }}
-    /* Dropdown chevron arrow */
+    /* Dropdown chevron arrow — white on red bg */
     [data-testid="stMainBlockContainer"] .stSelectbox svg,
     [data-testid="stMain"] .stSelectbox svg,
     [data-testid="stMainBlockContainer"] [data-baseweb="select"] svg,
     [data-testid="stMain"] [data-baseweb="select"] svg {{
-        color: {C_RED_L} !important;
-        fill: {C_RED_L} !important;
+        color: #FFFFFF !important;
+        fill: #FFFFFF !important;
+        opacity: .85 !important;
     }}
-    /* Selected value text */
+    /* Selected value text — bright white on red gradient */
     [data-testid="stMainBlockContainer"] .stSelectbox [data-baseweb="select"] span,
     [data-testid="stMain"] .stSelectbox [data-baseweb="select"] span,
     [data-testid="stMainBlockContainer"] [data-baseweb="select"] [data-baseweb="select-input"],
     [data-testid="stMain"] [data-baseweb="select"] [data-baseweb="select-input"] {{
-        color: #FFD0D0 !important;
-        font-weight: 600 !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
         font-size: .92rem !important;
+        text-shadow: 0 1px 3px rgba(0,0,0,.3) !important;
     }}
     /* Dropdown popover list — dark container, no fill until hover */
     [data-baseweb="popover"] [role="listbox"],
