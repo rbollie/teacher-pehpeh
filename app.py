@@ -369,15 +369,34 @@ def check_conn():
 def gen_image(prompt):
     """Try DALL-E-3/gpt-image-1 (Canva) first, then Gemini image generation (Nano Banana)"""
     import base64 as _b64
-    img_style = "Clean, professional educational infographic style. Bright colors on white background. NO chalkboard, NO hand-drawn sketches, NO chalk-style text. Use clear labels, simple diagrams, and modern flat design. Culturally relevant to West Africa/Liberia."
-    full_prompt = f"Educational visual aid: {prompt}. {img_style}"
+
+    # === Teacher Pehpeh permanent background — always consulted for image generation ===
+    tp_context = (
+        "The image is for Liberian students and teachers in West Africa. "
+        "Show culturally authentic details: African students in school uniforms, "
+        "West African/Liberian settings such as local classrooms, tropical landscapes, market scenes, farms. "
+        "People depicted must have dark skin and African features reflecting Liberian society. "
+        "Avoid Western, American, or European settings and faces. "
+        "IBT (Institute of Basic Technology) built this tool to serve underresourced Liberian schools — "
+        "the image must feel like it comes from someone who knows Liberia from the inside."
+    )
+
+    img_style = (
+        "Clean, professional educational diagram or infographic. "
+        "Modern flat design with bright, clear colors on a white background. "
+        "NO cartoon style. NO comic-book style. NO anime. NO watercolor painting. NO illustration art. "
+        "NO chalkboard. NO hand-drawn or sketch look. NO chalk-style text. "
+        "Use clear labels, well-spaced diagrams, and a professional school-textbook aesthetic. "
+        f"{tp_context}"
+    )
+    full_prompt = f"Educational visual aid for a Liberian school: {prompt}. {img_style}"
 
     # --- ChatGPT image generation (Canva) ---
     if OAI and OPENAI_API_KEY:
         c = openai.OpenAI(api_key=OPENAI_API_KEY)
-        # Primary: DALL-E-3 — widely available, returns a URL
+        # Primary: DALL-E-3 with HD quality — reduces cartoonish output
         try:
-            r = c.images.generate(model="dall-e-3", prompt=full_prompt, size="1024x1024", quality="standard", n=1)
+            r = c.images.generate(model="dall-e-3", prompt=full_prompt, size="1024x1024", quality="hd", n=1)
             url = r.data[0].url
             if url:
                 return url, "Canva"
@@ -393,6 +412,7 @@ def gen_image(prompt):
     # --- Gemini image generation (Nano Banana) ---
     # Uses new google-genai SDK (google.genai) which supports response_modalities
     if GOOGLE_API_KEY:
+        _img_errs = []
         try:
             from google import genai as _new_genai
             from google.genai import types as _gtypes
@@ -400,22 +420,36 @@ def gen_image(prompt):
             _resp = _gc.models.generate_content(
                 model="gemini-2.0-flash-preview-image-generation",
                 contents=full_prompt,
-                config=_gtypes.GenerateContentConfig(response_modalities=["TEXT", "IMAGE"])
+                config=_gtypes.GenerateContentConfig(response_modalities=["IMAGE", "TEXT"])
             )
             for _part in _resp.candidates[0].content.parts:
                 if hasattr(_part, "inline_data") and _part.inline_data and _part.inline_data.mime_type.startswith("image/"):
-                    b64 = _b64.b64encode(_part.inline_data.data).decode()
-                    return f"data:image/png;base64,{b64}", "Nano Banana"
-        except: pass
-        # Fallback: Imagen 3 via old SDK
+                    _idata = _part.inline_data.data
+                    # inline_data.data may already be a base64 string or raw bytes
+                    b64 = _idata if isinstance(_idata, str) else _b64.b64encode(_idata).decode()
+                    return f"data:{_part.inline_data.mime_type};base64,{b64}", "Nano Banana"
+            _img_errs.append("gemini-flash: response contained no image parts")
+        except Exception as _ge:
+            _img_errs.append(f"gemini-flash: {_ge}")
+
+        # Fallback: Imagen 3 via google-generativeai SDK
         if GEM:
             try:
-                genai.configure(api_key=GOOGLE_API_KEY)
-                client = genai.ImageGenerationModel("imagen-3.0-generate-002")
-                response = client.generate_images(prompt=full_prompt, number_of_images=1)
-                if response.images:
-                    b64 = _b64.b64encode(response.images[0]._image_bytes).decode()
+                import google.generativeai as _gai_img
+                _gai_img.configure(api_key=GOOGLE_API_KEY)
+                _img_client = _gai_img.ImageGenerationModel("imagen-3.0-generate-002")
+                _img_resp = _img_client.generate_images(prompt=full_prompt, number_of_images=1)
+                if _img_resp.images:
+                    b64 = _b64.b64encode(_img_resp.images[0]._image_bytes).decode()
                     return f"data:image/png;base64,{b64}", "Nano Banana"
+                _img_errs.append("imagen-3: no images returned in response")
+            except Exception as _ie:
+                _img_errs.append(f"imagen-3: {_ie}")
+
+        # Surface errors in session state for debugging
+        if _img_errs:
+            try:
+                st.session_state["_img_gen_errors"] = _img_errs
             except: pass
 
     return None, None
