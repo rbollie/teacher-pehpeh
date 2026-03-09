@@ -546,15 +546,12 @@ def gen_image(prompt, agent="Auto"):
         if _working_model:
             _flash_candidates = [_working_model]
         else:
+            # Confirmed image-capable models from ListModels diagnostic (March 2026)
             _flash_candidates = [
-                # v1 first — confirmed model exists there (HTTP 400, not 404)
-                ("v1",     "gemini-2.0-flash-preview-image-generation"),
-                ("v1beta", "gemini-2.0-flash-preview-image-generation"),
-                ("v1",     "gemini-2.0-flash-exp-image-generation"),
-                ("v1beta", "gemini-2.0-flash-exp-image-generation"),
-                ("v1",     "gemini-2.5-flash-preview-04-17"),
-                ("v1",     "gemini-2.0-flash"),
-                ("v1beta", "gemini-2.0-flash"),
+                ("v1beta", "gemini-2.5-flash-image"),               # Gemini 2.5 Flash Image ✅
+                ("v1beta", "gemini-3.1-flash-image-preview"),       # Gemini 3.1 Flash Image ✅
+                ("v1beta", "gemini-3-pro-image-preview"),           # Gemini 3 Pro Image ✅
+                ("v1beta", "gemini-2.0-flash-exp-image-generation"),# Gemini 2.0 Flash Exp Image ✅
             ]
         # v1 uses snake_case, v1beta uses camelCase — send both so either version accepts it
         _payload_flash = {
@@ -591,13 +588,11 @@ def gen_image(prompt, agent="Auto"):
                 # 404 = wrong name/version — keep trying
 
         # ── Tier 2: Imagen via predict — both API versions ────────────────────
+        # Imagen 4 confirmed available on this key via ListModels
         _imagen_candidates = [
-            ("v1",     "imagen-3.0-generate-001"),
-            ("v1beta", "imagen-3.0-generate-001"),
-            ("v1",     "imagen-3.0-fast-generate-001"),
-            ("v1beta", "imagen-3.0-fast-generate-001"),
-            ("v1",     "imagegeneration@006"),
-            ("v1beta", "imagegeneration@006"),
+            ("v1beta", "imagen-4.0-fast-generate-001"),   # fastest
+            ("v1beta", "imagen-4.0-generate-001"),         # standard
+            ("v1beta", "imagen-4.0-ultra-generate-001"),   # highest quality
         ]
         _payload_imagen = {
             "instances": [{"prompt": _gemini_prompt}],
