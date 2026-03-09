@@ -1160,10 +1160,6 @@ def build_free_chat():
         "When generating MCQs, always format them as:\n"
         "1. Question text\nA) option\nB) option\nC) option\nD) option\n\nAnswer: X\n\n"
         "Be encouraging, clear, and culturally relevant to West African education contexts. "
-        "RESPONSE LENGTH RULE: Match your response length to the complexity of the request. "
-        "For greetings, simple confirmations, or short conversational messages (e.g. 'hello', 'hi', 'can you hear me', 'are you there', 'okay', 'thanks'), "
-        "reply with just 1–2 short friendly sentences — do NOT launch into long explanations or lists. "
-        "Only give detailed, structured responses when the user asks a substantive question or requests content. "
         f"{_kb()}\n{_r()}"
     )
 
@@ -2528,6 +2524,19 @@ def main():
     [data-testid="stSidebar"] .stExpander {{ background:linear-gradient(135deg,#1a3a6b,#2B7DE9);border-radius:10px;border:none !important }}
     [data-testid="stSidebar"] .stExpander summary {{ color:white !important;font-weight:700 }}
     [data-testid="stSidebar"] .stExpander [data-testid="stExpanderDetails"] {{ background:rgba(0,0,0,.15);border-radius:0 0 10px 10px }}
+    /* Save / Load / Exit sidebar buttons — larger emoji, readable label */
+    section[data-testid="stSidebar"] button[data-testid="baseButton-secondary"],
+    section[data-testid="stSidebar"] button[data-testid="baseButton-primary"] {{
+        font-size: 0.82rem !important;
+        padding: 0.45rem 0.5rem !important;
+        line-height: 1.4 !important;
+    }}
+    section[data-testid="stSidebar"] div[data-testid="stButton"]:has(button[key="sv_prof"]) button p,
+    section[data-testid="stSidebar"] div[data-testid="stButton"]:has(button[key="ld_prof"]) button p,
+    section[data-testid="stSidebar"] div[data-testid="stButton"]:has(button[key="logout_btn"]) button p {{
+        font-size: 0.85rem !important;
+        letter-spacing: 0.01em;
+    }}
     /* Sidebar text inputs — bright text, clear borders */
     section[data-testid="stSidebar"] .stTextInput > div > div > input {{color:#FFFFFF !important;background:#3D0C0C !important;border:1.5px solid #D4A843 !important;border-radius:8px !important;caret-color:#F5D998 !important}}
     section[data-testid="stSidebar"] .stTextInput > div > div > input::placeholder {{color:#C0A070 !important;opacity:1 !important}}
@@ -3443,7 +3452,7 @@ def main():
         # ── Row 5a: Save / Load — 2 equal columns ──────────────────────────
         _sf1, _sf2 = st.columns(2)
         with _sf1:
-            if st.button("💾", use_container_width=True, key="sv_prof"):
+            if st.button("💾  Save Configuration", use_container_width=True, key="sv_prof"):
                 _c = st.session_state.get("country_sel","Liberia")
                 _l = st.session_state.get("lang_sel","English")
                 _r = st.session_state.get("cfg_region", list(_regions().keys())[0])
@@ -3456,13 +3465,13 @@ def main():
                 st.session_state["_show_save_opts"] = True
                 st.rerun()
         with _sf2:
-            if st.button("📂", use_container_width=True, key="ld_prof"):
+            if st.button("📂  Load Configuration", use_container_width=True, key="ld_prof"):
                 st.session_state["_show_load_opts"] = not st.session_state.get("_show_load_opts", False)
                 st.session_state["_show_save_opts"] = False
                 st.rerun()
         # ── Row 5b: Sign Out — full width, only shown when logged in ─────────
         if _login_required() and _is_logged_in():
-            if st.button("🚪", key="logout_btn", use_container_width=True, type="secondary"):
+            if st.button("🚪  Exit", key="logout_btn", use_container_width=True, type="secondary"):
                 st.session_state["_logged_in"] = False
                 st.session_state["_login_label"] = ""
                 # Remove persistent token so refresh also logs out
@@ -6048,18 +6057,11 @@ Be factual. Do not invent data. Keep each section focused and practical."""
             st.markdown(f'<div style="font-size:.75rem;color:{_cam_color};font-weight:700;text-align:center;margin-top:2px">{_cam_label}</div>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
         with label_col:
-            # AI selector — default single best, option to query all three
-            _ask_all_ai = st.checkbox(
-                "🤖 Ask all 3 AIs", key="chat_ask_all_ai",
-                value=st.session_state.get("chat_ask_all_ai", False),
-                help="By default Teacher Pehpeh picks the best AI for you. Tick to compare all three responses."
-            )
+            # Always single best AI — no multi-AI by default
+            st.session_state["chat_ask_all_ai"] = False
             _avail_ais = [n for k,n in [(OPENAI_API_KEY,"ChatGPT"),(ANTHROPIC_API_KEY,"Claude"),(GOOGLE_API_KEY,"Gemini")] if k]
-            if _ask_all_ai:
-                st.markdown(f'<div style="background:rgba(43,125,233,.12);border:1px solid rgba(43,125,233,.3);border-radius:8px;padding:6px 10px;margin-top:4px"><span style="font-size:.78rem;color:#7BB8F5">Querying: {", ".join(_avail_ais)}</span></div>', unsafe_allow_html=True)
-            else:
-                _default_ai = next(iter(_avail_ais), "AI")
-                st.markdown(f'<div style="background:rgba(43,125,233,.08);border:1px solid rgba(43,125,233,.2);border-radius:8px;padding:6px 10px;margin-top:4px"><span style="font-size:.78rem;color:#7BB8F5">Best response from: {_default_ai}</span></div>', unsafe_allow_html=True)
+            _default_ai = next(iter(_avail_ais), "AI")
+            st.markdown(f'<div style="background:rgba(43,125,233,.08);border:1px solid rgba(43,125,233,.2);border-radius:8px;padding:6px 10px;margin-top:4px"><span style="font-size:.78rem;color:#7BB8F5">🤖 Powered by: {_default_ai}</span></div>', unsafe_allow_html=True)
 
         # Photo upload / camera area (shown when toggled on)
         chat_photo_b64 = None
@@ -6121,7 +6123,6 @@ Be factual. Do not invent data. Keep each section focused and practical."""
             if _show_cam and st.button("📸 Ask Teacher Pehpeh about this photo", type="primary", key="photo_send"):
                 uq = _pq if _pq else T("photo_default")
         if uq:
-          try:
             # Check if there's a photo attached
             _attached_photo = chat_photo_b64 if (_show_cam and chat_photo_b64) else None
             _attached_mime = chat_photo_mime if _attached_photo else None
@@ -6183,8 +6184,6 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                         msg_data["image_src"]=img_model
                 status.update(label=T("response_ready"),state="complete",expanded=False)
             st.session_state.chat_messages.append(msg_data); st.rerun()
-          except Exception as _chat_err:
-            st.error(f"⚠️ Something went wrong — please try your message again. (Detail: {_chat_err})")
         if st.session_state.chat_messages and st.button(T("clear"),key="cc"): st.session_state.chat_messages=[]; st.rerun()
         st.markdown("---")
         _hdr_col, _shuf_col = st.columns([5, 1])
