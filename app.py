@@ -1160,6 +1160,9 @@ def build_free_chat():
         "When generating MCQs, always format them as:\n"
         "1. Question text\nA) option\nB) option\nC) option\nD) option\n\nAnswer: X\n\n"
         "Be encouraging, clear, and culturally relevant to West African education contexts. "
+        "RESPONSE LENGTH: Keep answers SHORT and DIRECT. For simple questions, respond in 2-4 sentences. "
+        "For explanations, use at most 100 words. Only go longer if the question explicitly asks for a full lesson, quiz, or list. "
+        "Avoid long intros, summaries, or repeating the question back. Get straight to the point. "
         f"{_kb()}\n{_r()}"
     )
 
@@ -6159,7 +6162,7 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                     allr = {m: r} if m else {"AI": r}
                     msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
                 else:
-                    st.write(f"{T('asking_claude')} {T('asking_chatgpt')} {T('asking_gemini')}")
+                    st.write(f"{T('asking_claude')}")
                     _sp_chat = build_free_chat()
                     _hist_chat = [{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]]
                     if st.session_state.get("chat_ask_all_ai", False):
@@ -6183,7 +6186,18 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                         msg_data["image"]=img_url
                         msg_data["image_src"]=img_model
                 status.update(label=T("response_ready"),state="complete",expanded=False)
-            st.session_state.chat_messages.append(msg_data); st.rerun()
+            st.session_state.chat_messages.append(msg_data)
+            # Auto-generate TTS when input came from voice — so audio plays immediately on rerun
+            if voice_text and ELEVENLABS_API_KEY:
+                _auto_content = msg_data.get("content", "")
+                if _auto_content and not str(_auto_content).startswith("⚠️"):
+                    _auto_mi = len(st.session_state.chat_messages) - 1
+                    _auto_key = f"tts_audio_chat_{_auto_mi}"
+                    if _auto_key not in st.session_state:
+                        _b64, _src = speak_elevenlabs(_auto_content[:2000])
+                        if _b64:
+                            st.session_state[_auto_key] = {"b64": _b64, "src": _src}
+            st.rerun()
         if st.session_state.chat_messages and st.button(T("clear"),key="cc"): st.session_state.chat_messages=[]; st.rerun()
         st.markdown("---")
         _hdr_col, _shuf_col = st.columns([5, 1])
