@@ -2565,11 +2565,11 @@ def main():
         border: 1.5px solid rgba(255,190,190,.40) !important;
         border-radius: 7px !important;
         font-weight: 600 !important;
-        font-size: .78rem !important;
-        padding: 4px 10px !important;
-        min-height: 30px !important;
-        height: 30px !important;
-        line-height: 1.2 !important;
+        font-size: .72rem !important;
+        padding: 2px 8px !important;
+        min-height: 24px !important;
+        height: 24px !important;
+        line-height: 1.1 !important;
         box-shadow: none !important;
         transition: background .18s, border-color .18s, color .18s !important;
     }}
@@ -2588,10 +2588,10 @@ def main():
         background: rgba(212,168,67,.14) !important;
         border: 1.5px solid rgba(212,168,67,.55) !important;
         color: #F5D98E !important;
-        font-size: .78rem !important;
-        padding: 4px 10px !important;
-        min-height: 30px !important;
-        height: 30px !important;
+        font-size: .72rem !important;
+        padding: 2px 8px !important;
+        min-height: 24px !important;
+        height: 24px !important;
     }}
     section[data-testid="stSidebar"] [data-testid="logout_btn"]:hover,
     section[data-testid="stSidebar"] button[data-testid="logout_btn"]:hover {{
@@ -2607,10 +2607,10 @@ def main():
         border: 1.5px solid rgba(255,190,190,.40) !important;
         border-radius: 7px !important;
         font-weight: 600 !important;
-        font-size: .78rem !important;
-        padding: 4px 10px !important;
-        min-height: 30px !important;
-        height: 30px !important;
+        font-size: .72rem !important;
+        padding: 2px 8px !important;
+        min-height: 24px !important;
+        height: 24px !important;
         box-shadow: none !important;
     }}
     section[data-testid="stSidebar"] [data-testid="stDownloadButton"] > button:hover,
