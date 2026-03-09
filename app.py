@@ -3068,16 +3068,12 @@ def main():
 
     st.markdown("""<script>
 (function(){{
-  // 1. Viewport meta — critical for mobile scaling
+  /* ── 1. Viewport meta ── */
   var vp = document.querySelector('meta[name=viewport]');
-  if(!vp){{
-    vp = document.createElement('meta');
-    vp.name = 'viewport';
-    document.head.appendChild(vp);
-  }}
+  if(!vp){{ vp=document.createElement('meta'); vp.name='viewport'; document.head.appendChild(vp); }}
   vp.content = 'width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes';
 
-  // 2. Mobile-web-app meta tags
+  /* ── 2. Apple / Android web-app meta tags ── */
   ['mobile-web-app-capable','apple-mobile-web-app-capable'].forEach(function(n){{
     if(!document.querySelector('meta[name="'+n+'"]')){{
       var m=document.createElement('meta'); m.name=n; m.content='yes';
@@ -3085,10 +3081,67 @@ def main():
     }}
   }});
 
-  // 3. Prevent iOS double-tap zoom on interactive elements
-  var style = document.createElement('style');
-  style.textContent = 'button, a, select, input, textarea, [role="button"] {{ touch-action: manipulation; }}';
-  document.head.appendChild(style);
+  /* ── 3. Touch-action: kill double-tap zoom on interactive elements ── */
+  var ts = document.createElement('style');
+  ts.textContent = [
+    'button,a,select,input,textarea,[role="button"],',
+    '[data-testid="baseButton-primary"],[data-testid="baseButton-secondary"]',
+    '{{ touch-action:manipulation !important; }}'
+  ].join('');
+  document.head.appendChild(ts);
+
+  /* ── 4. Strip Streamlit inline column widths on mobile so CSS can stack ── */
+  function fixColumns(){{
+    var w = window.innerWidth || document.documentElement.clientWidth;
+    var isMobile  = w <= 640;
+    var isTablet  = w > 640 && w <= 900;
+    var cols = document.querySelectorAll('[data-testid="stColumn"]');
+    cols.forEach(function(col){{
+      if(isMobile){{
+        col.style.removeProperty('width');
+        col.style.removeProperty('flex');
+        col.style.removeProperty('min-width');
+        col.style.width = '100%';
+        col.style.minWidth = '100%';
+        col.style.flex = '1 1 100%';
+      }} else if(isTablet){{
+        col.style.removeProperty('width');
+        col.style.removeProperty('flex');
+        col.style.removeProperty('min-width');
+        /* Let CSS handle tablet layout */
+      }} else {{
+        /* Desktop: restore natural flex */
+        col.style.removeProperty('width');
+        col.style.removeProperty('min-width');
+        col.style.removeProperty('flex');
+      }}
+    }});
+    /* Make all horizontal blocks flex-wrap on mobile */
+    var blocks = document.querySelectorAll('[data-testid="stHorizontalBlock"]');
+    blocks.forEach(function(b){{
+      if(isMobile){{
+        b.style.flexDirection = 'column';
+        b.style.gap = '0.4rem';
+      }} else if(isTablet){{
+        b.style.flexWrap = 'wrap';
+        b.style.flexDirection = '';
+      }} else {{
+        b.style.flexDirection = '';
+        b.style.flexWrap = '';
+      }}
+    }});
+  }}
+
+  /* Run on load and on every Streamlit re-render (MutationObserver) */
+  fixColumns();
+  window.addEventListener('resize', fixColumns);
+  var _obs = new MutationObserver(function(muts){{
+    var relevant = muts.some(function(m){{
+      return m.addedNodes.length > 0;
+    }});
+    if(relevant) fixColumns();
+  }});
+  _obs.observe(document.body, {{childList:true, subtree:true}});
 }})();
 </script>""", unsafe_allow_html=True)
     # ── Session state defaults (sidebar removed — all UI in main content) ──────
@@ -3169,12 +3222,17 @@ def main():
   font-family: "Source Sans Pro", sans-serif;
   font-size: .78rem;
   display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
-  padding: 6px 16px; border-radius: 20px;
+  padding: 5px 10px; border-radius: 16px;
   border: 1px dashed #2a3a5a; opacity: .85;
-  margin-bottom: .3rem;
+  margin-bottom: .3rem; box-sizing: border-box; width: 100%;
 }}
 .tp-bar span {{ white-space: nowrap; }}
-.tp-div {{ color: #3a4a6a; margin: 0 8px; font-size: 1.1rem; }}
+.tp-div {{ color: #3a4a6a; margin: 0 4px; font-size: 1.1rem; }}
+@media (max-width: 520px) {{
+  .tp-bar {{ font-size: .70rem; padding: 4px 8px; gap: 3px; }}
+  .tp-div {{ display: none; }}
+  #recheck-btn {{ font-size: .70rem; padding: 2px 7px; }}
+}}
 #dev-chip {{
   display:inline-flex; align-items:center; gap:5px;
   padding:2px 8px; border-radius:12px;
@@ -3233,7 +3291,7 @@ def main():
   }});
 }})();
 </script>
-""", height=46, scrolling=False)
+""", height=60, scrolling=False)
         if st.button(T("recheck"), key="recheck_sidebar"):
             st.session_state.conn_checked = False
             st.rerun()
@@ -3300,8 +3358,8 @@ def main():
             st.selectbox("Language", list(LANGS.keys()), key="lang_sel",
                 label_visibility="collapsed", format_func=lambda x: f"🗣️ {x}", help="Response language")
 
-        # ── Row 2: Classroom dropdowns ────────────────────────────────────
-        _cb1, _cb2, _cb3, _cb4, _cb5 = st.columns(5)
+        # ── Row 2: Classroom dropdowns — 3-col + 2-col rows (mobile-friendly) ──
+        _cb1, _cb2, _cb3 = st.columns(3)
         with _cb1:
             st.selectbox(T("setting"), list(_regions().keys()), key="cfg_region",
                 label_visibility="collapsed", format_func=lambda x: f"📍 {x}", help="Urban, rural, or remote")
@@ -3311,6 +3369,7 @@ def main():
         with _cb3:
             st.selectbox(T("subject"), _subjects(), key="cfg_subject",
                 label_visibility="collapsed", format_func=lambda x: f"📚 {x}", help="Subject")
+        _cb4, _cb5 = st.columns(2)
         with _cb4:
             st.selectbox(T("class_size"), list(_sizes().keys()), key="cfg_clsz",
                 label_visibility="collapsed", format_func=lambda x: f"👥 {x}", help="Class size")
@@ -3374,8 +3433,8 @@ def main():
                     _mano_stats = get_mano_stats()
                     if _mano_stats: st.caption(f"🗣️ {_mano_stats['total']}+ words loaded")
 
-        # ── Row 5: Save / Load + subscription + logout ────────────────────
-        _sf1, _sf2, _sf3 = st.columns([2, 2, 1])
+        # ── Row 5: Save / Load + logout — 2 equal cols + narrow logout ─────
+        _sf1, _sf2, _sf3 = st.columns([3, 3, 2])
         with _sf1:
             if st.button("💾 Save Configuration", use_container_width=True, key="sv_prof"):
                 _c = st.session_state.get("country_sel","Liberia")
@@ -3581,7 +3640,10 @@ setTimeout(function() {{
 
         # Build per-category display list with sentinel header option
         _cat_list   = list(_TASK_CATEGORIES.keys())   # ["📋 Planning", "📝 Assessment", ...]
-        _dd_cols    = st.columns(len(_cat_list))
+        # 2×2 layout: first row = first two categories, second row = last two
+        _dd_row1 = st.columns(2)
+        _dd_row2 = st.columns(2)
+        _dd_cols = [_dd_row1[0], _dd_row1[1], _dd_row2[0], _dd_row2[1]]
         _active_cat = st.session_state.task_cat
 
         for _ci, _cname in enumerate(_cat_list):
