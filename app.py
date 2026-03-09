@@ -1160,6 +1160,10 @@ def build_free_chat():
         "When generating MCQs, always format them as:\n"
         "1. Question text\nA) option\nB) option\nC) option\nD) option\n\nAnswer: X\n\n"
         "Be encouraging, clear, and culturally relevant to West African education contexts. "
+        "RESPONSE LENGTH RULE: Match your response length to the complexity of the request. "
+        "For greetings, simple confirmations, or short conversational messages (e.g. 'hello', 'hi', 'can you hear me', 'are you there', 'okay', 'thanks'), "
+        "reply with just 1–2 short friendly sentences — do NOT launch into long explanations or lists. "
+        "Only give detailed, structured responses when the user asks a substantive question or requests content. "
         f"{_kb()}\n{_r()}"
     )
 
@@ -6117,6 +6121,7 @@ Be factual. Do not invent data. Keep each section focused and practical."""
             if _show_cam and st.button("📸 Ask Teacher Pehpeh about this photo", type="primary", key="photo_send"):
                 uq = _pq if _pq else T("photo_default")
         if uq:
+          try:
             # Check if there's a photo attached
             _attached_photo = chat_photo_b64 if (_show_cam and chat_photo_b64) else None
             _attached_mime = chat_photo_mime if _attached_photo else None
@@ -6178,6 +6183,8 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                         msg_data["image_src"]=img_model
                 status.update(label=T("response_ready"),state="complete",expanded=False)
             st.session_state.chat_messages.append(msg_data); st.rerun()
+          except Exception as _chat_err:
+            st.error(f"⚠️ Something went wrong — please try your message again. (Detail: {_chat_err})")
         if st.session_state.chat_messages and st.button(T("clear"),key="cc"): st.session_state.chat_messages=[]; st.rerun()
         st.markdown("---")
         _hdr_col, _shuf_col = st.columns([5, 1])
