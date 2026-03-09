@@ -518,11 +518,10 @@ def gen_image(prompt, agent="Auto"):
         import urllib.request as _ur
         import urllib.error as _ue
         _img_errs = []
-        _base = "https://generativelanguage.googleapis.com/v1beta/models"
-        _key  = f"?key={GOOGLE_API_KEY}"
+        # Try both API versions — some models only exist under v1, others under v1beta
+        _key = f"?key={GOOGLE_API_KEY}"
 
         def _http_post(url, payload):
-            """POST JSON, return parsed response or raise."""
             _req = _ur.Request(
                 url,
                 data=_json.dumps(payload).encode(),
@@ -532,8 +531,7 @@ def gen_image(prompt, agent="Auto"):
             with _ur.urlopen(_req, timeout=60) as _r:
                 return _json.loads(_r.read().decode())
 
-        def _extract_b64_from_response(resp_json):
-            """Pull the first image/... inline_data base64 out of a generateContent response."""
+        def _extract_img(resp_json):
             for cand in resp_json.get("candidates", []):
                 for part in cand.get("content", {}).get("parts", []):
                     idata = part.get("inlineData") or part.get("inline_data")
@@ -541,52 +539,70 @@ def gen_image(prompt, agent="Auto"):
                         return idata["data"], idata["mimeType"]
             return None, None
 
-        # ── Tier 1: generateContent with IMAGE modality (Gemini Flash models) ──
-        _flash_models = [
-            "gemini-2.0-flash-preview-image-generation",
-            "gemini-2.0-flash-exp",
-            "gemini-2.5-flash-preview-05-20",
-            "gemini-2.5-flash",
-        ]
+        # ── Tier 1: generateContent IMAGE modality — try both API versions ───
+        # Use the override model if the diagnostic already found a working one
+        _working_model = st.session_state.get("_gemini_working_model", None)
+        _flash_candidates = []
+        if _working_model:
+            _flash_candidates = [_working_model]
+        else:
+            _flash_candidates = [
+                # v1 versions (more stable, broader availability)
+                ("v1",     "gemini-2.0-flash-preview-image-generation"),
+                ("v1beta", "gemini-2.0-flash-preview-image-generation"),
+                ("v1",     "gemini-2.0-flash-exp"),
+                ("v1beta", "gemini-2.0-flash-exp"),
+                ("v1",     "gemini-2.5-flash-preview-04-17"),
+                ("v1beta", "gemini-2.5-flash-preview-04-17"),
+                ("v1",     "gemini-2.0-flash"),
+                ("v1beta", "gemini-2.0-flash"),
+            ]
         _payload_flash = {
             "contents": [{"parts": [{"text": _gemini_prompt}]}],
             "generationConfig": {"responseModalities": ["IMAGE", "TEXT"]}
         }
-        for _fm in _flash_models:
+        _got_non_404 = False
+        for _fc in _flash_candidates:
+            if isinstance(_fc, tuple):
+                _ver, _fm = _fc
+            else:
+                _ver, _fm = "v1beta", _fc.replace("models/", "")
             try:
-                _url = f"{_base}/{_fm}:generateContent{_key}"
+                _url = f"https://generativelanguage.googleapis.com/{_ver}/models/{_fm}:generateContent{_key}"
                 _resp_j = _http_post(_url, _payload_flash)
-                _b64_data, _mime = _extract_b64_from_response(_resp_j)
+                _b64_data, _mime = _extract_img(_resp_j)
                 if _b64_data:
+                    st.session_state["_gemini_working_model"] = (_ver, _fm)
                     return f"data:{_mime};base64,{_b64_data}", "Nano Banana"
-                # Model responded but no image — log and stop trying flash models
-                _img_errs.append(f"{_fm}: no image in response — {str(_resp_j)[:300]}")
-                break
+                _img_errs.append(f"{_ver}/{_fm}: responded, no image — {str(_resp_j)[:200]}")
+                _got_non_404 = True
+                break  # model reached, just no image output
             except _ue.HTTPError as _he:
                 _body = ""
                 try: _body = _he.read().decode()[:300]
                 except: pass
-                _img_errs.append(f"{_fm}: HTTP {_he.code} — {_body}")
+                _img_errs.append(f"{_ver}/{_fm}: HTTP {_he.code} — {_body[:200]}")
                 if _he.code in (400, 401, 403, 429):
-                    break   # auth/quota/bad-request — stop immediately
-                # 404 = wrong model name, try next
-            except Exception as _e:
-                _img_errs.append(f"{_fm}: {_e}")
-                break
+                    _got_non_404 = True
+                    break  # real error — stop
+                # 404 = wrong name/version — keep trying
 
-        # ── Tier 2: predict endpoint (Imagen 3) ──────────────────────────────
-        _imagen_models = [
-            "imagen-3.0-generate-001",
-            "imagen-3.0-generate-002",
-            "imagen-3.0-fast-generate-001",
+        # ── Tier 2: Imagen via predict — both API versions ────────────────────
+        _imagen_candidates = [
+            ("v1",     "imagen-3.0-generate-001"),
+            ("v1beta", "imagen-3.0-generate-001"),
+            ("v1",     "imagen-3.0-fast-generate-001"),
+            ("v1beta", "imagen-3.0-fast-generate-001"),
+            ("v1",     "imagegeneration@006"),
+            ("v1beta", "imagegeneration@006"),
         ]
         _payload_imagen = {
             "instances": [{"prompt": _gemini_prompt}],
             "parameters": {"sampleCount": 1}
         }
-        for _im in _imagen_models:
+        for _ver, _im in _imagen_candidates:
             try:
-                _url = f"{_base}/{_im}:predict{_key}"
+                _url = f"https://generativelanguage.googleapis.com/{_ver}/models/{_im}:predict{_key}"
                 _resp_j = _http_post(_url, _payload_imagen)
                 _preds = _resp_j.get("predictions", [])
                 if _preds:
@@ -596,18 +612,15 @@ def gen_image(prompt, agent="Auto"):
                     )
                     if _img_b64:
                         return f"data:image/png;base64,{_img_b64}", "Nano Banana"
-                _img_errs.append(f"{_im}: no image in response — {str(_resp_j)[:300]}")
+                _img_errs.append(f"{_ver}/{_im}: no image — {str(_resp_j)[:200]}")
                 break
             except _ue.HTTPError as _he:
                 _body = ""
                 try: _body = _he.read().decode()[:300]
                 except: pass
-                _img_errs.append(f"{_im}: HTTP {_he.code} — {_body}")
+                _img_errs.append(f"{_ver}/{_im}: HTTP {_he.code} — {_body[:200]}")
                 if _he.code in (400, 401, 403, 429):
                     break
-            except Exception as _e:
-                _img_errs.append(f"{_im}: {_e}")
-                break
 
         if _img_errs:
             st.session_state["_img_gen_errors"] = _img_errs
@@ -3646,60 +3659,93 @@ def main():
 
         # ── Nano Banana API diagnostic ─────────────────────────────────────
         with st.expander("🧪 Test Nano Banana (Gemini)", expanded=False):
-            st.markdown("<div style='font-size:.8rem;color:#A0B8D0'>Tap to run a live API test and see exactly what Google returns.</div>", unsafe_allow_html=True)
-            if st.button("▶ Run Gemini Image Test", key="gemini_diag_btn", use_container_width=True):
+            st.markdown("<div style='font-size:.8rem;color:#A0B8D0'>Lists every model your API key can actually see, then tests image generation on the right ones.</div>", unsafe_allow_html=True)
+            if st.button("▶ List Available Models + Test Images", key="gemini_diag_btn", use_container_width=True):
                 import json as _dj, urllib.request as _dur, urllib.error as _due
                 _dkey = GOOGLE_API_KEY
                 if not _dkey:
                     st.error("❌ GOOGLE_API_KEY is not set in Streamlit secrets.")
                 else:
                     st.info(f"✅ GOOGLE_API_KEY found (ends …{_dkey[-6:]})")
-                    _test_prompt = "A photo of a student writing in a classroom in Monrovia Liberia"
-                    _test_models = [
-                        "gemini-2.0-flash-preview-image-generation",
-                        "gemini-2.0-flash-exp",
-                        "gemini-2.5-flash-preview-05-20",
-                        "imagen-3.0-generate-001",
-                    ]
-                    for _tm in _test_models:
-                        st.write(f"Testing **{_tm}**…")
-                        try:
-                            if "imagen" in _tm:
-                                _url = f"https://generativelanguage.googleapis.com/v1beta/models/{_tm}:predict?key={_dkey}"
-                                _payload = {"instances":[{"prompt":_test_prompt}],"parameters":{"sampleCount":1}}
-                            else:
-                                _url = f"https://generativelanguage.googleapis.com/v1beta/models/{_tm}:generateContent?key={_dkey}"
-                                _payload = {
-                                    "contents":[{"parts":[{"text":_test_prompt}]}],
-                                    "generationConfig":{"responseModalities":["IMAGE","TEXT"]}
-                                }
-                            _req = _dur.Request(_url, data=_dj.dumps(_payload).encode(),
-                                                headers={"Content-Type":"application/json"}, method="POST")
-                            with _dur.urlopen(_req, timeout=30) as _r:
-                                _rbody = _dj.loads(_r.read().decode())
-                            # Look for image
-                            _found = False
-                            for _c in _rbody.get("candidates",[]):
-                                for _p in _c.get("content",{}).get("parts",[]):
-                                    _id = _p.get("inlineData") or _p.get("inline_data")
-                                    if _id and "image" in _id.get("mimeType",""):
-                                        st.success(f"✅ {_tm} → IMAGE returned! ({_id['mimeType']})")
+                    # ── Step 1: List all models available on this key ──────────
+                    st.markdown("**Step 1 — Fetching your available models from Google…**")
+                    _all_models = []
+                    _img_capable = []
+                    try:
+                        _lurl = f"https://generativelanguage.googleapis.com/v1beta/models?key={_dkey}&pageSize=200"
+                        with _dur.urlopen(_lurl, timeout=15) as _lr:
+                            _lbody = _dj.loads(_lr.read().decode())
+                        _all_models = _lbody.get("models", [])
+                        # Filter to models that support generateContent or predict AND involve image
+                        _gen_models = []
+                        for _m in _all_models:
+                            _nm = _m.get("name","")
+                            _methods = [x.get("name","") for x in _m.get("supportedGenerationMethods",[])]
+                            # Image-capable: name contains image/imagen/flash or methods include generateContent + imageOutput
+                            _is_img = any(x in _nm.lower() for x in ("imagen","image"))
+                            _is_gen = "generateContent" in _methods
+                            _is_pred = "predict" in _methods
+                            if _is_img or (_is_gen and "flash" in _nm.lower()):
+                                _gen_models.append((_nm, _methods))
+                        if _gen_models:
+                            st.success(f"✅ Found {len(_gen_models)} potentially useful models:")
+                            for _nm, _mth in _gen_models:
+                                st.code(f"{_nm}  →  methods: {', '.join(_mth)}")
+                        else:
+                            st.warning(f"⚠️ No image or flash models found. Total models on key: {len(_all_models)}")
+                            st.code("
+".join(m.get('name','') for m in _all_models[:30]))
+                    except _due.HTTPError as _le:
+                        _lb=""
+                        try: _lb=_le.read().decode()[:400]
+                        except: pass
+                        st.error(f"❌ ListModels failed: HTTP {_le.code} — {_lb}")
+                        _gen_models = []
+                    except Exception as _lex:
+                        st.error(f"❌ ListModels error: {_lex}")
+                        _gen_models = []
+
+                    # ── Step 2: Test image generation on each candidate ────────
+                    if _gen_models:
+                        st.markdown("**Step 2 — Testing image generation on each candidate…**")
+                        _test_prompt = "A photo of a student writing in a classroom in Monrovia Liberia"
+                        for _nm, _mth in _gen_models:
+                            _short = _nm.replace("models/","")
+                            st.write(f"Testing **{_short}**…")
+                            try:
+                                if "predict" in _mth:
+                                    _url = f"https://generativelanguage.googleapis.com/v1beta/{_nm}:predict?key={_dkey}"
+                                    _payload = {"instances":[{"prompt":_test_prompt}],"parameters":{"sampleCount":1}}
+                                else:
+                                    _url = f"https://generativelanguage.googleapis.com/v1beta/{_nm}:generateContent?key={_dkey}"
+                                    _payload = {
+                                        "contents":[{"parts":[{"text":_test_prompt}]}],
+                                        "generationConfig":{"responseModalities":["IMAGE","TEXT"]}
+                                    }
+                                _req = _dur.Request(_url, data=_dj.dumps(_payload).encode(),
+                                                    headers={"Content-Type":"application/json"}, method="POST")
+                                with _dur.urlopen(_req, timeout=45) as _r:
+                                    _rbody = _dj.loads(_r.read().decode())
+                                _found = False
+                                for _c in _rbody.get("candidates",[]):
+                                    for _p in _c.get("content",{}).get("parts",[]):
+                                        _id = _p.get("inlineData") or _p.get("inline_data")
+                                        if _id and "image" in _id.get("mimeType",""):
+                                            st.success(f"🎉 **{_short} WORKS!** Image returned ({_id['mimeType']}) — use this model name!")
+                                            _found = True
+                                for _pred in _rbody.get("predictions",[]):
+                                    if _pred.get("bytesBase64Encoded"):
+                                        st.success(f"🎉 **{_short} WORKS!** (Imagen format) — use this model name!")
                                         _found = True
-                            for _pred in _rbody.get("predictions",[]):
-                                if _pred.get("bytesBase64Encoded"):
-                                    st.success(f"✅ {_tm} → IMAGE returned (Imagen)!")
-                                    _found = True
-                            if not _found:
-                                st.warning(f"⚠️ {_tm} responded but no image. Response:")
-                                st.code(_dj.dumps(_rbody, indent=2)[:1000], language="json")
-                        except _due.HTTPError as _he:
-                            _hbody=""
-                            try: _hbody=_he.read().decode()[:600]
-                            except: pass
-                            st.error(f"❌ {_tm}: HTTP {_he.code}")
-                            st.code(_hbody, language="json")
-                        except Exception as _ex:
-                            st.error(f"❌ {_tm}: {_ex}")
+                                if not _found:
+                                    st.warning(f"⚠️ {_short}: responded, no image. Sample: {str(_rbody)[:200]}")
+                            except _due.HTTPError as _he:
+                                _hb=""
+                                try: _hb=_he.read().decode()[:300]
+                                except: pass
+                                st.error(f"❌ {_short}: HTTP {_he.code} — {_hb[:200]}")
+                            except Exception as _ex:
+                                st.error(f"❌ {_short}: {_ex}")
 
     if not conn:
         keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
