@@ -581,8 +581,22 @@ def gen_image(prompt, agent="Auto"):
                 _body = ""
                 try: _body = _he.read().decode()[:300]
                 except: pass
+                if _he.code == 429:
+                    # Quota hit — wait and retry once
+                    import time as _t; _t.sleep(4)
+                    try:
+                        _resp_j = _http_post(_url, _payload_flash)
+                        _b64_data, _mime = _extract_img(_resp_j)
+                        if _b64_data:
+                            st.session_state["_gemini_working_model"] = (_ver, _fm)
+                            return f"data:{_mime};base64,{_b64_data}", "Nano Banana"
+                        _img_errs.append(f"{_ver}/{_fm}: 429 retry — no image in response")
+                    except Exception as _re:
+                        _img_errs.append(f"{_ver}/{_fm}: 429 retry failed — {_re}")
+                    _got_non_404 = True
+                    break
                 _img_errs.append(f"{_ver}/{_fm}: HTTP {_he.code} — {_body[:200]}")
-                if _he.code in (400, 401, 403, 429):
+                if _he.code in (400, 401, 403):
                     _got_non_404 = True
                     break  # real error — stop
                 # 404 = wrong name/version — keep trying
@@ -3685,16 +3699,18 @@ def main():
                             st.code(f"Unexpected type {type(_lbody)}: {_lraw[:400]}")
                             _all_models = []
                         # Filter to models that support generateContent or predict AND involve image
+                        # Only keep models that are clearly image-capable:
+                        # - name contains "image" or "imagen" (image generation models)
+                        # - uses "predict" method (Imagen series)
+                        # Exclude generic flash/text models to avoid wasting quota
                         _gen_models = []
                         for _m in _all_models:
                             _nm = _m.get("name","")
                             _raw_methods = _m.get("supportedGenerationMethods", [])
                             _methods = [x if isinstance(x, str) else x.get("name","") for x in _raw_methods]
-                            # Image-capable: name contains image/imagen/flash or methods include generateContent + imageOutput
                             _is_img = any(x in _nm.lower() for x in ("imagen","image"))
-                            _is_gen = "generateContent" in _methods
                             _is_pred = "predict" in _methods
-                            if _is_img or (_is_gen and "flash" in _nm.lower()):
+                            if _is_img or _is_pred:
                                 _gen_models.append((_nm, _methods))
                         if _gen_models:
                             st.success(f"✅ Found {len(_gen_models)} potentially useful models:")
