@@ -2556,16 +2556,20 @@ def main():
     section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] > p {{ margin-bottom: 0 !important }}
     section[data-testid="stSidebar"] .stExpander {{ margin-bottom: 2px !important }}
 
-    /* ── SIDEBAR BUTTONS — ghost style on red background ────────────────── */
-    /* Target Streamlit's actual button data-testid attributes */
+    /* ── SIDEBAR BUTTONS — compact ghost style on red background ───────── */
     section[data-testid="stSidebar"] [data-testid="baseButton-secondary"],
     section[data-testid="stSidebar"] [data-testid="baseButton-primary"],
     section[data-testid="stSidebar"] .stButton > button {{
         background: rgba(255,255,255,.10) !important;
         color: #FFE8E8 !important;
         border: 1.5px solid rgba(255,190,190,.40) !important;
-        border-radius: 8px !important;
+        border-radius: 7px !important;
         font-weight: 600 !important;
+        font-size: .78rem !important;
+        padding: 4px 10px !important;
+        min-height: 30px !important;
+        height: 30px !important;
+        line-height: 1.2 !important;
         box-shadow: none !important;
         transition: background .18s, border-color .18s, color .18s !important;
     }}
@@ -2578,12 +2582,16 @@ def main():
         transform: none !important;
         box-shadow: none !important;
     }}
-    /* Sign Out — gold-outlined to signal it's destructive/exit */
+    /* Sign Out — compact gold-outlined */
     section[data-testid="stSidebar"] [data-testid="logout_btn"],
     section[data-testid="stSidebar"] button[data-testid="logout_btn"] {{
         background: rgba(212,168,67,.14) !important;
         border: 1.5px solid rgba(212,168,67,.55) !important;
         color: #F5D98E !important;
+        font-size: .78rem !important;
+        padding: 4px 10px !important;
+        min-height: 30px !important;
+        height: 30px !important;
     }}
     section[data-testid="stSidebar"] [data-testid="logout_btn"]:hover,
     section[data-testid="stSidebar"] button[data-testid="logout_btn"]:hover {{
@@ -2591,14 +2599,18 @@ def main():
         border-color: {C_GOLD} !important;
         color: #FFE9A0 !important;
     }}
-    /* Download buttons in sidebar */
+    /* Download buttons in sidebar — same compact size */
     section[data-testid="stSidebar"] [data-testid="stDownloadButton"] > button,
     section[data-testid="stSidebar"] .stDownloadButton > button {{
         background: rgba(255,255,255,.10) !important;
         color: #FFE8E8 !important;
         border: 1.5px solid rgba(255,190,190,.40) !important;
-        border-radius: 8px !important;
+        border-radius: 7px !important;
         font-weight: 600 !important;
+        font-size: .78rem !important;
+        padding: 4px 10px !important;
+        min-height: 30px !important;
+        height: 30px !important;
         box-shadow: none !important;
     }}
     section[data-testid="stSidebar"] [data-testid="stDownloadButton"] > button:hover,
