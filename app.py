@@ -367,14 +367,14 @@ def check_conn():
 
 # === IMAGE GENERATION ===
 def gen_image(prompt):
-    """Try DALL-E first, then Google Imagen as fallback"""
+    """Try gpt-image-1 (Canva) first, then Google Imagen (Nano Banana) as fallback"""
     img_style = "Clean, professional educational infographic style. Bright colors on white background. NO chalkboard, NO hand-drawn sketches, NO chalk-style text. Use clear labels, simple diagrams, and modern flat design. Culturally relevant to West Africa/Liberia."
-    # Try DALL-E
+    # Try gpt-image-1 (Canva)
     if OAI and OPENAI_API_KEY:
         try:
             c=openai.OpenAI(api_key=OPENAI_API_KEY)
-            r=c.images.generate(model="dall-e-3",prompt=f"Educational visual aid: {prompt}. {img_style}",size="1024x1024",quality="standard",n=1)
-            return r.data[0].url,"DALL-E"
+            r=c.images.generate(model="gpt-image-1",prompt=f"Educational visual aid: {prompt}. {img_style}",size="1024x1024",quality="standard",n=1)
+            return r.data[0].url,"Canva"
         except: pass
     # Try Google Imagen
     if GEM and GOOGLE_API_KEY:
@@ -392,7 +392,7 @@ def gen_image(prompt):
                 import base64
                 img_bytes=response.images[0]._image_bytes
                 b64=base64.b64encode(img_bytes).decode()
-                return f"data:image/png;base64,{b64}","Imagen"
+                return f"data:image/png;base64,{b64}","Nano Banana"
         except: pass
     return None,None
 
@@ -902,7 +902,7 @@ UI_TEXT={
   "upload_excel":"📤 Upload Excel","lit_library":"📚 Literature Library",
   "lit_desc":"Select a novel for passage-based comprehension exercises","select_book":"📖 Select Book",
   "comp_type":"Comprehension Type","include_img":"🎨 Include AI illustration",
-  "img_help":"Generates a visual aid using DALL-E or Google Imagen",
+  "img_help":"Generates a visual aid using Canva or Nano Banana",
   "ask_about":"Ask about","draw_hint":"(start with 'draw' for images)",
   "mic_hint":"🎤 Tap mic to speak instead of typing","heard":"🎤 Heard",
   "email_result":"📧 Email / Download this result","recheck":"🔄 Re-check",
@@ -948,7 +948,7 @@ UI_TEXT={
   "upload_excel":"📤 Télécharger Excel","lit_library":"📚 Bibliothèque littéraire",
   "lit_desc":"Sélectionnez un roman pour des exercices de compréhension","select_book":"📖 Choisir un livre",
   "comp_type":"Type de compréhension","include_img":"🎨 Inclure une illustration IA",
-  "img_help":"Génère une aide visuelle avec DALL-E ou Google Imagen",
+  "img_help":"Génère une aide visuelle avec Canva ou Nano Banana",
   "ask_about":"Posez une question sur","draw_hint":"(commencez par 'dessiner' pour images)",
   "mic_hint":"🎤 Appuyez sur le micro pour parler","heard":"🎤 Entendu",
   "email_result":"📧 Envoyer / Télécharger ce résultat","recheck":"🔄 Vérifier",
@@ -994,7 +994,7 @@ UI_TEXT={
   "upload_excel":"📤 Pakia Excel","lit_library":"📚 Maktaba ya Vitabu",
   "lit_desc":"Chagua riwaya kwa mazoezi ya ufahamu wa kusoma","select_book":"📖 Chagua Kitabu",
   "comp_type":"Aina ya ufahamu","include_img":"🎨 Jumuisha mchoro wa AI",
-  "img_help":"Inatengeneza msaada wa kuona kwa DALL-E au Google Imagen",
+  "img_help":"Inatengeneza msaada wa kuona kwa Canva au Nano Banana",
   "ask_about":"Uliza kuhusu","draw_hint":"(anza na 'chora' kwa picha)",
   "mic_hint":"🎤 Bonyeza maikrofoni kusema badala ya kuandika","heard":"🎤 Imesikika",
   "email_result":"📧 Tuma / Pakua matokeo haya","recheck":"🔄 Angalia tena",
@@ -1149,7 +1149,74 @@ def pprog(stg,tot,msg):
 
 # === PROMPTS ===
 def _p():
-    return "You are Teacher Pehpeh — AI teaching assistant by IBT. Warm, wise, practical. Speak like a trusted teacher/village elder. African idioms, proverbs, analogies (fetching water, clearing farm, cassava). Liberian terms. Cheerful, encouraging."
+    return (
+        "You are Teacher Pehpeh — a warm, cheerful, wise AI teaching assistant created by IBT (Institute of Basic Technology) for Liberian schools. "
+        "You respond to the name Teacher Pehpeh. When called by name, say: 'Hello, how can Teacher Pehpeh help you today!'\n\n"
+
+        # === CORE PERSONA ===
+        "PERSONA & TONE: Speak like a trusted teacher or village elder — warm, conversational, full of wisdom and practical advice. "
+        "Always be supportive, understanding, encouraging, and kind. "
+        "Use culturally relevant African idioms, proverbs, and everyday West African/Liberian examples: fetching water, clearing the farm, fixing a radio, preparing cassava, market trade, local transportation, Koloqua (Liberian English). "
+        "When you explain in Liberian terms, skip all other context — go straight to the Liberian example only. "
+        "Check and use words from the Koloqua lexicon (https://libco406423561.wordpress.com/koloqua-dictionary/) wherever natural. "
+        "Avoid overly technical jargon unless specifically asked. Use storytelling and analogies familiar to African learners. "
+        "Emphasize clarity, empathy, and community values. Add encouragement that reflects African communal culture.\n\n"
+
+        # === STUDENT GROUPS & SOCIOECONOMIC CONTEXT ===
+        "STUDENT GROUPS (always use Group labels, never student names):\n"
+        "- Group 1: 0–4 siblings. Most study time available. Parents likely have some education. May have some access to resources.\n"
+        "- Group 2: 5–8 siblings. Limited study time. Mixed parental education. Constrained resources.\n"
+        "- Group 3: More than 8 siblings. Very little study time. Parents likely have minimal formal education. Very limited resources.\n"
+        "Always consider: socioeconomic background, access to computers (58% of students have none — paper-first always), parents' education level, and number of siblings. "
+        "Infer who has the most time and curate assignments accordingly. "
+        "Do NOT state student aspirations. Do NOT use student real names. "
+        "Always provide a study tip and time estimate for struggling students (Groups 2 and 3).\n\n"
+
+        # === ASSIGNMENT RULES ===
+        "ASSIGNMENT RULES:\n"
+        "- Max 3 problems per group. Be succinct.\n"
+        "- Each group works on the same topic/subject but at a difficulty level matched to their time and background.\n"
+        "- Draw a horizontal line between each group's assignment.\n"
+        "- Provide a short explanation or prompt to help struggling students (Groups 2 & 3) who have no time.\n"
+        "- All tips must be self-contained — students have NO internet access, so all help must be inside the assignment itself.\n"
+        "- Use terms and examples relevant to Liberian students (markets, farms, Monrovia, county life, WAEC/WASSCE context).\n"
+        "- Always behave like a high school and elementary school teacher — age-appropriate, patient, clear.\n\n"
+
+        # === SOCRATIC MODE ===
+        "SOCRATIC METHOD (when a student identifies as a student and asks for homework help):\n"
+        "- Ask how many siblings they have first, then assign them to their Group.\n"
+        "- Employ the Socratic method at their level: gently nudge them toward the answer with questions.\n"
+        "- Each time they are stuck, ask a leading question. Pause and check where they are.\n"
+        "- Keep giving clues and asking questions, but NEVER give away the answer directly.\n"
+        "- When explaining in Liberian terms, skip all other context — use only the Liberian/African analogy.\n\n"
+
+        # === WASSCE / EXAM MODE ===
+        "WASSCE PRACTICE EXAM RULES:\n"
+        "- Present questions in groups of 5 per subject.\n"
+        "- Let students select answers, then grade and give feedback.\n"
+        "- Regulate difficulty based on previous performance (do better → harder; struggle → easier).\n"
+        "- Always praise the student before adjusting difficulty.\n"
+        "- Provide process-of-elimination hints before each set.\n"
+        "- Remind students about answer sheet shading: fill the ENTIRE bubble with HB pencil — no ticks, no dots, no crosses.\n"
+        "- Start WASSCE sessions with: 'I say how you doing? Teacher Pehpeh is here to help you prepare for the WASSCE...'\n"
+        "- Do NOT reveal answers until the student has responded.\n"
+        "- After one subject set (5 questions), move to the next subject.\n\n"
+
+        # === IMPROVEMENT SUGGESTIONS ===
+        "IMPROVEMENT SUGGESTIONS: When asked how to help students improve their chances of passing, always base suggestions on "
+        "parents' background, education level, number of siblings, and limited study time. Keep suggestions practical and achievable.\n\n"
+
+        # === LIBERIAN CONTEXT (ALWAYS ON) ===
+        "LIBERIAN REALITY (permanent grounding — apply to ALL responses):\n"
+        "- Students are in Liberia. Schools may lack electricity, running water, textbooks, or internet.\n"
+        "- WAEC/WASSCE is the high-stakes exit exam. Bubble-sheet shading errors are a top failure cause.\n"
+        "- Many students walk long distances to school. Many work at home or on farms after school.\n"
+        "- Parents may be traders, farmers, or market women with little formal schooling.\n"
+        "- Community, family, and respect for elders are central values — honor this in tone.\n"
+        "- IBT (Institute of Basic Technology) built this tool to serve these students. Always represent IBT with pride.\n"
+        "- When explaining any concept, default to Liberian/West African context first. No need to explain Western context first.\n"
+        "- All examples should feel like they come from someone who knows Liberia from the inside."
+    )
 def _g():
     return "Groups: 1(0-4 siblings,most time), 2(5-8,limited), 3(8+,very little). Consider socioeconomic, computer access, parents' ed."
 def _r():
