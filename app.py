@@ -3677,13 +3677,24 @@ def main():
                     try:
                         _lurl = f"https://generativelanguage.googleapis.com/v1beta/models?key={_dkey}&pageSize=200"
                         with _dur.urlopen(_lurl, timeout=15) as _lr:
-                            _lbody = _dj.loads(_lr.read().decode())
-                        _all_models = _lbody.get("models", [])
+                            _lraw = _lr.read().decode()
+                        _lbody = _dj.loads(_lraw)
+                        # Response may be {"models":[...]} or a bare list
+                        if isinstance(_lbody, list):
+                            _all_models = _lbody
+                        elif isinstance(_lbody, dict):
+                            _all_models = _lbody.get("models", [])
+                            if not _all_models:
+                                st.code(_lraw[:800], language="json")
+                        else:
+                            st.code(f"Unexpected type {type(_lbody)}: {_lraw[:400]}")
+                            _all_models = []
                         # Filter to models that support generateContent or predict AND involve image
                         _gen_models = []
                         for _m in _all_models:
                             _nm = _m.get("name","")
-                            _methods = [x.get("name","") for x in _m.get("supportedGenerationMethods",[])]
+                            _raw_methods = _m.get("supportedGenerationMethods", [])
+                            _methods = [x if isinstance(x, str) else x.get("name","") for x in _raw_methods]
                             # Image-capable: name contains image/imagen/flash or methods include generateContent + imageOutput
                             _is_img = any(x in _nm.lower() for x in ("imagen","image"))
                             _is_gen = "generateContent" in _methods
