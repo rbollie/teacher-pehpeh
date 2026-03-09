@@ -2848,6 +2848,15 @@ def main():
             width: 100% !important;
         }}
     }}
+
+    /* ── Category dropdown styling ─────────────────────────────────────────
+       Make the header option (category name) look like a section label.
+       Highlight whichever dropdown has an active task selected.           */
+    /* Active category dropdown — gold accent border */
+    [data-testid="stMainBlockContainer"] .stSelectbox[data-active-cat="true"] > div > div {
+        border-color: #D4A843 !important;
+        box-shadow: 0 0 0 2px rgba(212,168,67,.18) !important;
+    }
     </style>""",unsafe_allow_html=True)
 
 
@@ -3336,36 +3345,61 @@ setTimeout(function() {{
         _NEEDS_IMG={"detailed lesson plan","homework with minimal resources","group activity","hands-on zero-cost activity","lesson with AI-generated visual","reading passage with questions"}
         _WASSCE_TASKS={"50 WASSCE-style MCQs","WASSCE theory questions","BECE-style exam","10-question quiz with answer key","20-question quiz"}
 
-        # ── Category pill buttons ──
+        # ── Category dropdowns (one per category, each shows its own tasks) ──
         if "task_cat" not in st.session_state: st.session_state.task_cat="📋 Planning"
-        _CAT_TIPS = {
-            "📋 Planning":     "Lesson plans, weekly & term schemes, teaching strategies",
-            "📝 Assessment":   "Quizzes, WASSCE/BECE exam prep, grading rubrics",
-            "🎯 Activities":   "Homework, group work, reading comprehension, educational games",
-            "📚 Study Support":"Revision notes and remedial catch-up material",
-        }
-        _cat_cols = st.columns(len(_TASK_CATEGORIES))
-        for _ci, _cname in enumerate(_TASK_CATEGORIES):
-            with _cat_cols[_ci]:
-                _is_cat = st.session_state.task_cat == _cname
-                if st.button(_cname, key=f"cat_{_ci}", use_container_width=True,
-                             type="primary" if _is_cat else "secondary",
-                             help=_CAT_TIPS.get(_cname,"")):
-                    st.session_state.task_cat = _cname
-                    st.session_state.pop("task_sel", None)
-                    st.rerun()
-
-        # Build filtered task list by matching English TASKS values to current language
-        _cat_en_keys = _TASK_CATEGORIES[st.session_state.task_cat]   # English task names
-        _cat_en_vals = {TASKS[k] for k in _cat_en_keys if k in TASKS}  # English task values
         _all_tasks = _tasks()   # display-language dict
-        _cat_display_keys = [k for k, v in _all_tasks.items() if v in _cat_en_vals]
 
-        c1, c2 = st.columns(2)
-        with c1:
-            task = st.selectbox(T("task"), _cat_display_keys, key="task_sel",
-                                label_visibility="collapsed",
-                                format_func=lambda x: f"\U0001f4dd Task: {x}", help="What you want Teacher Pehpeh to create for you")
+        # Sentinel prefix used in the "header" option of each dropdown
+        _CAT_PREFIX = "──"
+
+        def _cat_tasks_display(cat_key):
+            """Return display task names for a given category key."""
+            _en_keys = _TASK_CATEGORIES[cat_key]
+            _en_vals = {TASKS[k] for k in _en_keys if k in TASKS}
+            return [k for k, v in _all_tasks.items() if v in _en_vals]
+
+        # Build per-category display list with sentinel header option
+        _cat_list   = list(_TASK_CATEGORIES.keys())   # ["📋 Planning", "📝 Assessment", ...]
+        _dd_cols    = st.columns(len(_cat_list))
+        _active_cat = st.session_state.task_cat
+
+        for _ci, _cname in enumerate(_cat_list):
+            _dd_tasks = _cat_tasks_display(_cname)
+            # Compose options: header option + tasks
+            _header_opt   = f"{_CAT_PREFIX} {_cname}"
+            _dd_options   = [_header_opt] + _dd_tasks
+            # Default index: if this is the active category and a task_sel is remembered, preselect it
+            _prev_sel = st.session_state.get("task_sel", None)
+            if _cname == _active_cat and _prev_sel in _dd_tasks:
+                _dd_idx = _dd_options.index(_prev_sel)
+            else:
+                _dd_idx = 0   # show header
+
+            with _dd_cols[_ci]:
+                _chosen = st.selectbox(
+                    label=_cname,
+                    options=_dd_options,
+                    index=_dd_idx,
+                    key=f"dd_cat_{_ci}",
+                    label_visibility="collapsed",
+                    format_func=lambda x, _h=_header_opt: (
+                        x if not x.startswith(_CAT_PREFIX)
+                        else x.replace(f"{_CAT_PREFIX} ", "")
+                    ),
+                    help=f"Select a {_cname.split()[-1]} task",
+                )
+                # If user picked a real task (not the header), switch to that category + task
+                if _chosen != _header_opt:
+                    if st.session_state.task_cat != _cname or st.session_state.get("task_sel") != _chosen:
+                        st.session_state.task_cat   = _cname
+                        st.session_state["task_sel"] = _chosen
+                        st.rerun()
+
+        # Resolve the current task from session state
+        _active_tasks = _cat_tasks_display(st.session_state.task_cat)
+        _cur_task_sel = st.session_state.get("task_sel")
+        task = _cur_task_sel if _cur_task_sel in _active_tasks else (_active_tasks[0] if _active_tasks else "")
+
         _task_val = _all_tasks.get(task, "detailed lesson plan")
         _IS_PARENT_LETTER = False   # Parent Letter moved to Students tab
         _show_time    = _task_val in _NEEDS_TIME
@@ -3379,13 +3413,13 @@ setTimeout(function() {{
             st.markdown(f'<div style="background:linear-gradient(135deg,rgba(139,26,26,.3),rgba(212,168,67,.1));border:1px solid {C_GOLD}66;border-radius:10px;padding:10px 16px;margin:6px 0;display:flex;align-items:center;gap:10px"><span style="font-size:1.1rem">📋</span><span style="color:{C_GOLD};font-weight:700;font-size:.88rem">WASSCE Prep</span><span style="color:#D0D8E8;font-size:.82rem"> — Review answer sheet shading technique before generating</span></div>', unsafe_allow_html=True)
             if st.button("📋 Open Answer Sheet Guide", key="wassce_guide_btn", use_container_width=False):
                 wassce_shading_modal()
-        with c2:
-            if _show_time:
-                tm = st.selectbox(T("time"), _times(), label_visibility="collapsed",
-                                  format_func=lambda x: f"\u23f1\ufe0f Time: {x}", help="How long your lesson or activity will run")
-            else:
-                tm = "N/A"
-                st.markdown(f'<div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:10px 14px;color:var(--text-muted);font-size:.85rem;opacity:.5">\u23f1\ufe0f Time: not needed for this task</div>', unsafe_allow_html=True)
+
+        # Time selector — shown as its own row below the dropdowns
+        if _show_time:
+            tm = st.selectbox(T("time"), _times(), label_visibility="collapsed",
+                              format_func=lambda x: f"\u23f1\ufe0f Time: {x}", help="How long your lesson or activity will run")
+        else:
+            tm = "N/A"
 
         _parent_letter_override=None
         _pl_delivery=None
