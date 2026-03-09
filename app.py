@@ -2467,7 +2467,7 @@ def main():
     section[data-testid="stSidebar"] .stMarkdown h2 {{color:{C_GOLD_L} !important;font-family:'Playfair Display',serif}}
     section[data-testid="stSidebar"] .stMarkdown p,section[data-testid="stSidebar"] .stMarkdown li {{color:#F0D5D5}}
     section[data-testid="stSidebar"] label {{color:#F0D5D5 !important}}
-    section[data-testid="stSidebar"] .stSelectbox > div > div {{background:#3D0C0C !important;color:#F0D5D5 !important;border-color:#8B3030 !important}}
+    section[data-testid="stSidebar"] .stSelectbox > div > div {{background:#3D0C0C !important;color:#FFD0D0 !important;border:2px solid {C_RED} !important;border-radius:8px !important}}
     section[data-testid="stSidebar"] hr {{border-color:#8B3030 !important}}
     .stStatusWidget {{display:none !important}}
     .stTabs [data-baseweb="tab-list"] {{background:#111C35;border-radius:10px;padding:5px;gap:3px;border:2px solid #2a3a6a !important}}
@@ -2598,33 +2598,56 @@ def main():
         transform: translateY(-1px) !important;
     }}
 
-    /* MAIN-AREA SELECTBOXES — fat visible border + clear hover/focus ring */
+    /* MAIN-AREA SELECTBOXES — IBT red identity */
     .main .stSelectbox > div > div,
     [data-testid="stMain"] .stSelectbox > div > div,
     [data-testid="stMainBlockContainer"] .stSelectbox > div > div {{
-        border: 2px solid #3D5580 !important;
+        border: 2px solid {C_RED} !important;
         border-radius: 9px !important;
-        background: #0D1A30 !important;
+        background: rgba(139,26,26,.12) !important;
         min-height: 42px !important;
-        transition: border-color .18s, box-shadow .18s !important;
+        transition: border-color .18s, box-shadow .18s, background .18s !important;
     }}
     .main .stSelectbox > div > div:hover,
     [data-testid="stMain"] .stSelectbox > div > div:hover,
     [data-testid="stMainBlockContainer"] .stSelectbox > div > div:hover {{
-        border-color: {C_BLUE} !important;
+        border-color: {C_RED_L} !important;
+        background: rgba(139,26,26,.2) !important;
     }}
     .main .stSelectbox > div > div:focus-within,
     [data-testid="stMain"] .stSelectbox > div > div:focus-within,
     [data-testid="stMainBlockContainer"] .stSelectbox > div > div:focus-within {{
-        border-color: {C_BLUE} !important;
-        box-shadow: 0 0 0 3px rgba(43,125,233,.22) !important;
+        border-color: {C_RED_L} !important;
+        box-shadow: 0 0 0 3px rgba(139,26,26,.28) !important;
+        background: rgba(139,26,26,.2) !important;
+    }}
+    /* Selectbox dropdown arrow SVG — red tint */
+    [data-testid="stMainBlockContainer"] .stSelectbox svg,
+    [data-testid="stMain"] .stSelectbox svg {{
+        color: {C_RED_L} !important;
+        fill: {C_RED_L} !important;
     }}
     /* Selectbox text color in main area */
     [data-testid="stMainBlockContainer"] .stSelectbox [data-baseweb="select"] span,
     [data-testid="stMain"] .stSelectbox [data-baseweb="select"] span {{
-        color: #D0E4FF !important;
+        color: #FFD0D0 !important;
         font-weight: 600 !important;
         font-size: .92rem !important;
+    }}
+    /* Dropdown popover list */
+    [data-baseweb="popover"] [role="listbox"] {{
+        background: #1A0808 !important;
+        border: 1.5px solid {C_RED} !important;
+        border-radius: 9px !important;
+    }}
+    [data-baseweb="popover"] [role="option"] {{
+        background: transparent !important;
+        color: #FFD0D0 !important;
+    }}
+    [data-baseweb="popover"] [role="option"]:hover,
+    [data-baseweb="popover"] [role="option"][aria-selected="true"] {{
+        background: rgba(139,26,26,.45) !important;
+        color: #FFFFFF !important;
     }}
 
     /* CLASSROOM CONFIG EXPANDER — standout panel */
@@ -2855,7 +2878,7 @@ def main():
     /* Active category dropdown — gold accent border */
     [data-testid="stMainBlockContainer"] .stSelectbox[data-active-cat="true"] > div > div {{
         border-color: {C_GOLD} !important;
-        box-shadow: 0 0 0 2px rgba(212,168,67,.18) !important;
+        box-shadow: 0 0 0 3px rgba(212,168,67,.22) !important;
     }}
     </style>""",unsafe_allow_html=True)
 
