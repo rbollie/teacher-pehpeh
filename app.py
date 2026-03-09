@@ -6416,6 +6416,26 @@ Be factual. Do not invent data. Keep each section focused and practical."""
 
 
         uq = st.chat_input(f"{T('ask_about')} {subject}... {T('draw_hint')}")
+
+        # Image agent selector — sits directly below the chat input bar
+        _chat_img_agents_opts = []
+        if OPENAI_API_KEY: _chat_img_agents_opts.append("🟢 ChatGPT (DALL·E)")
+        if GOOGLE_API_KEY: _chat_img_agents_opts.append("🔵 Nano Banana (Gemini)")
+        if len(_chat_img_agents_opts) > 1:
+            _chat_img_agents_opts.insert(0, "⚡ Auto (best available)")
+        if _chat_img_agents_opts:
+            _agent_left, _agent_right = st.columns([1, 3])
+            with _agent_left:
+                st.markdown('<div style="font-size:.75rem;color:#6677AA;padding-top:6px">🖼️ Image via:</div>', unsafe_allow_html=True)
+            with _agent_right:
+                st.selectbox(
+                    "Image agent",
+                    _chat_img_agents_opts,
+                    key="chat_img_agent_pick",
+                    label_visibility="collapsed",
+                    help="Which AI generates images when you type 'draw ...'. ChatGPT = near-photorealistic (DALL·E 3). Nano Banana = Gemini/Imagen."
+                )
+
         # Intervention action pre-fill — auto-send encouragement script request
         if not uq and st.session_state.get("_nav_chat_prompt"):
             uq = st.session_state.pop("_nav_chat_prompt")
@@ -6528,7 +6548,11 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                     msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
                 if want_chat_img:
                     st.write(T("creating_img"))
-                    _chat_agent = st.session_state.get("_chat_img_agent_choice", "Auto")
+                    # Read directly from the widget key — guaranteed current value
+                    _raw_pick = st.session_state.get("chat_img_agent_pick", "")
+                    if "ChatGPT" in _raw_pick: _chat_agent = "ChatGPT"
+                    elif "Nano Banana" in _raw_pick: _chat_agent = "Nano Banana"
+                    else: _chat_agent = "Auto"
                     img_url,img_model=gen_image(f"{_subj_en}: {uq} for {_grade_en} in {country}", agent=_chat_agent)
                     if img_url:
                         msg_data["image"]=img_url
@@ -6584,28 +6608,7 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                     })
                     st.rerun()
 
-        # Image agent selector for chat tab — shown compactly below the hint
-        _chat_img_agents = []
-        if OPENAI_API_KEY: _chat_img_agents.append("🟢 ChatGPT (DALL·E)")
-        if GOOGLE_API_KEY: _chat_img_agents.append("🔵 Nano Banana (Gemini)")
-        if len(_chat_img_agents) > 1:
-            _chat_img_agents.insert(0, "⚡ Auto (best available)")
-        _hint_col, _agent_col = st.columns([3, 2])
-        with _hint_col:
-            st.markdown(f'<div style="font-size:.78rem;color:#6677AA;margin:6px 0 4px">💡 Ask anything — start with <em>draw</em> for images, or 📸 upload a photo and say <em>transcribe</em></div>', unsafe_allow_html=True)
-        with _agent_col:
-            if _chat_img_agents:
-                _chat_agent_sel = st.selectbox(
-                    "Image agent:",
-                    _chat_img_agents,
-                    key="chat_img_agent_pick",
-                    label_visibility="collapsed",
-                    help="Which AI to use when you type 'draw ...' in chat. ChatGPT = near-photorealistic. Nano Banana = Gemini/Imagen."
-                )
-                if "ChatGPT" in _chat_agent_sel: _chat_agent_choice = "ChatGPT"
-                elif "Nano Banana" in _chat_agent_sel: _chat_agent_choice = "Nano Banana"
-                else: _chat_agent_choice = "Auto"
-                st.session_state["_chat_img_agent_choice"] = _chat_agent_choice
+        st.markdown(f'<div style="font-size:.78rem;color:#6677AA;margin:6px 0 4px">💡 Ask anything — start with <em>draw</em> for images, or 📸 upload a photo and say <em>transcribe</em></div>', unsafe_allow_html=True)
         st.markdown("---")
 
     # TAB 4: QUIZ (works offline — no internet or API keys needed)
