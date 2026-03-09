@@ -367,49 +367,57 @@ def check_conn():
 
 # === IMAGE GENERATION ===
 def gen_image(prompt):
-    """Try gpt-image-1 (Canva) first, then DALL-E-3, then Gemini 2.0 Flash (Nano Banana)"""
+    """Try DALL-E-3/gpt-image-1 (Canva) first, then Gemini image generation (Nano Banana)"""
     import base64 as _b64
     img_style = "Clean, professional educational infographic style. Bright colors on white background. NO chalkboard, NO hand-drawn sketches, NO chalk-style text. Use clear labels, simple diagrams, and modern flat design. Culturally relevant to West Africa/Liberia."
     full_prompt = f"Educational visual aid: {prompt}. {img_style}"
-    # --- ChatGPT: try gpt-image-1 (always returns b64_json), fallback to dall-e-3 ---
+
+    # --- ChatGPT image generation (Canva) ---
     if OAI and OPENAI_API_KEY:
         c = openai.OpenAI(api_key=OPENAI_API_KEY)
-        # gpt-image-1 always returns b64_json — no response_format param needed
-        try:
-            r = c.images.generate(model="gpt-image-1", prompt=full_prompt, size="1024x1024", quality="standard", n=1)
-            b64 = r.data[0].b64_json
-            if b64:
-                return f"data:image/png;base64,{b64}", "Canva"
-        except: pass
-        # Fallback: dall-e-3 returns a URL
+        # Primary: DALL-E-3 — widely available, returns a URL
         try:
             r = c.images.generate(model="dall-e-3", prompt=full_prompt, size="1024x1024", quality="standard", n=1)
             url = r.data[0].url
             if url:
                 return url, "Canva"
         except: pass
-    # --- Gemini 2.0 Flash image generation (Nano Banana) ---
-    if GEM and GOOGLE_API_KEY:
+        # Secondary: gpt-image-1 — newer model, returns b64_json natively
         try:
-            genai.configure(api_key=GOOGLE_API_KEY)
-            model = genai.GenerativeModel("gemini-2.0-flash-exp-image-generation")
-            response = model.generate_content(
-                full_prompt,
-                generation_config=genai.types.GenerationConfig(response_modalities=["IMAGE", "TEXT"])
+            r = c.images.generate(model="gpt-image-1", prompt=full_prompt, size="1024x1024", n=1)
+            b64 = r.data[0].b64_json
+            if b64:
+                return f"data:image/png;base64,{b64}", "Canva"
+        except: pass
+
+    # --- Gemini image generation (Nano Banana) ---
+    # Uses new google-genai SDK (google.genai) which supports response_modalities
+    if GOOGLE_API_KEY:
+        try:
+            from google import genai as _new_genai
+            from google.genai import types as _gtypes
+            _gc = _new_genai.Client(api_key=GOOGLE_API_KEY)
+            _resp = _gc.models.generate_content(
+                model="gemini-2.0-flash-preview-image-generation",
+                contents=full_prompt,
+                config=_gtypes.GenerateContentConfig(response_modalities=["TEXT", "IMAGE"])
             )
-            for part in response.candidates[0].content.parts:
-                if part.inline_data and part.inline_data.mime_type.startswith("image/"):
-                    b64 = _b64.b64encode(part.inline_data.data).decode()
+            for _part in _resp.candidates[0].content.parts:
+                if hasattr(_part, "inline_data") and _part.inline_data and _part.inline_data.mime_type.startswith("image/"):
+                    b64 = _b64.b64encode(_part.inline_data.data).decode()
                     return f"data:image/png;base64,{b64}", "Nano Banana"
         except: pass
-        # Fallback: Imagen 3 via ImageGenerationModel (requires billing but try anyway)
-        try:
-            client = genai.ImageGenerationModel("imagen-3.0-generate-002")
-            response = client.generate_images(prompt=full_prompt, number_of_images=1)
-            if response.images:
-                b64 = _b64.b64encode(response.images[0]._image_bytes).decode()
-                return f"data:image/png;base64,{b64}", "Nano Banana"
-        except: pass
+        # Fallback: Imagen 3 via old SDK
+        if GEM:
+            try:
+                genai.configure(api_key=GOOGLE_API_KEY)
+                client = genai.ImageGenerationModel("imagen-3.0-generate-002")
+                response = client.generate_images(prompt=full_prompt, number_of_images=1)
+                if response.images:
+                    b64 = _b64.b64encode(response.images[0]._image_bytes).decode()
+                    return f"data:image/png;base64,{b64}", "Nano Banana"
+            except: pass
+
     return None, None
 
 # === TEXT TO SPEECH ===
