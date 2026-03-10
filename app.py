@@ -445,8 +445,9 @@ def _enhance_image_prompt(raw_prompt, openai_client):
 def gen_image(prompt, agent="Auto"):
     """Generate image. agent: 'ChatGPT' | 'Nano Banana' | 'Auto' (ChatGPT first, Gemini fallback)"""
     import base64 as _b64
-    # Always clear stale errors from previous runs
+    # Always clear stale errors AND the debug flag from previous runs
     st.session_state.pop("_img_gen_errors", None)
+    st.session_state.pop("_show_img_debug", None)
 
     # --- ChatGPT image generation (DALL-E) ---
     if agent in ("ChatGPT", "Auto") and OAI and OPENAI_API_KEY:
@@ -8343,7 +8344,7 @@ def wassce_shading_modal():
 </body>
 </html>
 """
-        _components.html(_sheet_html, height=780, scrolling=True)
+        _components.html(_sheet_html, height=1100, scrolling=True)
 
     elif _wtab == "💡 Exam Tips":
         tips = [
