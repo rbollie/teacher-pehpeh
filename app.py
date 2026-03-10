@@ -256,6 +256,8 @@ C_RED = "#8B1A1A"
 C_RED_L = "#B22234"
 C_GOLD = "#D4A843"
 C_GOLD_L = "#F5D98E"
+C_AMBER   = "#F59E0B"   # Primary CTA — generate button, action emphasis
+C_AMBER_D = "#D97706"   # Darker shade for gradients
 
 # === KNOWLEDGE BASE (assembled at runtime only) ===
 @st.cache_data
@@ -2821,9 +2823,9 @@ def main():
     .stTabs [data-baseweb="tab-list"] {{background:#111C35;border-radius:10px;padding:5px;gap:3px;border:2px solid #2a3a6a !important}}
     .stTabs [data-baseweb="tab"] {{border-radius:7px !important;font-weight:600 !important;padding:7px 16px !important;border:1.5px solid transparent !important;transition:all .2s !important;color:#7A90B8 !important;margin:0 1px !important}}
     .stTabs [data-baseweb="tab"]:not([aria-selected="true"]):hover {{border-color:#2B7DE944 !important;color:#B0C8E8 !important;background:rgba(43,125,233,.1) !important}}
-    .stTabs [aria-selected="true"] {{color:white !important;background:linear-gradient(135deg,{C_BLUE_D},{C_BLUE}) !important;border-color:{C_BLUE} !important;border-radius:7px !important;box-shadow:0 2px 10px rgba(43,125,233,.45) !important;font-weight:700 !important}}
-    .stButton > button[kind="primary"] {{background:linear-gradient(135deg,{C_BLUE_D},{C_BLUE}) !important;color:white !important;font-weight:700 !important;border:none !important;border-radius:8px !important;box-shadow:0 3px 10px rgba(43,125,233,.35) !important;padding:8px 20px !important;transition:all .2s !important}}
-    .stButton > button[kind="primary"]:hover {{box-shadow:0 5px 20px rgba(43,125,233,.5) !important;transform:translateY(-1px) !important}}
+    .stTabs [aria-selected="true"] {{color:white !important;background:linear-gradient(135deg,{C_AMBER_D},{C_AMBER}) !important;border-color:{C_AMBER} !important;border-radius:7px !important;box-shadow:0 2px 10px rgba(245,158,11,.45) !important;font-weight:700 !important}}
+    .stButton > button[kind="primary"] {{background:linear-gradient(135deg,{C_AMBER_D},{C_AMBER}) !important;color:white !important;font-weight:700 !important;border:none !important;border-radius:8px !important;box-shadow:0 3px 12px rgba(245,158,11,.45) !important;padding:8px 20px !important;transition:all .2s !important}}
+    .stButton > button[kind="primary"]:hover {{box-shadow:0 5px 22px rgba(245,158,11,.6) !important;transform:translateY(-1px) !important}}
     .stButton > button[kind="secondary"], .stButton > button:not([kind="primary"]) {{background:#0D1A30 !important;color:#A8C0DC !important;font-weight:600 !important;border:2px solid #3D5580 !important;border-radius:10px !important;box-shadow:inset 0 1px 4px rgba(0,0,0,.25),0 1px 3px rgba(0,0,0,.15) !important;transition:all .2s !important}}
     .stButton > button[kind="secondary"]:hover, .stButton > button:not([kind="primary"]):hover {{border-color:{C_BLUE} !important;color:#D4E8FF !important;background:rgba(43,125,233,.12) !important;box-shadow:0 3px 12px rgba(43,125,233,.22) !important;transform:translateY(-1px) !important}}
     /* Status bar: clearly non-interactive */
@@ -2852,7 +2854,7 @@ def main():
     }}
     [data-testid="stMain"] .stExpander summary,
     [data-testid="stMainBlockContainer"] .stExpander summary {{
-        background: linear-gradient(135deg, {C_BLUE_D}, {C_BLUE}) !important;
+        background: linear-gradient(135deg, #1a2744, #1D5CBF) !important;
         color: #FFFFFF !important;
         font-weight: 700 !important;
         padding: 10px 14px !important;
@@ -2860,7 +2862,7 @@ def main():
     }}
     [data-testid="stMain"] .stExpander summary:hover,
     [data-testid="stMainBlockContainer"] .stExpander summary:hover {{
-        background: linear-gradient(135deg, {C_BLUE}, #4090F0) !important;
+        background: linear-gradient(135deg, #1D5CBF, #2B7DE9) !important;
     }}
     /* Expander chevron arrow — large, fully white, always visible */
     [data-testid="stMain"] .stExpander summary svg,
@@ -3030,14 +3032,14 @@ def main():
        ACCESSIBILITY ENHANCEMENTS — TILES & DROPDOWNS
        ══════════════════════════════════════════════════ */
 
-    /* CATEGORY TILE BUTTONS — active state: bright blue glow + thick border */
+    /* CATEGORY TILE BUTTONS — active state: amber glow + thick border */
     [data-testid="baseButton-primary"] {{
-        background: linear-gradient(135deg, {C_BLUE_D}, {C_BLUE}) !important;
+        background: linear-gradient(135deg, {C_AMBER_D}, {C_AMBER}) !important;
         color: white !important;
         font-weight: 700 !important;
-        border: 2.5px solid {C_BLUE} !important;
+        border: 2.5px solid {C_AMBER} !important;
         border-radius: 10px !important;
-        box-shadow: 0 0 0 3px rgba(43,125,233,.22), 0 3px 14px rgba(43,125,233,.45) !important;
+        box-shadow: 0 0 0 3px rgba(245,158,11,.22), 0 3px 14px rgba(245,158,11,.45) !important;
         padding: 10px 14px !important;
         letter-spacing: .3px !important;
     }}
@@ -3464,6 +3466,69 @@ def main():
     [data-testid="stMainBlockContainer"] .stSelectbox[data-active-cat="true"] > div > div {{
         border-color: {C_GOLD} !important;
         box-shadow: 0 0 0 3px rgba(212,168,67,.22) !important;
+    }}
+
+    /* ══════════════════════════════════════════════════════════
+       SETUP CONFIG FIELDS (inside expander) — white card style
+       Separates "configure me" from "choose what to create"
+       ══════════════════════════════════════════════════════════ */
+    [data-testid="stExpanderDetails"] .stSelectbox > div > div,
+    [data-testid="stExpanderDetails"] [data-baseweb="select"] {{
+        background: rgba(255,255,255,.92) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        color: #1a2744 !important;
+        box-shadow: 0 1px 4px rgba(0,0,0,.10) !important;
+    }}
+    [data-testid="stExpanderDetails"] [data-baseweb="select"] > div {{
+        background: transparent !important;
+        border: none !important;
+        color: #1a2744 !important;
+    }}
+    [data-testid="stExpanderDetails"] [data-baseweb="select"] span,
+    [data-testid="stExpanderDetails"] [data-baseweb="select"] [data-testid="stMarkdownContainer"] {{
+        color: #1a2744 !important;
+    }}
+    [data-testid="stExpanderDetails"] [data-baseweb="select"] svg {{
+        color: #475569 !important;
+        fill: #475569 !important;
+    }}
+    [data-testid="stExpanderDetails"] .stSelectbox > div > div:hover,
+    [data-testid="stExpanderDetails"] [data-baseweb="select"]:hover {{
+        border-color: {C_BLUE} !important;
+        box-shadow: 0 2px 8px rgba(43,125,233,.25) !important;
+        background: rgba(255,255,255,1) !important;
+    }}
+    /* Text inputs inside expander — also white */
+    [data-testid="stExpanderDetails"] .stTextInput > div > div > input {{
+        background: rgba(255,255,255,.92) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        color: #1a2744 !important;
+    }}
+    [data-testid="stExpanderDetails"] .stTextInput > div > div > input::placeholder {{
+        color: #94a3b8 !important;
+    }}
+
+    /* ══════════════════════════════════════════════════════════
+       AGENT SELECTOR — indigo accent to read as a "power" toggle
+       ══════════════════════════════════════════════════════════ */
+    .agent-select-wrap .stSelectbox > div > div,
+    .agent-select-wrap [data-baseweb="select"] {{
+        background: linear-gradient(135deg, rgba(79,70,229,.35), rgba(99,102,241,.25)) !important;
+        border: 1.5px solid rgba(129,140,248,.5) !important;
+        box-shadow: 0 0 0 2px rgba(99,102,241,.18) !important;
+    }}
+
+    /* ══════════════════════════════════════════════════════════
+       SECTION LABEL utility class
+       ══════════════════════════════════════════════════════════ */
+    .tp-section-label {{
+        font-size: 10.5px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.1em !important;
+        text-transform: uppercase !important;
+        color: #64748b !important;
+        margin: 10px 0 4px !important;
+        padding-left: 2px !important;
     }}
     </style>""",unsafe_allow_html=True)
 
@@ -3989,6 +4054,28 @@ setTimeout(function() {{
     # TAB 1: GENERATE
     if t1:
      with t1:
+        # ── Setup summary chips (always visible, even when expander is collapsed) ──
+        _chip_grade   = st.session_state.get("cfg_grade",  _grades()[0])
+        _chip_subj    = st.session_state.get("cfg_subject", _subjects()[0])
+        _chip_country = st.session_state.get("country_sel", "Liberia")
+        _chip_region  = st.session_state.get("cfg_region",  list(_regions().keys())[0])
+        st.markdown(
+            f'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px">'
+            f'<span style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#475569">Setup:</span>'
+            f'<span style="font-size:11px;padding:2px 9px;border-radius:20px;background:rgba(43,125,233,.15);color:#7BB8F5;font-weight:600;border:1px solid rgba(43,125,233,.25)">🌍 {_chip_country}</span>'
+            f'<span style="font-size:11px;padding:2px 9px;border-radius:20px;background:rgba(43,125,233,.15);color:#7BB8F5;font-weight:600;border:1px solid rgba(43,125,233,.25)">🎓 {_chip_grade}</span>'
+            f'<span style="font-size:11px;padding:2px 9px;border-radius:20px;background:rgba(43,125,233,.15);color:#7BB8F5;font-weight:600;border:1px solid rgba(43,125,233,.25)">📚 {_chip_subj}</span>'
+            f'<span style="font-size:11px;padding:2px 9px;border-radius:20px;background:rgba(43,125,233,.15);color:#7BB8F5;font-weight:600;border:1px solid rgba(43,125,233,.25)">📍 {_chip_region}</span>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
+
+        # ── Section label for content type selection ──
+        st.markdown(
+            '<p class="tp-section-label">What do you want to create?</p>',
+            unsafe_allow_html=True
+        )
+
         # ── Task category selector → filters task list ──
         # Handle navigation preset from intervention action buttons
         if st.session_state.get("_nav_task_cat"):
@@ -4363,6 +4450,14 @@ setTimeout(function() {{
             _n=len(_avail_agents)
             _all_label=f"Best answer — all {_n} agents" if _n>1 else f"{_avail_agents[0]}"
             _agent_opts=[_all_label]+[f"{a} only" for a in _avail_agents]
+            # Styled agent selector header
+            st.markdown(
+                f'<div style="display:flex;align-items:center;gap:8px;margin:8px 0 4px">'
+                f'<span style="font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b">AI Engine</span>'
+                f'<span style="font-size:10px;padding:1px 7px;border-radius:10px;background:rgba(99,102,241,.2);color:#a5b4fc;font-weight:600;border:1px solid rgba(99,102,241,.3)">⚡ {_n} agent{"s" if _n != 1 else ""} available</span>'
+                f'</div>',
+                unsafe_allow_html=True
+            )
             _agent_sel=st.selectbox("AI:",_agent_opts,key="agent_pick",label_visibility="collapsed",
                                     help="All agents gives the best result but may take a little longer and use more data. If you're on a slow connection, picking one agent can be faster.")
             if "all" in _agent_sel or _agent_sel==_all_label and _n>1:
@@ -4372,16 +4467,17 @@ setTimeout(function() {{
             # Soft advisory when all agents selected and more than one available
             if len(_agent_pick)>1:
                 st.markdown(
-                    f'<div style="background:rgba(212,168,67,.07);border-left:3px solid {C_GOLD}88;' +
-                    f'border-radius:0 6px 6px 0;padding:6px 12px;margin:4px 0 2px;font-size:.78rem;color:#C8B06A">' +
-                    f'<strong>Heads up:</strong> Using all {len(_agent_pick)} agents gives richer results — though it may take a little longer ' +
-                    f'and could use more mobile data on slower connections. Just something to keep in mind!</div>',
+                    f'<div style="background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.3);' +
+                    f'border-radius:8px;padding:8px 12px;margin:4px 0 2px;font-size:.78rem;color:#a5b4fc;display:flex;align-items:center;gap:8px">' +
+                    f'<span style="font-size:1rem">⚡</span>'
+                    f'<span><strong style="color:#c7d2fe">Richer results mode on</strong> — all {len(_agent_pick)} agents will answer and Teacher Pehpeh picks the best. '
+                    f'May take a little longer on slower connections.</span></div>',
                     unsafe_allow_html=True
                 )
         else: _agent_pick=[]
         gen_col, clr_col = st.columns([3,1])
         with gen_col:
-            gen_btn=st.button(T("gen_btn"),type="primary",use_container_width=True,key="gen")
+            gen_btn=st.button(f"✨ {T('gen_btn')}",type="primary",use_container_width=True,key="gen")
         with clr_col:
             if st.button(T("clear"),use_container_width=True,key="gen_clr"):
                 st.session_state.gen_result=None; st.rerun()
