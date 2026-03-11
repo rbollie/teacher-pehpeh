@@ -3638,41 +3638,41 @@ def main():
     moe_on   = st.session_state.get("moe_toggle", False)
     mano_on  = st.session_state.get("mano_toggle", False)
 
-    # ── Slim top header bar ───────────────────────────────────────────────
-    _b64_hdr = get_b64()
-    _logo_html = (f'<img src="data:image/png;base64,{_b64_hdr}" '
-                  f'style="height:48px;width:48px;border-radius:50%;border:2px solid #D4A843;'
-                  f'object-fit:cover;flex-shrink:0">') if _b64_hdr else '<span style="font-size:2rem">🌶️</span>'
-    _login_label = st.session_state.get("_login_label","Teacher")
-    _av_init = "".join(w[0].upper() for w in _login_label.split()[:2]) if _login_label else "T"
+    # ── Slim header bar — uses existing logo + app color scheme ─────────
+    _b64_top = get_b64()
+    _logo_tag = (f'<img src="data:image/png;base64,{_b64_top}" '
+                 f'style="height:46px;width:46px;border-radius:50%;'
+                 f'border:2px solid {C_GOLD};object-fit:cover;flex-shrink:0">'
+                 ) if _b64_top else '<span style="font-size:2rem">🌶️</span>'
+    _av_label = st.session_state.get("_login_label","Teacher")
+    _av_init  = "".join(w[0].upper() for w in _av_label.split()[:2]) if _av_label else "T"
     st.markdown(f"""
 <style>
 .tp-bar{{display:flex;align-items:center;justify-content:space-between;
   background:#0F1C36;border:1px solid #1e2e4a;border-radius:14px;
   padding:9px 16px;margin-bottom:10px}}
 .tp-bar-l{{display:flex;align-items:center;gap:11px}}
-.tp-bar-name{{font-family:'Playfair Display',serif;font-size:1.05rem;
-  font-weight:700;color:#D4A843;line-height:1.1}}
-.tp-bar-sub{{font-size:.7rem;color:#6A7F99;margin-top:1px}}
+.tp-bar-name{{font-size:1rem;font-weight:700;color:{C_GOLD};line-height:1.1}}
+.tp-bar-sub{{font-size:.68rem;color:#6A7F99;margin-top:1px}}
 .tp-bar-r{{display:flex;align-items:center;gap:10px}}
-.tp-bar-gear{{font-size:.68rem;color:#4A5E72;text-align:right;line-height:1.35}}
-.tp-avatar{{width:34px;height:34px;border-radius:50%;
+.tp-bar-gear{{font-size:.67rem;color:#4A5E72;text-align:right;line-height:1.4}}
+.tp-av{{width:34px;height:34px;border-radius:50%;
   background:linear-gradient(135deg,#1B4D2E,#2A7045);
-  border:2px solid #D4A843;display:flex;align-items:center;
+  border:2px solid {C_GOLD};display:flex;align-items:center;
   justify-content:center;font-size:.75rem;font-weight:800;
   color:#F5D98E;flex-shrink:0}}
 </style>
 <div class="tp-bar">
   <div class="tp-bar-l">
-    {_logo_html}
+    {_logo_tag}
     <div>
       <div class="tp-bar-name">Teacher Pehpeh</div>
-      <div class="tp-bar-sub">Classroom Assistant &bull; IBT Liberia</div>
+      <div class="tp-bar-sub">Classroom Assistant</div>
     </div>
   </div>
   <div class="tp-bar-r">
-    <div class="tp-bar-gear">⚙️ Classroom Settings<br><span style="color:#2a3a4a">hidden setup ▾</span></div>
-    <div class="tp-avatar">{_av_init}</div>
+    <div class="tp-bar-gear">&#9881;&#65039; Classroom Settings<br><span style="color:#2a3a4a">hidden setup</span></div>
+    <div class="tp-av">{_av_init}</div>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -4022,103 +4022,86 @@ def main():
 
     # ══════════════════════════════════════════════════════════════════════
     # NLP LANDING CARD — "What are we teaching today?"
-    # All features preserved; this card is just the entry point.
+    # All tabs, features, and menu items remain fully intact below.
     # ══════════════════════════════════════════════════════════════════════
     if "_show_home" not in st.session_state:
         st.session_state["_show_home"] = True
 
-    # ── Simple NLP parser ─────────────────────────────────────────────
+    # Simple NLP parser — extracts subject, grade, topic, duration
     import re as _re
     def _parse_nlp(txt):
         t = txt.lower()
-        _dur = None
         _dm = _re.search(r'(\d+)\s*[-\s]?(?:minute|min|mins|hour|hr)', t)
+        _dur = None
         if _dm:
-            val = int(_dm.group(1))
-            _dur = f"{val} {'hour' if ('hour' in _dm.group(0) or 'hr' in _dm.group(0)) else 'mins'}"
-        _grade_out = None
+            _dur = f"{_dm.group(1)} {'hour' if ('hour' in _dm.group(0) or 'hr' in _dm.group(0)) else 'mins'}"
         _gm = _re.search(r'(?:grade\s*(\d+)|(\d+)(?:st|nd|rd|th)\s*grad)', t)
-        if _gm:
-            _grade_out = f"Grade {_gm.group(1) or _gm.group(2)}"
+        _grade_out = f"Grade {_gm.group(1) or _gm.group(2)}" if _gm else None
         _subj_out = None
         for _kw, _sv in [("math","Mathematics"),("english","English"),("biology","Biology"),
-                          ("physics","Physics"),("chemistry","Chemistry"),("geography","Geography"),
-                          ("history","History"),("french","French"),("economics","Economics"),
-                          ("science","Science"),("civics","Civics")]:
+                         ("physics","Physics"),("chemistry","Chemistry"),("geography","Geography"),
+                         ("history","History"),("french","French"),("economics","Economics"),
+                         ("science","Science"),("civics","Civics")]:
             if _kw in t: _subj_out = _sv; break
-        _topic_out = None
         _tm = _re.search(r'(?:on|about|topic[:\s]+)\s+([a-z][a-z\s,\']+?)(?:\s+for|\s+in|\s+at|\s*$)', t)
+        _topic_out = None
         if _tm:
-            _raw = _tm.group(1).strip().rstrip(',')
-            if _raw not in ('the','a','an','my','this','that'): _topic_out = _raw.title()
+            _r = _tm.group(1).strip().rstrip(',')
+            if _r not in ('the','a','an','my','this','that'): _topic_out = _r.title()
         return _subj_out, _grade_out, _topic_out, _dur
 
     if st.session_state["_show_home"] and online and keys:
-        st.markdown("""
+        st.markdown(f"""
 <style>
-.tp-nlp-card{
-  background:#131f38;border:1px solid #1e2e4a;border-radius:20px;
-  padding:2rem 1.8rem 1.5rem;max-width:660px;margin:.4rem auto 0;
-  box-shadow:0 8px 40px rgba(0,0,0,.35)
-}
-.tp-nlp-h{
-  font-family:'Playfair Display',serif;
-  font-size:clamp(1.4rem,3.2vw,1.9rem);font-weight:700;
-  color:#E4EAF4;text-align:center;margin-bottom:1.1rem
-}
-.tp-sum{
-  background:#0d1728;border:1px solid #253550;border-radius:12px;
-  padding:13px 17px;margin:10px 0 13px
-}
-.tp-sum-t{font-size:.73rem;font-weight:800;letter-spacing:1.1px;
-  text-transform:uppercase;color:#D4A843;margin-bottom:7px}
-.tp-sum-r{display:flex;align-items:center;gap:8px;
-  font-size:.86rem;color:#C0CEDF;margin-bottom:3px}
-.tp-chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}
-.tp-powered{text-align:center;font-size:.68rem;color:#3a4a5a;margin-top:10px}
+.tp-card{{background:#131f38;border:1px solid #1e2e4a;border-radius:18px;
+  padding:2rem 1.8rem 1.5rem;max-width:640px;margin:.3rem auto 0;
+  box-shadow:0 8px 40px rgba(0,0,0,.4)}}
+.tp-card-h{{font-size:clamp(1.4rem,3.2vw,1.85rem);font-weight:700;
+  color:#E4EAF4;text-align:center;margin-bottom:1rem}}
+.tp-sum-box{{background:#0d1728;border:1px solid #253550;border-radius:10px;
+  padding:12px 16px;margin:10px 0 12px}}
+.tp-sum-lbl{{font-size:.7rem;font-weight:800;letter-spacing:1px;
+  text-transform:uppercase;color:{C_GOLD};margin-bottom:6px}}
+.tp-sum-row{{font-size:.85rem;color:#C0CEDF;margin-bottom:3px}}
+.tp-foot{{text-align:center;font-size:.67rem;color:#3a4a5a;margin-top:9px;line-height:1.5}}
 </style>
+<div class="tp-card">
+  <div class="tp-card-h">What are we teaching today?</div>
 """, unsafe_allow_html=True)
 
-        st.markdown('<div class="tp-nlp-card">', unsafe_allow_html=True)
-        st.markdown('<div class="tp-nlp-h">What are we teaching today?</div>', unsafe_allow_html=True)
-
-        _nlp_val = st.text_input("nlp", label_visibility="collapsed",
+        _nlp_val = st.text_input("q", label_visibility="collapsed",
             placeholder="e.g., A 40-minute math lesson on fractions for 9th graders.",
-            key="_nlp_v")
+            key="_nlp_q")
 
-        # Parse and show live summary card
         _ps, _pg, _pt, _pd = None, None, None, None
         if _nlp_val and len(_nlp_val) > 5:
             _ps, _pg, _pt, _pd = _parse_nlp(_nlp_val)
+
         if any([_ps, _pg, _pt, _pd]):
+            _sd = _ps or st.session_state.get("cfg_subject","—")
+            _gd = _pg or "—"
             st.markdown(f"""
-<div class="tp-sum">
-  <div class="tp-sum-t">Lesson Summary</div>
-  <div class="tp-sum-r">🔢 <strong>Subject:</strong>&nbsp;{_ps or st.session_state.get('cfg_subject','—')} ({_pg or '—'})</div>
-  <div class="tp-sum-r">📖 <strong>Topic:</strong>&nbsp;{_pt or '—'}</div>
-  <div class="tp-sum-r">⏱️ <strong>Duration:</strong>&nbsp;{_pd or '—'}</div>
+<div class="tp-sum-box">
+  <div class="tp-sum-lbl">Lesson Summary</div>
+  <div class="tp-sum-row">🔢 <strong>Subject:</strong> {_sd} ({_gd})</div>
+  <div class="tp-sum-row">📖 <strong>Topic:</strong> {_pt or "—"}</div>
+  <div class="tp-sum-row">⏱️ <strong>Duration:</strong> {_pd or "—"}</div>
 </div>""", unsafe_allow_html=True)
 
         # Add-on chips
-        for _ck in ["_ck_quiz","_ck_group","_ck_read"]:
-            if _ck not in st.session_state: st.session_state[_ck] = False
-        _cc1, _cc2, _cc3 = st.columns(3)
-        for _col, _ck, _lbl in zip(
-            [_cc1, _cc2, _cc3],
-            ["_ck_quiz","_ck_group","_ck_read"],
-            ["[+]  Include Quiz","[+]  Group Activity","[+]  Read-Aloud"]
-        ):
+        for _k in ["_ck_quiz","_ck_grp","_ck_rl"]:
+            if _k not in st.session_state: st.session_state[_k] = False
+        _c1,_c2,_c3 = st.columns(3)
+        for _col,_k,_lb in zip([_c1,_c2,_c3],["_ck_quiz","_ck_grp","_ck_rl"],
+                                ["[+]  Include Quiz","[+]  Group Activity","[+]  Read-Aloud"]):
             with _col:
-                if st.button(_lbl, key=f"b{_ck}", use_container_width=True,
-                             type="primary" if st.session_state[_ck] else "secondary"):
-                    st.session_state[_ck] = not st.session_state[_ck]; st.rerun()
+                if st.button(_lb, key=f"b{_k}", use_container_width=True,
+                             type="primary" if st.session_state[_k] else "secondary"):
+                    st.session_state[_k] = not st.session_state[_k]; st.rerun()
 
-        # Generate button
-        st.markdown("<div style='height:5px'></div>", unsafe_allow_html=True)
-        if st.button("Generate Lesson Plan", key="_nlp_gen",
-                     use_container_width=True, type="primary",
-                     disabled=not bool(_nlp_val and len(_nlp_val) > 3)):
-            # Apply parsed subject/grade to session state
+        st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
+        if st.button("Generate Lesson Plan", key="_nlp_go", use_container_width=True,
+                     type="primary", disabled=not bool(_nlp_val and len(_nlp_val) > 3)):
             if _ps:
                 for _ds in _subjects():
                     if _to_en_subj(_ds).lower() == _ps.lower():
@@ -4127,11 +4110,10 @@ def main():
                 for _dg in _grades():
                     if _to_en_grade(_dg) == _pg:
                         st.session_state["cfg_grade"] = _dg; break
-            # Build enriched topic string
             _ts = _pt or _nlp_val
-            if st.session_state.get("_ck_quiz"):  _ts += " — include a short quiz"
-            if st.session_state.get("_ck_group"): _ts += " — include a group activity"
-            if st.session_state.get("_ck_read"):  _ts += " — suitable for read-aloud"
+            if st.session_state.get("_ck_quiz"): _ts += " — include a short quiz"
+            if st.session_state.get("_ck_grp"):  _ts += " — include a group activity"
+            if st.session_state.get("_ck_rl"):   _ts += " — suitable for read-aloud"
             if _pd: _ts += f" ({_pd})"
             st.session_state["_nlp_prefill"] = _ts
             st.session_state["task_cat"] = "📋 Planning"
@@ -4139,18 +4121,15 @@ def main():
             st.rerun()
 
         st.markdown(
-            '<div class="tp-powered">Teacher Pehpeh is carefully building a culturally relevant '
-            'lesson plan for your students. This may take a moment.</div>',
-            unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        return   # don't render tabs on home screen
+            '<div class="tp-foot">Teacher Pehpeh is carefully building a culturally relevant '
+            'lesson plan for your students. This may take a moment.</div>'
+            '</div>', unsafe_allow_html=True)
+        return   # tabs render only after teacher proceeds
 
-    # 🏠 Home pill — always visible inside the app
+    # 🏠 Home button — inside the app
     if not st.session_state.get("_show_home", True):
-        _hcol, _ = st.columns([1, 6])
-        with _hcol:
-            if st.button("🏠 Home", key="_home_btn"):
-                st.session_state["_show_home"] = True; st.rerun()
+        if st.button("🏠  Home", key="_back_home", help="Return to main screen"):
+            st.session_state["_show_home"] = True; st.rerun()
 
     # Tabs
     if online and keys:
@@ -4720,10 +4699,8 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             else:
                 sp=build_sys(_region_val,country,_grade_en,_subj_en,_task_val,_size_val,_res_val,LANGS[lang],_abl_val,tm,_topic_en,school_name,_mano_prompt_ctx)
                 q=f"Create {_task_val}.\nSubject:{_subj_en}\nGrade:{_grade_en}\nTopic:{_topic_en}\nIMMEDIATELY USABLE."
-            # Append NLP home-screen context if teacher typed a natural-language prompt
             _nlp_ctx = st.session_state.pop("_nlp_prefill", None)
-            if _nlp_ctx:
-                q += f"\n\nTeacher's original request: {_nlp_ctx}"
+            if _nlp_ctx: q += f"\n\nTeacher's original request: {_nlp_ctx}"
             if exs: q+="\n"+"; ".join(exs)
             # === MOE Curriculum: inject context into prompts ===
             if is_curriculum_aligned and curriculum_context:
