@@ -3638,44 +3638,9 @@ def main():
     moe_on   = st.session_state.get("moe_toggle", False)
     mano_on  = st.session_state.get("mano_toggle", False)
 
-    # ── Slim header bar — uses existing logo + app color scheme ─────────
-    _b64_top = get_b64()
-    _logo_tag = (f'<img src="data:image/png;base64,{_b64_top}" '
-                 f'style="height:46px;width:46px;border-radius:50%;'
-                 f'border:2px solid {C_GOLD};object-fit:cover;flex-shrink:0">'
-                 ) if _b64_top else '<span style="font-size:2rem">🌶️</span>'
-    _av_label = st.session_state.get("_login_label","Teacher")
-    _av_init  = "".join(w[0].upper() for w in _av_label.split()[:2]) if _av_label else "T"
-    st.markdown(f"""
-<style>
-.tp-bar{{display:flex;align-items:center;justify-content:space-between;
-  background:#0F1C36;border:1px solid #1e2e4a;border-radius:14px;
-  padding:9px 16px;margin-bottom:10px}}
-.tp-bar-l{{display:flex;align-items:center;gap:11px}}
-.tp-bar-name{{font-size:1rem;font-weight:700;color:{C_GOLD};line-height:1.1}}
-.tp-bar-sub{{font-size:.68rem;color:#6A7F99;margin-top:1px}}
-.tp-bar-r{{display:flex;align-items:center;gap:10px}}
-.tp-bar-gear{{font-size:.67rem;color:#4A5E72;text-align:right;line-height:1.4}}
-.tp-av{{width:34px;height:34px;border-radius:50%;
-  background:linear-gradient(135deg,#1B4D2E,#2A7045);
-  border:2px solid {C_GOLD};display:flex;align-items:center;
-  justify-content:center;font-size:.75rem;font-weight:800;
-  color:#F5D98E;flex-shrink:0}}
-</style>
-<div class="tp-bar">
-  <div class="tp-bar-l">
-    {_logo_tag}
-    <div>
-      <div class="tp-bar-name">Teacher Pehpeh</div>
-      <div class="tp-bar-sub">Classroom Assistant</div>
-    </div>
-  </div>
-  <div class="tp-bar-r">
-    <div class="tp-bar-gear">&#9881;&#65039; Classroom Settings<br><span style="color:#2a3a4a">hidden setup</span></div>
-    <div class="tp-av">{_av_init}</div>
-  </div>
-</div>
-""", unsafe_allow_html=True)
+    show_logo(country)
+    _subtitle={"en":"Curating Personalized Content to Support Underresourced Teachers","fr":"Création de contenu personnalisé pour soutenir les enseignants sous-dotés","sw":"Kuunda Maudhui ya Kibinafsi Kusaidia Walimu Wasio na Rasilimali za Kutosha"}.get(_lang_key(),"Curating Personalized Content to Support Underresourced Teachers")
+    st.markdown(f'<p style="text-align:center;color:#8899BB;font-size:clamp(.72rem,.95rem,1rem);margin-bottom:.6rem;line-height:1.5">{_subtitle}<br><span style="font-size:clamp(.68rem,.85rem,.9rem)">ChatGPT &bull; Claude &bull; Gemini</span></p>',unsafe_allow_html=True)
 
     # Unified status bar
     if conn:
@@ -3835,7 +3800,7 @@ def main():
     _exp_parts += [_cfg_grade_lbl, _cfg_subj_lbl]
     _expander_label = "  ·  ".join(_exp_parts)
 
-    with st.expander(_expander_label, expanded=False):
+    with st.expander(_expander_label, expanded=not bool(_sn.strip())):
         # ── Row 1: Country + Language ──────────────────────────────────────
         _crow1, _crow2 = st.columns([3, 2])
         with _crow1:
@@ -4021,115 +3986,171 @@ def main():
         _chat_mano_ctx = build_mano_prompt_context(_subj_en, _subj_en)
 
     # ══════════════════════════════════════════════════════════════════════
-    # NLP LANDING CARD — "What are we teaching today?"
-    # All tabs, features, and menu items remain fully intact below.
+    # LANDING HOME SCREEN — shown on first load; hides when user picks a task
     # ══════════════════════════════════════════════════════════════════════
     if "_show_home" not in st.session_state:
         st.session_state["_show_home"] = True
 
-    # Simple NLP parser — extracts subject, grade, topic, duration
-    import re as _re
-    def _parse_nlp(txt):
-        t = txt.lower()
-        _dm = _re.search(r'(\d+)\s*[-\s]?(?:minute|min|mins|hour|hr)', t)
-        _dur = None
-        if _dm:
-            _dur = f"{_dm.group(1)} {'hour' if ('hour' in _dm.group(0) or 'hr' in _dm.group(0)) else 'mins'}"
-        _gm = _re.search(r'(?:grade\s*(\d+)|(\d+)(?:st|nd|rd|th)\s*grad)', t)
-        _grade_out = f"Grade {_gm.group(1) or _gm.group(2)}" if _gm else None
-        _subj_out = None
-        for _kw, _sv in [("math","Mathematics"),("english","English"),("biology","Biology"),
-                         ("physics","Physics"),("chemistry","Chemistry"),("geography","Geography"),
-                         ("history","History"),("french","French"),("economics","Economics"),
-                         ("science","Science"),("civics","Civics")]:
-            if _kw in t: _subj_out = _sv; break
-        _tm = _re.search(r'(?:on|about|topic[:\s]+)\s+([a-z][a-z\s,\']+?)(?:\s+for|\s+in|\s+at|\s*$)', t)
-        _topic_out = None
-        if _tm:
-            _r = _tm.group(1).strip().rstrip(',')
-            if _r not in ('the','a','an','my','this','that'): _topic_out = _r.title()
-        return _subj_out, _grade_out, _topic_out, _dur
-
     if st.session_state["_show_home"] and online and keys:
-        st.markdown(f"""
+        st.markdown("""
 <style>
-.tp-card{{background:#131f38;border:1px solid #1e2e4a;border-radius:18px;
-  padding:2rem 1.8rem 1.5rem;max-width:640px;margin:.3rem auto 0;
-  box-shadow:0 8px 40px rgba(0,0,0,.4)}}
-.tp-card-h{{font-size:clamp(1.4rem,3.2vw,1.85rem);font-weight:700;
-  color:#E4EAF4;text-align:center;margin-bottom:1rem}}
-.tp-sum-box{{background:#0d1728;border:1px solid #253550;border-radius:10px;
-  padding:12px 16px;margin:10px 0 12px}}
-.tp-sum-lbl{{font-size:.7rem;font-weight:800;letter-spacing:1px;
-  text-transform:uppercase;color:{C_GOLD};margin-bottom:6px}}
-.tp-sum-row{{font-size:.85rem;color:#C0CEDF;margin-bottom:3px}}
-.tp-foot{{text-align:center;font-size:.67rem;color:#3a4a5a;margin-top:9px;line-height:1.5}}
+/* ── Landing page styles ───────────────────────────────────────────── */
+.tp-home-title {
+    font-size:clamp(1.5rem,3.2vw,2.1rem);
+    font-weight:800; color:#FFFFFF; margin-bottom:.2rem;
+    text-align:center; text-shadow:0 2px 16px rgba(0,0,0,.5);
+}
+.tp-home-sub {
+    font-size:.92rem; color:#C8D8E8; margin-bottom:.15rem;
+    font-weight:400; text-align:center;
+}
+.tp-home-q {
+    font-size:clamp(1rem,2.2vw,1.25rem); font-weight:700;
+    color:#FFFFFF; margin:.8rem 0 1.2rem; text-align:center;
+    letter-spacing:.02em;
+}
+/* Tile buttons */
+div[data-testid="stButton"] button {
+    border-radius: 18px !important;
+    font-size: 1.15rem !important;
+    font-weight: 800 !important;
+    height: 110px !important;
+    min-height: 110px !important;
+    padding: 0 1.2rem !important;
+    border: none !important;
+    transition: transform .15s ease, box-shadow .15s ease !important;
+    box-shadow: 0 6px 24px rgba(0,0,0,.35) !important;
+    width: 100% !important;
+    letter-spacing:.01em !important;
+    text-shadow: 0 1px 4px rgba(0,0,0,.4) !important;
+}
+div[data-testid="stButton"] button:hover {
+    transform: translateY(-4px) scale(1.02) !important;
+    box-shadow: 0 12px 36px rgba(0,0,0,.45) !important;
+}
+/* Per-tile colours — target by key order in DOM */
+div[data-testid="stButton"]:has(button[kind="secondary"]:nth-of-type(1)),
+[data-testid="element-container"]:has(button[key="_home_lesson"]) button,
+button[data-testid="baseButton-secondary"]:first-of-type { background:unset !important }
+
+/* Use a wrapper div trick via markdown to colour each tile */
+.tile-blue   button { background: linear-gradient(135deg,#1565C0,#42A5F5) !important; color:#fff !important; }
+.tile-orange button { background: linear-gradient(135deg,#E65100,#FFA726) !important; color:#fff !important; }
+.tile-green  button { background: linear-gradient(135deg,#1B5E20,#66BB6A) !important; color:#fff !important; }
+.tile-purple button { background: linear-gradient(135deg,#4A148C,#AB47BC) !important; color:#fff !important; }
 </style>
-<div class="tp-card">
-  <div class="tp-card-h">What are we teaching today?</div>
 """, unsafe_allow_html=True)
 
-        _nlp_val = st.text_input("q", label_visibility="collapsed",
-            placeholder="e.g., A 40-minute math lesson on fractions for 9th graders.",
-            key="_nlp_q")
-
-        _ps, _pg, _pt, _pd = None, None, None, None
-        if _nlp_val and len(_nlp_val) > 5:
-            _ps, _pg, _pt, _pd = _parse_nlp(_nlp_val)
-
-        if any([_ps, _pg, _pt, _pd]):
-            _sd = _ps or st.session_state.get("cfg_subject","—")
-            _gd = _pg or "—"
-            st.markdown(f"""
-<div class="tp-sum-box">
-  <div class="tp-sum-lbl">Lesson Summary</div>
-  <div class="tp-sum-row">🔢 <strong>Subject:</strong> {_sd} ({_gd})</div>
-  <div class="tp-sum-row">📖 <strong>Topic:</strong> {_pt or "—"}</div>
-  <div class="tp-sum-row">⏱️ <strong>Duration:</strong> {_pd or "—"}</div>
-</div>""", unsafe_allow_html=True)
-
-        # Add-on chips
-        for _k in ["_ck_quiz","_ck_grp","_ck_rl"]:
-            if _k not in st.session_state: st.session_state[_k] = False
-        _c1,_c2,_c3 = st.columns(3)
-        for _col,_k,_lb in zip([_c1,_c2,_c3],["_ck_quiz","_ck_grp","_ck_rl"],
-                                ["[+]  Include Quiz","[+]  Group Activity","[+]  Read-Aloud"]):
-            with _col:
-                if st.button(_lb, key=f"b{_k}", use_container_width=True,
-                             type="primary" if st.session_state[_k] else "secondary"):
-                    st.session_state[_k] = not st.session_state[_k]; st.rerun()
-
-        st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
-        if st.button("Generate Lesson Plan", key="_nlp_go", use_container_width=True,
-                     type="primary", disabled=not bool(_nlp_val and len(_nlp_val) > 3)):
-            if _ps:
-                for _ds in _subjects():
-                    if _to_en_subj(_ds).lower() == _ps.lower():
-                        st.session_state["cfg_subject"] = _ds; break
-            if _pg:
-                for _dg in _grades():
-                    if _to_en_grade(_dg) == _pg:
-                        st.session_state["cfg_grade"] = _dg; break
-            _ts = _pt or _nlp_val
-            if st.session_state.get("_ck_quiz"): _ts += " — include a short quiz"
-            if st.session_state.get("_ck_grp"):  _ts += " — include a group activity"
-            if st.session_state.get("_ck_rl"):   _ts += " — suitable for read-aloud"
-            if _pd: _ts += f" ({_pd})"
-            st.session_state["_nlp_prefill"] = _ts
-            st.session_state["task_cat"] = "📋 Planning"
-            st.session_state["_show_home"] = False
-            st.rerun()
-
+        # Welcome heading
         st.markdown(
-            '<div class="tp-foot">Teacher Pehpeh is carefully building a culturally relevant '
-            'lesson plan for your students. This may take a moment.</div>'
-            '</div>', unsafe_allow_html=True)
-        return   # tabs render only after teacher proceeds
+            '<div class="tp-home-title">Welcome to Teacher Pehpeh!</div>'
+            '<div class="tp-home-sub">Helping teachers in underresourced classrooms.</div>'
+            '<div class="tp-home-q">What would you like to create today?</div>',
+            unsafe_allow_html=True
+        )
 
-    # 🏠 Home button — inside the app
+        # 4 coloured tiles — 2×2 grid using inline HTML tiles (onclick via Streamlit buttons below)
+        _t1, _t2 = st.columns(2, gap="medium")
+        _t3, _t4 = st.columns(2, gap="medium")
+
+        # Tile 1 — Blue: Create Lesson (African student studying image via emoji scene)
+        with _t1:
+            st.markdown("""
+<div style="background:linear-gradient(135deg,#1565C0 0%,#42A5F5 100%);
+  border-radius:18px;padding:0 16px;height:110px;display:flex;align-items:center;
+  gap:14px;box-shadow:0 6px 24px rgba(0,0,0,.35);cursor:pointer;
+  overflow:hidden;position:relative;margin-bottom:2px">
+  <div style="font-size:3.2rem;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))">📓✏️</div>
+  <div>
+    <div style="font-size:1.15rem;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.4)">Create Lesson</div>
+    <div style="font-size:.72rem;color:#BBDEFB;margin-top:3px">Lesson plans · Worksheets · Notes</div>
+  </div>
+  <div style="position:absolute;right:-8px;bottom:-10px;font-size:4.5rem;opacity:.18;line-height:1">🧑🏿‍🏫</div>
+</div>""", unsafe_allow_html=True)
+            if st.button("📓  Create Lesson", key="_home_lesson", use_container_width=True,
+                         help="Generate lesson plans, worksheets, and teaching materials"):
+                st.session_state["_show_home"] = False
+                st.session_state["task_cat"] = "📋 Planning"
+                st.session_state["_nav_tab"] = 0
+                st.rerun()
+
+        # Tile 2 — Orange: Create Quiz
+        with _t2:
+            st.markdown("""
+<div style="background:linear-gradient(135deg,#E65100 0%,#FFA726 100%);
+  border-radius:18px;padding:0 16px;height:110px;display:flex;align-items:center;
+  gap:14px;box-shadow:0 6px 24px rgba(0,0,0,.35);cursor:pointer;
+  overflow:hidden;position:relative;margin-bottom:2px">
+  <div style="font-size:3.2rem;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))">📝✅</div>
+  <div>
+    <div style="font-size:1.15rem;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.4)">Create Quiz</div>
+    <div style="font-size:.72rem;color:#FFF8E1;margin-top:3px">MCQs · WASSCE prep · Exams</div>
+  </div>
+  <div style="position:absolute;right:-8px;bottom:-10px;font-size:4.5rem;opacity:.18;line-height:1">👩🏿‍🎓</div>
+</div>""", unsafe_allow_html=True)
+            if st.button("📝  Create Quiz", key="_home_quiz", use_container_width=True,
+                         help="Generate quizzes, MCQs and WASSCE-style assessments"):
+                st.session_state["_show_home"] = False
+                st.session_state["task_cat"] = "📝 Assessment"
+                st.session_state["_nav_tab"] = 0
+                st.rerun()
+
+        # Tile 3 — Green: Classroom Activities
+        with _t3:
+            st.markdown("""
+<div style="background:linear-gradient(135deg,#1B5E20 0%,#66BB6A 100%);
+  border-radius:18px;padding:0 16px;height:110px;display:flex;align-items:center;
+  gap:14px;box-shadow:0 6px 24px rgba(0,0,0,.35);cursor:pointer;
+  overflow:hidden;position:relative;margin-bottom:2px">
+  <div style="font-size:3.2rem;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))">🙋🏿‍♂️⚽</div>
+  <div>
+    <div style="font-size:1.15rem;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.4)">Classroom Activities</div>
+    <div style="font-size:.72rem;color:#F1F8E9;margin-top:3px">Group work · Games · Projects</div>
+  </div>
+  <div style="position:absolute;right:-8px;bottom:-10px;font-size:4.5rem;opacity:.18;line-height:1">🧑🏿‍🤝‍🧑🏿</div>
+</div>""", unsafe_allow_html=True)
+            if st.button("🎭  Classroom Activities", key="_home_activity", use_container_width=True,
+                         help="Group work, games, and interactive classroom activities"):
+                st.session_state["_show_home"] = False
+                st.session_state["task_cat"] = "🎯 Activities"
+                st.session_state["_nav_tab"] = 0
+                st.rerun()
+
+        # Tile 4 — Purple: Study Help
+        with _t4:
+            st.markdown("""
+<div style="background:linear-gradient(135deg,#4A148C 0%,#AB47BC 100%);
+  border-radius:18px;padding:0 16px;height:110px;display:flex;align-items:center;
+  gap:14px;box-shadow:0 6px 24px rgba(0,0,0,.35);cursor:pointer;
+  overflow:hidden;position:relative;margin-bottom:2px">
+  <div style="font-size:3.2rem;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))">💡📚</div>
+  <div>
+    <div style="font-size:1.15rem;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.4)">Study Help</div>
+    <div style="font-size:.72rem;color:#F3E5F5;margin-top:3px">Explanations · Summaries · Support</div>
+  </div>
+  <div style="position:absolute;right:-8px;bottom:-10px;font-size:4.5rem;opacity:.18;line-height:1">👩🏿‍💻</div>
+</div>""", unsafe_allow_html=True)
+            if st.button("💡  Study Help", key="_home_study", use_container_width=True,
+                         help="Study guides, explanations and student support materials"):
+                st.session_state["_show_home"] = False
+                st.session_state["task_cat"] = "📚 Study Support"
+                st.session_state["_nav_tab"] = 0
+                st.rerun()
+
+        # Powered-by footer
+        st.markdown(
+            '<p style="text-align:center;font-size:.75rem;color:#445566;margin-top:1.5rem">'
+            'Powered by ChatGPT &bull; Claude &bull; Gemini</p>',
+            unsafe_allow_html=True
+        )
+        # Don't render the tabs at all on the home screen
+        return
+
+    # "← Home" breadcrumb shown whenever user is inside the app
     if not st.session_state.get("_show_home", True):
-        if st.button("🏠  Home", key="_back_home", help="Return to main screen"):
-            st.session_state["_show_home"] = True; st.rerun()
+        if st.button("🏠  Home", key="_back_home", help="Return to the main menu"):
+            st.session_state["_show_home"] = True
+            st.rerun()
 
     # Tabs
     if online and keys:
@@ -4699,8 +4720,6 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
             else:
                 sp=build_sys(_region_val,country,_grade_en,_subj_en,_task_val,_size_val,_res_val,LANGS[lang],_abl_val,tm,_topic_en,school_name,_mano_prompt_ctx)
                 q=f"Create {_task_val}.\nSubject:{_subj_en}\nGrade:{_grade_en}\nTopic:{_topic_en}\nIMMEDIATELY USABLE."
-            _nlp_ctx = st.session_state.pop("_nlp_prefill", None)
-            if _nlp_ctx: q += f"\n\nTeacher's original request: {_nlp_ctx}"
             if exs: q+="\n"+"; ".join(exs)
             # === MOE Curriculum: inject context into prompts ===
             if is_curriculum_aligned and curriculum_context:
