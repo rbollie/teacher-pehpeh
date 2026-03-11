@@ -3797,30 +3797,40 @@ def main():
 /* ── Shared tile style ───────────────────────────────────────────────── */
 .tp-tile button {
     border-radius:12px !important;
-    height:68px !important; min-height:68px !important;
-    font-size:clamp(.78rem,.95vw,1rem) !important; font-weight:700 !important;
+    height:auto !important; min-height:80px !important;
+    font-size:clamp(1rem,2.2vw,1.3rem) !important; font-weight:800 !important;
     border:none !important;
-    /* Auto text color: white for dark backgrounds, dark for light */
     color:#fff !important;
-    text-shadow:0 1px 3px rgba(0,0,0,.5) !important;
+    text-shadow:0 1px 4px rgba(0,0,0,.55) !important;
     box-shadow:0 3px 12px rgba(0,0,0,.3) !important;
     transition:transform .15s, box-shadow .15s !important;
     width:100% !important;
     white-space:normal !important;
-    line-height:1.25 !important;
-    padding:6px 10px !important;
+    line-height:1.35 !important;
+    padding:12px 14px !important;
+    letter-spacing:.01em !important;
+}
+/* Emoji/icon — rendered as part of button text, scale with font */
+.tp-tile button p, .tp-tile button span {
+    font-size:inherit !important;
 }
 .tp-tile button:hover {
     transform:translateY(-2px) !important;
     box-shadow:0 6px 20px rgba(0,0,0,.45) !important;
 }
-/* 5 distinct tile colours */
+/* 5 distinct tile colours — all dark enough for white text */
 .tp-cfg    button { background:linear-gradient(135deg,#00695C,#26A69A) !important; color:#fff !important; }
 .tp-lesson button { background:linear-gradient(135deg,#1565C0,#42A5F5) !important; color:#fff !important; }
 .tp-class  button { background:linear-gradient(135deg,#6A1B9A,#AB47BC) !important; color:#fff !important; }
 .tp-study  button { background:linear-gradient(135deg,#2E7D32,#66BB6A) !important; color:#fff !important; }
 .tp-quiz   button { background:linear-gradient(135deg,#B71C1C,#EF5350) !important; color:#fff !important; }
-/* Light background override — if tile ever renders on white/light bg */
+/* Light/white background fallback — dark text for legibility */
+@media (prefers-color-scheme: light) {
+    .tp-cfg button, .tp-lesson button, .tp-class button,
+    .tp-study button, .tp-quiz button {
+        color:#fff !important;   /* gradients are dark enough even in light mode */
+    }
+}
 .tp-cfg button[style*="background:#fff"],
 .tp-lesson button[style*="background:#fff"],
 .tp-class button[style*="background:#fff"],
@@ -3829,13 +3839,25 @@ def main():
 /* Small utility buttons */
 .tp-sm button {
     height:40px !important; min-height:40px !important;
-    font-size:clamp(.72rem,.8vw,.82rem) !important; font-weight:600 !important;
+    font-size:clamp(.75rem,.9vw,.88rem) !important; font-weight:600 !important;
     background:linear-gradient(135deg,#1a2a4a,#2a3f6a) !important;
     border:1px solid #3a5080 !important; color:#fff !important;
 }
-/* Responsive: stack columns on narrow screens */
-@media (max-width:640px) {
-    .tp-tile button { height:56px !important; font-size:.82rem !important; }
+/* Responsive breakpoints */
+@media (max-width:768px) {
+    .tp-tile button {
+        min-height:68px !important;
+        font-size:clamp(.92rem,3.5vw,1.1rem) !important;
+        padding:10px 10px !important;
+    }
+}
+@media (max-width:480px) {
+    .tp-tile button {
+        min-height:58px !important;
+        font-size:clamp(.85rem,4vw,1rem) !important;
+        padding:8px 8px !important;
+        line-height:1.2 !important;
+    }
 }
 </style>
 """, unsafe_allow_html=True)
