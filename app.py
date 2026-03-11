@@ -3748,10 +3748,6 @@ def main():
 }})();
 </script>
 """, height=44, scrolling=False)
-        if st.button("🔄", key="recheck_sidebar", use_container_width=True):
-            st.session_state.conn_checked = False
-            st.rerun()
-
     if not conn:
         keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
 
@@ -3814,12 +3810,12 @@ def main():
     box-shadow:0 8px 28px rgba(0,0,0,.5) !important;
     color:#fff !important;
 }
-/* Tile colours — distinct, accessible, high-contrast */
-.tp-cfg    button { background:linear-gradient(135deg,#00695C,#26A69A) !important; } /* Teal — neutral/setup */
-.tp-lesson button { background:linear-gradient(135deg,#1565C0,#42A5F5) !important; } /* Blue — primary action */
+/* Tile colours — 5 distinct, accessible */
+.tp-cfg    button { background:linear-gradient(135deg,#00695C,#26A69A) !important; } /* Teal   — setup/info */
+.tp-lesson button { background:linear-gradient(135deg,#1565C0,#42A5F5) !important; } /* Blue   — lesson/plan */
 .tp-class  button { background:linear-gradient(135deg,#6A1B9A,#AB47BC) !important; } /* Purple — group/social */
-.tp-quiz   button { background:linear-gradient(135deg,#E65100,#FFA726) !important; } /* Amber — assessment */
-.tp-study  button { background:linear-gradient(135deg,#2E7D32,#66BB6A) !important; } /* Green — support/growth */
+.tp-study  button { background:linear-gradient(135deg,#2E7D32,#66BB6A) !important; } /* Green  — support/growth */
+.tp-quiz   button { background:linear-gradient(135deg,#B71C1C,#EF5350) !important; } /* Red    — assessment/test */
 .tp-sm     button {
     height:44px !important; min-height:44px !important;
     font-size:.78rem !important; font-weight:600 !important;
