@@ -3642,6 +3642,28 @@ def main():
     _subtitle={"en":"Curating Personalized Content to Support Underresourced Teachers","fr":"Création de contenu personnalisé pour soutenir les enseignants sous-dotés","sw":"Kuunda Maudhui ya Kibinafsi Kusaidia Walimu Wasio na Rasilimali za Kutosha"}.get(_lang_key(),"Curating Personalized Content to Support Underresourced Teachers")
     st.markdown(f'<p style="text-align:center;color:#8899BB;font-size:clamp(.72rem,.95rem,1rem);margin-bottom:.6rem;line-height:1.5">{_subtitle}<br><span style="font-size:clamp(.68rem,.85rem,.9rem)">ChatGPT &bull; Claude &bull; Gemini</span></p>',unsafe_allow_html=True)
 
+    # ── Help dropdown — top right corner ─────────────────────────────────
+    _help_spacer, _help_col = st.columns([5, 1])
+    with _help_col:
+        with st.expander("❓ Help", expanded=False):
+            st.markdown(
+                "<div style='font-size:.8rem;color:#A0B8D0;margin-bottom:6px'>"
+                "<b style='color:#D4A843'>Teacher Pehpeh User Guide</b><br>"
+                "All 6 tabs, login, exports, intervention plans.</div>",
+                unsafe_allow_html=True)
+            st.download_button(
+                label="📄 Download Guide (.docx)",
+                data=_get_guide_bytes(),
+                file_name="Teacher_Pehpeh_User_Guide.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                use_container_width=True, key="dl_user_guide_top")
+            st.markdown(
+                "<div style='font-size:.72rem;color:#556;margin-top:6px;line-height:1.5'>"
+                "📞 +231-770-625-656<br>"
+                "✉ info@institutebasictechnology.org<br>"
+                "🌐 www.institutebasictechnology.org</div>",
+                unsafe_allow_html=True)
+
     # Unified status bar
     if conn:
         keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
@@ -3754,31 +3776,7 @@ def main():
             st.session_state.conn_checked = False
             st.rerun()
 
-        # ── Help menu ──────────────────────────────────────────────────────
-        with st.expander("❓ Help & User Guide", expanded=False):
-            st.markdown(
-                "<div style='font-size:.83rem;color:#A0B8D0;margin-bottom:8px'>"
-                "<b style='color:#D4A843'>Teacher Pehpeh User Guide</b><br>"
-                "Complete reference — all 6 tabs, login, exports, intervention plans, and security."
-                "</div>",
-                unsafe_allow_html=True,
-            )
-            st.download_button(
-                label="📄 Download User Guide (.docx)",
-                data=_get_guide_bytes(),
-                file_name="Teacher_Pehpeh_User_Guide.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                use_container_width=True,
-                key="dl_user_guide",
-            )
-            st.markdown(
-                "<div style='font-size:.75rem;color:#556;margin-top:8px;line-height:1.5'>"
-                "📞 +231-770-625-656<br>"
-                "✉ info@institutebasictechnology.org<br>"
-                "🌐 www.institutebasictechnology.org"
-                "</div>",
-                unsafe_allow_html=True,
-            )
+        # ── Help menu moved to top-right corner ──────────────────────────
 
     if not conn:
         keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
@@ -3795,10 +3793,8 @@ def main():
     _cfg_region_lbl = st.session_state.get("cfg_region",  list(_regions().keys())[0])
     _cfg_lang_lbl   = st.session_state.get("lang_sel",    "English")
     _cfg_ctry_lbl   = st.session_state.get("country_sel", "Liberia")
-    _exp_parts = [f"⚙️ {_sn}" if _sn.strip() else "⚙️ Setup"]
-    if _tn.strip(): _exp_parts.append(_tn)
-    _exp_parts += [_cfg_grade_lbl, _cfg_subj_lbl]
-    _expander_label = "  ·  ".join(_exp_parts)
+    _exp_parts = [f"👋 Hello Educator! {_sn} — let's set up your class" if _sn.strip() else "👋 Hello Educator! Let's set up your class"]
+    _expander_label = _exp_parts[0]
 
     with st.expander(_expander_label, expanded=not bool(_sn.strip())):
         # ── Row 1: Country + Language ──────────────────────────────────────
@@ -3992,52 +3988,58 @@ def main():
         st.session_state["_show_home"] = True
 
     if st.session_state["_show_home"] and online and keys:
-        st.markdown("""
+        st.markdown(f"""
 <style>
-/* ── Landing page styles ───────────────────────────────────────────── */
-.tp-home-title {
-    font-size:clamp(1.5rem,3.2vw,2.1rem);
-    font-weight:800; color:#FFFFFF; margin-bottom:.2rem;
-    text-align:center; text-shadow:0 2px 16px rgba(0,0,0,.5);
-}
-.tp-home-sub {
+/* ── Landing tile headings ───────────────────────────────────────────── */
+.tp-home-title {{
+    font-size:clamp(1.5rem,3.2vw,2.1rem); font-weight:800;
+    color:#FFFFFF; margin-bottom:.2rem; text-align:center;
+    text-shadow:0 2px 16px rgba(0,0,0,.5);
+}}
+.tp-home-sub {{
     font-size:.92rem; color:#C8D8E8; margin-bottom:.15rem;
     font-weight:400; text-align:center;
-}
-.tp-home-q {
+}}
+.tp-home-q {{
     font-size:clamp(1rem,2.2vw,1.25rem); font-weight:700;
     color:#FFFFFF; margin:.8rem 0 1.2rem; text-align:center;
-    letter-spacing:.02em;
-}
-/* Tile buttons */
-div[data-testid="stButton"] button {
-    border-radius: 18px !important;
-    font-size: 1.15rem !important;
-    font-weight: 800 !important;
-    height: 110px !important;
-    min-height: 110px !important;
-    padding: 0 1.2rem !important;
-    border: none !important;
-    transition: transform .15s ease, box-shadow .15s ease !important;
-    box-shadow: 0 6px 24px rgba(0,0,0,.35) !important;
-    width: 100% !important;
+}}
+/* ── Tile button base ────────────────────────────────────────────────── */
+div[data-testid="stHorizontalBlock"] div[data-testid="stButton"] button {{
+    border-radius:18px !important; height:110px !important;
+    min-height:110px !important; font-size:1.2rem !important;
+    font-weight:800 !important; border:none !important;
+    color:#fff !important; text-shadow:0 1px 6px rgba(0,0,0,.45) !important;
+    box-shadow:0 6px 24px rgba(0,0,0,.4) !important;
+    transition:transform .15s ease, box-shadow .15s ease !important;
     letter-spacing:.01em !important;
-    text-shadow: 0 1px 4px rgba(0,0,0,.4) !important;
-}
-div[data-testid="stButton"] button:hover {
-    transform: translateY(-4px) scale(1.02) !important;
-    box-shadow: 0 12px 36px rgba(0,0,0,.45) !important;
-}
-/* Per-tile colours — target by key order in DOM */
-div[data-testid="stButton"]:has(button[kind="secondary"]:nth-of-type(1)),
-[data-testid="element-container"]:has(button[key="_home_lesson"]) button,
-button[data-testid="baseButton-secondary"]:first-of-type { background:unset !important }
-
-/* Use a wrapper div trick via markdown to colour each tile */
-.tile-blue   button { background: linear-gradient(135deg,#1565C0,#42A5F5) !important; color:#fff !important; }
-.tile-orange button { background: linear-gradient(135deg,#E65100,#FFA726) !important; color:#fff !important; }
-.tile-green  button { background: linear-gradient(135deg,#1B5E20,#66BB6A) !important; color:#fff !important; }
-.tile-purple button { background: linear-gradient(135deg,#4A148C,#AB47BC) !important; color:#fff !important; }
+}}
+div[data-testid="stHorizontalBlock"] div[data-testid="stButton"] button:hover {{
+    transform:translateY(-4px) scale(1.02) !important;
+    box-shadow:0 12px 36px rgba(0,0,0,.5) !important;
+    color:#fff !important;
+}}
+/* ── Per-tile colours via row×column nth-child ───────────────────────── */
+div[data-testid="stHorizontalBlock"]:nth-of-type(1)
+  div[data-testid="stColumn"]:nth-child(1)
+  div[data-testid="stButton"] button {{
+    background:linear-gradient(135deg,#1565C0 0%,#42A5F5 100%) !important;
+}}
+div[data-testid="stHorizontalBlock"]:nth-of-type(1)
+  div[data-testid="stColumn"]:nth-child(2)
+  div[data-testid="stButton"] button {{
+    background:linear-gradient(135deg,#E65100 0%,#FFA726 100%) !important;
+}}
+div[data-testid="stHorizontalBlock"]:nth-of-type(2)
+  div[data-testid="stColumn"]:nth-child(1)
+  div[data-testid="stButton"] button {{
+    background:linear-gradient(135deg,#1B5E20 0%,#66BB6A 100%) !important;
+}}
+div[data-testid="stHorizontalBlock"]:nth-of-type(2)
+  div[data-testid="stColumn"]:nth-child(2)
+  div[data-testid="stButton"] button {{
+    background:linear-gradient(135deg,#4A148C 0%,#AB47BC 100%) !important;
+}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -4049,89 +4051,31 @@ button[data-testid="baseButton-secondary"]:first-of-type { background:unset !imp
             unsafe_allow_html=True
         )
 
-        # 4 coloured tiles — 2×2 grid using inline HTML tiles (onclick via Streamlit buttons below)
-        _t1, _t2 = st.columns(2, gap="medium")
-        _t3, _t4 = st.columns(2, gap="medium")
-
-        # Tile 1 — Blue: Create Lesson (African student studying image via emoji scene)
-        with _t1:
-            st.markdown("""
-<div style="background:linear-gradient(135deg,#1565C0 0%,#42A5F5 100%);
-  border-radius:18px;padding:0 16px;height:110px;display:flex;align-items:center;
-  gap:14px;box-shadow:0 6px 24px rgba(0,0,0,.35);cursor:pointer;
-  overflow:hidden;position:relative;margin-bottom:2px">
-  <div style="font-size:3.2rem;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))">📓✏️</div>
-  <div>
-    <div style="font-size:1.15rem;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.4)">Create Lesson</div>
-    <div style="font-size:.72rem;color:#BBDEFB;margin-top:3px">Lesson plans · Worksheets · Notes</div>
-  </div>
-  <div style="position:absolute;right:-8px;bottom:-10px;font-size:4.5rem;opacity:.18;line-height:1">🧑🏿‍🏫</div>
-</div>""", unsafe_allow_html=True)
-            if st.button("📓  Create Lesson", key="_home_lesson", use_container_width=True,
-                         help="Generate lesson plans, worksheets, and teaching materials"):
+        # Row 1 tiles
+        _hc1, _hc2 = st.columns(2, gap="medium")
+        with _hc1:
+            if st.button("📓  Create Lesson", key="_home_lesson", use_container_width=True):
                 st.session_state["_show_home"] = False
                 st.session_state["task_cat"] = "📋 Planning"
                 st.session_state["_nav_tab"] = 0
                 st.rerun()
-
-        # Tile 2 — Orange: Create Quiz
-        with _t2:
-            st.markdown("""
-<div style="background:linear-gradient(135deg,#E65100 0%,#FFA726 100%);
-  border-radius:18px;padding:0 16px;height:110px;display:flex;align-items:center;
-  gap:14px;box-shadow:0 6px 24px rgba(0,0,0,.35);cursor:pointer;
-  overflow:hidden;position:relative;margin-bottom:2px">
-  <div style="font-size:3.2rem;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))">📝✅</div>
-  <div>
-    <div style="font-size:1.15rem;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.4)">Create Quiz</div>
-    <div style="font-size:.72rem;color:#FFF8E1;margin-top:3px">MCQs · WASSCE prep · Exams</div>
-  </div>
-  <div style="position:absolute;right:-8px;bottom:-10px;font-size:4.5rem;opacity:.18;line-height:1">👩🏿‍🎓</div>
-</div>""", unsafe_allow_html=True)
-            if st.button("📝  Create Quiz", key="_home_quiz", use_container_width=True,
-                         help="Generate quizzes, MCQs and WASSCE-style assessments"):
+        with _hc2:
+            if st.button("📝  Create Quiz", key="_home_quiz", use_container_width=True):
                 st.session_state["_show_home"] = False
                 st.session_state["task_cat"] = "📝 Assessment"
                 st.session_state["_nav_tab"] = 0
                 st.rerun()
 
-        # Tile 3 — Green: Classroom Activities
-        with _t3:
-            st.markdown("""
-<div style="background:linear-gradient(135deg,#1B5E20 0%,#66BB6A 100%);
-  border-radius:18px;padding:0 16px;height:110px;display:flex;align-items:center;
-  gap:14px;box-shadow:0 6px 24px rgba(0,0,0,.35);cursor:pointer;
-  overflow:hidden;position:relative;margin-bottom:2px">
-  <div style="font-size:3.2rem;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))">🙋🏿‍♂️⚽</div>
-  <div>
-    <div style="font-size:1.15rem;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.4)">Classroom Activities</div>
-    <div style="font-size:.72rem;color:#F1F8E9;margin-top:3px">Group work · Games · Projects</div>
-  </div>
-  <div style="position:absolute;right:-8px;bottom:-10px;font-size:4.5rem;opacity:.18;line-height:1">🧑🏿‍🤝‍🧑🏿</div>
-</div>""", unsafe_allow_html=True)
-            if st.button("🎭  Classroom Activities", key="_home_activity", use_container_width=True,
-                         help="Group work, games, and interactive classroom activities"):
+        # Row 2 tiles
+        _hc3, _hc4 = st.columns(2, gap="medium")
+        with _hc3:
+            if st.button("🙋🏿  Classroom Activities", key="_home_activity", use_container_width=True):
                 st.session_state["_show_home"] = False
                 st.session_state["task_cat"] = "🎯 Activities"
                 st.session_state["_nav_tab"] = 0
                 st.rerun()
-
-        # Tile 4 — Purple: Study Help
-        with _t4:
-            st.markdown("""
-<div style="background:linear-gradient(135deg,#4A148C 0%,#AB47BC 100%);
-  border-radius:18px;padding:0 16px;height:110px;display:flex;align-items:center;
-  gap:14px;box-shadow:0 6px 24px rgba(0,0,0,.35);cursor:pointer;
-  overflow:hidden;position:relative;margin-bottom:2px">
-  <div style="font-size:3.2rem;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))">💡📚</div>
-  <div>
-    <div style="font-size:1.15rem;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.4)">Study Help</div>
-    <div style="font-size:.72rem;color:#F3E5F5;margin-top:3px">Explanations · Summaries · Support</div>
-  </div>
-  <div style="position:absolute;right:-8px;bottom:-10px;font-size:4.5rem;opacity:.18;line-height:1">👩🏿‍💻</div>
-</div>""", unsafe_allow_html=True)
-            if st.button("💡  Study Help", key="_home_study", use_container_width=True,
-                         help="Study guides, explanations and student support materials"):
+        with _hc4:
+            if st.button("💡  Study Help", key="_home_study", use_container_width=True):
                 st.session_state["_show_home"] = False
                 st.session_state["task_cat"] = "📚 Study Support"
                 st.session_state["_nav_tab"] = 0
