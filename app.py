@@ -4001,15 +4001,15 @@ def main():
             _l1, _l2, _l3 = st.columns(3)
             with _l1:
                 if st.button("📄 Lesson Plan", key="_hl_plan", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["task_cat"]="📋 Planning"; st.rerun()
+                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📋 Planning"; st.rerun()
             with _l2:
                 if st.button("📋 Worksheet", key="_hl_ws", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["task_cat"]="📋 Planning"; st.rerun()
+                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📋 Planning"; st.rerun()
             with _l3:
                 if st.button("📖 Reading Passage", key="_hl_read", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["task_cat"]="📋 Planning"; st.rerun()
+                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📋 Planning"; st.rerun()
             if st.button("➡️  Open full lesson builder", key="_hl_full", type="primary", use_container_width=True):
-                st.session_state["_show_home"]=False; st.session_state["task_cat"]="📋 Planning"; st.session_state["_nav_tab"]=0; st.rerun()
+                st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📋 Planning"; st.session_state["_nav_tab"]=0; st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
         elif _active == "activity":
@@ -4018,15 +4018,15 @@ def main():
             _a1, _a2, _a3 = st.columns(3)
             with _a1:
                 if st.button("👥 Group Work", key="_ha_grp", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["task_cat"]="🎯 Activities"; st.rerun()
+                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="🎯 Activities"; st.rerun()
             with _a2:
                 if st.button("🎮 Class Game", key="_ha_game", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["task_cat"]="🎯 Activities"; st.rerun()
+                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="🎯 Activities"; st.rerun()
             with _a3:
                 if st.button("🗣️ Discussion", key="_ha_disc", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["task_cat"]="🎯 Activities"; st.rerun()
+                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="🎯 Activities"; st.rerun()
             if st.button("➡️  Open full activities builder", key="_ha_full", type="primary", use_container_width=True):
-                st.session_state["_show_home"]=False; st.session_state["task_cat"]="🎯 Activities"; st.session_state["_nav_tab"]=0; st.rerun()
+                st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="🎯 Activities"; st.session_state["_nav_tab"]=0; st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
         elif _active == "study":
@@ -4035,15 +4035,15 @@ def main():
             _s1, _s2, _s3 = st.columns(3)
             with _s1:
                 if st.button("📖 Study Guide", key="_hs_guide", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["task_cat"]="📚 Study Support"; st.rerun()
+                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📚 Study Support"; st.rerun()
             with _s2:
                 if st.button("💬 Explanation", key="_hs_expl", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["task_cat"]="📚 Study Support"; st.rerun()
+                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📚 Study Support"; st.rerun()
             with _s3:
                 if st.button("🤖 Ask Chat", key="_hs_chat", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["task_cat"]="📚 Study Support"; st.session_state["_nav_tab"]=4; st.rerun()
+                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📚 Study Support"; st.session_state["_nav_tab"]=4; st.rerun()
             if st.button("➡️  Open full study help", key="_hs_full", type="primary", use_container_width=True):
-                st.session_state["_show_home"]=False; st.session_state["task_cat"]="📚 Study Support"; st.session_state["_nav_tab"]=0; st.rerun()
+                st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📚 Study Support"; st.session_state["_nav_tab"]=0; st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
         elif _active == "quiz":
@@ -4052,15 +4052,15 @@ def main():
             _q1, _q2, _q3 = st.columns(3)
             with _q1:
                 if st.button("✅ MCQ Quiz", key="_hq_mcq", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["task_cat"]="📝 Assessment"; st.rerun()
+                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📝 Assessment"; st.rerun()
             with _q2:
                 if st.button("📋 WASSCE Prep", key="_hq_wassce", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["task_cat"]="📝 Assessment"; st.rerun()
+                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📝 Assessment"; st.rerun()
             with _q3:
                 if st.button("📝 Short Answer", key="_hq_short", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["task_cat"]="📝 Assessment"; st.rerun()
+                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📝 Assessment"; st.rerun()
             if st.button("➡️  Open full quiz builder", key="_hq_full", type="primary", use_container_width=True):
-                st.session_state["_show_home"]=False; st.session_state["task_cat"]="📝 Assessment"; st.session_state["_nav_tab"]=0; st.rerun()
+                st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📝 Assessment"; st.session_state["_nav_tab"]=0; st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('<p style="text-align:center;font-size:.72rem;color:#334455;margin-top:1.2rem">Powered by ChatGPT &bull; Claude &bull; Gemini</p>', unsafe_allow_html=True)
@@ -4111,13 +4111,13 @@ def main():
         _bot_l, _bot_r = st.columns([3, 1], gap="small")
         with _bot_r:
             st.markdown('<div class="tp-tile tp-sm" style="margin-bottom:4px">', unsafe_allow_html=True)
-            if st.button("🔄  Refresh", key="_home_refresh", use_container_width=True):
-                st.session_state.conn_checked = False; st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
-            st.markdown('<div class="tp-tile tp-sm">', unsafe_allow_html=True)
             if st.button("❓  Help", key="_home_help_btn", use_container_width=True):
                 st.session_state["_home_active"] = "help" if st.session_state.get("_home_active") != "help" else None
                 st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown('<div class="tp-tile tp-sm">', unsafe_allow_html=True)
+            if st.button("🔄  Refresh", key="_home_refresh", use_container_width=True):
+                st.session_state.conn_checked = False; st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
         # ── Help submenu ──────────────────────────────────────────────────
@@ -4291,43 +4291,77 @@ setTimeout(function() {{
 
         # Build per-category display list with sentinel header option
         _cat_list   = list(_TASK_CATEGORIES.keys())   # ["📋 Planning", "📝 Assessment", ...]
-        # 2×2 layout: first row = first two categories, second row = last two
-        _dd_row1 = st.columns(2)
-        _dd_row2 = st.columns(2)
-        _dd_cols = [_dd_row1[0], _dd_row1[1], _dd_row2[0], _dd_row2[1]]
         _active_cat = st.session_state.task_cat
 
-        for _ci, _cname in enumerate(_cat_list):
-            _dd_tasks = _cat_tasks_display(_cname)
-            # Compose options: header option + tasks
-            _header_opt   = f"{_CAT_PREFIX} {_cname}"
-            _dd_options   = [_header_opt] + _dd_tasks
-            # Default index: if this is the active category and a task_sel is remembered, preselect it
-            _prev_sel = st.session_state.get("task_sel", None)
-            if _cname == _active_cat and _prev_sel in _dd_tasks:
-                _dd_idx = _dd_options.index(_prev_sel)
-            else:
-                _dd_idx = 0   # show header
+        # ── If arrived from a home tile, show ONLY the relevant category ──
+        _home_mode = st.session_state.get("_home_nav_mode", False)
 
-            with _dd_cols[_ci]:
-                _chosen = st.selectbox(
-                    label=_cname,
-                    options=_dd_options,
-                    index=_dd_idx,
-                    key=f"dd_cat_{_ci}",
-                    label_visibility="collapsed",
-                    format_func=lambda x, _h=_header_opt: (
-                        x if not x.startswith(_CAT_PREFIX)
-                        else x.replace(f"{_CAT_PREFIX} ", "")
-                    ),
-                    help=f"Select a {_cname.split()[-1]} task",
-                )
-                # If user picked a real task (not the header), switch to that category + task
-                if _chosen != _header_opt:
-                    if st.session_state.task_cat != _cname or st.session_state.get("task_sel") != _chosen:
-                        st.session_state.task_cat   = _cname
-                        st.session_state["task_sel"] = _chosen
-                        st.rerun()
+        if _home_mode:
+            # Single-category focused view — just the one dropdown for this category
+            _focused_cats = [_active_cat]
+            _dd_cols_focused = [st.columns(1)[0]]
+            for _ci, _cname in zip([0], _focused_cats):
+                _dd_tasks = _cat_tasks_display(_cname)
+                _header_opt = f"{_CAT_PREFIX} {_cname}"
+                _dd_options = [_header_opt] + _dd_tasks
+                _prev_sel = st.session_state.get("task_sel", None)
+                _dd_idx = _dd_options.index(_prev_sel) if (_cname == _active_cat and _prev_sel in _dd_tasks) else 0
+                with _dd_cols_focused[0]:
+                    _chosen = st.selectbox(
+                        label=_cname,
+                        options=_dd_options,
+                        index=_dd_idx,
+                        key=f"dd_cat_0",
+                        label_visibility="collapsed",
+                        format_func=lambda x, _h=_header_opt: (
+                            x if not x.startswith(_CAT_PREFIX)
+                            else x.replace(f"{_CAT_PREFIX} ", "")
+                        ),
+                        help=f"Select a task",
+                    )
+                    if _chosen != _header_opt:
+                        if st.session_state.task_cat != _cname or st.session_state.get("task_sel") != _chosen:
+                            st.session_state.task_cat   = _cname
+                            st.session_state["task_sel"] = _chosen
+                            st.rerun()
+            # Small link to switch to full view
+            if st.button("⬅  Show all categories", key="_exit_home_mode", use_container_width=False):
+                st.session_state["_home_nav_mode"] = False
+                st.rerun()
+        else:
+            # Full 2×2 dropdown grid — normal view
+            _dd_row1 = st.columns(2)
+            _dd_row2 = st.columns(2)
+            _dd_cols = [_dd_row1[0], _dd_row1[1], _dd_row2[0], _dd_row2[1]]
+
+            for _ci, _cname in enumerate(_cat_list):
+                _dd_tasks = _cat_tasks_display(_cname)
+                _header_opt   = f"{_CAT_PREFIX} {_cname}"
+                _dd_options   = [_header_opt] + _dd_tasks
+                _prev_sel = st.session_state.get("task_sel", None)
+                if _cname == _active_cat and _prev_sel in _dd_tasks:
+                    _dd_idx = _dd_options.index(_prev_sel)
+                else:
+                    _dd_idx = 0
+
+                with _dd_cols[_ci]:
+                    _chosen = st.selectbox(
+                        label=_cname,
+                        options=_dd_options,
+                        index=_dd_idx,
+                        key=f"dd_cat_{_ci}",
+                        label_visibility="collapsed",
+                        format_func=lambda x, _h=_header_opt: (
+                            x if not x.startswith(_CAT_PREFIX)
+                            else x.replace(f"{_CAT_PREFIX} ", "")
+                        ),
+                        help=f"Select a {_cname.split()[-1]} task",
+                    )
+                    if _chosen != _header_opt:
+                        if st.session_state.task_cat != _cname or st.session_state.get("task_sel") != _chosen:
+                            st.session_state.task_cat   = _cname
+                            st.session_state["task_sel"] = _chosen
+                            st.rerun()
 
         # Resolve the current task from session state
         _active_tasks = _cat_tasks_display(st.session_state.task_cat)
