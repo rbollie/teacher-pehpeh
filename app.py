@@ -3764,11 +3764,27 @@ def main():
     school_name  = st.session_state.get("_school_confirmed","")
     teacher_name = st.session_state.get("_teacher_confirmed","")
     teacher_phone= st.session_state.get("_phone_confirmed","")
-    _region_val=_regions()[region]
+    # Safe lookups — keys may be stale if country/language just changed
+    _regions_now = _regions()
+    if region not in _regions_now:
+        region = list(_regions_now.keys())[0]
+        st.session_state["cfg_region"] = region
+    _region_val = _regions_now[region]
+
     _grade_en=_to_en_grade(grade)
     _subj_en=_to_en_subj(subject)
-    _size_val=_sizes()[clsz]
-    _abl_val=_ability()[abl]
+
+    _sizes_now = _sizes()
+    if clsz not in _sizes_now:
+        clsz = list(_sizes_now.keys())[0]
+        st.session_state["cfg_clsz"] = clsz
+    _size_val = _sizes_now[clsz]
+
+    _ability_now = _ability()
+    if abl not in _ability_now:
+        abl = list(_ability_now.keys())[0]
+        st.session_state["cfg_abl"] = abl
+    _abl_val = _ability_now[abl]
     st.markdown('<hr style="margin:4px 0 8px;border-color:#1e2a3a">',unsafe_allow_html=True)
 
     # Compute general MOE curriculum context for chat (now that _grade_en/_subj_en are defined)
@@ -3882,9 +3898,10 @@ def main():
             with _crow1:
                 _country_sel = st.selectbox(T("country"), COUNTRIES, key="country_sel",
                     label_visibility="collapsed", format_func=lambda x: f"🌍 {x}", help="Your country")
-                if "lang_auto_done" not in st.session_state: st.session_state.lang_auto_done = set()
-                if _country_sel not in st.session_state.lang_auto_done:
-                    st.session_state.lang_auto_done.add(_country_sel)
+                # Always auto-set language when country changes (no once-only guard)
+                _prev_country = st.session_state.get("_last_country_sel")
+                if _country_sel != _prev_country:
+                    st.session_state["_last_country_sel"] = _country_sel
                     if _country_sel in FRANCOPHONE: st.session_state.lang_sel = "Français"
                     elif _country_sel in SWAHILI_COUNTRIES: st.session_state.lang_sel = "Kiswahili"
                     else: st.session_state.lang_sel = "English"
