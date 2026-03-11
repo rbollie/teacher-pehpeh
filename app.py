@@ -3814,12 +3814,18 @@ def main():
     box-shadow:0 8px 28px rgba(0,0,0,.5) !important;
     color:#fff !important;
 }
-/* Tile colours — alternating blue/orange */
-.tp-cfg    button { background:linear-gradient(135deg,#1565C0,#42A5F5) !important; }
-.tp-lesson button { background:linear-gradient(135deg,#E65100,#FFA726) !important; }
-.tp-class  button { background:linear-gradient(135deg,#1565C0,#42A5F5) !important; }
-.tp-quiz   button { background:linear-gradient(135deg,#E65100,#FFA726) !important; }
-.tp-study  button { background:linear-gradient(135deg,#1565C0,#42A5F5) !important; }
+/* Tile colours — distinct, accessible, high-contrast */
+.tp-cfg    button { background:linear-gradient(135deg,#00695C,#26A69A) !important; } /* Teal — neutral/setup */
+.tp-lesson button { background:linear-gradient(135deg,#1565C0,#42A5F5) !important; } /* Blue — primary action */
+.tp-class  button { background:linear-gradient(135deg,#6A1B9A,#AB47BC) !important; } /* Purple — group/social */
+.tp-quiz   button { background:linear-gradient(135deg,#E65100,#FFA726) !important; } /* Amber — assessment */
+.tp-study  button { background:linear-gradient(135deg,#2E7D32,#66BB6A) !important; } /* Green — support/growth */
+.tp-sm     button {
+    height:44px !important; min-height:44px !important;
+    font-size:.78rem !important; font-weight:600 !important;
+    background:linear-gradient(135deg,#1a2a4a,#2a3f6a) !important;
+    border:1px solid #3a5080 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -3827,7 +3833,7 @@ def main():
         _cfg_l, _cfg_m, _cfg_r = st.columns([1, 2, 1])
         with _cfg_m:
             st.markdown('<div class="tp-tile tp-cfg">', unsafe_allow_html=True)
-            if st.button("⚙️  Class Configuration", key="_home_cfg", use_container_width=True):
+            if st.button("📋  Background Info About Your Classroom", key="_home_cfg", use_container_width=True):
                 st.session_state["_home_active"] = "config" if st.session_state.get("_home_active") != "config" else None
                 st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
@@ -4050,6 +4056,28 @@ def main():
             st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('<p style="text-align:center;font-size:.72rem;color:#334455;margin-top:1.2rem">Powered by ChatGPT &bull; Claude &bull; Gemini</p>', unsafe_allow_html=True)
+
+        # ── Bottom-right: Refresh + Help — flushed to lowest right corner ─
+        _bot_l, _bot_r = st.columns([3, 1], gap="small")
+        with _bot_r:
+            st.markdown('<div class="tp-tile tp-sm" style="margin-bottom:4px">', unsafe_allow_html=True)
+            if st.button("🔄  Refresh", key="_home_refresh", use_container_width=True):
+                st.session_state.conn_checked = False; st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown('<div class="tp-tile tp-sm">', unsafe_allow_html=True)
+            if st.button("❓  Help", key="_home_help_btn", use_container_width=True):
+                st.session_state["_home_active"] = "help" if st.session_state.get("_home_active") != "help" else None
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        # ── Help submenu ──────────────────────────────────────────────────
+        if st.session_state.get("_home_active") == "help":
+            st.markdown('<div style="background:#0d1a2e;border:1px solid #2a3f6a;border-radius:12px;padding:14px 16px;margin-top:6px">', unsafe_allow_html=True)
+            st.markdown("<b style='color:#D4A843'>📄 Teacher Pehpeh User Guide</b><br><span style='font-size:.85rem;color:#A0B8D0'>All 6 tabs, login, exports, intervention plans.</span>", unsafe_allow_html=True)
+            st.download_button(label="📄 Download Guide (.docx)", data=_get_guide_bytes(), file_name="Teacher_Pehpeh_User_Guide.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True, key="dl_user_guide_top")
+            st.markdown("<div style='font-size:.78rem;color:#778899;margin-top:8px;line-height:1.7'>📞 +231-770-625-656<br>✉ info@institutebasictechnology.org<br>🌐 www.institutebasictechnology.org</div>", unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+
         return
 
     # "← Home" breadcrumb shown whenever user is inside the app
