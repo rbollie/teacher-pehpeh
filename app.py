@@ -3841,11 +3841,11 @@ def main():
     color:#fff !important;
 }
 /* Tile colours */
-.tp-cfg   button { background:linear-gradient(135deg,#37474F,#78909C) !important; }
-.tp-lesson button { background:linear-gradient(135deg,#1565C0,#42A5F5) !important; }
-.tp-class  button { background:linear-gradient(135deg,#1B5E20,#66BB6A) !important; }
-.tp-quiz   button { background:linear-gradient(135deg,#E65100,#FFA726) !important; }
-.tp-study  button { background:linear-gradient(135deg,#4A148C,#AB47BC) !important; }
+.tp-cfg   button { background:linear-gradient(135deg,#1565C0,#42A5F5) !important; }
+.tp-lesson button { background:linear-gradient(135deg,#E65100,#FFA726) !important; }
+.tp-class  button { background:linear-gradient(135deg,#1565C0,#42A5F5) !important; }
+.tp-quiz   button { background:linear-gradient(135deg,#1565C0,#42A5F5) !important; }
+.tp-study  button { background:linear-gradient(135deg,#E65100,#FFA726) !important; }
 .tp-sm     button {
     height:52px !important; min-height:52px !important;
     font-size:.82rem !important; font-weight:600 !important;
@@ -4029,7 +4029,7 @@ def main():
         _subtitle={"en":"Curating Personalized Content to Support Underresourced Teachers","fr":"Création de contenu personnalisé pour soutenir les enseignants sous-dotés","sw":"Kuunda Maudhui ya Kibinafsi Kusaidia Walimu Wasio na Rasilimali za Kutosha"}.get(_lang_key(),"Curating Personalized Content to Support Underresourced Teachers")
         st.markdown(f'<p style="text-align:center;color:#8899BB;font-size:clamp(.72rem,.95rem,1rem);margin-bottom:.6rem;line-height:1.5">{_subtitle}<br><span style="font-size:clamp(.68rem,.85rem,.9rem)">ChatGPT &bull; Claude &bull; Gemini</span></p>', unsafe_allow_html=True)
 
-        # ── BOTTOM ROW: Study Help | Create Quiz (left) + Refresh|Help (right) ─
+        # ── BOTTOM ROW: Study Help | Create Quiz (left) + Refresh|Help bottom-right ─
         _br_l, _br_r = st.columns([3, 1], gap="small")
         with _br_l:
             _brl1, _brl2 = st.columns(2, gap="small")
@@ -4046,6 +4046,8 @@ def main():
                     st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
         with _br_r:
+            # Spacer pushes buttons to bottom-right corner
+            st.markdown('<div style="height:3rem"></div>', unsafe_allow_html=True)
             st.markdown('<div class="tp-tile tp-sm">', unsafe_allow_html=True)
             if st.button("🔄  Refresh", key="_home_refresh", use_container_width=True):
                 st.session_state.conn_checked = False; st.rerun()
