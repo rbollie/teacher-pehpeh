@@ -3810,12 +3810,7 @@ def main():
     box-shadow:0 8px 28px rgba(0,0,0,.5) !important;
     color:#fff !important;
 }
-/* Tile colours — 5 distinct, accessible */
-.tp-cfg    button { background:linear-gradient(135deg,#00695C,#26A69A) !important; } /* Teal   — setup/info */
-.tp-lesson button { background:linear-gradient(135deg,#1565C0,#42A5F5) !important; } /* Blue   — lesson/plan */
-.tp-class  button { background:linear-gradient(135deg,#6A1B9A,#AB47BC) !important; } /* Purple — group/social */
-.tp-study  button { background:linear-gradient(135deg,#2E7D32,#66BB6A) !important; } /* Green  — support/growth */
-.tp-quiz   button { background:linear-gradient(135deg,#B71C1C,#EF5350) !important; } /* Red    — assessment/test */
+/* Base tile style only — colours applied via JS below */
 .tp-sm     button {
     height:44px !important; min-height:44px !important;
     font-size:.78rem !important; font-weight:600 !important;
@@ -3964,6 +3959,8 @@ def main():
             st.markdown('</div>', unsafe_allow_html=True)
 
         with _mc:
+            # Spacing gap between Config tile and logo
+            st.markdown('<div style="height:1.4rem"></div>', unsafe_allow_html=True)
             # Logo centered
             show_logo(country)
             _subtitle = {"en":"Curating Personalized Content to Support Underresourced Teachers","fr":"Création de contenu personnalisé pour soutenir les enseignants sous-dotés","sw":"Kuunda Maudhui ya Kibinafsi Kusaidia Walimu Wasio na Rasilimali za Kutosha"}.get(_lang_key(),"Curating Personalized Content to Support Underresourced Teachers")
@@ -4053,7 +4050,49 @@ def main():
 
         st.markdown('<p style="text-align:center;font-size:.72rem;color:#334455;margin-top:1.2rem">Powered by ChatGPT &bull; Claude &bull; Gemini</p>', unsafe_allow_html=True)
 
-        # ── Bottom-right: Refresh + Help — flushed to lowest right corner ─
+        # ── JS: colour each tile by its label text ────────────────────────
+        import streamlit.components.v1 as _tile_comp
+        _tile_comp.html("""
+<script>
+(function(){
+  var COLORS = {
+    'Background Info': 'linear-gradient(135deg,#00695C,#26A69A)',
+    'Create Lesson':   'linear-gradient(135deg,#1565C0,#42A5F5)',
+    'Classroom Activities': 'linear-gradient(135deg,#6A1B9A,#AB47BC)',
+    'Study Help':      'linear-gradient(135deg,#2E7D32,#66BB6A)',
+    'Create Quiz':     'linear-gradient(135deg,#B71C1C,#EF5350)'
+  };
+  function paint(){
+    try {
+      var doc = window.parent.document;
+      doc.querySelectorAll('button p, button div').forEach(function(el){
+        var txt = el.textContent || '';
+        for(var label in COLORS){
+          if(txt.indexOf(label) !== -1){
+            var btn = el.closest('button');
+            if(btn){
+              btn.style.setProperty('background', COLORS[label], 'important');
+              btn.style.setProperty('border','none','important');
+              btn.style.setProperty('color','#fff','important');
+              btn.style.setProperty('font-weight','700','important');
+              btn.style.setProperty('text-shadow','0 1px 4px rgba(0,0,0,.45)','important');
+              btn.style.setProperty('box-shadow','0 4px 18px rgba(0,0,0,.35)','important');
+            }
+          }
+        }
+      });
+    } catch(e){}
+  }
+  paint();
+  setTimeout(paint,300);
+  setTimeout(paint,900);
+  setTimeout(paint,2000);
+})();
+</script>
+""", height=0, scrolling=False)
+
+        # ── Bottom-right: Refresh + Help — flushed lowest right ───────────
+        _bot_spacer = st.markdown('<div style="height:2.5rem"></div>', unsafe_allow_html=True)
         _bot_l, _bot_r = st.columns([3, 1], gap="small")
         with _bot_r:
             st.markdown('<div class="tp-tile tp-sm" style="margin-bottom:4px">', unsafe_allow_html=True)
