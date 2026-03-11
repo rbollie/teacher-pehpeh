@@ -3890,7 +3890,7 @@ def main():
         # ── Row 5a: Save / Load — 2 equal columns ──────────────────────────
         _sf1, _sf2 = st.columns(2)
         with _sf1:
-            if st.button("💾  Save Configuration", use_container_width=True, key="sv_prof"):
+            if st.button("💾  Save Configuration", use_container_width=True, key="sv_prof", type="primary"):
                 _c = st.session_state.get("country_sel","Liberia")
                 _l = st.session_state.get("lang_sel","English")
                 _r = st.session_state.get("cfg_region", list(_regions().keys())[0])
@@ -3903,7 +3903,7 @@ def main():
                 st.session_state["_show_save_opts"] = True
                 st.rerun()
         with _sf2:
-            if st.button("📂  Load Configuration", use_container_width=True, key="ld_prof"):
+            if st.button("📂  Load Configuration", use_container_width=True, key="ld_prof", type="primary"):
                 st.session_state["_show_load_opts"] = not st.session_state.get("_show_load_opts", False)
                 st.session_state["_show_save_opts"] = False
                 st.rerun()
@@ -3990,36 +3990,22 @@ def main():
     if st.session_state["_show_home"] and online and keys:
         st.markdown(f"""
 <style>
-/* ── Landing tile headings ───────────────────────────────────────────── */
-.tp-home-title {{
-    font-size:clamp(1.5rem,3.2vw,2.1rem); font-weight:800;
-    color:#FFFFFF; margin-bottom:.2rem; text-align:center;
-    text-shadow:0 2px 16px rgba(0,0,0,.5);
-}}
-.tp-home-sub {{
-    font-size:.92rem; color:#C8D8E8; margin-bottom:.15rem;
-    font-weight:400; text-align:center;
-}}
-.tp-home-q {{
-    font-size:clamp(1rem,2.2vw,1.25rem); font-weight:700;
-    color:#FFFFFF; margin:.8rem 0 1.2rem; text-align:center;
-}}
-/* ── Tile button base ────────────────────────────────────────────────── */
+/* ── Tile button base — smaller, not full-screen ───────────────────── */
 div[data-testid="stHorizontalBlock"] div[data-testid="stButton"] button {{
-    border-radius:18px !important; height:110px !important;
-    min-height:110px !important; font-size:1.2rem !important;
-    font-weight:800 !important; border:none !important;
-    color:#fff !important; text-shadow:0 1px 6px rgba(0,0,0,.45) !important;
-    box-shadow:0 6px 24px rgba(0,0,0,.4) !important;
+    border-radius:14px !important; height:62px !important;
+    min-height:62px !important; font-size:.95rem !important;
+    font-weight:700 !important; border:none !important;
+    color:#fff !important; text-shadow:0 1px 4px rgba(0,0,0,.4) !important;
+    box-shadow:0 4px 16px rgba(0,0,0,.35) !important;
     transition:transform .15s ease, box-shadow .15s ease !important;
     letter-spacing:.01em !important;
 }}
 div[data-testid="stHorizontalBlock"] div[data-testid="stButton"] button:hover {{
-    transform:translateY(-4px) scale(1.02) !important;
-    box-shadow:0 12px 36px rgba(0,0,0,.5) !important;
+    transform:translateY(-3px) scale(1.01) !important;
+    box-shadow:0 8px 24px rgba(0,0,0,.45) !important;
     color:#fff !important;
 }}
-/* ── Per-tile colours via row×column nth-child ───────────────────────── */
+/* Per-tile colours */
 div[data-testid="stHorizontalBlock"]:nth-of-type(1)
   div[data-testid="stColumn"]:nth-child(1)
   div[data-testid="stButton"] button {{
@@ -4043,39 +4029,126 @@ div[data-testid="stHorizontalBlock"]:nth-of-type(2)
 </style>
 """, unsafe_allow_html=True)
 
-        # Welcome heading
-        st.markdown(
-            '<div class="tp-home-title">Welcome to Teacher Pehpeh!</div>'
-            '<div class="tp-home-sub">Helping teachers in underresourced classrooms.</div>'
-            '<div class="tp-home-q">What would you like to create today?</div>',
-            unsafe_allow_html=True
-        )
-
-        # Row 1 tiles
+        # ── 4 tiles — no welcome heading (already shown by show_logo above) ──
         _hc1, _hc2 = st.columns(2, gap="medium")
         with _hc1:
             if st.button("📓  Create Lesson", key="_home_lesson", use_container_width=True):
+                st.session_state["_home_active"] = "lesson"
+                st.rerun()
+        with _hc2:
+            if st.button("📝  Create Quiz", key="_home_quiz", use_container_width=True):
+                st.session_state["_home_active"] = "quiz"
+                st.rerun()
+        _hc3, _hc4 = st.columns(2, gap="medium")
+        with _hc3:
+            if st.button("🙋🏿  Classroom Activities", key="_home_activity", use_container_width=True):
+                st.session_state["_home_active"] = "activity"
+                st.rerun()
+        with _hc4:
+            if st.button("💡  Study Help", key="_home_study", use_container_width=True):
+                st.session_state["_home_active"] = "study"
+                st.rerun()
+
+        # ── Relevant submenu appears below the tiles on click ─────────────
+        _active = st.session_state.get("_home_active", None)
+
+        if _active == "lesson":
+            st.markdown("---")
+            st.markdown("**📓 Create Lesson** — choose a type then hit Generate:")
+            _l1, _l2, _l3 = st.columns(3)
+            with _l1:
+                if st.button("📄 Lesson Plan", key="_hl_plan", use_container_width=True):
+                    st.session_state["_show_home"] = False
+                    st.session_state["task_cat"] = "📋 Planning"
+                    st.session_state["task_sel"] = next((k for k,v in {**dict(zip(_cat_tasks_display("📋 Planning"),_cat_tasks_display("📋 Planning")))} .items() if "lesson plan" in k.lower()), _cat_tasks_display("📋 Planning")[0] if _cat_tasks_display("📋 Planning") else "")
+                    st.rerun()
+            with _l2:
+                if st.button("📋 Worksheet", key="_hl_ws", use_container_width=True):
+                    st.session_state["_show_home"] = False
+                    st.session_state["task_cat"] = "📋 Planning"
+                    st.rerun()
+            with _l3:
+                if st.button("📖 Reading Passage", key="_hl_read", use_container_width=True):
+                    st.session_state["_show_home"] = False
+                    st.session_state["task_cat"] = "📋 Planning"
+                    st.rerun()
+            if st.button("➡️  Open full lesson builder", key="_hl_full", type="primary"):
                 st.session_state["_show_home"] = False
                 st.session_state["task_cat"] = "📋 Planning"
                 st.session_state["_nav_tab"] = 0
                 st.rerun()
-        with _hc2:
-            if st.button("📝  Create Quiz", key="_home_quiz", use_container_width=True):
+
+        elif _active == "quiz":
+            st.markdown("---")
+            st.markdown("**📝 Create Quiz** — choose a format:")
+            _q1, _q2, _q3 = st.columns(3)
+            with _q1:
+                if st.button("✅ MCQ Quiz", key="_hq_mcq", use_container_width=True):
+                    st.session_state["_show_home"] = False
+                    st.session_state["task_cat"] = "📝 Assessment"
+                    st.rerun()
+            with _q2:
+                if st.button("📋 WASSCE Prep", key="_hq_wassce", use_container_width=True):
+                    st.session_state["_show_home"] = False
+                    st.session_state["task_cat"] = "📝 Assessment"
+                    st.rerun()
+            with _q3:
+                if st.button("📝 Short Answer", key="_hq_short", use_container_width=True):
+                    st.session_state["_show_home"] = False
+                    st.session_state["task_cat"] = "📝 Assessment"
+                    st.rerun()
+            if st.button("➡️  Open full quiz builder", key="_hq_full", type="primary"):
                 st.session_state["_show_home"] = False
                 st.session_state["task_cat"] = "📝 Assessment"
                 st.session_state["_nav_tab"] = 0
                 st.rerun()
 
-        # Row 2 tiles
-        _hc3, _hc4 = st.columns(2, gap="medium")
-        with _hc3:
-            if st.button("🙋🏿  Classroom Activities", key="_home_activity", use_container_width=True):
+        elif _active == "activity":
+            st.markdown("---")
+            st.markdown("**🙋🏿 Classroom Activities** — choose a type:")
+            _a1, _a2, _a3 = st.columns(3)
+            with _a1:
+                if st.button("👥 Group Work", key="_ha_grp", use_container_width=True):
+                    st.session_state["_show_home"] = False
+                    st.session_state["task_cat"] = "🎯 Activities"
+                    st.rerun()
+            with _a2:
+                if st.button("🎮 Class Game", key="_ha_game", use_container_width=True):
+                    st.session_state["_show_home"] = False
+                    st.session_state["task_cat"] = "🎯 Activities"
+                    st.rerun()
+            with _a3:
+                if st.button("🗣️ Discussion", key="_ha_disc", use_container_width=True):
+                    st.session_state["_show_home"] = False
+                    st.session_state["task_cat"] = "🎯 Activities"
+                    st.rerun()
+            if st.button("➡️  Open full activities builder", key="_ha_full", type="primary"):
                 st.session_state["_show_home"] = False
                 st.session_state["task_cat"] = "🎯 Activities"
                 st.session_state["_nav_tab"] = 0
                 st.rerun()
-        with _hc4:
-            if st.button("💡  Study Help", key="_home_study", use_container_width=True):
+
+        elif _active == "study":
+            st.markdown("---")
+            st.markdown("**💡 Study Help** — choose a type:")
+            _s1, _s2, _s3 = st.columns(3)
+            with _s1:
+                if st.button("📖 Study Guide", key="_hs_guide", use_container_width=True):
+                    st.session_state["_show_home"] = False
+                    st.session_state["task_cat"] = "📚 Study Support"
+                    st.rerun()
+            with _s2:
+                if st.button("💬 Explanation", key="_hs_expl", use_container_width=True):
+                    st.session_state["_show_home"] = False
+                    st.session_state["task_cat"] = "📚 Study Support"
+                    st.rerun()
+            with _s3:
+                if st.button("🤖 Ask Chat", key="_hs_chat", use_container_width=True):
+                    st.session_state["_show_home"] = False
+                    st.session_state["task_cat"] = "📚 Study Support"
+                    st.session_state["_nav_tab"] = 4
+                    st.rerun()
+            if st.button("➡️  Open full study help", key="_hs_full", type="primary"):
                 st.session_state["_show_home"] = False
                 st.session_state["task_cat"] = "📚 Study Support"
                 st.session_state["_nav_tab"] = 0
@@ -4087,7 +4160,6 @@ div[data-testid="stHorizontalBlock"]:nth-of-type(2)
             'Powered by ChatGPT &bull; Claude &bull; Gemini</p>',
             unsafe_allow_html=True
         )
-        # Don't render the tabs at all on the home screen
         return
 
     # "← Home" breadcrumb shown whenever user is inside the app
