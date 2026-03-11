@@ -3797,25 +3797,45 @@ def main():
 /* ── Shared tile style ───────────────────────────────────────────────── */
 .tp-tile button {
     border-radius:12px !important;
-    height:72px !important; min-height:72px !important;
-    font-size:1rem !important; font-weight:700 !important;
-    border:none !important; color:#fff !important;
-    text-shadow:0 1px 4px rgba(0,0,0,.45) !important;
-    box-shadow:0 4px 18px rgba(0,0,0,.35) !important;
+    height:68px !important; min-height:68px !important;
+    font-size:clamp(.78rem,.95vw,1rem) !important; font-weight:700 !important;
+    border:none !important;
+    /* Auto text color: white for dark backgrounds, dark for light */
+    color:#fff !important;
+    text-shadow:0 1px 3px rgba(0,0,0,.5) !important;
+    box-shadow:0 3px 12px rgba(0,0,0,.3) !important;
     transition:transform .15s, box-shadow .15s !important;
     width:100% !important;
+    white-space:normal !important;
+    line-height:1.25 !important;
+    padding:6px 10px !important;
 }
 .tp-tile button:hover {
-    transform:translateY(-3px) !important;
-    box-shadow:0 8px 28px rgba(0,0,0,.5) !important;
-    color:#fff !important;
+    transform:translateY(-2px) !important;
+    box-shadow:0 6px 20px rgba(0,0,0,.45) !important;
 }
-/* Base tile style only — colours applied via JS below */
-.tp-sm     button {
-    height:44px !important; min-height:44px !important;
-    font-size:.78rem !important; font-weight:600 !important;
+/* 5 distinct tile colours */
+.tp-cfg    button { background:linear-gradient(135deg,#00695C,#26A69A) !important; color:#fff !important; }
+.tp-lesson button { background:linear-gradient(135deg,#1565C0,#42A5F5) !important; color:#fff !important; }
+.tp-class  button { background:linear-gradient(135deg,#6A1B9A,#AB47BC) !important; color:#fff !important; }
+.tp-study  button { background:linear-gradient(135deg,#2E7D32,#66BB6A) !important; color:#fff !important; }
+.tp-quiz   button { background:linear-gradient(135deg,#B71C1C,#EF5350) !important; color:#fff !important; }
+/* Light background override — if tile ever renders on white/light bg */
+.tp-cfg button[style*="background:#fff"],
+.tp-lesson button[style*="background:#fff"],
+.tp-class button[style*="background:#fff"],
+.tp-study button[style*="background:#fff"],
+.tp-quiz button[style*="background:#fff"] { color:#111 !important; text-shadow:none !important; }
+/* Small utility buttons */
+.tp-sm button {
+    height:40px !important; min-height:40px !important;
+    font-size:clamp(.72rem,.8vw,.82rem) !important; font-weight:600 !important;
     background:linear-gradient(135deg,#1a2a4a,#2a3f6a) !important;
-    border:1px solid #3a5080 !important;
+    border:1px solid #3a5080 !important; color:#fff !important;
+}
+/* Responsive: stack columns on narrow screens */
+@media (max-width:640px) {
+    .tp-tile button { height:56px !important; font-size:.82rem !important; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -3943,11 +3963,10 @@ def main():
             st.markdown('</div>', unsafe_allow_html=True)
 
         # ── MIDDLE ROW: [2 tiles left] | [Logo center] | [2 tiles right] ──
-        _ml, _mc, _mr = st.columns([2, 3, 2], gap="small")
+        _ml, _mc, _mr = st.columns([5, 4, 5], gap="small")
 
         with _ml:
-            # Left tiles — stacked, close together
-            st.markdown('<div class="tp-tile tp-lesson" style="margin-bottom:6px">', unsafe_allow_html=True)
+            st.markdown('<div class="tp-tile tp-lesson" style="margin-bottom:3px">', unsafe_allow_html=True)
             if st.button("📓  Create Lesson", key="_home_lesson", use_container_width=True):
                 st.session_state["_home_active"] = "lesson" if st.session_state.get("_home_active") != "lesson" else None
                 st.rerun()
@@ -3959,16 +3978,12 @@ def main():
             st.markdown('</div>', unsafe_allow_html=True)
 
         with _mc:
-            # Spacing gap between Config tile and logo
-            st.markdown('<div style="height:1.4rem"></div>', unsafe_allow_html=True)
-            # Logo centered
             show_logo(country)
             _subtitle = {"en":"Curating Personalized Content to Support Underresourced Teachers","fr":"Création de contenu personnalisé pour soutenir les enseignants sous-dotés","sw":"Kuunda Maudhui ya Kibinafsi Kusaidia Walimu Wasio na Rasilimali za Kutosha"}.get(_lang_key(),"Curating Personalized Content to Support Underresourced Teachers")
             st.markdown(f'<p style="text-align:center;color:#8899BB;font-size:clamp(.65rem,.85rem,.9rem);margin-bottom:.3rem;line-height:1.4">{_subtitle}<br><span style="font-size:.78rem">ChatGPT &bull; Claude &bull; Gemini</span></p>', unsafe_allow_html=True)
 
         with _mr:
-            # Right tiles — stacked, close together
-            st.markdown('<div class="tp-tile tp-study" style="margin-bottom:6px">', unsafe_allow_html=True)
+            st.markdown('<div class="tp-tile tp-study" style="margin-bottom:3px">', unsafe_allow_html=True)
             if st.button("💡  Study Help", key="_home_study", use_container_width=True):
                 st.session_state["_home_active"] = "study" if st.session_state.get("_home_active") != "study" else None
                 st.rerun()
