@@ -445,9 +445,8 @@ def _enhance_image_prompt(raw_prompt, openai_client):
 def gen_image(prompt, agent="Auto"):
     """Generate image. agent: 'ChatGPT' | 'Nano Banana' | 'Auto' (ChatGPT first, Gemini fallback)"""
     import base64 as _b64
-    # Always clear stale errors AND the debug flag from previous runs
+    # Always clear stale errors from previous runs
     st.session_state.pop("_img_gen_errors", None)
-    st.session_state.pop("_show_img_debug", None)
 
     # --- ChatGPT image generation (DALL-E) ---
     if agent in ("ChatGPT", "Auto") and OAI and OPENAI_API_KEY:
@@ -1567,8 +1566,8 @@ def _render_intervention_bubble(student_name, avg_score=None, profile=None, subj
     cp   = p.get("cp", "Unknown")
     nt   = p.get("nt", "")
 
-    # ── Tab indices (must match st.tabs() order: generate,chat,quiz,students,academic,ibt) ──
-    _TAB = {"generate": 0, "chat": 1, "quiz": 2, "students": 3, "academic": 4, "ibt": 5}
+    # ── Tab indices (must match st.tabs() order: generate,students,academic,ibt,chat,quiz) ──
+    _TAB = {"generate": 0, "students": 1, "academic": 2, "ibt": 3, "chat": 4, "quiz": 5}
 
     # ── Derive urgency level ───────────────────────────────
     risk_count = sum([
@@ -3995,7 +3994,7 @@ def main():
 .stTabs [data-baseweb="tab-list"] { position: relative; }
 .stTabs [data-baseweb="tab"] { position: relative; }
 
-/* Generate tab */
+/* Generate tab — position 1 */
 .stTabs [data-baseweb="tab"]:nth-child(1)::after {
   content: "Create lesson plans, quizzes, activities & more";
   position:absolute; bottom:-32px; left:50%; transform:translateX(-50%);
@@ -4005,9 +4004,9 @@ def main():
 }
 .stTabs [data-baseweb="tab"]:nth-child(1):hover::after { opacity:1; }
 
-/* Chat tab */
+/* Students tab — position 2 */
 .stTabs [data-baseweb="tab"]:nth-child(2)::after {
-  content: "Ask Teacher Pehpeh anything about your subject";
+  content: "Manage student profiles, risk analysis & parent letters";
   position:absolute; bottom:-32px; left:50%; transform:translateX(-50%);
   background:#1a2a4a; color:#D0D8E8; font-size:.72rem; white-space:nowrap;
   padding:3px 8px; border-radius:6px; border:1px solid #2a3a5a;
@@ -4015,9 +4014,9 @@ def main():
 }
 .stTabs [data-baseweb="tab"]:nth-child(2):hover::after { opacity:1; }
 
-/* Quiz tab */
+/* Academic Report tab — position 3 */
 .stTabs [data-baseweb="tab"]:nth-child(3)::after {
-  content: "Practice quizzes & WASSCE exam simulation — works offline";
+  content: "View class academic performance reports";
   position:absolute; bottom:-32px; left:50%; transform:translateX(-50%);
   background:#1a2a4a; color:#D0D8E8; font-size:.72rem; white-space:nowrap;
   padding:3px 8px; border-radius:6px; border:1px solid #2a3a5a;
@@ -4025,18 +4024,38 @@ def main():
 }
 .stTabs [data-baseweb="tab"]:nth-child(3):hover::after { opacity:1; }
 
-/* Students tab */
+/* IBT Reports tab — position 4 */
 .stTabs [data-baseweb="tab"]:nth-child(4)::after {
-  content: "Manage student profiles, risk analysis & parent letters";
+  content: "IBT research-backed risk scores & intervention plans";
   position:absolute; bottom:-32px; left:50%; transform:translateX(-50%);
   background:#1a2a4a; color:#D0D8E8; font-size:.72rem; white-space:nowrap;
   padding:3px 8px; border-radius:6px; border:1px solid #2a3a5a;
   pointer-events:none; opacity:0; transition:opacity .2s; z-index:999;
 }
 .stTabs [data-baseweb="tab"]:nth-child(4):hover::after { opacity:1; }
+
+/* Chat tab — position 5 */
+.stTabs [data-baseweb="tab"]:nth-child(5)::after {
+  content: "Ask Teacher Pehpeh anything about your subject";
+  position:absolute; bottom:-32px; left:50%; transform:translateX(-50%);
+  background:#1a2a4a; color:#D0D8E8; font-size:.72rem; white-space:nowrap;
+  padding:3px 8px; border-radius:6px; border:1px solid #2a3a5a;
+  pointer-events:none; opacity:0; transition:opacity .2s; z-index:999;
+}
+.stTabs [data-baseweb="tab"]:nth-child(5):hover::after { opacity:1; }
+
+/* Quiz tab — position 6 */
+.stTabs [data-baseweb="tab"]:nth-child(6)::after {
+  content: "Practice quizzes & WASSCE exam simulation — works offline";
+  position:absolute; bottom:-32px; left:50%; transform:translateX(-50%);
+  background:#1a2a4a; color:#D0D8E8; font-size:.72rem; white-space:nowrap;
+  padding:3px 8px; border-radius:6px; border:1px solid #2a3a5a;
+  pointer-events:none; opacity:0; transition:opacity .2s; z-index:999;
+}
+.stTabs [data-baseweb="tab"]:nth-child(6):hover::after { opacity:1; }
 </style>
 """, unsafe_allow_html=True)
-        t1,t3,t4,t2,t5,t6=st.tabs([T("generate"),T("chat"),T("quiz"),T("students"),"📊 Academic Report","📈 IBT Reports"])
+        t1,t2,t5,t6,t3,t4=st.tabs([T("generate"),T("students"),"📊 Academic Report","📈 IBT Reports",T("chat"),T("quiz")])
         t5=t5  # Academic Report tab
         t6=t6  # IBT Reports tab
 
@@ -8344,7 +8363,7 @@ def wassce_shading_modal():
 </body>
 </html>
 """
-        _components.html(_sheet_html, height=1100, scrolling=True)
+        _components.html(_sheet_html, height=780, scrolling=True)
 
     elif _wtab == "💡 Exam Tips":
         tips = [
