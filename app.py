@@ -1566,7 +1566,7 @@ def _render_intervention_bubble(student_name, avg_score=None, profile=None, subj
     cp   = p.get("cp", "Unknown")
     nt   = p.get("nt", "")
 
-    # ── Tab indices (must match st.tabs() order: generate,students,academic,ibt,chat,quiz) ──
+    # ── Tab indices (must match st.tabs() order: generate,chat,quiz,students,academic,ibt) ──
     _TAB = {"generate": 0, "students": 1, "academic": 2, "ibt": 3, "chat": 4, "quiz": 5}
 
     # ── Derive urgency level ───────────────────────────────
@@ -3985,6 +3985,112 @@ def main():
     if mano_on and MANO_AVAILABLE:
         _chat_mano_ctx = build_mano_prompt_context(_subj_en, _subj_en)
 
+    # ══════════════════════════════════════════════════════════════════════
+    # LANDING HOME SCREEN — shown on first load; hides when user picks a task
+    # ══════════════════════════════════════════════════════════════════════
+    if "_show_home" not in st.session_state:
+        st.session_state["_show_home"] = True
+
+    if st.session_state["_show_home"] and online and keys:
+        st.markdown("""
+<style>
+/* ── Landing page big-button styles ─────────────────────────────────── */
+div[data-testid="stVerticalBlock"] .tp-home-wrap {
+    display:flex; flex-direction:column; align-items:center;
+    padding: 0.5rem 0 2rem; text-align:center;
+}
+.tp-home-title {
+    font-family:'Playfair Display',serif;
+    font-size:clamp(1.4rem,3vw,2rem);
+    font-weight:700; color:#D4A843; margin-bottom:.15rem;
+    text-shadow: 0 2px 12px rgba(212,168,67,.3);
+}
+.tp-home-sub {
+    font-size:.88rem; color:#8899BB; margin-bottom:.2rem; font-weight:400;
+}
+.tp-home-q {
+    font-size:clamp(1rem,2.2vw,1.2rem); font-weight:700;
+    color:#D0D8E8; margin:1rem 0 1.4rem; letter-spacing:.02em;
+}
+/* The 4 landing buttons — override Streamlit's default button look */
+.tp-home-grid button[kind="secondary"],
+.tp-home-grid button {
+    background: #1C2A44 !important;
+    border: 2px solid #2d3f60 !important;
+    border-radius: 16px !important;
+    color: #D0D8E8 !important;
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    padding: 1.2rem 1rem !important;
+    height: auto !important;
+    min-height: 80px !important;
+    transition: all .18s ease !important;
+    box-shadow: 0 4px 18px rgba(0,0,0,.25) !important;
+    width: 100% !important;
+}
+.tp-home-grid button:hover {
+    border-color: #D4A843 !important;
+    background: #1E3355 !important;
+    color: #F5D98E !important;
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 28px rgba(212,168,67,.18) !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+        # Welcome heading
+        st.markdown(
+            '<div class="tp-home-title">Welcome to Teacher Pehpeh!</div>'
+            '<div class="tp-home-sub">Helping teachers in underresourced classrooms.</div>'
+            '<div class="tp-home-q">What would you like to create today?</div>',
+            unsafe_allow_html=True
+        )
+
+        # 4 big buttons — 2×2 grid
+        st.markdown('<div class="tp-home-grid">', unsafe_allow_html=True)
+        _hc1, _hc2 = st.columns(2, gap="medium")
+        with _hc1:
+            if st.button("📚  Create Lesson", key="_home_lesson", use_container_width=True):
+                st.session_state["_show_home"] = False
+                st.session_state["task_cat"] = "📋 Planning"
+                st.session_state["_nav_tab"] = 0
+                st.rerun()
+        with _hc2:
+            if st.button("📝  Create Quiz", key="_home_quiz", use_container_width=True):
+                st.session_state["_show_home"] = False
+                st.session_state["task_cat"] = "📝 Assessment"
+                st.session_state["_nav_tab"] = 0
+                st.rerun()
+        _hc3, _hc4 = st.columns(2, gap="medium")
+        with _hc3:
+            if st.button("🎭  Classroom Activities", key="_home_activity", use_container_width=True):
+                st.session_state["_show_home"] = False
+                st.session_state["task_cat"] = "🎯 Activities"
+                st.session_state["_nav_tab"] = 0
+                st.rerun()
+        with _hc4:
+            if st.button("💡  Study Help", key="_home_study", use_container_width=True):
+                st.session_state["_show_home"] = False
+                st.session_state["task_cat"] = "📚 Study Support"
+                st.session_state["_nav_tab"] = 0
+                st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # Powered-by footer
+        st.markdown(
+            '<p style="text-align:center;font-size:.75rem;color:#445566;margin-top:2rem">'
+            'Powered by ChatGPT &bull; Claude &bull; Gemini</p>',
+            unsafe_allow_html=True
+        )
+        # Don't render the tabs at all on the home screen
+        return
+
+    # "← Home" breadcrumb shown whenever user is inside the app
+    if not st.session_state.get("_show_home", True):
+        if st.button("🏠  Home", key="_back_home", help="Return to the main menu"):
+            st.session_state["_show_home"] = True
+            st.rerun()
+
     # Tabs
     if online and keys:
         # CSS tooltip layer for tabs (st.tabs has no native help= param)
@@ -3994,7 +4100,7 @@ def main():
 .stTabs [data-baseweb="tab-list"] { position: relative; }
 .stTabs [data-baseweb="tab"] { position: relative; }
 
-/* Generate tab — position 1 */
+/* Generate tab — pos 1 */
 .stTabs [data-baseweb="tab"]:nth-child(1)::after {
   content: "Create lesson plans, quizzes, activities & more";
   position:absolute; bottom:-32px; left:50%; transform:translateX(-50%);
@@ -4004,7 +4110,7 @@ def main():
 }
 .stTabs [data-baseweb="tab"]:nth-child(1):hover::after { opacity:1; }
 
-/* Students tab — position 2 */
+/* Students tab — pos 2 */
 .stTabs [data-baseweb="tab"]:nth-child(2)::after {
   content: "Manage student profiles, risk analysis & parent letters";
   position:absolute; bottom:-32px; left:50%; transform:translateX(-50%);
@@ -4014,7 +4120,7 @@ def main():
 }
 .stTabs [data-baseweb="tab"]:nth-child(2):hover::after { opacity:1; }
 
-/* Academic Report tab — position 3 */
+/* Academic Report tab — pos 3 */
 .stTabs [data-baseweb="tab"]:nth-child(3)::after {
   content: "View class academic performance reports";
   position:absolute; bottom:-32px; left:50%; transform:translateX(-50%);
@@ -4024,7 +4130,7 @@ def main():
 }
 .stTabs [data-baseweb="tab"]:nth-child(3):hover::after { opacity:1; }
 
-/* IBT Reports tab — position 4 */
+/* IBT Reports tab — pos 4 */
 .stTabs [data-baseweb="tab"]:nth-child(4)::after {
   content: "IBT research-backed risk scores & intervention plans";
   position:absolute; bottom:-32px; left:50%; transform:translateX(-50%);
@@ -4034,7 +4140,7 @@ def main():
 }
 .stTabs [data-baseweb="tab"]:nth-child(4):hover::after { opacity:1; }
 
-/* Chat tab — position 5 */
+/* Chat tab — pos 5 */
 .stTabs [data-baseweb="tab"]:nth-child(5)::after {
   content: "Ask Teacher Pehpeh anything about your subject";
   position:absolute; bottom:-32px; left:50%; transform:translateX(-50%);
@@ -4044,7 +4150,7 @@ def main():
 }
 .stTabs [data-baseweb="tab"]:nth-child(5):hover::after { opacity:1; }
 
-/* Quiz tab — position 6 */
+/* Quiz tab — pos 6 */
 .stTabs [data-baseweb="tab"]:nth-child(6)::after {
   content: "Practice quizzes & WASSCE exam simulation — works offline";
   position:absolute; bottom:-32px; left:50%; transform:translateX(-50%);
