@@ -3621,6 +3621,9 @@ def main():
         if _vk not in st.session_state: st.session_state[_vk]=0
     for _dk,_dv in [("cfg_region",list(_regions().keys())[0]),("cfg_grade",_grades()[0]),("cfg_subject",_subjects()[0]),("cfg_clsz",list(_sizes().keys())[0]),("cfg_abl",list(_ability().keys())[0])]:
         if _dk not in st.session_state: st.session_state[_dk]=_dv
+    # Non-widget mirror keys — survive when home screen selectboxes stop rendering
+    for _mk,_mv in [("_saved_cfg_grade",_grades()[0]),("_saved_cfg_subject",_subjects()[0]),("_saved_cfg_region",list(_regions().keys())[0])]:
+        if _mk not in st.session_state: st.session_state[_mk]=_mv
     if st.session_state.get("_pending_grade_from_sheet"):
         st.session_state["cfg_grade"]=st.session_state.pop("_pending_grade_from_sheet")
     _res_val="standard resources"
@@ -4167,6 +4170,10 @@ def main():
             st.markdown("<div style='font-size:.78rem;color:#778899;margin-top:8px;line-height:1.7'>📞 +231-770-625-656<br>✉ info@institutebasictechnology.org<br>🌐 www.institutebasictechnology.org</div>", unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
 
+        # Snapshot config into non-widget keys so they survive when home screen stops rendering
+        st.session_state["_saved_cfg_grade"]   = st.session_state.get("cfg_grade",   _grades()[0])
+        st.session_state["_saved_cfg_subject"] = st.session_state.get("cfg_subject", _subjects()[0])
+        st.session_state["_saved_cfg_region"]  = st.session_state.get("cfg_region",  list(_regions().keys())[0])
         return
 
     # "← Home" breadcrumb shown whenever user is inside the app
@@ -4268,12 +4275,13 @@ setTimeout(function() {{
         # (The values computed at line 3759/3775 above were read BEFORE the home
         #  screen widgets rendered, so they may reflect the previous run's selection.
         #  Reading here ensures we always get what the user last saved in config.)
-        _subj_en  = _to_en_subj(st.session_state.get("cfg_subject", _subjects()[0]))
-        _grade_en = _to_en_grade(st.session_state.get("cfg_grade",  _grades()[0]))
+        # Read from non-widget mirror keys — these persist even when home screen is not rendering
+        _subj_en  = _to_en_subj(st.session_state.get("_saved_cfg_subject", st.session_state.get("cfg_subject", _subjects()[0])))
+        _grade_en = _to_en_grade(st.session_state.get("_saved_cfg_grade",   st.session_state.get("cfg_grade",  _grades()[0])))
 
         # ── Setup summary chips ──
         _chip_country = st.session_state.get("country_sel", "Liberia")
-        _chip_region  = st.session_state.get("cfg_region",  list(_regions().keys())[0])
+        _chip_region  = st.session_state.get("_saved_cfg_region", st.session_state.get("cfg_region", list(_regions().keys())[0]))
         st.markdown(
             f'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px">'
             f'<span style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#475569">Setup:</span>'
