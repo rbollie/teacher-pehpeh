@@ -4264,38 +4264,22 @@ setTimeout(function() {{
     # TAB 1: GENERATE
     if t1:
      with t1:
-        # ── Validate stored subject/grade are still valid options (language may have changed) ──
-        _stored_subj = st.session_state.get("cfg_subject", _subjects()[0])
-        if _stored_subj not in _subjects():
-            # Find the equivalent in current language by going through English
-            _en_s = _to_en_subj(_stored_subj)
-            _matched = next((s for s in _subjects() if _to_en_subj(s) == _en_s), _subjects()[0])
-            st.session_state["cfg_subject"] = _matched
-        _stored_grade = st.session_state.get("cfg_grade", _grades()[0])
-        if _stored_grade not in _grades():
-            st.session_state["cfg_grade"] = _grades()[0]
+        # ── Re-read subject/grade from session state fresh inside the tab ──
+        # (The values computed at line 3759/3775 above were read BEFORE the home
+        #  screen widgets rendered, so they may reflect the previous run's selection.
+        #  Reading here ensures we always get what the user last saved in config.)
+        _subj_en  = _to_en_subj(st.session_state.get("cfg_subject", _subjects()[0]))
+        _grade_en = _to_en_grade(st.session_state.get("cfg_grade",  _grades()[0]))
 
-        # ── Subject + Grade selectors (live — key= only, no index= so stored value is always respected) ──
-        _gen_col1, _gen_col2 = st.columns(2)
-        with _gen_col1:
-            st.selectbox(T("subject"), _subjects(), key="cfg_subject",
-                label_visibility="collapsed", format_func=lambda x: f"📚 {x}",
-                help="Subject — changing this updates the topic list below")
-        with _gen_col2:
-            st.selectbox(T("grade"), _grades(), key="cfg_grade",
-                label_visibility="collapsed", format_func=lambda x: f"🎓 {x}", help="Grade")
-
-        # Re-derive _subj_en from live value (this drives the topic list)
-        subject  = st.session_state["cfg_subject"]
-        _subj_en = _to_en_subj(subject)
-
-        # Context chips (country + region — the rest is editable above)
+        # ── Setup summary chips ──
         _chip_country = st.session_state.get("country_sel", "Liberia")
         _chip_region  = st.session_state.get("cfg_region",  list(_regions().keys())[0])
         st.markdown(
             f'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px">'
-            f'<span style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#475569">Context:</span>'
+            f'<span style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#475569">Setup:</span>'
             f'<span style="font-size:11px;padding:2px 9px;border-radius:20px;background:rgba(43,125,233,.15);color:#7BB8F5;font-weight:600;border:1px solid rgba(43,125,233,.25)">🌍 {_chip_country}</span>'
+            f'<span style="font-size:11px;padding:2px 9px;border-radius:20px;background:rgba(43,125,233,.15);color:#7BB8F5;font-weight:600;border:1px solid rgba(43,125,233,.25)">🎓 {_grade_en}</span>'
+            f'<span style="font-size:11px;padding:2px 9px;border-radius:20px;background:rgba(43,125,233,.15);color:#7BB8F5;font-weight:600;border:1px solid rgba(43,125,233,.25)">📚 {_subj_en}</span>'
             f'<span style="font-size:11px;padding:2px 9px;border-radius:20px;background:rgba(43,125,233,.15);color:#7BB8F5;font-weight:600;border:1px solid rgba(43,125,233,.25)">📍 {_chip_region}</span>'
             f'</div>',
             unsafe_allow_html=True
