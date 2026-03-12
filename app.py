@@ -3621,9 +3621,18 @@ def main():
         if _vk not in st.session_state: st.session_state[_vk]=0
     for _dk,_dv in [("cfg_region",list(_regions().keys())[0]),("cfg_grade",_grades()[0]),("cfg_subject",_subjects()[0]),("cfg_clsz",list(_sizes().keys())[0]),("cfg_abl",list(_ability().keys())[0])]:
         if _dk not in st.session_state: st.session_state[_dk]=_dv
-    # Non-widget mirror keys — survive when home screen selectboxes stop rendering
-    for _mk,_mv in [("_saved_cfg_grade",_grades()[0]),("_saved_cfg_subject",_subjects()[0]),("_saved_cfg_region",list(_regions().keys())[0])]:
-        if _mk not in st.session_state: st.session_state[_mk]=_mv
+    # Non-widget mirror keys — always sync at TOP of every run, before any widgets render.
+    # At this point session_state still holds the previous run's widget values (Streamlit
+    # clears orphaned widget keys during rendering, not before). So capturing here ensures
+    # we always have the last user-selected value even when the config panel is closed.
+    for _wk,_mk,_def in [("cfg_grade","_saved_cfg_grade",_grades()[0]),
+                          ("cfg_subject","_saved_cfg_subject",_subjects()[0]),
+                          ("cfg_region","_saved_cfg_region",list(_regions().keys())[0])]:
+        _cur = st.session_state.get(_wk)
+        if _cur:  # only overwrite mirror if widget key has a real value
+            st.session_state[_mk] = _cur
+        elif _mk not in st.session_state:
+            st.session_state[_mk] = _def
     if st.session_state.get("_pending_grade_from_sheet"):
         st.session_state["cfg_grade"]=st.session_state.pop("_pending_grade_from_sheet")
     _res_val="standard resources"
