@@ -4264,17 +4264,26 @@ setTimeout(function() {{
     # TAB 1: GENERATE
     if t1:
      with t1:
-        # ── Setup summary chips (always visible, even when expander is collapsed) ──
-        _chip_grade   = st.session_state.get("cfg_grade",  _grades()[0])
-        _chip_subj    = st.session_state.get("cfg_subject", _subjects()[0])
+        # ── Subject + Grade selectors (live — changes here instantly update topics) ──
+        _gen_col1, _gen_col2 = st.columns(2)
+        with _gen_col1:
+            _cur_subj_idx = _subjects().index(st.session_state.get("cfg_subject", _subjects()[0])) if st.session_state.get("cfg_subject", _subjects()[0]) in _subjects() else 0
+            st.selectbox(T("subject"), _subjects(), index=_cur_subj_idx, key="cfg_subject",
+                label_visibility="collapsed", format_func=lambda x: f"📚 {x}", help="Subject — changing this updates the topic list below")
+        with _gen_col2:
+            _cur_grade_idx = _grades().index(st.session_state.get("cfg_grade", _grades()[0])) if st.session_state.get("cfg_grade", _grades()[0]) in _grades() else 0
+            st.selectbox(T("grade"), _grades(), index=_cur_grade_idx, key="cfg_grade",
+                label_visibility="collapsed", format_func=lambda x: f"🎓 {x}", help="Grade")
+        # Re-derive _subj_en from the live selectbox value
+        subject  = st.session_state["cfg_subject"]
+        _subj_en = _to_en_subj(subject)
+        # Setup context chips (country + region only — subject/grade now editable above)
         _chip_country = st.session_state.get("country_sel", "Liberia")
         _chip_region  = st.session_state.get("cfg_region",  list(_regions().keys())[0])
         st.markdown(
             f'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px">'
-            f'<span style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#475569">Setup:</span>'
+            f'<span style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#475569">Context:</span>'
             f'<span style="font-size:11px;padding:2px 9px;border-radius:20px;background:rgba(43,125,233,.15);color:#7BB8F5;font-weight:600;border:1px solid rgba(43,125,233,.25)">🌍 {_chip_country}</span>'
-            f'<span style="font-size:11px;padding:2px 9px;border-radius:20px;background:rgba(43,125,233,.15);color:#7BB8F5;font-weight:600;border:1px solid rgba(43,125,233,.25)">🎓 {_chip_grade}</span>'
-            f'<span style="font-size:11px;padding:2px 9px;border-radius:20px;background:rgba(43,125,233,.15);color:#7BB8F5;font-weight:600;border:1px solid rgba(43,125,233,.25)">📚 {_chip_subj}</span>'
             f'<span style="font-size:11px;padding:2px 9px;border-radius:20px;background:rgba(43,125,233,.15);color:#7BB8F5;font-weight:600;border:1px solid rgba(43,125,233,.25)">📍 {_chip_region}</span>'
             f'</div>',
             unsafe_allow_html=True
