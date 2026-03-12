@@ -4264,20 +4264,32 @@ setTimeout(function() {{
     # TAB 1: GENERATE
     if t1:
      with t1:
-        # ── Subject + Grade selectors (live — changes here instantly update topics) ──
+        # ── Validate stored subject/grade are still valid options (language may have changed) ──
+        _stored_subj = st.session_state.get("cfg_subject", _subjects()[0])
+        if _stored_subj not in _subjects():
+            # Find the equivalent in current language by going through English
+            _en_s = _to_en_subj(_stored_subj)
+            _matched = next((s for s in _subjects() if _to_en_subj(s) == _en_s), _subjects()[0])
+            st.session_state["cfg_subject"] = _matched
+        _stored_grade = st.session_state.get("cfg_grade", _grades()[0])
+        if _stored_grade not in _grades():
+            st.session_state["cfg_grade"] = _grades()[0]
+
+        # ── Subject + Grade selectors (live — key= only, no index= so stored value is always respected) ──
         _gen_col1, _gen_col2 = st.columns(2)
         with _gen_col1:
-            _cur_subj_idx = _subjects().index(st.session_state.get("cfg_subject", _subjects()[0])) if st.session_state.get("cfg_subject", _subjects()[0]) in _subjects() else 0
-            st.selectbox(T("subject"), _subjects(), index=_cur_subj_idx, key="cfg_subject",
-                label_visibility="collapsed", format_func=lambda x: f"📚 {x}", help="Subject — changing this updates the topic list below")
+            st.selectbox(T("subject"), _subjects(), key="cfg_subject",
+                label_visibility="collapsed", format_func=lambda x: f"📚 {x}",
+                help="Subject — changing this updates the topic list below")
         with _gen_col2:
-            _cur_grade_idx = _grades().index(st.session_state.get("cfg_grade", _grades()[0])) if st.session_state.get("cfg_grade", _grades()[0]) in _grades() else 0
-            st.selectbox(T("grade"), _grades(), index=_cur_grade_idx, key="cfg_grade",
+            st.selectbox(T("grade"), _grades(), key="cfg_grade",
                 label_visibility="collapsed", format_func=lambda x: f"🎓 {x}", help="Grade")
-        # Re-derive _subj_en from the live selectbox value
+
+        # Re-derive _subj_en from live value (this drives the topic list)
         subject  = st.session_state["cfg_subject"]
         _subj_en = _to_en_subj(subject)
-        # Setup context chips (country + region only — subject/grade now editable above)
+
+        # Context chips (country + region — the rest is editable above)
         _chip_country = st.session_state.get("country_sel", "Liberia")
         _chip_region  = st.session_state.get("cfg_region",  list(_regions().keys())[0])
         st.markdown(
