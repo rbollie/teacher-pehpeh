@@ -4536,7 +4536,7 @@ setTimeout(function() {{
 
         else:
             if _show_topic:
-                topic=st.selectbox(T("topic"),_get_topics(_subj_en),label_visibility="collapsed",format_func=lambda x: f"\U0001f4d6 Topic: {x}", help="The specific topic inside this subject")
+                topic=st.selectbox(T("topic"),_get_topics(_subj_en),key=f"topic_sel_{_subj_en}",label_visibility="collapsed",format_func=lambda x: f"\U0001f4d6 Topic: {x}", help="The specific topic inside this subject")
                 _topic_en=_to_en_topic(topic)
             else:
                 topic=_subj_en; _topic_en=_subj_en
