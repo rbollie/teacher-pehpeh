@@ -3612,21 +3612,44 @@ def main():
 }})();
 </script>""", unsafe_allow_html=True)
     # ── Session state defaults (sidebar removed — all UI in main content) ──────
-    if "country_sel" not in st.session_state: st.session_state.country_sel="Liberia"
-    if "lang_sel" not in st.session_state: st.session_state.lang_sel="English"
     if "profile_set" not in st.session_state: st.session_state.profile_set=False
     for _ck in ["_school_confirmed","_teacher_confirmed","_phone_confirmed"]:
         if _ck not in st.session_state: st.session_state[_ck]=""
     for _vk in ["_school_v","_teacher_v","_phone_v"]:
         if _vk not in st.session_state: st.session_state[_vk]=0
-    for _dk,_dv in [("cfg_region",list(_regions().keys())[0]),("cfg_grade",_grades()[0]),("cfg_subject",_subjects()[0]),("cfg_clsz",list(_sizes().keys())[0]),("cfg_abl",list(_ability().keys())[0])]:
-        if _dk not in st.session_state: st.session_state[_dk]=_dv
-    # Non-widget mirror keys — seeded once; updated ONLY via on_change callbacks on the
-    # selectboxes below, so they never get overwritten by default re-seeding logic.
-    for _mk,_mv in [("_saved_cfg_grade",_grades()[0]),
-                    ("_saved_cfg_subject",_subjects()[0]),
-                    ("_saved_cfg_region",list(_regions().keys())[0])]:
+
+    # ── Persistent mirror keys (never cleared by Streamlit widget cleanup) ──────
+    # These are the source of truth. Widget keys (cfg_grade etc.) are ephemeral —
+    # Streamlit clears them when their widget stops rendering (menu closed). The
+    # mirrors are seeded once on first load, then updated ONLY by on_change callbacks
+    # when the user makes an explicit selection, so they always hold the last real choice.
+    _cfg_defaults = [
+        ("_saved_country_sel",  "Liberia"),
+        ("_saved_lang_sel",     "English"),
+        ("_saved_cfg_region",   list(_regions().keys())[0]),
+        ("_saved_cfg_grade",    _grades()[0]),
+        ("_saved_cfg_subject",  _subjects()[0]),
+        ("_saved_cfg_clsz",     list(_sizes().keys())[0]),
+        ("_saved_cfg_abl",      list(_ability().keys())[0]),
+    ]
+    for _mk, _mv in _cfg_defaults:
         if _mk not in st.session_state: st.session_state[_mk] = _mv
+
+    # ── Widget keys: seed from mirror so reopening the menu shows last selection ──
+    # Use "if not in" so we don't overwrite a value Streamlit already has for a
+    # currently-rendered widget (that would cause a flash/reset mid-session).
+    _widget_to_mirror = [
+        ("country_sel",  "_saved_country_sel"),
+        ("lang_sel",     "_saved_lang_sel"),
+        ("cfg_region",   "_saved_cfg_region"),
+        ("cfg_grade",    "_saved_cfg_grade"),
+        ("cfg_subject",  "_saved_cfg_subject"),
+        ("cfg_clsz",     "_saved_cfg_clsz"),
+        ("cfg_abl",      "_saved_cfg_abl"),
+    ]
+    for _wk, _mk in _widget_to_mirror:
+        if _wk not in st.session_state:
+            st.session_state[_wk] = st.session_state[_mk]
     if st.session_state.get("_pending_grade_from_sheet"):
         st.session_state["cfg_grade"]=st.session_state.pop("_pending_grade_from_sheet")
     _res_val="standard resources"
@@ -3896,6 +3919,13 @@ def main():
         # ── CONFIG SUBMENU ────────────────────────────────────────────────
         _active = st.session_state.get("_home_active")
         if _active == "config":
+            # Restore all widget keys from mirrors so reopening always shows last selection
+            for _wk, _mk in [("country_sel","_saved_country_sel"),("lang_sel","_saved_lang_sel"),
+                              ("cfg_region","_saved_cfg_region"),("cfg_grade","_saved_cfg_grade"),
+                              ("cfg_subject","_saved_cfg_subject"),("cfg_clsz","_saved_cfg_clsz"),
+                              ("cfg_abl","_saved_cfg_abl")]:
+                if _mk in st.session_state:
+                    st.session_state[_wk] = st.session_state[_mk]
             _sn = st.session_state["_school_confirmed"]
             _tn = st.session_state["_teacher_confirmed"]
             _pn = st.session_state["_phone_confirmed"]
@@ -3903,7 +3933,8 @@ def main():
             _crow1, _crow2 = st.columns([3, 2])
             with _crow1:
                 _country_sel = st.selectbox(T("country"), COUNTRIES, key="country_sel",
-                    label_visibility="collapsed", format_func=lambda x: f"🌍 {x}", help="Your country")
+                    label_visibility="collapsed", format_func=lambda x: f"🌍 {x}", help="Your country",
+                    on_change=lambda: st.session_state.update({"_saved_country_sel": st.session_state["country_sel"]}))
                 # Always auto-set language when country changes (no once-only guard)
                 _prev_country = st.session_state.get("_last_country_sel")
                 if _country_sel != _prev_country:
@@ -3913,7 +3944,8 @@ def main():
                     else: st.session_state.lang_sel = "English"
             with _crow2:
                 st.selectbox("Language", list(LANGS.keys()), key="lang_sel",
-                    label_visibility="collapsed", format_func=lambda x: f"🗣️ {x}", help="Response language")
+                    label_visibility="collapsed", format_func=lambda x: f"🗣️ {x}", help="Response language",
+                    on_change=lambda: st.session_state.update({"_saved_lang_sel": st.session_state["lang_sel"]}))
             _cb1, _cb2, _cb3 = st.columns(3)
             with _cb1:
                 st.selectbox(T("setting"), list(_regions().keys()), key="cfg_region",
@@ -3930,10 +3962,12 @@ def main():
             _cb4, _cb5 = st.columns(2)
             with _cb4:
                 st.selectbox(T("class_size"), list(_sizes().keys()), key="cfg_clsz",
-                    label_visibility="collapsed", format_func=lambda x: f"👥 {x}", help="Class size")
+                    label_visibility="collapsed", format_func=lambda x: f"👥 {x}", help="Class size",
+                    on_change=lambda: st.session_state.update({"_saved_cfg_clsz": st.session_state["cfg_clsz"]}))
             with _cb5:
                 st.selectbox(T("student_level"), list(_ability().keys()), key="cfg_abl",
-                    label_visibility="collapsed", format_func=lambda x: f"📊 {x}", help="Level")
+                    label_visibility="collapsed", format_func=lambda x: f"📊 {x}", help="Level",
+                    on_change=lambda: st.session_state.update({"_saved_cfg_abl": st.session_state["cfg_abl"]}))
             st.markdown('<hr style="margin:6px 0;border-color:#1e2a3a">', unsafe_allow_html=True)
             _pc1, _pc2, _pc3 = st.columns([2, 2, 1])
             with _pc1:
