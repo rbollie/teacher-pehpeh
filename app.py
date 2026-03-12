@@ -3621,18 +3621,12 @@ def main():
         if _vk not in st.session_state: st.session_state[_vk]=0
     for _dk,_dv in [("cfg_region",list(_regions().keys())[0]),("cfg_grade",_grades()[0]),("cfg_subject",_subjects()[0]),("cfg_clsz",list(_sizes().keys())[0]),("cfg_abl",list(_ability().keys())[0])]:
         if _dk not in st.session_state: st.session_state[_dk]=_dv
-    # Non-widget mirror keys — always sync at TOP of every run, before any widgets render.
-    # At this point session_state still holds the previous run's widget values (Streamlit
-    # clears orphaned widget keys during rendering, not before). So capturing here ensures
-    # we always have the last user-selected value even when the config panel is closed.
-    for _wk,_mk,_def in [("cfg_grade","_saved_cfg_grade",_grades()[0]),
-                          ("cfg_subject","_saved_cfg_subject",_subjects()[0]),
-                          ("cfg_region","_saved_cfg_region",list(_regions().keys())[0])]:
-        _cur = st.session_state.get(_wk)
-        if _cur:  # only overwrite mirror if widget key has a real value
-            st.session_state[_mk] = _cur
-        elif _mk not in st.session_state:
-            st.session_state[_mk] = _def
+    # Non-widget mirror keys — seeded once; updated ONLY via on_change callbacks on the
+    # selectboxes below, so they never get overwritten by default re-seeding logic.
+    for _mk,_mv in [("_saved_cfg_grade",_grades()[0]),
+                    ("_saved_cfg_subject",_subjects()[0]),
+                    ("_saved_cfg_region",list(_regions().keys())[0])]:
+        if _mk not in st.session_state: st.session_state[_mk] = _mv
     if st.session_state.get("_pending_grade_from_sheet"):
         st.session_state["cfg_grade"]=st.session_state.pop("_pending_grade_from_sheet")
     _res_val="standard resources"
@@ -3923,13 +3917,16 @@ def main():
             _cb1, _cb2, _cb3 = st.columns(3)
             with _cb1:
                 st.selectbox(T("setting"), list(_regions().keys()), key="cfg_region",
-                    label_visibility="collapsed", format_func=lambda x: f"📍 {x}", help="Setting")
+                    label_visibility="collapsed", format_func=lambda x: f"📍 {x}", help="Setting",
+                    on_change=lambda: st.session_state.update({"_saved_cfg_region": st.session_state["cfg_region"]}))
             with _cb2:
                 st.selectbox(T("grade"), _grades(), key="cfg_grade",
-                    label_visibility="collapsed", format_func=lambda x: f"🎓 {x}", help="Grade")
+                    label_visibility="collapsed", format_func=lambda x: f"🎓 {x}", help="Grade",
+                    on_change=lambda: st.session_state.update({"_saved_cfg_grade": st.session_state["cfg_grade"]}))
             with _cb3:
                 st.selectbox(T("subject"), _subjects(), key="cfg_subject",
-                    label_visibility="collapsed", format_func=lambda x: f"📚 {x}", help="Subject")
+                    label_visibility="collapsed", format_func=lambda x: f"📚 {x}", help="Subject",
+                    on_change=lambda: st.session_state.update({"_saved_cfg_subject": st.session_state["cfg_subject"]}))
             _cb4, _cb5 = st.columns(2)
             with _cb4:
                 st.selectbox(T("class_size"), list(_sizes().keys()), key="cfg_clsz",
@@ -4179,10 +4176,6 @@ def main():
             st.markdown("<div style='font-size:.78rem;color:#778899;margin-top:8px;line-height:1.7'>📞 +231-770-625-656<br>✉ info@institutebasictechnology.org<br>🌐 www.institutebasictechnology.org</div>", unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
 
-        # Snapshot config into non-widget keys so they survive when home screen stops rendering
-        st.session_state["_saved_cfg_grade"]   = st.session_state.get("cfg_grade",   _grades()[0])
-        st.session_state["_saved_cfg_subject"] = st.session_state.get("cfg_subject", _subjects()[0])
-        st.session_state["_saved_cfg_region"]  = st.session_state.get("cfg_region",  list(_regions().keys())[0])
         return
 
     # "← Home" breadcrumb shown whenever user is inside the app
