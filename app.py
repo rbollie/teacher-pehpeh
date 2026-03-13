@@ -4931,6 +4931,216 @@ html, body, [class*="css"] {
   pointer-events:none; opacity:0; transition:opacity .2s; z-index:999;
 }
 .stTabs [data-baseweb="tab"]:nth-child(6):hover::after { opacity:1; }
+
+/* ══════════════════════════════════════════════════════════════
+   LIGHT MODE — comprehensive overrides
+   Covers both prefers-color-scheme:light (OS setting) and
+   Streamlit's own light theme detection.
+   Every hardcoded dark color is replaced with a legible light
+   equivalent at the same or higher CSS specificity.
+   ══════════════════════════════════════════════════════════════ */
+
+@media (prefers-color-scheme: light) {
+
+    /* Main background & global text */
+    [data-testid="stAppViewContainer"],
+    [data-testid="stMain"], .main, .block-container {
+        background: #F4F6FA !important;
+        color: #1A2035 !important;
+    }
+
+    /* Streamlit default text */
+    .stMarkdown, .stMarkdown p, .stMarkdown li,
+    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3,
+    [data-testid="stText"] {
+        color: #1A2035 !important;
+    }
+
+    /* Tab bar */
+    .stTabs [data-baseweb="tab-list"] {
+        background: #E8ECF4 !important;
+        border: 2px solid #C8D0E0 !important;
+    }
+    .stTabs [data-baseweb="tab"] { color: #4A5568 !important; }
+    .stTabs [data-baseweb="tab"]:not([aria-selected="true"]):hover {
+        background: rgba(43,125,233,.1) !important;
+        color: #1A3A6A !important;
+        border-color: #2B7DE966 !important;
+    }
+
+    /* Secondary / ghost buttons */
+    [data-testid="baseButton-secondary"],
+    .stButton > button[kind="secondary"],
+    .stButton > button:not([kind="primary"]) {
+        background: #FFFFFF !important;
+        color: #1A3A6A !important;
+        border: 2px solid #3D5580 !important;
+        box-shadow: 0 1px 4px rgba(0,0,0,.12) !important;
+    }
+    [data-testid="baseButton-secondary"]:hover,
+    .stButton > button:not([kind="primary"]):hover {
+        background: #EFF4FF !important;
+        color: #1A2A5A !important;
+        border-color: #2B7DE9 !important;
+    }
+
+    /* Expanders — main area */
+    [data-testid="stMain"] .stExpander,
+    [data-testid="stMainBlockContainer"] .stExpander {
+        background: #FFFFFF !important;
+        border: 2px solid #CBD5E0 !important;
+    }
+    [data-testid="stMain"] .stExpander [data-testid="stExpanderDetails"],
+    [data-testid="stMainBlockContainer"] .stExpander [data-testid="stExpanderDetails"] {
+        background: #FFFFFF !important;
+        color: #1A2035 !important;
+        border-top: 1px solid #CBD5E0 !important;
+    }
+    [data-testid="stMainBlockContainer"] .stExpander > details {
+        background: #FFFFFF !important;
+        border: 2px solid #CBD5E0 !important;
+    }
+    [data-testid="stMainBlockContainer"] .stExpander > details > summary {
+        color: #1A2744 !important;
+        background: linear-gradient(135deg,#E8EEFA,#D0DCFF) !important;
+    }
+
+    /* Dropdown popover — light container */
+    [data-baseweb="popover"] [role="listbox"],
+    [data-baseweb="popover"] ul {
+        background: #FFFFFF !important;
+        border: 2px solid #2B7DE9 !important;
+        box-shadow: 0 8px 28px rgba(0,0,0,.18) !important;
+    }
+    [data-baseweb="popover"] [role="option"],
+    [data-baseweb="popover"] li {
+        color: #1A2035 !important;
+        background: transparent !important;
+    }
+    [data-baseweb="popover"] [role="option"]:hover,
+    [data-baseweb="popover"] li:hover {
+        background: rgba(43,125,233,.12) !important;
+        color: #1A2744 !important;
+    }
+    [data-baseweb="popover"] [role="option"][aria-selected="true"],
+    [data-baseweb="popover"] li[aria-selected="true"] {
+        background: rgba(43,125,233,.10) !important;
+        color: #1A3A8A !important;
+    }
+
+    /* Text inputs */
+    .stTextInput > div > div > input,
+    .stTextArea > div > div > textarea {
+        background: #FFFFFF !important;
+        color: #1A2035 !important;
+        border: 1.5px solid #3D5580 !important;
+    }
+    .stTextInput > div > div > input::placeholder,
+    .stTextArea > div > div > textarea::placeholder {
+        color: #7A8AAA !important;
+    }
+
+    /* Custom CSS classes used in the app */
+    .sc {   /* student card */
+        background: #FFFFFF !important;
+        border: 1.5px solid #CBD5E0 !important;
+        color: #1A2035 !important;
+    }
+    .rb {   /* result body */
+        background: #FFFFFF !important;
+        color: #1A2035 !important;
+        border-color: #CBD5E0 !important;
+    }
+    .ct, .cp {  /* chat bubbles */
+        background: rgba(43,125,233,.06) !important;
+        color: #1A2035 !important;
+    }
+    .qbox, .qok, .qno { color: #1A2035 !important; }
+    .qtip { color: #2A3A6A !important; }
+    .ft { color: #6B7280 !important; border-color: #CBD5E0 !important; }
+    .status-bar { border-color: #CBD5E0 !important; }
+
+    /* IBT banner */
+    div[style*="position:fixed"][style*="top:0"][style*="right:0"] {
+        background: linear-gradient(135deg,rgba(240,244,255,.97),rgba(255,255,255,.98)) !important;
+        border-color: rgba(43,125,233,.3) !important;
+        box-shadow: -2px 2px 18px rgba(0,0,0,.12) !important;
+    }
+    div[style*="position:fixed"][style*="top:0"][style*="right:0"] div[style*="color:#D4A843"] {
+        color: #1A3A6A !important;
+    }
+    div[style*="position:fixed"][style*="top:0"][style*="right:0"] a {
+        color: #1D5CBF !important;
+    }
+
+    /* Tab tooltip tooltips (::after content) */
+    .stTabs [data-baseweb="tab"]::after {
+        background: #FFFFFF !important;
+        color: #1A2035 !important;
+        border-color: #CBD5E0 !important;
+    }
+
+    /* Metric labels and values */
+    [data-testid="stMetricLabel"] { color: #4A5568 !important; }
+    [data-testid="stMetricValue"] { color: #1A2035 !important; }
+
+    /* Caption / small text */
+    .stCaption, [data-testid="stCaptionContainer"] { color: #6B7280 !important; }
+
+    /* st.info / st.warning / st.success / st.error boxes */
+    [data-testid="stAlert"] { color: #1A2035 !important; }
+
+    /* Checkbox label */
+    .stCheckbox label, .stCheckbox span { color: #1A2035 !important; }
+
+    /* Radio buttons */
+    .stRadio label, .stRadio span { color: #1A2035 !important; }
+}
+
+/* ── Streamlit-specific light theme class detection ─────────── */
+/* When Streamlit sets a white background via inline style or class */
+[data-testid="stAppViewContainer"][style*="background-color: white"],
+[data-testid="stAppViewContainer"][style*="background-color: rgb(255, 255, 255)"],
+[data-testid="stAppViewContainer"][style*="background-color: rgb(240"],
+[data-testid="stAppViewContainer"][style*="background-color: rgb(248"] {
+
+    .stTabs [data-baseweb="tab-list"] {
+        background: #E8ECF4 !important;
+        border: 2px solid #C8D0E0 !important;
+    }
+    .stTabs [data-baseweb="tab"] { color: #4A5568 !important; }
+
+    [data-testid="baseButton-secondary"],
+    .stButton > button:not([kind="primary"]) {
+        background: #FFFFFF !important;
+        color: #1A3A6A !important;
+        border: 2px solid #3D5580 !important;
+    }
+
+    [data-testid="stMain"] .stExpander,
+    [data-testid="stMainBlockContainer"] .stExpander {
+        background: #FFFFFF !important;
+        border: 2px solid #CBD5E0 !important;
+    }
+    [data-testid="stMain"] .stExpander [data-testid="stExpanderDetails"],
+    [data-testid="stMainBlockContainer"] .stExpander [data-testid="stExpanderDetails"] {
+        background: #FFFFFF !important;
+        color: #1A2035 !important;
+    }
+
+    .sc { background: #FFFFFF !important; color: #1A2035 !important; border: 1.5px solid #CBD5E0 !important; }
+    .rb { background: #FFFFFF !important; color: #1A2035 !important; }
+    .ct, .cp { color: #1A2035 !important; }
+
+    [data-baseweb="popover"] [role="listbox"],
+    [data-baseweb="popover"] ul {
+        background: #FFFFFF !important;
+        border: 2px solid #2B7DE9 !important;
+    }
+    [data-baseweb="popover"] [role="option"],
+    [data-baseweb="popover"] li { color: #1A2035 !important; }
+}
+
 </style>
 """, unsafe_allow_html=True)
         t1,t2,t5,t6,t3,t4=st.tabs([T("generate"),T("students"),"📊 Academic Report","📈 IBT Reports",T("chat"),T("quiz")])
