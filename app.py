@@ -3943,17 +3943,23 @@ html, body, [class*="css"] {
         with _cfg_m:
             st.markdown('<div class="tp-tile tp-cfg">', unsafe_allow_html=True)
             if st.button("📋  Background Info About Your Classroom", key="_home_cfg", use_container_width=True):
-                st.session_state["_home_active"] = "config" if st.session_state.get("_home_active") != "config" else None
+                _opening = st.session_state.get("_home_active") != "config"
+                st.session_state["_home_active"] = "config" if _opening else None
+                if not _opening:
+                    st.session_state["_cfg_panel_was_open"] = False  # reset so labels show on next open
                 st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
         # ── CONFIG SUBMENU ────────────────────────────────────────────────
         _active = st.session_state.get("_home_active")
         if _active == "config":
-            # Force widget keys to None so labels/placeholders always show on open.
-            # Mirrors (_saved_*) still hold the real values for AI generation.
-            for _wk in ["country_sel","lang_sel","cfg_region","cfg_grade","cfg_subject","cfg_clsz","cfg_abl"]:
-                st.session_state[_wk] = None
+            # Only reset widget keys to None (show placeholder labels) when the panel
+            # is freshly opened — not on every rerun, so selections stick.
+            _just_opened = not st.session_state.get("_cfg_panel_was_open", False)
+            if _just_opened:
+                for _wk in ["country_sel","lang_sel","cfg_region","cfg_grade","cfg_subject","cfg_clsz","cfg_abl"]:
+                    st.session_state[_wk] = None
+            st.session_state["_cfg_panel_was_open"] = True
             _sn = st.session_state["_school_confirmed"]
             _tn = st.session_state["_teacher_confirmed"]
             _pn = st.session_state["_phone_confirmed"]
