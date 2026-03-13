@@ -2785,117 +2785,84 @@ def _record_consent(school_code: str):
 
 def _show_consent_gate() -> bool:
     """
-    Shows a full-screen privacy consent dialog.
-    Returns True  if the teacher accepted.
-    Returns False if they declined (or are admin — skipped entirely).
-    Skips silently if consent was already given this week.
+    Shows a privacy consent page using normal Streamlit widgets — no CSS overlay.
+    The fixed overlay approach hid the buttons behind the div.
+    Since st.stop() blocks the rest of the app, this IS the whole page.
     """
-    import datetime as _dt
-
-    # Admin never sees the consent gate
     _label = st.session_state.get("_login_label", "")
     if _label.lower() in ("ibt admin", "ibt_admin"):
         return True
 
-    # Derive a stable school key from the logged-in username
     _school_code = st.session_state.get("_login_code", _label)
 
-    # Already consented this week — skip
     if _consent_given_this_week(_school_code):
         return True
 
-    # ── Render consent overlay ────────────────────────────────────
-    _consent_placeholder = st.empty()
+    # Hide sidebar/header so this looks like a standalone page
+    st.markdown("""<style>
+[data-testid="stSidebar"], header, footer,
+[data-testid="stToolbar"] { display: none !important; }
+.block-container { max-width: 580px !important; padding-top: 3rem !important; }
+</style>""", unsafe_allow_html=True)
 
-    def _render(declined=False):
-        _warn = (
-            '<div style="background:rgba(239,83,80,.12);border:1px solid #EF535066;'
-            'border-radius:8px;padding:8px 12px;margin-bottom:16px;color:#EF9A9A;font-size:.82rem">'
-            '⚠️ You declined the location check. The connectivity snapshot will be skipped this week. '
-            'You can accept next week when prompted again.</div>'
-        ) if declined else ""
+    st.markdown(
+        '<div style="text-align:center;margin-bottom:1.2rem">'
+        '<div style="font-size:2.4rem">📡</div>'
+        '<div style="color:#D4A843;font-weight:800;font-size:1.3rem;margin-top:6px">'
+        'Classroom Connectivity Check</div>'
+        '<div style="color:#8899BB;font-size:.84rem;margin-top:4px">'
+        'Institute of Basic Technology · West Africa Education Network</div>'
+        '</div>',
+        unsafe_allow_html=True)
 
-        _consent_placeholder.markdown(
-            f'<div style="position:fixed;top:0;left:0;width:100%;height:100%;'
-            f'background:linear-gradient(160deg,#050C1C 0%,#0B1E3D 60%,#061228 100%);'
-            f'display:flex;align-items:center;justify-content:center;z-index:999998;'
-            f'font-family:system-ui,sans-serif">'
-            f'<div style="background:linear-gradient(135deg,#0E1E38,#162B50);'
-            f'border:1px solid rgba(212,168,67,.4);border-radius:20px;'
-            f'padding:36px 40px;max-width:520px;width:94%;'
-            f'box-shadow:0 12px 60px rgba(212,168,67,.15)">'
+    st.markdown(
+        '<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);'
+        'border-radius:12px;padding:16px 18px;margin-bottom:1rem">'
+        '<div style="color:#D4A843;font-weight:700;font-size:.9rem;margin-bottom:10px">'
+        '📋 What we collect — once a week, automatically:</div>'
+        + "".join(
+            f'<div style="display:flex;gap:8px;margin-bottom:7px">'
+            f'<span style="color:#D4A843;flex-shrink:0">▸</span>'
+            f'<span style="color:#D0D8E8;font-size:.84rem">{item}</span></div>'
+            for item in [
+                "<b>Download speed</b> in Mbps — the real quality of your classroom internet",
+                "<b>Connection type</b> — Wi-Fi, 4G LTE, 3G, or fixed broadband",
+                "<b>Device GPS location</b> (browser permission required) — your classroom coordinates",
+                "<b>IP geolocation</b> — city, region, country, and internet provider",
+                "<b>School login name</b> and a timestamp",
+            ]
+        ) + '</div>',
+        unsafe_allow_html=True)
 
-            # Header
-            f'<div style="text-align:center;margin-bottom:20px">'
-            f'<div style="font-size:2rem;margin-bottom:8px">📡</div>'
-            f'<div style="color:#D4A843;font-weight:800;font-size:1.15rem;letter-spacing:.3px">'
-            f'Classroom Connectivity Check</div>'
-            f'<div style="color:#8899BB;font-size:.82rem;margin-top:4px">'
-            f'Institute of Basic Technology · West Africa Education Network</div>'
-            f'</div>'
+    st.markdown(
+        '<div style="color:#8899BB;font-size:.84rem;line-height:1.6;margin-bottom:1rem">'
+        'This data builds a ground-level picture of digital access in West African classrooms — '
+        'information that exists nowhere else. It is used exclusively by IBT for research and '
+        'improving educational technology support. <b style="color:#D0D8E8">No personal teacher '
+        'or student data is collected.</b>'
+        '</div>',
+        unsafe_allow_html=True)
 
-            # What we collect
-            f'<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);'
-            f'border-radius:12px;padding:16px 18px;margin-bottom:18px">'
-            f'<div style="color:#D4A843;font-weight:700;font-size:.88rem;margin-bottom:10px">'
-            f'📋 What we collect — once a week, automatically:</div>'
-            + "".join([
-                f'<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:7px">'
-                f'<span style="color:#D4A843;font-size:.75rem;margin-top:2px">▸</span>'
-                f'<span style="color:#D0D8E8;font-size:.82rem">{item}</span></div>'
-                for item in [
-                    "<b>Download speed</b> in Mbps — the real quality of your classroom internet",
-                    "<b>Connection type</b> — Wi-Fi, 4G LTE, 3G, or fixed broadband",
-                    "<b>Device GPS location</b> (browser permission required) — your classroom coordinates",
-                    "<b>IP geolocation</b> — city, region, country, and internet provider",
-                    "<b>School login name</b> and a timestamp",
-                ]
-            ]) +
-            f'</div>'
+    st.info("🗓️ You will only be asked again in 7 days. The check takes only a few seconds.")
 
-            # Why
-            f'<div style="color:#8899BB;font-size:.8rem;line-height:1.55;margin-bottom:20px">'
-            f'This data builds a ground-level picture of digital access in West African classrooms — '
-            f'information that exists nowhere else. It is used exclusively by IBT for research and '
-            f'improving educational technology support. No personal teacher or student data is collected. '
-            f'The check runs <b style="color:#D4A843">once per week</b> and takes only a few seconds.'
-            f'</div>'
-
-            f'{_warn}'
-
-            # Frequency note
-            f'<div style="background:rgba(212,168,67,.07);border:1px solid rgba(212,168,67,.2);'
-            f'border-radius:8px;padding:8px 12px;margin-bottom:18px;'
-            f'color:#C8A030;font-size:.78rem;text-align:center">'
-            f'🗓️ You will only be asked again in 7 days.</div>'
-
-            f'</div></div>',
-            unsafe_allow_html=True,
-        )
-
-    _render()
-
-    # Buttons rendered outside the overlay (Streamlit widgets must be in normal flow)
-    _spacer, _col_dec, _col_acc, _spacer2 = st.columns([1, 2, 2, 1])
-    with _col_dec:
-        _declined = st.button("❌ Skip this week", key="_consent_decline",
-                              use_container_width=True, type="secondary")
+    _col_acc, _col_dec = st.columns(2)
     with _col_acc:
         _accepted = st.button("✅ I agree — run the check", key="_consent_accept",
                               use_container_width=True, type="primary")
+    with _col_dec:
+        _declined = st.button("❌ Skip this week", key="_consent_decline",
+                              use_container_width=True, type="secondary")
 
     if _accepted:
         _record_consent(_school_code)
-        _consent_placeholder.empty()
-        return True
+        st.rerun()
 
     if _declined:
-        # Record a declined timestamp so we don't ask again for 7 days
         _record_consent(_school_code + "__declined")
-        _render(declined=True)
-        st.stop()   # stop rendering; teacher re-loads the page to continue
+        st.success("No problem — the connectivity check will be skipped this week.")
+        st.caption("Reload the page to continue to Teacher Pehpeh.")
+        st.stop()
 
-    # Neither button pressed yet — block the rest of the app
     st.stop()
 
 
