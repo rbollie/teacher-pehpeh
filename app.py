@@ -2696,34 +2696,50 @@ def _run_connectivity_snapshot():
             '</div></div>',
             unsafe_allow_html=True,
         )
+        # Inject geolocation into the PARENT page, not the iframe.
+        # st.components.v1.html iframes are blocked from navigator.geolocation
+        # by Feature-Policy unless allow="geolocation" is set (Streamlit does
+        # not set it). Injecting a <script> into window.parent.document runs
+        # the code in the top-level page context where geolocation works freely.
         _comp.html("""
 <script>
 (function() {
-  function done(lat, lon, acc) {
-    var url = new URL(window.parent.location.href);
-    url.searchParams.set('_geo_captured', '1');
-    if (lat !== null) {
-      url.searchParams.set('_geo_lat', lat.toFixed(6));
-      url.searchParams.set('_geo_lon', lon.toFixed(6));
-      url.searchParams.set('_geo_acc', Math.round(acc));
-    } else {
-      url.searchParams.set('_geo_lat', 'denied');
-    }
-    window.parent.location.replace(url.toString());
-  }
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      function(p) { done(p.coords.latitude, p.coords.longitude, p.coords.accuracy); },
-      function()  { done(null, null, null); },
-      { timeout: 6000, maximumAge: 300000 }
-    );
-  } else {
-    done(null, null, null);
-  }
+  var pd = window.parent.document;
+  // Remove stale copy
+  var _old = pd.getElementById('__tp_geo');
+  if (_old) _old.remove();
+  var s = pd.createElement('script');
+  s.id = '__tp_geo';
+  s.textContent = [
+    "(function(){",
+    "  if(window.__tpGeoDone)return;",
+    "  window.__tpGeoDone=true;",
+    "  function done(lat,lon,acc){",
+    "    var u=new URL(window.location.href);",
+    "    u.searchParams.set('_geo_captured','1');",
+    "    if(lat!==null){",
+    "      u.searchParams.set('_geo_lat',lat.toFixed(6));",
+    "      u.searchParams.set('_geo_lon',lon.toFixed(6));",
+    "      u.searchParams.set('_geo_acc',Math.round(acc));",
+    "    } else {",
+    "      u.searchParams.set('_geo_lat','denied');",
+    "    }",
+    "    window.location.replace(u.toString());",
+    "  }",
+    "  if(navigator.geolocation){",
+    "    navigator.geolocation.getCurrentPosition(",
+    "      function(p){done(p.coords.latitude,p.coords.longitude,p.coords.accuracy);},",
+    "      function(){done(null,null,null);},",
+    "      {enableHighAccuracy:true,timeout:8000,maximumAge:300000}",
+    "    );",
+    "  } else { done(null,null,null); }",
+    "})();"
+  ].join("\n");
+  pd.head.appendChild(s);
 })();
 </script>
 """, height=0)
-        _t.sleep(7)   # wait for JS + page reload; if still here, fall through to Pass 2
+        _t.sleep(9)   # parent script + browser permission prompt + page reload
         _ov0.empty()
 
     # ── PASS 2: GPS coords available in URL params — run full snapshot ──
