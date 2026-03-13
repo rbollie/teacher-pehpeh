@@ -4932,6 +4932,21 @@ html, body, [class*="css"] {
 }
 .stTabs [data-baseweb="tab"]:nth-child(6):hover::after { opacity:1; }
 
+/* ── AI Engine advisory box (above Ask AI button) ─────────── */
+.tp-ai-advisory {
+    background: rgba(212,168,67,.08);
+    border: 1px solid rgba(212,168,67,.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 6px 0 4px;
+    font-size: .85rem;
+    color: #F5D98E;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+.tp-ai-advisory-strong { color: #D4A843; }
+
 /* ══════════════════════════════════════════════════════════════
    LIGHT MODE — comprehensive overrides
    Covers both prefers-color-scheme:light (OS setting) and
@@ -5089,6 +5104,14 @@ html, body, [class*="css"] {
 
     /* st.info / st.warning / st.success / st.error boxes */
     [data-testid="stAlert"] { color: #1A2035 !important; }
+
+    /* AI Engine advisory box */
+    .tp-ai-advisory {
+        background: rgba(43,125,233,.08) !important;
+        border: 1px solid rgba(43,125,233,.3) !important;
+        color: #1A3A6A !important;
+    }
+    .tp-ai-advisory-strong { color: #1D5CBF !important; }
 
     /* Checkbox label */
     .stCheckbox label, .stCheckbox span { color: #1A2035 !important; }
@@ -5624,10 +5647,9 @@ setTimeout(function() {{
             # Friendly advisory when all engines selected
             if len(_agent_pick)>1:
                 st.markdown(
-                    f'<div style="background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.3);' +
-                    f'border-radius:8px;padding:10px 14px;margin:6px 0 4px;font-size:.85rem;color:#F5D98E;display:flex;align-items:flex-start;gap:10px">' +
+                    f'<div class="tp-ai-advisory">' +
                     f'<span style="font-size:1.2rem;line-height:1.3">💡</span>' +
-                    f'<span><strong style="color:#D4A843">Good choice!</strong> All {len(_agent_pick)} AI engines will work together and Teacher Pehpeh picks the best answer for you. '
+                    f'<span><strong class="tp-ai-advisory-strong">Good choice!</strong> All {len(_agent_pick)} AI engines will work together and Teacher Pehpeh picks the best answer for you. '
                     f'It may take a few extra seconds and use a little more data — totally worth it for important lessons. '
                     f'If your connection is slow today, you can always pick just one engine below.</span></div>',
                     unsafe_allow_html=True
