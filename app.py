@@ -5523,114 +5523,139 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     email_result(r, f"Teacher Pehpeh — Grade Feedback for {gs} ({gsub}, {grade})", "grade")
                     tts_player(r, "grade")
 
-        # === PHOTO GRADING — Batch scan student work ===
+        # === SNAP & GRADE — Select student → Camera → AI grades → writes to sheet ===
         if st.session_state.students:
             st.markdown("---")
+            st.markdown(
+                '<div style="background:linear-gradient(135deg,#1565C0,#0D47A1);border-radius:12px;' +
+                'padding:14px 18px;margin-bottom:14px;color:white;display:flex;align-items:center;gap:10px">' +
+                '<span style="font-size:1.4rem">📸</span>' +
+                '<div><strong style="font-size:1.05rem">Snap & Grade</strong>' +
+                '<div style="font-size:.88rem;opacity:.85;margin-top:2px">Select a student, snap their work, and Teacher Pehpeh grades it instantly</div></div></div>',
+                unsafe_allow_html=True
+            )
 
-            # If teacher is in manual entry mode, collapse camera by default
-            _manual_mode_active = "🔢" in st.session_state.get("gmode", "")
-            if _manual_mode_active:
-                _cam_enabled = st.checkbox(
-                    "📸 Enable Photo Grading (camera/upload)",
-                    value=st.session_state.get("_pg_cam_enabled", False),
-                    key="_pg_cam_enabled",
-                    help="Camera is disabled while Manual entry mode is active. Enable here if needed."
+            # ── Assignment context (shared across all students) ──────────────
+            _pg_c1, _pg_c2 = st.columns(2)
+            with _pg_c1:
+                pg_subj = st.selectbox("Subject:", _subjects(), key="pg_subj")
+            with _pg_c2:
+                pg_topic = st.text_input("Topic / Assignment:", key="pg_topic", placeholder="e.g., Algebra Quiz #3")
+            _pg_subj_en = _to_en_subj(pg_subj)
+
+            # ── Selectable student name cards ────────────────────────────────
+            _stu_names = [s["name"] for s in st.session_state.students]
+            _selected_stu = st.session_state.get("_snap_selected_stu")
+
+            st.markdown('<div style="font-size:.82rem;font-weight:700;color:#8aaad4;letter-spacing:.06em;text-transform:uppercase;margin:8px 0 6px">Select a Student</div>', unsafe_allow_html=True)
+
+            # Render clickable name tiles
+            _tile_cols = st.columns(min(4, len(_stu_names)))
+            for _ti, _tname in enumerate(_stu_names):
+                _is_sel = _tname == _selected_stu
+                with _tile_cols[_ti % len(_tile_cols)]:
+                    _tile_bg = "linear-gradient(135deg,#D4A843,#B8860B)" if _is_sel else "rgba(255,255,255,.06)"
+                    _tile_col = "#111" if _is_sel else "#D0D8E8"
+                    _tile_bdr = "#D4A843" if _is_sel else "rgba(255,255,255,.12)"
+                    st.markdown(
+                        f'<div style="background:{_tile_bg};border:2px solid {_tile_bdr};border-radius:10px;' +
+                        f'padding:10px 12px;margin-bottom:6px;cursor:pointer;text-align:center">' +
+                        f'<div style="color:{_tile_col};font-weight:700;font-size:.95rem">{_tname}</div>' +
+                        f'{"<div style=\'font-size:.75rem;color:#333;margin-top:2px\'>✅ Selected</div>" if _is_sel else ""}' +
+                        f'</div>',
+                        unsafe_allow_html=True
+                    )
+                    if st.button("Select" if not _is_sel else "✓ Selected", key=f"snap_sel_{_ti}", use_container_width=True,
+                                 type="primary" if _is_sel else "secondary"):
+                        st.session_state["_snap_selected_stu"] = _tname
+                        st.session_state.pop("_snap_photo_result", None)
+                        st.rerun()
+
+            # ── Camera activates only after a student is selected ────────────
+            if _selected_stu:
+                _snap_profile = next((s for s in st.session_state.students if s["name"] == _selected_stu), None)
+                st.markdown(
+                    f'<div style="background:rgba(212,168,67,.1);border:1px solid #D4A84355;border-radius:10px;' +
+                    f'padding:10px 14px;margin:10px 0 8px;display:flex;align-items:center;gap:10px">' +
+                    f'<span style="font-size:1.5rem">📷</span>' +
+                    f'<div><strong style="color:#D4A843">{_selected_stu}</strong>' +
+                    f'<span style="color:#8aaad4;font-size:.88rem"> — camera ready. Point at the student\'s work and snap.</span></div></div>',
+                    unsafe_allow_html=True
                 )
-            else:
-                _cam_enabled = True
-                st.session_state["_pg_cam_enabled"] = True
+                _snap_tab1, _snap_tab2 = st.tabs(["📷 Take Photo", "📁 Upload Image"])
+                with _snap_tab1:
+                    _snap_cam = st.camera_input(f"Snap {_selected_stu}'s work", key=f"snap_cam_{_selected_stu}", label_visibility="collapsed")
+                with _snap_tab2:
+                    _snap_up = st.file_uploader("Upload photo of work", type=["jpg","jpeg","png","heic"], key=f"snap_up_{_selected_stu}", label_visibility="collapsed")
+                _snap_photo = _snap_cam or _snap_up
 
-            # Skip photo grading section if grades already loaded via Excel upload
-            _excel_grades_loaded = st.session_state.get("_ibt_has_grades") and bool(st.session_state.grade_history)
-            if _excel_grades_loaded:
-                st.info("✅ Grades loaded from Excel. Use **IBT Reports** or **Academic Reports** tabs to analyse and export.")
-                _cam_enabled = False
-
-            if _cam_enabled:
-                st.markdown(f'<div style="background:linear-gradient(135deg,#1565C0,#0D47A1);border-radius:12px;padding:14px 18px;margin-bottom:10px;color:white"><strong>📸 Photo Grading</strong> — Snap or upload photos of handwritten student work</div>',unsafe_allow_html=True)
-                _max_batch = min(10, len(st.session_state.students))
-                pg_cols = st.columns([2,2,2])
-                with pg_cols[0]:
-                    pg_count = st.number_input("Students to grade", min_value=1, max_value=_max_batch, value=min(3, _max_batch), key="pg_count")
-                with pg_cols[1]:
-                    pg_subj = st.selectbox("Subject:", _subjects(), key="pg_subj")
-                with pg_cols[2]:
-                    pg_topic = st.text_input("Topic/Assignment:", key="pg_topic", placeholder="e.g., Algebra Quiz #3")
-                _pg_subj_en = _to_en_subj(pg_subj)
-
-                # Create upload slots
-                pg_uploads = []
-                pg_students = []
-                for slot in range(int(pg_count)):
-                    sc1, sc2 = st.columns([1, 2])
-                    with sc1:
-                        stu_name = st.selectbox(f"Student {slot+1}:", [s["name"] for s in st.session_state.students], key=f"pg_stu_{slot}")
-                        pg_students.append(stu_name)
-                    with sc2:
-                        photo = st.file_uploader(f"Upload work", type=["jpg","jpeg","png","heic","pdf"], key=f"pg_img_{slot}", label_visibility="collapsed")
-                        if not photo:
-                            photo = st.camera_input(f"📷 Or take photo", key=f"pg_cam_{slot}", label_visibility="collapsed")
-                        pg_uploads.append(photo)
-
-                _has_any = any(pg_uploads)
-                if st.button("Grade All Photos", type="primary", use_container_width=True, key="pg_go", disabled=not _has_any):
-                    _graded = 0
-                    for slot in range(int(pg_count)):
-                        photo = pg_uploads[slot]
-                        sname = pg_students[slot]
-                        if not photo:
-                            continue
-                        sel = next((s for s in st.session_state.students if s["name"] == sname), None)
-                        if not sel:
-                            continue
-                        info = f'{sel["name"]},{sel["sib"]}sib,Mom:{sel["mom"]},SM:{sel["sm"]},Works:{sel["wk"]},Comp:{sel["cp"]},{sel["nt"]}'
-                        img_bytes = photo.read()
-                        img_b64 = base64.b64encode(img_bytes).decode()
-                        mime = photo.type if hasattr(photo, 'type') and photo.type else "image/jpeg"
-                        if "pdf" in mime:
-                            st.warning(f"⚠️ PDF not supported for {sname} — use JPG/PNG photo instead.")
-                            continue
-                        sys_prompt = f"""You are Teacher Pehpeh, an expert Liberian education AI grading handwritten student work.
-STUDENT PROFILE: {info}
+                if _snap_photo and not st.session_state.get("_snap_photo_result"):
+                    info = f'{_snap_profile["name"]},{_snap_profile["sib"]}sib,Mom:{_snap_profile["mom"]},SM:{_snap_profile["sm"]},Works:{_snap_profile["wk"]},Comp:{_snap_profile["cp"]},{_snap_profile["nt"]}' if _snap_profile else _selected_stu
+                    img_bytes = _snap_photo.read()
+                    img_b64 = base64.b64encode(img_bytes).decode()
+                    mime = _snap_photo.type if hasattr(_snap_photo, 'type') and _snap_photo.type else "image/jpeg"
+                    _snap_sys = f"""You are Teacher Pehpeh, an expert education AI grading handwritten student work.
+STUDENT: {info}
 SCHOOL: {school_name or 'Not specified'} | COUNTRY: {country} | GRADE: {_grade_en} | SUBJECT: {_pg_subj_en}
 TOPIC: {pg_topic or 'General'}
-
 INSTRUCTIONS:
-1. Read the handwritten work carefully. Transcribe what you see.
-2. Grade on a scale of 0-100.
+1. Read the handwritten work carefully.
+2. Grade on a scale of 0-100. Put SCORE: XX/100 on the very first line.
 3. Note specific errors with corrections.
-4. TAILOR feedback to this student's profile (risk factors, background).
-5. Give 2-3 specific next steps personalized for this student.
-6. Be encouraging — celebrate what they got right FIRST.
-7. Format: SCORE | TRANSCRIPTION | STRENGTHS | ERRORS | PERSONALIZED FEEDBACK | NEXT STEPS
-
-IMPORTANT: Extract a numeric score (0-100) on the FIRST line as: SCORE: XX/100"""
-                        with st.spinner(f"📸 Grading {sname}'s work..."):
-                            r, m = best_vision(sys_prompt, f"Grade this student's handwritten {_pg_subj_en} work on {pg_topic}. Student: {sname}.", img_b64, mime)
-                        if r and not str(r).startswith("⚠️"):
-                            _graded += 1
-                            import re as _re
-                            _score_match = _re.search(r'SCORE:\s*(\d+)', r, _re.IGNORECASE)
-                            _score = int(_score_match.group(1)) if _score_match else None
-                            if not _score:
-                                _score_match = _re.search(r'(\d+)\s*/\s*100', r)
-                                _score = int(_score_match.group(1)) if _score_match else None
-                            if _score is not None:
-                                import datetime
-                                st.session_state.grade_history.append({
-                                    "student": sname, "subject": _pg_subj_en,
-                                    "topic": pg_topic or "General", "score": _score,
-                                    "date": datetime.datetime.now().isoformat(),
-                                    "grade_level": _grade_en, "model": m
-                                })
-                            _fb_label = {"en":"Feedback","fr":"Commentaires","sw":"Maoni"}.get(_lang_key(),"Feedback")
-                            _score_display = f" — {_score}/100" if _score else ""
-                            st.markdown(f'<div class="rh"><h3>📸 {_fb_label}: {sname}{_score_display}</h3></div><div class="rb">{highlight_result(r)}<div style="font-size:.65rem;color:#556;margin-top:4px">by {m}</div></div>',unsafe_allow_html=True)
-                            email_result(r, f"Teacher Pehpeh — Photo Grade for {sname} ({pg_subj}, {grade})", f"pg_{slot}")
+4. Tailor feedback to this student's background and risk profile.
+5. Be encouraging — celebrate what they got right FIRST.
+6. Give 2-3 personalised next steps."""
+                    with st.spinner(f"📸 Teacher Pehpeh is grading {_selected_stu}'s work..."):
+                        _snap_r, _snap_m = best_vision(_snap_sys, f"Grade this handwritten {_pg_subj_en} work. Student: {_selected_stu}.", img_b64, mime)
+                    st.session_state["_snap_photo_result"] = {"result": _snap_r, "model": _snap_m, "student": _selected_stu}
+                    # Extract score and write to grade_history (this feeds the sheet)
+                    import re as _re
+                    _sm = _re.search(r'SCORE:\s*(\d+)', _snap_r or "", _re.IGNORECASE) or _re.search(r'(\d+)\s*/\s*100', _snap_r or "")
+                    _snap_score = int(_sm.group(1)) if _sm else None
+                    if _snap_score is not None:
+                        import datetime as _dt
+                        _existing = next((i for i, g in enumerate(st.session_state.grade_history)
+                                         if g["student"] == _selected_stu and g["subject"] == _pg_subj_en
+                                         and g.get("topic","") == (pg_topic or "General")), None)
+                        _entry = {"student": _selected_stu, "subject": _pg_subj_en,
+                                  "topic": pg_topic or "General", "score": _snap_score,
+                                  "date": _dt.datetime.now().isoformat(), "grade_level": _grade_en, "model": _snap_m}
+                        if _existing is not None:
+                            st.session_state.grade_history[_existing] = _entry
                         else:
-                            st.error(f"⚠️ Could not grade {sname}'s work: {r}")
-                    if _graded:
-                        st.success(f"✅ Graded {_graded} student{'s' if _graded>1 else ''}'s work!")
+                            st.session_state.grade_history.append(_entry)
+                    st.rerun()
+
+                # Show result
+                _snap_res = st.session_state.get("_snap_photo_result")
+                if _snap_res and _snap_res.get("student") == _selected_stu:
+                    _r, _m = _snap_res["result"], _snap_res["model"]
+                    import re as _re2
+                    _sm2 = _re2.search(r'SCORE:\s*(\d+)', _r or "", _re2.IGNORECASE) or _re2.search(r'(\d+)\s*/\s*100', _r or "")
+                    _disp_score = int(_sm2.group(1)) if _sm2 else None
+                    _score_badge = (
+                        f'<span style="background:#D4A843;color:#111;font-weight:800;font-size:1.1rem;' +
+                        f'padding:3px 12px;border-radius:8px;margin-left:10px">{_disp_score}/100</span>'
+                    ) if _disp_score else ""
+                    st.markdown(
+                        f'<div class="rh"><h3>📸 Grade: {_selected_stu}{_score_badge}</h3></div>' +
+                        f'<div class="rb">{highlight_result(_r)}' +
+                        f'<div style="font-size:.72rem;color:#556;margin-top:4px">Graded by {_m}' +
+                        (f' · ✅ Score {_disp_score}/100 written to grade sheet' if _disp_score else "") +
+                        '</div></div>',
+                        unsafe_allow_html=True
+                    )
+                    email_result(_r, f"Teacher Pehpeh — Grade for {_selected_stu} ({pg_subj}, {grade})", f"snap_{_selected_stu}")
+                    _sg1, _sg2 = st.columns(2)
+                    with _sg1:
+                        if st.button("📷 Grade Another Student", key="snap_next", use_container_width=True):
+                            st.session_state.pop("_snap_selected_stu", None)
+                            st.session_state.pop("_snap_photo_result", None)
+                            st.rerun()
+                    with _sg2:
+                        if st.button("🔄 Retake Photo", key="snap_retake", use_container_width=True):
+                            st.session_state.pop("_snap_photo_result", None)
+                            st.rerun()
 
         # === TREND ANALYTICS — Performance over time ===
         if st.session_state.grade_history:
