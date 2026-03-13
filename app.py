@@ -2560,6 +2560,178 @@ def synth(sp,q,resps):
         if r and not str(r).startswith("⚠️"): return r
     return max(v.values(),key=len)
 
+# ═══════════════════════════════════════════════════════════
+# CONNECTIVITY SNAPSHOT
+# On first launch at a school, silently captures a ground-level
+# picture of digital access: speed, tech type, location, ISP.
+# Runs once per session — automatic, no setup, no forms.
+# Builds the IBT West Africa classroom connectivity dataset.
+# ═══════════════════════════════════════════════════════════
+
+def _save_connectivity_log(record: dict):
+    """Append one timestamped connectivity record to the school-level CSV log."""
+    import csv as _csv
+    _log_path = APP_DIR / "connectivity_log.csv"
+    _fields = [
+        "timestamp", "school_code", "server_ip", "city", "region", "country",
+        "isp", "ip_lat", "ip_lon", "latency_ms", "server_quality",
+        "measured_download_mbps", "inferred_tech_type",
+    ]
+    _write_header = not _log_path.exists()
+    try:
+        with open(_log_path, "a", newline="", encoding="utf-8") as _f:
+            _w = _csv.DictWriter(_f, fieldnames=_fields, extrasaction="ignore")
+            if _write_header:
+                _w.writeheader()
+            _w.writerow({k: record.get(k, "") for k in _fields})
+    except Exception:
+        pass
+
+
+def _run_connectivity_snapshot():
+    """
+    One-time silent connectivity snapshot on first login per session.
+    Shows an animated 4-step startup screen while gathering data.
+    Captures: download speed, connection tech type, geolocation, ISP.
+    Logs a timestamped record to connectivity_log.csv.
+    """
+    import urllib.request as _ur, json as _json, datetime as _dt, time as _t
+    from pathlib import Path as _Path
+
+    if st.session_state.get("_conn_snapshot_done"):
+        return
+
+    # ── Animated overlay renderer ────────────────────────────────────
+    _ov = st.empty()
+
+    def _draw(active_step: int, results: dict = {}):
+        _steps = [
+            ("01", "Speed Test",            "Measuring download speed in Mbps"),
+            ("02", "Technology Type",       "Identifying Wi-Fi, 5G, 4G LTE, 3G or broadband"),
+            ("03", "Geotag & Location",     "Logging GPS coordinates, city, region & ISP"),
+            ("04", "Logged & Timestamped",  "Saving secure school-level connectivity record"),
+        ]
+        _rows = ""
+        for i, (num, label, detail) in enumerate(_steps):
+            step_i = i + 1
+            if step_i < active_step:
+                _cls = "done"; _badge = "✓"; _num_col = "#81C784"; _border = "#81C78455"
+                _op = ".68"; _tx = "0"
+            elif step_i == active_step:
+                _cls = "active"; _badge = num; _num_col = "#D4A843"; _border = "#D4A843"
+                _op = "1"; _tx = "0"
+            else:
+                _cls = "pending"; _badge = num; _num_col = "#445"; _border = "#334"
+                _op = ".28"; _tx = "-6px"
+            _extra = f'<div style="color:#8899BB;font-size:.74rem;margin-top:2px">{results.get(step_i,"")}</div>' if results.get(step_i) else ""
+            _rows += (
+                f'<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;'
+                f'border-bottom:1px solid rgba(255,255,255,.05);opacity:{_op};'
+                f'transform:translateX({_tx});transition:all .4s">'
+                f'<div style="width:28px;height:28px;border-radius:50%;border:1.5px solid {_border};'
+                f'background:{"rgba(212,168,67,.12)" if step_i==active_step else ("rgba(46,125,50,.18)" if step_i<active_step else "transparent")};'
+                f'display:flex;align-items:center;justify-content:center;'
+                f'font-size:.72rem;font-weight:800;color:{_num_col};flex-shrink:0;margin-top:1px">{_badge}</div>'
+                f'<div><div style="color:#D0D8E8;font-size:.88rem;font-weight:600">{label}</div>'
+                f'<div style="color:#6677AA;font-size:.76rem;margin-top:1px">{detail}</div>'
+                f'{_extra}</div></div>'
+            )
+        _pct = int((active_step - 1) / 4 * 100)
+        _ov.markdown(
+            f'<div style="position:fixed;top:0;left:0;width:100%;height:100%;'
+            f'background:linear-gradient(160deg,#050C1C 0%,#0B1E3D 60%,#061228 100%);'
+            f'display:flex;align-items:center;justify-content:center;z-index:999999">'
+            f'<div style="background:linear-gradient(135deg,#0E1E38,#162B50);'
+            f'border:1px solid rgba(212,168,67,.35);border-radius:20px;'
+            f'padding:36px 44px;max-width:460px;width:94%;'
+            f'box-shadow:0 12px 60px rgba(212,168,67,.18);text-align:center">'
+            f'<div style="font-size:2.4rem;margin-bottom:8px">🌍</div>'
+            f'<div style="color:#D4A843;font-weight:800;font-size:1.22rem;letter-spacing:.5px;margin-bottom:4px">Teacher Pehpeh by IBT</div>'
+            f'<div style="color:#8899BB;font-size:.82rem;margin-bottom:24px">Initializing your classroom connection — one moment…</div>'
+            f'<div style="text-align:left">{_rows}</div>'
+            f'<div style="height:4px;background:rgba(212,168,67,.12);border-radius:99px;margin-top:20px;overflow:hidden">'
+            f'<div style="height:100%;width:{_pct}%;background:linear-gradient(90deg,#D4A843,#F0C94A);'
+            f'border-radius:99px;box-shadow:0 0 8px rgba(212,168,67,.55);transition:width .6s ease"></div></div>'
+            f'<div style="color:#334;font-size:.72rem;margin-top:16px">Institute of Basic Technology · West Africa Education Network</div>'
+            f'</div></div>',
+            unsafe_allow_html=True,
+        )
+
+    _res = {}
+
+    # ── Step 1: Download Speed Test ─────────────────────────────────
+    _draw(1)
+    _download_mbps = None
+    try:
+        # ~25 KB Google logo — small, always reachable, good for low-bandwidth check
+        _speed_url = "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"
+        _t0 = _t.time()
+        _req = _ur.Request(_speed_url, headers={"User-Agent": "TeacherPehpeh/1.0", "Cache-Control": "no-cache"})
+        _data = _ur.urlopen(_req, timeout=10).read()
+        _elapsed = _t.time() - _t0
+        if _elapsed > 0 and len(_data) > 0:
+            _download_mbps = round(len(_data) * 8 / _elapsed / 1_000_000, 3)
+    except Exception:
+        pass
+    _res[1] = f"{_download_mbps} Mbps" if _download_mbps is not None else "Could not measure"
+
+    # ── Step 2: Tech Type Inference (latency + ipapi data) ──────────
+    _draw(2, _res)
+    _conn_info = check_conn()
+    _lat_ms = _conn_info.get("latency_ms") or 9_999
+    if _lat_ms < 60:
+        _tech_type = "Fixed Broadband / Wi-Fi"
+    elif _lat_ms < 150:
+        _tech_type = "4G LTE"
+    elif _lat_ms < 400:
+        _tech_type = "3G"
+    elif _lat_ms < 1_500:
+        _tech_type = "2G / Edge"
+    else:
+        _tech_type = "Very Slow / Offline"
+    _res[2] = _tech_type
+
+    # ── Step 3: Geolocation & ISP (IP-based) ────────────────────────
+    _draw(3, _res)
+    _geo = {}
+    try:
+        _geo_req = _ur.Request("https://ipapi.co/json/", headers={"User-Agent": "TeacherPehpeh/1.0"})
+        _geo = _json.loads(_ur.urlopen(_geo_req, timeout=6).read().decode())
+    except Exception:
+        pass
+    _city    = _geo.get("city", "")
+    _region  = _geo.get("region", "")
+    _country = _geo.get("country_name", "Liberia")
+    _isp     = _geo.get("org", "")
+    _res[3]  = f"{_city}, {_region}" if _city else "Location logged via IP"
+
+    # ── Step 4: Log & Timestamp ─────────────────────────────────────
+    _draw(4, _res)
+    _record = {
+        "timestamp":             _dt.datetime.now().isoformat(),
+        "school_code":           str(st.session_state.get("_login_label", "unknown")),
+        "server_ip":             str(_geo.get("ip", "")),
+        "city":                  _city,
+        "region":                _region,
+        "country":               _country,
+        "isp":                   _isp,
+        "ip_lat":                str(_geo.get("latitude", "")),
+        "ip_lon":                str(_geo.get("longitude", "")),
+        "latency_ms":            str(_conn_info.get("latency_ms", "")),
+        "server_quality":        str(_conn_info.get("quality", "")),
+        "measured_download_mbps": str(_download_mbps or ""),
+        "inferred_tech_type":    _tech_type,
+    }
+    _save_connectivity_log(_record)
+    _res[4] = f"Saved · {_dt.datetime.now().strftime('%H:%M:%S')}"
+    _draw(5, _res)   # all 4 steps marked done
+    _t.sleep(1.1)
+
+    # ── Dismiss overlay & continue ───────────────────────────────────
+    _ov.empty()
+    st.session_state["_conn_snapshot_done"] = True
+
+
 # === MAIN ===
 def main():
     # Load Teacher Pehpeh logo as PIL Image for taskbar/tab icon
@@ -2590,6 +2762,11 @@ def main():
     if _login_required() and not _is_logged_in():
         _show_login_screen()
         st.stop()
+
+    # ── CONNECTIVITY SNAPSHOT (first launch only, silent & automatic) ──
+    # Captures school connectivity data: speed, tech type, location, ISP.
+    # Runs once per session before the teacher's session begins.
+    _run_connectivity_snapshot()
 
     # ── INACTIVITY TIMER (inject once per session into parent DOM) ──
     # 28 min → warning overlay with countdown; 30 min → auto-logout
