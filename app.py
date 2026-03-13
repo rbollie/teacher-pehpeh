@@ -54,16 +54,40 @@ import datetime
 def _check_subscription():
     """
     Returns (is_active, days_left, tier)
-    Reads LICENSE_KEY and LICENSE_EXPIRY from secrets/env.
-    If not set, defaults to free tier.
+    Checks per-school expiry first (SCHOOL_NN_EXPIRY), then falls back to
+    global LICENSE_KEY / LICENSE_EXPIRY. Called after login so
+    st.session_state["_login_label"] is already set.
     """
-    expiry_str = _get_key("LICENSE_EXPIRY")   # format: YYYY-MM-DD  e.g. 2026-12-31
-    license_key = _get_key("LICENSE_KEY")      # any non-empty string = paid school
+    import datetime as _dt
+    # Per-school expiry — look up the logged-in school's expiry key
+    _label = ""
+    try:
+        _label = st.session_state.get("_login_label", "")
+    except Exception:
+        pass
+    # Find which slot this label belongs to
+    for _n in range(1, 21):
+        _pfx = f"SCHOOL_{_n:02d}"
+        _sl  = _get_key(f"{_pfx}_NAME") or _get_key(f"{_pfx}_CODE")
+        _sc  = _get_key(f"{_pfx}_CODE")
+        if _sc and (_label.lower() in (_sl.lower(), _sc.lower()) if _sl else _label.lower() == _sc.lower()):
+            _exp = _get_key(f"{_pfx}_EXPIRY")
+            if _exp:
+                try:
+                    _expiry = _dt.date.fromisoformat(_exp.strip())
+                    _today  = _dt.date.today()
+                    _days   = (_expiry - _today).days
+                    return (True, _days, "paid") if _days >= 0 else (False, _days, "expired")
+                except Exception:
+                    pass
+    # Legacy / global fallback
+    expiry_str = _get_key("LICENSE_EXPIRY")
+    license_key = _get_key("LICENSE_KEY")
     if not license_key or not expiry_str:
         return False, 0, "free"
     try:
-        expiry = datetime.date.fromisoformat(expiry_str.strip())
-        today  = datetime.date.today()
+        expiry = _dt.date.fromisoformat(expiry_str.strip())
+        today  = _dt.date.today()
         days_left = (expiry - today).days
         if days_left >= 0:
             return True, days_left, "paid"
@@ -76,31 +100,61 @@ SUBSCRIPTION_ACTIVE, _SUB_DAYS_LEFT, _SUB_TIER = _check_subscription()
 
 # ═══════════════════════════════════════════════════════════
 # LOGIN SYSTEM
-# Schools get a SCHOOL_CODE and SCHOOL_PASS in their secrets.
-# IBT admin can also set ADMIN_PASS to access all schools.
+# Supports up to 20 numbered school accounts (SCHOOL_01 …
+# SCHOOL_20) plus one legacy SCHOOL_CODE account and the
+# IBT admin account — all read from secrets / env vars.
 # ═══════════════════════════════════════════════════════════
 
 def _get_credentials():
-    """Return list of valid (username, password, label) tuples from secrets."""
+    """
+    Return list of (username, password, label, expiry_str) tuples.
+    Numbered accounts:  SCHOOL_01_CODE / _PASS / _NAME / _EXPIRY … SCHOOL_20_…
+    Legacy account:     SCHOOL_CODE / SCHOOL_PASS / SCHOOL_NAME_LOGIN
+    Admin:              ADMIN_PASS  →  username "ibt_admin"
+    Expired accounts are silently excluded so they simply can't log in.
+    """
+    import datetime as _dt
     creds = []
-    # Primary school account
-    sc = _get_key("SCHOOL_CODE")
-    sp = _get_key("SCHOOL_PASS")
-    sl = _get_key("SCHOOL_NAME_LOGIN") or "School Account"
-    if sc and sp:
-        creds.append((sc.strip(), sp.strip(), sl.strip()))
-    # Admin / IBT account
-    ap = _get_key("ADMIN_PASS")
+    today = _dt.date.today()
+
+    # ── Numbered accounts SCHOOL_01 … SCHOOL_20 ─────────────────────
+    for _n in range(1, 21):
+        _pfx = f"SCHOOL_{_n:02d}"
+        _sc  = _get_key(f"{_pfx}_CODE").strip()
+        _sp  = _get_key(f"{_pfx}_PASS").strip()
+        _sl  = (_get_key(f"{_pfx}_NAME") or f"School {_n:02d}").strip()
+        _exp = _get_key(f"{_pfx}_EXPIRY").strip()
+        if not (_sc and _sp):
+            continue
+        # Expiry check — blank expiry = no expiry (admin-set accounts)
+        if _exp:
+            try:
+                if (_dt.date.fromisoformat(_exp) - today).days < 0:
+                    continue   # expired — exclude from valid credentials
+            except Exception:
+                pass
+        creds.append((_sc, _sp, _sl, _exp))
+
+    # ── Legacy single school account ─────────────────────────────────
+    _sc = _get_key("SCHOOL_CODE").strip()
+    _sp = _get_key("SCHOOL_PASS").strip()
+    _sl = (_get_key("SCHOOL_NAME_LOGIN") or "School Account").strip()
+    _exp = _get_key("LICENSE_EXPIRY").strip()
+    if _sc and _sp:
+        if not _exp or (_dt.date.fromisoformat(_exp) - today).days >= 0 if _exp else True:
+            creds.append((_sc, _sp, _sl, _exp))
+
+    # ── IBT Admin ────────────────────────────────────────────────────
+    ap = _get_key("ADMIN_PASS").strip()
     if ap:
-        creds.append(("ibt_admin", ap.strip(), "IBT Admin"))
-    # If no credentials configured at all, use a simple open-access mode
+        creds.append(("ibt_admin", ap, "IBT Admin", ""))
+
     return creds
 
 def _make_session_token(username):
     """HMAC-style signed token so we can verify without storing password."""
     import hashlib
     creds = _get_credentials()
-    # Use the password for that user as the signing secret
     secret = next((c[1] for c in creds if c[0].lower() == username.lower()), None)
     if secret is None:
         secret = "tp_fallback_secret_2025"
@@ -152,17 +206,37 @@ def _show_login_screen():
         submitted = st.form_submit_button("🔐 Sign In", use_container_width=True, type="primary")
 
     if submitted:
+        import datetime as _ldt
         creds = _get_credentials()
         match = next((c for c in creds if c[0].lower()==username.strip().lower() and c[1]==password.strip()), None)
         if match:
             st.session_state["_logged_in"] = True
             st.session_state["_login_label"] = match[2]
-            # Persist login across browser refresh via signed query param token
+            st.session_state["_login_code"]  = match[0]   # raw username for consent store key
             _tok = _make_session_token(match[0])
             st.query_params["_s"] = f"{match[0]}|{match[2]}|{_tok}"
+            # Show expiry warning if within 3 days
+            _exp_str = match[3] if len(match) > 3 else ""
+            if _exp_str:
+                try:
+                    _days_left = (_ldt.date.fromisoformat(_exp_str) - _ldt.date.today()).days
+                    if 0 <= _days_left <= 3:
+                        st.warning(f"⚠️ Your school access expires in {_days_left} day{'s' if _days_left!=1 else ''}. Contact IBT to renew.")
+                except Exception:
+                    pass
             st.rerun()
         else:
-            st.error("Incorrect username or password. Please contact IBT for access.")
+            # Check if account exists but is expired
+            _all_raw = []
+            for _n in range(1, 21):
+                _pfx = f"SCHOOL_{_n:02d}"
+                _sc  = _get_key(f"{_pfx}_CODE").strip()
+                _sp  = _get_key(f"{_pfx}_PASS").strip()
+                if _sc and _sp and _sc.lower()==username.strip().lower() and _sp==password.strip():
+                    st.error("⏰ Your school access has expired. Contact IBT to renew: [institutebasictechnology.org](https://www.institutebasictechnology.org)")
+                    break
+            else:
+                st.error("Incorrect username or password. Please contact IBT for access.")
 
     st.markdown(
         '<p style="text-align:center;font-size:.8rem;color:#556;margin-top:2rem">'+
@@ -2658,6 +2732,173 @@ def _build_conn_log_csv() -> bytes:
     return _buf.getvalue().encode("utf-8")
 
 
+
+# ═══════════════════════════════════════════════════════════
+# PRIVACY CONSENT GATE
+# Non-admin accounts see a consent dialog once per week.
+# Consent is stored server-side (cache_resource) keyed by
+# school code, so the check survives page refreshes within
+# the same server process. After 7 days the entry expires
+# and the school is prompted again.
+# ═══════════════════════════════════════════════════════════
+
+@st.cache_resource
+def _get_consent_store():
+    """Shared across all sessions: { school_code: iso_datetime_string }"""
+    return {}
+
+
+def _consent_given_this_week(school_code: str) -> bool:
+    """True if this school consented (or declined) within the last 7 days."""
+    import datetime as _dt
+    _store = _get_consent_store()
+    # Check both accepted and declined keys
+    for _key in (school_code, school_code + "__declined"):
+        _ts = _store.get(_key)
+        if not _ts:
+            continue
+        try:
+            _age = _dt.datetime.now() - _dt.datetime.fromisoformat(_ts)
+            if _age.days < 7:
+                return True
+        except Exception:
+            pass
+    return False
+
+
+def _consent_accepted_this_week(school_code: str) -> bool:
+    """True only if consent was actively accepted (not just declined) this week."""
+    import datetime as _dt
+    _ts = _get_consent_store().get(school_code)
+    if not _ts:
+        return False
+    try:
+        return (_dt.datetime.now() - _dt.datetime.fromisoformat(_ts)).days < 7
+    except Exception:
+        return False
+
+
+def _record_consent(school_code: str):
+    import datetime as _dt
+    _get_consent_store()[school_code] = _dt.datetime.now().isoformat()
+
+
+def _show_consent_gate() -> bool:
+    """
+    Shows a full-screen privacy consent dialog.
+    Returns True  if the teacher accepted.
+    Returns False if they declined (or are admin — skipped entirely).
+    Skips silently if consent was already given this week.
+    """
+    import datetime as _dt
+
+    # Admin never sees the consent gate
+    _label = st.session_state.get("_login_label", "")
+    if _label.lower() in ("ibt admin", "ibt_admin"):
+        return True
+
+    # Derive a stable school key from the logged-in username
+    _school_code = st.session_state.get("_login_code", _label)
+
+    # Already consented this week — skip
+    if _consent_given_this_week(_school_code):
+        return True
+
+    # ── Render consent overlay ────────────────────────────────────
+    _consent_placeholder = st.empty()
+
+    def _render(declined=False):
+        _warn = (
+            '<div style="background:rgba(239,83,80,.12);border:1px solid #EF535066;'
+            'border-radius:8px;padding:8px 12px;margin-bottom:16px;color:#EF9A9A;font-size:.82rem">'
+            '⚠️ You declined the location check. The connectivity snapshot will be skipped this week. '
+            'You can accept next week when prompted again.</div>'
+        ) if declined else ""
+
+        _consent_placeholder.markdown(
+            f'<div style="position:fixed;top:0;left:0;width:100%;height:100%;'
+            f'background:linear-gradient(160deg,#050C1C 0%,#0B1E3D 60%,#061228 100%);'
+            f'display:flex;align-items:center;justify-content:center;z-index:999998;'
+            f'font-family:system-ui,sans-serif">'
+            f'<div style="background:linear-gradient(135deg,#0E1E38,#162B50);'
+            f'border:1px solid rgba(212,168,67,.4);border-radius:20px;'
+            f'padding:36px 40px;max-width:520px;width:94%;'
+            f'box-shadow:0 12px 60px rgba(212,168,67,.15)">'
+
+            # Header
+            f'<div style="text-align:center;margin-bottom:20px">'
+            f'<div style="font-size:2rem;margin-bottom:8px">📡</div>'
+            f'<div style="color:#D4A843;font-weight:800;font-size:1.15rem;letter-spacing:.3px">'
+            f'Classroom Connectivity Check</div>'
+            f'<div style="color:#8899BB;font-size:.82rem;margin-top:4px">'
+            f'Institute of Basic Technology · West Africa Education Network</div>'
+            f'</div>'
+
+            # What we collect
+            f'<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);'
+            f'border-radius:12px;padding:16px 18px;margin-bottom:18px">'
+            f'<div style="color:#D4A843;font-weight:700;font-size:.88rem;margin-bottom:10px">'
+            f'📋 What we collect — once a week, automatically:</div>'
+            + "".join([
+                f'<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:7px">'
+                f'<span style="color:#D4A843;font-size:.75rem;margin-top:2px">▸</span>'
+                f'<span style="color:#D0D8E8;font-size:.82rem">{item}</span></div>'
+                for item in [
+                    "<b>Download speed</b> in Mbps — the real quality of your classroom internet",
+                    "<b>Connection type</b> — Wi-Fi, 4G LTE, 3G, or fixed broadband",
+                    "<b>Device GPS location</b> (browser permission required) — your classroom coordinates",
+                    "<b>IP geolocation</b> — city, region, country, and internet provider",
+                    "<b>School login name</b> and a timestamp",
+                ]
+            ]) +
+            f'</div>'
+
+            # Why
+            f'<div style="color:#8899BB;font-size:.8rem;line-height:1.55;margin-bottom:20px">'
+            f'This data builds a ground-level picture of digital access in West African classrooms — '
+            f'information that exists nowhere else. It is used exclusively by IBT for research and '
+            f'improving educational technology support. No personal teacher or student data is collected. '
+            f'The check runs <b style="color:#D4A843">once per week</b> and takes only a few seconds.'
+            f'</div>'
+
+            f'{_warn}'
+
+            # Frequency note
+            f'<div style="background:rgba(212,168,67,.07);border:1px solid rgba(212,168,67,.2);'
+            f'border-radius:8px;padding:8px 12px;margin-bottom:18px;'
+            f'color:#C8A030;font-size:.78rem;text-align:center">'
+            f'🗓️ You will only be asked again in 7 days.</div>'
+
+            f'</div></div>',
+            unsafe_allow_html=True,
+        )
+
+    _render()
+
+    # Buttons rendered outside the overlay (Streamlit widgets must be in normal flow)
+    _spacer, _col_dec, _col_acc, _spacer2 = st.columns([1, 2, 2, 1])
+    with _col_dec:
+        _declined = st.button("❌ Skip this week", key="_consent_decline",
+                              use_container_width=True, type="secondary")
+    with _col_acc:
+        _accepted = st.button("✅ I agree — run the check", key="_consent_accept",
+                              use_container_width=True, type="primary")
+
+    if _accepted:
+        _record_consent(_school_code)
+        _consent_placeholder.empty()
+        return True
+
+    if _declined:
+        # Record a declined timestamp so we don't ask again for 7 days
+        _record_consent(_school_code + "__declined")
+        _render(declined=True)
+        st.stop()   # stop rendering; teacher re-loads the page to continue
+
+    # Neither button pressed yet — block the rest of the app
+    st.stop()
+
+
 def _run_connectivity_snapshot():
     """
     Two-pass startup sequence:
@@ -2926,10 +3167,19 @@ def main():
         _show_login_screen()
         st.stop()
 
-    # ── CONNECTIVITY SNAPSHOT (first launch only, silent & automatic) ──
-    # Captures school connectivity data: speed, tech type, location, ISP.
-    # Runs once per session before the teacher's session begins.
-    _run_connectivity_snapshot()
+    # ── PRIVACY CONSENT + CONNECTIVITY SNAPSHOT ────────────────────
+    # Non-admin accounts see a consent dialog once per week.
+    # Snapshot only runs if consent was actively accepted.
+    _label  = st.session_state.get("_login_label", "")
+    _school = st.session_state.get("_login_code", _label)
+    _is_admin = _label.lower() in ("ibt admin", "ibt_admin")
+
+    if not _is_admin:
+        _show_consent_gate()   # blocks with st.stop() until accepted or declined
+        # Only run the connectivity snapshot when consent was accepted this week
+        if _consent_accepted_this_week(_school):
+            _run_connectivity_snapshot()
+    # Admin bypasses consent and snapshot entirely
 
     # ── INACTIVITY TIMER (inject once per session into parent DOM) ──
     # 28 min → warning overlay with countdown; 30 min → auto-logout
