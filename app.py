@@ -2568,24 +2568,71 @@ def synth(sp,q,resps):
 # Builds the IBT West Africa classroom connectivity dataset.
 # ═══════════════════════════════════════════════════════════
 
+_CONN_LOG_FIELDS = [
+    "timestamp", "school_code", "server_ip", "city", "region", "country",
+    "isp", "ip_lat", "ip_lon", "latency_ms", "server_quality",
+    "measured_download_mbps", "inferred_tech_type",
+]
+
 def _save_connectivity_log(record: dict):
-    """Append one timestamped connectivity record to the school-level CSV log."""
-    import csv as _csv
+    """
+    Append one timestamped connectivity record.
+    • Primary:  connectivity_log.csv next to app.py  (persists on self-hosted)
+    • Backup:   st.session_state['_conn_log_records'] list  (always available,
+                survives Streamlit Cloud's ephemeral filesystem within the session)
+    """
+    import csv as _csv, io as _io
+
+    # ── In-memory backup (always works, downloadable via UI) ────────
+    if "_conn_log_records" not in st.session_state:
+        st.session_state["_conn_log_records"] = []
+    st.session_state["_conn_log_records"].append(
+        {k: record.get(k, "") for k in _CONN_LOG_FIELDS}
+    )
+
+    # ── File-based log (works on self-hosted; ephemeral on Cloud) ───
     _log_path = APP_DIR / "connectivity_log.csv"
-    _fields = [
-        "timestamp", "school_code", "server_ip", "city", "region", "country",
-        "isp", "ip_lat", "ip_lon", "latency_ms", "server_quality",
-        "measured_download_mbps", "inferred_tech_type",
-    ]
     _write_header = not _log_path.exists()
     try:
         with open(_log_path, "a", newline="", encoding="utf-8") as _f:
-            _w = _csv.DictWriter(_f, fieldnames=_fields, extrasaction="ignore")
+            _w = _csv.DictWriter(_f, fieldnames=_CONN_LOG_FIELDS, extrasaction="ignore")
             if _write_header:
                 _w.writeheader()
-            _w.writerow({k: record.get(k, "") for k in _fields})
+            _w.writerow({k: record.get(k, "") for k in _CONN_LOG_FIELDS})
     except Exception:
         pass
+
+
+def _build_conn_log_csv() -> bytes:
+    """
+    Build a downloadable CSV from all records captured in this session
+    PLUS any rows already in connectivity_log.csv on disk (if present).
+    Returns UTF-8 encoded bytes.
+    """
+    import csv as _csv, io as _io
+
+    # Start with anything already on disk
+    _rows = []
+    _log_path = APP_DIR / "connectivity_log.csv"
+    try:
+        with open(_log_path, "r", newline="", encoding="utf-8") as _f:
+            _rows = list(_csv.DictReader(_f))
+    except Exception:
+        pass
+
+    # Merge in-session records (avoid duplicates by timestamp)
+    _seen_ts = {r.get("timestamp") for r in _rows}
+    for _r in st.session_state.get("_conn_log_records", []):
+        if _r.get("timestamp") not in _seen_ts:
+            _rows.append(_r)
+            _seen_ts.add(_r.get("timestamp"))
+
+    # Serialise to CSV bytes
+    _buf = _io.StringIO()
+    _w = _csv.DictWriter(_buf, fieldnames=_CONN_LOG_FIELDS, extrasaction="ignore")
+    _w.writeheader()
+    _w.writerows(_rows)
+    return _buf.getvalue().encode("utf-8")
 
 
 def _run_connectivity_snapshot():
@@ -4260,6 +4307,22 @@ html, body, [class*="css"] {
                     st.session_state["_logged_in"]=False; st.session_state["_login_label"]=""
                     if "_s" in st.query_params: del st.query_params["_s"]
                     st.rerun()
+                # ── IBT Admin: download the connectivity log ────────────
+                if st.session_state.get("_login_label","").lower() in ("ibt admin","ibt_admin"):
+                    import datetime as _dl_dt
+                    _n_recs = len(st.session_state.get("_conn_log_records", []))
+                    _dl_label = f"📡 Download Connectivity Log ({_n_recs} record{'s' if _n_recs!=1 else ''})"
+                    _dl_csv = _build_conn_log_csv()
+                    _dl_fname = f"tp_connectivity_{_dl_dt.date.today().isoformat()}.csv"
+                    st.download_button(
+                        label=_dl_label,
+                        data=_dl_csv,
+                        file_name=_dl_fname,
+                        mime="text/csv",
+                        key="dl_conn_log",
+                        use_container_width=True,
+                        help="Download all connectivity snapshots captured across school sessions. Works on Streamlit Cloud — no file system needed.",
+                    )
             if st.session_state.get("_show_save_opts") and "saved_profile" in st.session_state:
                 st.success("✅ Saved! Download below.")
                 _default_name=(school_name.strip().replace(" ","_") or "my_classroom")
