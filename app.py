@@ -1208,7 +1208,7 @@ LANGS={"English":"English","Français":"French","Kiswahili":"Swahili"}
 # UI Translations
 UI_TEXT={
  "en":{
-  "generate":"📋 Generate","chat":"💬 Chat","quiz":"Quiz","students":"🧑‍🎓 Students",
+  "generate":"✏️ Create","chat":"💬 Chat","quiz":"Quiz","students":"🧑‍🎓 Students",
   "task":"Task","time":"Time","topic":"Topic","options":"Options","subject":"Subject","grade":"Grade",
   "country":"Country","setting":"Setting","class_size":"Class Size",
   "language":"Language","student_level":"Student Level","school_name":"🏫 School Name",
@@ -5087,10 +5087,7 @@ setTimeout(function() {{
                                 st.session_state.task_cat   = _cname
                                 st.session_state["task_sel"] = _chosen
                                 st.rerun()
-            # Small link to switch to full view
-            if st.button("⬅  Show all categories", key="_exit_home_mode", use_container_width=False):
-                st.session_state["_home_nav_mode"] = False
-                st.rerun()
+
         else:
             # Full 2×2 dropdown grid — normal view
             _dd_row1 = st.columns(2)
