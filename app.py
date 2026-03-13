@@ -2562,35 +2562,54 @@ def synth(sp,q,resps):
 
 # ═══════════════════════════════════════════════════════════
 # CONNECTIVITY SNAPSHOT
-# On first launch at a school, silently captures a ground-level
-# picture of digital access: speed, tech type, location, ISP.
+# First launch at a school: captures speed, tech type, client
+# GPS location (browser), server IP geolocation, and ISP.
+# Builds the IBT ground-level West Africa classroom dataset.
 # Runs once per session — automatic, no setup, no forms.
-# Builds the IBT West Africa classroom connectivity dataset.
 # ═══════════════════════════════════════════════════════════
 
 _CONN_LOG_FIELDS = [
-    "timestamp", "school_code", "server_ip", "city", "region", "country",
-    "isp", "ip_lat", "ip_lon", "latency_ms", "server_quality",
-    "measured_download_mbps", "inferred_tech_type",
+    "timestamp", "school_code",
+    # Client-side (browser GPS)
+    "client_lat", "client_lon", "client_accuracy_m",
+    # Server-side (IP geolocation)
+    "server_ip", "ip_city", "ip_region", "ip_country", "isp", "ip_lat", "ip_lon",
+    # Connectivity quality
+    "latency_ms", "server_quality", "measured_download_mbps", "inferred_tech_type",
 ]
+
+
+@st.cache_resource
+def _get_shared_conn_log():
+    """
+    Cross-session in-memory log shared across ALL concurrent school sessions.
+    Persists for the lifetime of the server process (resets on restart).
+    Used by IBT admin to see live results from every connected school.
+    """
+    return {"records": []}
+
 
 def _save_connectivity_log(record: dict):
     """
-    Append one timestamped connectivity record.
-    • Primary:  connectivity_log.csv next to app.py  (persists on self-hosted)
-    • Backup:   st.session_state['_conn_log_records'] list  (always available,
-                survives Streamlit Cloud's ephemeral filesystem within the session)
+    Save to three stores simultaneously:
+    1. st.cache_resource shared log  → visible to IBT admin across sessions
+    2. st.session_state              → downloadable in current session
+    3. connectivity_log.csv on disk  → persists on self-hosted servers
     """
-    import csv as _csv, io as _io
+    import csv as _csv
 
-    # ── In-memory backup (always works, downloadable via UI) ────────
+    _clean = {k: record.get(k, "") for k in _CONN_LOG_FIELDS}
+
+    # 1. Shared cross-session store (admin live view)
+    _shared = _get_shared_conn_log()
+    _shared["records"].append(_clean)
+
+    # 2. Session-scoped store (download button)
     if "_conn_log_records" not in st.session_state:
         st.session_state["_conn_log_records"] = []
-    st.session_state["_conn_log_records"].append(
-        {k: record.get(k, "") for k in _CONN_LOG_FIELDS}
-    )
+    st.session_state["_conn_log_records"].append(_clean)
 
-    # ── File-based log (works on self-hosted; ephemeral on Cloud) ───
+    # 3. Disk log (best-effort; ephemeral on Streamlit Cloud)
     _log_path = APP_DIR / "connectivity_log.csv"
     _write_header = not _log_path.exists()
     try:
@@ -2598,21 +2617,20 @@ def _save_connectivity_log(record: dict):
             _w = _csv.DictWriter(_f, fieldnames=_CONN_LOG_FIELDS, extrasaction="ignore")
             if _write_header:
                 _w.writeheader()
-            _w.writerow({k: record.get(k, "") for k in _CONN_LOG_FIELDS})
+            _w.writerow(_clean)
     except Exception:
         pass
 
 
 def _build_conn_log_csv() -> bytes:
     """
-    Build a downloadable CSV from all records captured in this session
-    PLUS any rows already in connectivity_log.csv on disk (if present).
-    Returns UTF-8 encoded bytes.
+    Merge records from: shared cache_resource + session_state + disk file.
+    Deduplicated by timestamp. Returns UTF-8 CSV bytes.
     """
     import csv as _csv, io as _io
 
-    # Start with anything already on disk
     _rows = []
+    # Disk rows first
     _log_path = APP_DIR / "connectivity_log.csv"
     try:
         with open(_log_path, "r", newline="", encoding="utf-8") as _f:
@@ -2620,82 +2638,160 @@ def _build_conn_log_csv() -> bytes:
     except Exception:
         pass
 
-    # Merge in-session records (avoid duplicates by timestamp)
+    # Merge shared cache records
     _seen_ts = {r.get("timestamp") for r in _rows}
+    for _r in _get_shared_conn_log().get("records", []):
+        if _r.get("timestamp") not in _seen_ts:
+            _rows.append(_r)
+            _seen_ts.add(_r.get("timestamp"))
+
+    # Merge session records
     for _r in st.session_state.get("_conn_log_records", []):
         if _r.get("timestamp") not in _seen_ts:
             _rows.append(_r)
             _seen_ts.add(_r.get("timestamp"))
 
-    # Serialise to CSV bytes
     _buf = _io.StringIO()
     _w = _csv.DictWriter(_buf, fieldnames=_CONN_LOG_FIELDS, extrasaction="ignore")
     _w.writeheader()
-    _w.writerows(_rows)
+    _w.writerows(sorted(_rows, key=lambda r: r.get("timestamp", ""), reverse=True))
     return _buf.getvalue().encode("utf-8")
 
 
 def _run_connectivity_snapshot():
     """
-    One-time silent connectivity snapshot on first login per session.
-    Shows an animated 4-step startup screen while gathering data.
-    Captures: download speed, connection tech type, geolocation, ISP.
-    Logs a timestamped record to connectivity_log.csv.
+    Two-pass startup sequence:
+    Pass 1  — Browser JS asks for GPS permission and writes coords to URL params,
+              then reloads the page.
+    Pass 2  — Reads GPS coords from URL params, runs the 4-step speed/geo
+              snapshot, logs the record, clears URL params.
+    Runs once per session; guarded by st.session_state['_conn_snapshot_done'].
     """
     import urllib.request as _ur, json as _json, datetime as _dt, time as _t
-    from pathlib import Path as _Path
+    import streamlit.components.v1 as _comp
 
     if st.session_state.get("_conn_snapshot_done"):
         return
 
-    # ── Animated overlay renderer ────────────────────────────────────
+    # ── PASS 1: Request client GPS via browser JS ───────────────────
+    # '_geo_captured' param absent → show geo-capture overlay, JS fires,
+    # writes coords to URL, page reloads automatically into Pass 2.
+    if "_geo_captured" not in st.query_params:
+        _ov0 = st.empty()
+        _ov0.markdown(
+            '<div style="position:fixed;top:0;left:0;width:100%;height:100%;'
+            'background:linear-gradient(160deg,#050C1C 0%,#0B1E3D 60%,#061228 100%);'
+            'display:flex;align-items:center;justify-content:center;z-index:999999">'
+            '<div style="background:linear-gradient(135deg,#0E1E38,#162B50);'
+            'border:1px solid rgba(212,168,67,.35);border-radius:20px;'
+            'padding:36px 44px;max-width:440px;width:94%;text-align:center;'
+            'box-shadow:0 12px 60px rgba(212,168,67,.18)">'
+            '<div style="font-size:2.6rem;margin-bottom:10px">🌍</div>'
+            '<div style="color:#D4A843;font-weight:800;font-size:1.18rem;margin-bottom:6px">Teacher Pehpeh by IBT</div>'
+            '<div style="color:#8899BB;font-size:.84rem;margin-bottom:18px">Detecting your classroom location…</div>'
+            '<div style="display:flex;align-items:center;justify-content:center;gap:8px;color:#D0D8E8;font-size:.82rem">'
+            '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#D4A843;'
+            'animation:blink 1s ease-in-out infinite"></span>Requesting GPS permission</div>'
+            '<style>@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}</style>'
+            '</div></div>',
+            unsafe_allow_html=True,
+        )
+        _comp.html("""
+<script>
+(function() {
+  function done(lat, lon, acc) {
+    var url = new URL(window.parent.location.href);
+    url.searchParams.set('_geo_captured', '1');
+    if (lat !== null) {
+      url.searchParams.set('_geo_lat', lat.toFixed(6));
+      url.searchParams.set('_geo_lon', lon.toFixed(6));
+      url.searchParams.set('_geo_acc', Math.round(acc));
+    } else {
+      url.searchParams.set('_geo_lat', 'denied');
+    }
+    window.parent.location.replace(url.toString());
+  }
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(p) { done(p.coords.latitude, p.coords.longitude, p.coords.accuracy); },
+      function()  { done(null, null, null); },
+      { timeout: 6000, maximumAge: 300000 }
+    );
+  } else {
+    done(null, null, null);
+  }
+})();
+</script>
+""", height=0)
+        _t.sleep(7)   # wait for JS + page reload; if still here, fall through to Pass 2
+        _ov0.empty()
+
+    # ── PASS 2: GPS coords available in URL params — run full snapshot ──
+    # Read client GPS from query params (set by Pass 1 JS)
+    _client_lat = st.query_params.get("_geo_lat", "")
+    _client_lon = st.query_params.get("_geo_lon", "")
+    _client_acc = st.query_params.get("_geo_acc", "")
+    if _client_lat in ("denied", ""):
+        _client_lat = _client_lon = _client_acc = ""
+
+    # Animated 4-step overlay
     _ov = st.empty()
 
     def _draw(active_step: int, results: dict = {}):
         _steps = [
-            ("01", "Speed Test",            "Measuring download speed in Mbps"),
-            ("02", "Technology Type",       "Identifying Wi-Fi, 5G, 4G LTE, 3G or broadband"),
-            ("03", "Geotag & Location",     "Logging GPS coordinates, city, region & ISP"),
-            ("04", "Logged & Timestamped",  "Saving secure school-level connectivity record"),
+            ("01", "Speed Test",         "Measuring download speed in Mbps"),
+            ("02", "Technology Type",    "Identifying Wi-Fi, 5G, 4G LTE, 3G or broadband"),
+            ("03", "Geotag & Location",  "Logging client GPS + server IP location & ISP"),
+            ("04", "Logged & Timestamped","Saving secure school-level connectivity record"),
         ]
-        _rows = ""
+        _rows_html = ""
         for i, (num, label, detail) in enumerate(_steps):
-            step_i = i + 1
-            if step_i < active_step:
-                _cls = "done"; _badge = "✓"; _num_col = "#81C784"; _border = "#81C78455"
-                _op = ".68"; _tx = "0"
-            elif step_i == active_step:
-                _cls = "active"; _badge = num; _num_col = "#D4A843"; _border = "#D4A843"
-                _op = "1"; _tx = "0"
+            si = i + 1
+            if si < active_step:
+                _nc, _bdr, _op, _bg = "#81C784", "#81C78455", ".68", "rgba(46,125,50,.18)"
+                _badge = "✓"
+            elif si == active_step:
+                _nc, _bdr, _op, _bg = "#D4A843", "#D4A843", "1", "rgba(212,168,67,.12)"
+                _badge = num
             else:
-                _cls = "pending"; _badge = num; _num_col = "#445"; _border = "#334"
-                _op = ".28"; _tx = "-6px"
-            _extra = f'<div style="color:#8899BB;font-size:.74rem;margin-top:2px">{results.get(step_i,"")}</div>' if results.get(step_i) else ""
-            _rows += (
+                _nc, _bdr, _op, _bg = "#445", "#334", ".28", "transparent"
+                _badge = num
+            _extra = (f'<div style="color:#8899BB;font-size:.74rem;margin-top:2px">{results[si]}</div>'
+                      if results.get(si) else "")
+            _rows_html += (
                 f'<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;'
-                f'border-bottom:1px solid rgba(255,255,255,.05);opacity:{_op};'
-                f'transform:translateX({_tx});transition:all .4s">'
-                f'<div style="width:28px;height:28px;border-radius:50%;border:1.5px solid {_border};'
-                f'background:{"rgba(212,168,67,.12)" if step_i==active_step else ("rgba(46,125,50,.18)" if step_i<active_step else "transparent")};'
-                f'display:flex;align-items:center;justify-content:center;'
-                f'font-size:.72rem;font-weight:800;color:{_num_col};flex-shrink:0;margin-top:1px">{_badge}</div>'
+                f'border-bottom:1px solid rgba(255,255,255,.05);opacity:{_op};transition:all .4s">'
+                f'<div style="width:28px;height:28px;border-radius:50%;border:1.5px solid {_bdr};'
+                f'background:{_bg};display:flex;align-items:center;justify-content:center;'
+                f'font-size:.72rem;font-weight:800;color:{_nc};flex-shrink:0;margin-top:1px">{_badge}</div>'
                 f'<div><div style="color:#D0D8E8;font-size:.88rem;font-weight:600">{label}</div>'
                 f'<div style="color:#6677AA;font-size:.76rem;margin-top:1px">{detail}</div>'
                 f'{_extra}</div></div>'
             )
         _pct = int((active_step - 1) / 4 * 100)
+        # Client GPS badge shown if we have coords
+        _gps_badge = ""
+        if _client_lat:
+            _gps_badge = (
+                f'<div style="display:inline-flex;align-items:center;gap:5px;'
+                f'background:rgba(129,199,132,.12);border:1px solid #81C78444;'
+                f'border-radius:20px;padding:3px 10px;font-size:.72rem;color:#81C784;margin-bottom:14px">'
+                f'📍 Client GPS: {_client_lat}, {_client_lon}'
+                f'{"  ±"+_client_acc+"m" if _client_acc else ""}</div>'
+            )
         _ov.markdown(
             f'<div style="position:fixed;top:0;left:0;width:100%;height:100%;'
             f'background:linear-gradient(160deg,#050C1C 0%,#0B1E3D 60%,#061228 100%);'
             f'display:flex;align-items:center;justify-content:center;z-index:999999">'
             f'<div style="background:linear-gradient(135deg,#0E1E38,#162B50);'
             f'border:1px solid rgba(212,168,67,.35);border-radius:20px;'
-            f'padding:36px 44px;max-width:460px;width:94%;'
+            f'padding:36px 44px;max-width:480px;width:94%;'
             f'box-shadow:0 12px 60px rgba(212,168,67,.18);text-align:center">'
             f'<div style="font-size:2.4rem;margin-bottom:8px">🌍</div>'
             f'<div style="color:#D4A843;font-weight:800;font-size:1.22rem;letter-spacing:.5px;margin-bottom:4px">Teacher Pehpeh by IBT</div>'
-            f'<div style="color:#8899BB;font-size:.82rem;margin-bottom:24px">Initializing your classroom connection — one moment…</div>'
-            f'<div style="text-align:left">{_rows}</div>'
+            f'<div style="color:#8899BB;font-size:.82rem;margin-bottom:16px">Initializing your classroom connection…</div>'
+            f'{_gps_badge}'
+            f'<div style="text-align:left">{_rows_html}</div>'
             f'<div style="height:4px;background:rgba(212,168,67,.12);border-radius:99px;margin-top:20px;overflow:hidden">'
             f'<div style="height:100%;width:{_pct}%;background:linear-gradient(90deg,#D4A843,#F0C94A);'
             f'border-radius:99px;box-shadow:0 0 8px rgba(212,168,67,.55);transition:width .6s ease"></div></div>'
@@ -2710,7 +2806,6 @@ def _run_connectivity_snapshot():
     _draw(1)
     _download_mbps = None
     try:
-        # ~25 KB Google logo — small, always reachable, good for low-bandwidth check
         _speed_url = "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"
         _t0 = _t.time()
         _req = _ur.Request(_speed_url, headers={"User-Agent": "TeacherPehpeh/1.0", "Cache-Control": "no-cache"})
@@ -2722,23 +2817,18 @@ def _run_connectivity_snapshot():
         pass
     _res[1] = f"{_download_mbps} Mbps" if _download_mbps is not None else "Could not measure"
 
-    # ── Step 2: Tech Type Inference (latency + ipapi data) ──────────
+    # ── Step 2: Tech Type Inference ──────────────────────────────────
     _draw(2, _res)
     _conn_info = check_conn()
     _lat_ms = _conn_info.get("latency_ms") or 9_999
-    if _lat_ms < 60:
-        _tech_type = "Fixed Broadband / Wi-Fi"
-    elif _lat_ms < 150:
-        _tech_type = "4G LTE"
-    elif _lat_ms < 400:
-        _tech_type = "3G"
-    elif _lat_ms < 1_500:
-        _tech_type = "2G / Edge"
-    else:
-        _tech_type = "Very Slow / Offline"
+    if _lat_ms < 60:   _tech_type = "Fixed Broadband / Wi-Fi"
+    elif _lat_ms < 150: _tech_type = "4G LTE"
+    elif _lat_ms < 400: _tech_type = "3G"
+    elif _lat_ms < 1_500: _tech_type = "2G / Edge"
+    else:               _tech_type = "Very Slow / Offline"
     _res[2] = _tech_type
 
-    # ── Step 3: Geolocation & ISP (IP-based) ────────────────────────
+    # ── Step 3: Server-side IP Geolocation & ISP ─────────────────────
     _draw(3, _res)
     _geo = {}
     try:
@@ -2746,36 +2836,46 @@ def _run_connectivity_snapshot():
         _geo = _json.loads(_ur.urlopen(_geo_req, timeout=6).read().decode())
     except Exception:
         pass
-    _city    = _geo.get("city", "")
-    _region  = _geo.get("region", "")
-    _country = _geo.get("country_name", "Liberia")
-    _isp     = _geo.get("org", "")
-    _res[3]  = f"{_city}, {_region}" if _city else "Location logged via IP"
+    _ip_city    = _geo.get("city", "")
+    _ip_region  = _geo.get("region", "")
+    _ip_country = _geo.get("country_name", "Liberia")
+    _isp        = _geo.get("org", "")
+    _loc_parts  = [x for x in [_ip_city, _ip_region] if x]
+    _client_label = f"Client GPS ✓" if _client_lat else "Client GPS: not granted"
+    _res[3] = f"{', '.join(_loc_parts) or 'IP logged'} · {_client_label}"
 
     # ── Step 4: Log & Timestamp ─────────────────────────────────────
     _draw(4, _res)
     _record = {
-        "timestamp":             _dt.datetime.now().isoformat(),
-        "school_code":           str(st.session_state.get("_login_label", "unknown")),
-        "server_ip":             str(_geo.get("ip", "")),
-        "city":                  _city,
-        "region":                _region,
-        "country":               _country,
-        "isp":                   _isp,
-        "ip_lat":                str(_geo.get("latitude", "")),
-        "ip_lon":                str(_geo.get("longitude", "")),
-        "latency_ms":            str(_conn_info.get("latency_ms", "")),
-        "server_quality":        str(_conn_info.get("quality", "")),
+        "timestamp":              _dt.datetime.now().isoformat(),
+        "school_code":            str(st.session_state.get("_login_label", "unknown")),
+        "client_lat":             _client_lat,
+        "client_lon":             _client_lon,
+        "client_accuracy_m":      _client_acc,
+        "server_ip":              str(_geo.get("ip", "")),
+        "ip_city":                _ip_city,
+        "ip_region":              _ip_region,
+        "ip_country":             _ip_country,
+        "isp":                    _isp,
+        "ip_lat":                 str(_geo.get("latitude", "")),
+        "ip_lon":                 str(_geo.get("longitude", "")),
+        "latency_ms":             str(_conn_info.get("latency_ms", "")),
+        "server_quality":         str(_conn_info.get("quality", "")),
         "measured_download_mbps": str(_download_mbps or ""),
-        "inferred_tech_type":    _tech_type,
+        "inferred_tech_type":     _tech_type,
     }
     _save_connectivity_log(_record)
     _res[4] = f"Saved · {_dt.datetime.now().strftime('%H:%M:%S')}"
-    _draw(5, _res)   # all 4 steps marked done
+    _draw(5, _res)
     _t.sleep(1.1)
 
-    # ── Dismiss overlay & continue ───────────────────────────────────
+    # ── Clean up geo URL params & finish ────────────────────────────
     _ov.empty()
+    for _pk in ("_geo_captured", "_geo_lat", "_geo_lon", "_geo_acc"):
+        try:
+            del st.query_params[_pk]
+        except Exception:
+            pass
     st.session_state["_conn_snapshot_done"] = True
 
 
@@ -4307,22 +4407,52 @@ html, body, [class*="css"] {
                     st.session_state["_logged_in"]=False; st.session_state["_login_label"]=""
                     if "_s" in st.query_params: del st.query_params["_s"]
                     st.rerun()
-                # ── IBT Admin: download the connectivity log ────────────
+                # ── IBT Admin: live connectivity viewer + download ──────
                 if st.session_state.get("_login_label","").lower() in ("ibt admin","ibt_admin"):
                     import datetime as _dl_dt
-                    _n_recs = len(st.session_state.get("_conn_log_records", []))
-                    _dl_label = f"📡 Download Connectivity Log ({_n_recs} record{'s' if _n_recs!=1 else ''})"
-                    _dl_csv = _build_conn_log_csv()
+                    _shared_recs = _get_shared_conn_log().get("records", [])
+                    _n_recs = len(_shared_recs)
+                    # Download button — count from shared store (all sessions)
+                    _dl_csv   = _build_conn_log_csv()
                     _dl_fname = f"tp_connectivity_{_dl_dt.date.today().isoformat()}.csv"
                     st.download_button(
-                        label=_dl_label,
+                        label=f"📡 Download Log ({_n_recs} record{'s' if _n_recs!=1 else ''})",
                         data=_dl_csv,
                         file_name=_dl_fname,
                         mime="text/csv",
                         key="dl_conn_log",
                         use_container_width=True,
-                        help="Download all connectivity snapshots captured across school sessions. Works on Streamlit Cloud — no file system needed.",
+                        help="All connectivity snapshots from every school session active since last server restart.",
                     )
+                    # Live results table — shows all schools' snapshots
+                    if _shared_recs:
+                        with st.expander(f"📶 Live School Results ({_n_recs})", expanded=False):
+                            st.markdown(
+                                '<div style="font-size:.75rem;color:#8899BB;margin-bottom:6px">'
+                                'Updated in real-time as schools connect · Resets on server restart</div>',
+                                unsafe_allow_html=True)
+                            for _sr in reversed(_shared_recs[-20:]):  # newest 20
+                                _mbps  = _sr.get("measured_download_mbps","—")
+                                _tech  = _sr.get("inferred_tech_type","—")
+                                _loc   = ", ".join(x for x in [_sr.get("ip_city",""), _sr.get("ip_region","")] if x) or _sr.get("ip_country","—")
+                                _clat  = _sr.get("client_lat","")
+                                _gps   = f'<span style="color:#81C784">📍GPS</span>' if _clat else '<span style="color:#556">no GPS</span>'
+                                _sch   = _sr.get("school_code","?")
+                                _ts    = _sr.get("timestamp","")[:16].replace("T"," ")
+                                _q     = _sr.get("server_quality","")
+                                _qcol  = {"high":"#81C784","medium":"#FFD54F","low":"#FFA726","very_low":"#EF5350"}.get(_q,"#8899BB")
+                                _mbps_disp = f'<b style="color:{_qcol}">{_mbps} Mbps</b>' if _mbps and _mbps != "—" else "—"
+                                st.markdown(
+                                    f'<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);'
+                                    f'border-radius:8px;padding:8px 10px;margin-bottom:4px;font-size:.76rem">'
+                                    f'<div style="color:#D4A843;font-weight:700">{_sch}</div>'
+                                    f'<div style="color:#D0D8E8;margin-top:2px">{_mbps_disp} &nbsp;·&nbsp; {_tech}</div>'
+                                    f'<div style="color:#8899BB;margin-top:2px">{_loc} &nbsp;·&nbsp; {_gps}</div>'
+                                    f'<div style="color:#445;margin-top:2px;font-size:.7rem">{_ts}</div>'
+                                    f'</div>',
+                                    unsafe_allow_html=True)
+                    else:
+                        st.caption("📡 No school sessions logged yet this session.")
             if st.session_state.get("_show_save_opts") and "saved_profile" in st.session_state:
                 st.success("✅ Saved! Download below.")
                 _default_name=(school_name.strip().replace(" ","_") or "my_classroom")
