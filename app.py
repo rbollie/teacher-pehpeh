@@ -1139,7 +1139,7 @@ UI_TEXT={
   "country":"Country","setting":"Setting","class_size":"Class Size",
   "language":"Language","student_level":"Student Level","school_name":"🏫 School Name",
   "school_placeholder":"e.g., Bahn, St. Martin's","my_classroom":"My Classroom","my_students":"My Students",
-  "gen_btn":"Generate","clear":"🗑️ Clear","hear":"🔊 Hear Results","grade_work":"Grade Work",
+  "gen_btn":"Ask the AI","clear":"🗑️ Clear","hear":"🔊 Hear Results","grade_work":"Grade Work",
   "grade_btn":"Grade","students_work":"Student's work:","offline_title":"📴 Offline — Practice Quiz",
   "offline_msg":"No internet? These quizzes work offline!","practice_quiz":"Practice Quiz",
   "adaptive":"Adaptive. Works offline too!","score":"Score","level":"Level","next":"➡️ Next",
@@ -1185,7 +1185,7 @@ UI_TEXT={
   "country":"Pays","setting":"Contexte","class_size":"Taille de classe",
   "language":"Langue","student_level":"Niveau des élèves","school_name":"🏫 Nom de l'école",
   "school_placeholder":"ex: Bahn, St. Martin's","my_classroom":"Ma Classe","my_students":"Mes Élèves",
-  "gen_btn":"Générer","clear":"🗑️ Effacer","hear":"🔊 Écouter","grade_work":"Noter le travail",
+  "gen_btn":"Demander à l'IA","clear":"🗑️ Effacer","hear":"🔊 Écouter","grade_work":"Noter le travail",
   "grade_btn":"Noter","students_work":"Travail de l'élève :","offline_title":"📴 Hors ligne — Quiz pratique",
   "offline_msg":"Pas d'internet ? Ces quiz fonctionnent hors ligne !","practice_quiz":"Quiz pratique",
   "adaptive":"Adaptatif. Fonctionne hors ligne aussi !","score":"Score","level":"Niveau","next":"➡️ Suivant",
@@ -1231,7 +1231,7 @@ UI_TEXT={
   "country":"Nchi","setting":"Mazingira","class_size":"Ukubwa wa darasa",
   "language":"Lugha","student_level":"Kiwango cha wanafunzi","school_name":"🏫 Jina la shule",
   "school_placeholder":"k.m., Bahn, St. Martin's","my_classroom":"Darasa Langu","my_students":"Wanafunzi Wangu",
-  "gen_btn":"Tengeneza","clear":"🗑️ Futa","hear":"🔊 Sikiliza","grade_work":"Sahihisha Kazi",
+  "gen_btn":"Uliza AI","clear":"🗑️ Futa","hear":"🔊 Sikiliza","grade_work":"Sahihisha Kazi",
   "grade_btn":"Sahihisha","students_work":"Kazi ya mwanafunzi:","offline_title":"📴 Nje ya mtandao — Maswali ya mazoezi",
   "offline_msg":"Hakuna mtandao? Maswali haya yanafanya kazi nje ya mtandao!","practice_quiz":"Maswali ya Mazoezi",
   "adaptive":"Yanabadilika. Yanafanya kazi nje ya mtandao pia!","score":"Alama","level":"Kiwango","next":"➡️ Ifuatayo",
@@ -4285,7 +4285,7 @@ setTimeout(function() {{
                         break
         _TASK_CATEGORIES = {
             "📋 Planning":     ["Lesson Plan","Weekly Scheme","Term Scheme","Strategy Guide"],
-            "📝 Assessment":   ["Quiz (10 Q)","Quiz (20 Q)","WASSCE MCQ (50)","WASSCE Theory","BECE Exam","Rubric"],
+            "📝 Assessment":   ["Quiz (10 Q)","Quiz (20 Q)","WASSCE MCQ (50)","WASSCE Theory"],
             "🎯 Activities":   ["Homework","Group Activity","Reading Comprehension","No-Lab Practical","Educational Game","Illustrated Lesson (AI image)"],
             "📚 Study Support":["Study Notes","Remedial Material"],
         }
@@ -4326,6 +4326,30 @@ setTimeout(function() {{
             "Term Scheme":    "Full term roadmap",
             "Strategy Guide": "Teaching tips hub",
         }
+        _ASSESSMENT_TIPS = {
+            "Quiz (10 Q)":     "10 graded questions",
+            "Quiz (20 Q)":     "20 graded questions",
+            "WASSCE MCQ (50)": "50 exam-style MCQs",
+            "WASSCE Theory":   "Long-answer exam",
+        }
+        _ACTIVITIES_TIPS = {
+            "Homework":                    "Take-home practice",
+            "Group Activity":              "Team learning task",
+            "Reading Comprehension":       "Passage with questions",
+            "No-Lab Practical":            "Zero-cost experiment",
+            "Educational Game":            "Fun learning game",
+            "Illustrated Lesson (AI image)": "Lesson with visuals",
+        }
+        _STUDY_TIPS = {
+            "Study Notes":     "Quick revision guide",
+            "Remedial Material": "Catch-up support",
+        }
+        _CAT_TIPS = {
+            "📋 Planning":      _PLANNING_TIPS,
+            "📝 Assessment":    _ASSESSMENT_TIPS,
+            "🎯 Activities":    _ACTIVITIES_TIPS,
+            "📚 Study Support": _STUDY_TIPS,
+        }
 
         if _home_mode:
             # Single-category focused view — just the one dropdown for this category
@@ -4349,7 +4373,7 @@ setTimeout(function() {{
                                 x if not x.startswith(_CAT_PREFIX)
                                 else x.replace(f"{_CAT_PREFIX} ", "")
                             ),
-                            help="\n".join(f"{k}: {v}" for k, v in _PLANNING_TIPS.items()),
+                            help="\n".join(f"{k}: {v}" for k, v in _CAT_TIPS.get(_cname, {}).items()),
                         )
                         if _chosen != _header_opt:
                             if st.session_state.task_cat != _cname or st.session_state.get("task_sel") != _chosen:
@@ -4370,7 +4394,7 @@ setTimeout(function() {{
                                 x if not x.startswith(_CAT_PREFIX)
                                 else x.replace(f"{_CAT_PREFIX} ", "")
                             ),
-                            help=f"Select a task",
+                            help="\n".join(f"{k}: {v}" for k, v in _CAT_TIPS.get(_cname, {}).items()),
                         )
                         if _chosen != _header_opt:
                             if st.session_state.task_cat != _cname or st.session_state.get("task_sel") != _chosen:
@@ -4409,7 +4433,7 @@ setTimeout(function() {{
                                 x if not x.startswith(_CAT_PREFIX)
                                 else x.replace(f"{_CAT_PREFIX} ", "")
                             ),
-                            help="\n".join(f"{k}: {v}" for k, v in _PLANNING_TIPS.items()),
+                            help="\n".join(f"{k}: {v}" for k, v in _CAT_TIPS.get(_cname, {}).items()),
                         )
                         if _chosen != _header_opt:
                             if st.session_state.task_cat != _cname or st.session_state.get("task_sel") != _chosen:
@@ -4433,7 +4457,7 @@ setTimeout(function() {{
                                 x if not x.startswith(_CAT_PREFIX)
                                 else x.replace(f"{_CAT_PREFIX} ", "")
                             ),
-                            help=f"Select a {_cname.split()[-1]} task",
+                            help="\n".join(f"{k}: {v}" for k, v in _CAT_TIPS.get(_cname, {}).items()),
                         )
                         if _chosen != _header_opt:
                             if st.session_state.task_cat != _cname or st.session_state.get("task_sel") != _chosen:
@@ -4688,7 +4712,7 @@ setTimeout(function() {{
         if GOOGLE_API_KEY: _avail_agents.append("Gemini")
         if _avail_agents:
             _n=len(_avail_agents)
-            _all_label=f"Best answer — all {_n} agents" if _n>1 else f"{_avail_agents[0]}"
+            _all_label=f"AI Agent Selection" if _n>1 else f"{_avail_agents[0]}"
             _agent_opts=[_all_label]+[f"{a} only" for a in _avail_agents]
             # Styled agent selector header
             st.markdown(
