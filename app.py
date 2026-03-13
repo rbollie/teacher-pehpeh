@@ -4050,13 +4050,15 @@ def main():
         with _ml:
             st.markdown('<div class="tp-tile tp-lesson" style="margin-bottom:3px">', unsafe_allow_html=True)
             if st.button("📓  Create Lesson", key="_home_lesson", use_container_width=True):
-                st.session_state["_home_active"] = "lesson" if st.session_state.get("_home_active") != "lesson" else None
-                st.rerun()
+                st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True
+                st.session_state["task_cat"]="📋 Planning"; st.session_state["task_sel"]="Lesson Plan"
+                st.session_state["_nav_tab"]=0; st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
             st.markdown('<div class="tp-tile tp-class">', unsafe_allow_html=True)
             if st.button("🙋🏿  Classroom Activities", key="_home_activity", use_container_width=True):
-                st.session_state["_home_active"] = "activity" if st.session_state.get("_home_active") != "activity" else None
-                st.rerun()
+                st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True
+                st.session_state["task_cat"]="🎯 Activities"; st.session_state["task_sel"]="Group Activity"
+                st.session_state["_nav_tab"]=0; st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
         with _mc:
@@ -4067,82 +4069,15 @@ def main():
         with _mr:
             st.markdown('<div class="tp-tile tp-study" style="margin-bottom:3px">', unsafe_allow_html=True)
             if st.button("💡  Study Help", key="_home_study", use_container_width=True):
-                st.session_state["_home_active"] = "study" if st.session_state.get("_home_active") != "study" else None
-                st.rerun()
+                st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True
+                st.session_state["task_cat"]="📚 Study Support"; st.session_state["task_sel"]="Study Notes"
+                st.session_state["_nav_tab"]=0; st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
             st.markdown('<div class="tp-tile tp-quiz">', unsafe_allow_html=True)
             if st.button("📝  Create Quiz", key="_home_quiz", use_container_width=True):
-                st.session_state["_home_active"] = "quiz" if st.session_state.get("_home_active") != "quiz" else None
-                st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
-
-        # ── Submenus — full width, appear below the middle row ────────────
-        if _active == "lesson":
-            st.markdown('<div style="background:#2a1200;border:1px solid #6a3500;border-radius:12px;padding:12px 16px;margin-top:8px">', unsafe_allow_html=True)
-            st.markdown("**📓 Create Lesson** — choose a type:")
-            _l1, _l2, _l3 = st.columns(3)
-            with _l1:
-                if st.button("📄 Lesson Plan", key="_hl_plan", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📋 Planning"; st.rerun()
-            with _l2:
-                if st.button("📋 Worksheet", key="_hl_ws", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📋 Planning"; st.rerun()
-            with _l3:
-                if st.button("📖 Reading Passage", key="_hl_read", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📋 Planning"; st.rerun()
-            if st.button("➡️  Open full lesson builder", key="_hl_full", type="primary", use_container_width=True):
-                st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📋 Planning"; st.session_state["_nav_tab"]=0; st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
-
-        elif _active == "activity":
-            st.markdown('<div style="background:#0a1628;border:1px solid #1e3a6a;border-radius:12px;padding:12px 16px;margin-top:8px">', unsafe_allow_html=True)
-            st.markdown("**🙋🏿 Classroom Activities** — choose a type:")
-            _a1, _a2, _a3 = st.columns(3)
-            with _a1:
-                if st.button("👥 Group Work", key="_ha_grp", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="🎯 Activities"; st.rerun()
-            with _a2:
-                if st.button("🎮 Class Game", key="_ha_game", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="🎯 Activities"; st.rerun()
-            with _a3:
-                if st.button("🗣️ Discussion", key="_ha_disc", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="🎯 Activities"; st.rerun()
-            if st.button("➡️  Open full activities builder", key="_ha_full", type="primary", use_container_width=True):
-                st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="🎯 Activities"; st.session_state["_nav_tab"]=0; st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
-
-        elif _active == "study":
-            st.markdown('<div style="background:#0a1628;border:1px solid #1e3a6a;border-radius:12px;padding:12px 16px;margin-top:8px">', unsafe_allow_html=True)
-            st.markdown("**💡 Study Help** — choose a type:")
-            _s1, _s2, _s3 = st.columns(3)
-            with _s1:
-                if st.button("📖 Study Guide", key="_hs_guide", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📚 Study Support"; st.rerun()
-            with _s2:
-                if st.button("💬 Explanation", key="_hs_expl", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📚 Study Support"; st.rerun()
-            with _s3:
-                if st.button("🤖 Ask Chat", key="_hs_chat", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📚 Study Support"; st.session_state["_nav_tab"]=4; st.rerun()
-            if st.button("➡️  Open full study help", key="_hs_full", type="primary", use_container_width=True):
-                st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📚 Study Support"; st.session_state["_nav_tab"]=0; st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
-
-        elif _active == "quiz":
-            st.markdown('<div style="background:#2a1200;border:1px solid #6a3500;border-radius:12px;padding:12px 16px;margin-top:8px">', unsafe_allow_html=True)
-            st.markdown("**📝 Create Quiz** — choose a format:")
-            _q1, _q2, _q3 = st.columns(3)
-            with _q1:
-                if st.button("✅ MCQ Quiz", key="_hq_mcq", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📝 Assessment"; st.rerun()
-            with _q2:
-                if st.button("📋 WASSCE Prep", key="_hq_wassce", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📝 Assessment"; st.rerun()
-            with _q3:
-                if st.button("📝 Short Answer", key="_hq_short", use_container_width=True):
-                    st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📝 Assessment"; st.rerun()
-            if st.button("➡️  Open full quiz builder", key="_hq_full", type="primary", use_container_width=True):
-                st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True; st.session_state["task_cat"]="📝 Assessment"; st.session_state["_nav_tab"]=0; st.rerun()
+                st.session_state["_show_home"]=False; st.session_state["_home_nav_mode"]=True
+                st.session_state["task_cat"]="📝 Assessment"; st.session_state["task_sel"]="Quiz (10 Q)"
+                st.session_state["_nav_tab"]=0; st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('<p style="text-align:center;font-size:.72rem;color:#334455;margin-top:1.2rem">Powered by ChatGPT &bull; Claude &bull; Gemini</p>', unsafe_allow_html=True)
