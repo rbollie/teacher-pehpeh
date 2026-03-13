@@ -3950,11 +3950,12 @@ html, body, [class*="css"] {
                 _opening = st.session_state.get("_home_active") != "config"
                 st.session_state["_home_active"] = "config" if _opening else None
                 if _opening:
-                    # Delete widget keys and set skip flag so seeding block doesn't
-                    # immediately refill them from mirrors on the next rerun
-                    for _wk in ["country_sel","lang_sel","cfg_region","cfg_grade","cfg_subject","cfg_clsz","cfg_abl"]:
-                        st.session_state.pop(_wk, None)
-                    st.session_state["_cfg_skip_seed"] = True
+                    # Only show placeholders on first-ever open (no profile saved yet).
+                    # After a save, reopening restores the saved selections.
+                    if not st.session_state.get("profile_set", False):
+                        for _wk in ["country_sel","lang_sel","cfg_region","cfg_grade","cfg_subject","cfg_clsz","cfg_abl"]:
+                            st.session_state.pop(_wk, None)
+                        st.session_state["_cfg_skip_seed"] = True
                 st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
