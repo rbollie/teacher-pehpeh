@@ -4384,34 +4384,62 @@ setTimeout(function() {{
         # ── If arrived from a home tile, show ONLY the relevant category ──
         _home_mode = st.session_state.get("_home_nav_mode", False)
 
+        # 3-word hover tooltips for Planning menu items (used in both view modes)
+        _PLANNING_TIPS = {
+            "Lesson Plan":    "Full class lesson",
+            "Weekly Scheme":  "5-day work plan",
+            "Term Scheme":    "Full term roadmap",
+            "Strategy Guide": "Teaching tips hub",
+        }
+
         if _home_mode:
             # Single-category focused view — just the one dropdown for this category
             _focused_cats = [_active_cat]
             _dd_cols_focused = [st.columns(1)[0]]
             for _ci, _cname in zip([0], _focused_cats):
                 _dd_tasks = _cat_tasks_display(_cname)
-                _header_opt = f"{_CAT_PREFIX} {_cname}"
-                _dd_options = [_header_opt] + _dd_tasks
                 _prev_sel = st.session_state.get("task_sel", None)
-                _dd_idx = _dd_options.index(_prev_sel) if (_cname == _active_cat and _prev_sel in _dd_tasks) else 0
                 with _dd_cols_focused[0]:
-                    _chosen = st.selectbox(
-                        label=_cname,
-                        options=_dd_options,
-                        index=_dd_idx,
-                        key=f"dd_cat_0",
-                        label_visibility="collapsed",
-                        format_func=lambda x, _h=_header_opt: (
-                            x if not x.startswith(_CAT_PREFIX)
-                            else x.replace(f"{_CAT_PREFIX} ", "")
-                        ),
-                        help=f"Select a task",
-                    )
-                    if _chosen != _header_opt:
-                        if st.session_state.task_cat != _cname or st.session_state.get("task_sel") != _chosen:
-                            st.session_state.task_cat   = _cname
-                            st.session_state["task_sel"] = _chosen
-                            st.rerun()
+                    if _cname == "📋 Planning":
+                        st.markdown(
+                            f'<div style="font-size:.72rem;font-weight:700;letter-spacing:.07em;'
+                            f'text-transform:uppercase;color:#64748b;margin-bottom:4px">📋 Planning</div>',
+                            unsafe_allow_html=True
+                        )
+                        for _ptask in _dd_tasks:
+                            _is_sel = (_cname == _active_cat and _prev_sel == _ptask)
+                            _tip = _PLANNING_TIPS.get(_ptask, "")
+                            if st.button(
+                                _ptask,
+                                key=f"plan_hm_btn_{_ptask}",
+                                help=_tip,
+                                use_container_width=True,
+                                type="primary" if _is_sel else "secondary",
+                            ):
+                                st.session_state.task_cat   = _cname
+                                st.session_state["task_sel"] = _ptask
+                                st.rerun()
+                    else:
+                        _header_opt = f"{_CAT_PREFIX} {_cname}"
+                        _dd_options = [_header_opt] + _dd_tasks
+                        _dd_idx = _dd_options.index(_prev_sel) if (_cname == _active_cat and _prev_sel in _dd_tasks) else 0
+                        _chosen = st.selectbox(
+                            label=_cname,
+                            options=_dd_options,
+                            index=_dd_idx,
+                            key=f"dd_cat_0",
+                            label_visibility="collapsed",
+                            format_func=lambda x, _h=_header_opt: (
+                                x if not x.startswith(_CAT_PREFIX)
+                                else x.replace(f"{_CAT_PREFIX} ", "")
+                            ),
+                            help=f"Select a task",
+                        )
+                        if _chosen != _header_opt:
+                            if st.session_state.task_cat != _cname or st.session_state.get("task_sel") != _chosen:
+                                st.session_state.task_cat   = _cname
+                                st.session_state["task_sel"] = _chosen
+                                st.rerun()
             # Small link to switch to full view
             if st.button("⬅  Show all categories", key="_exit_home_mode", use_container_width=False):
                 st.session_state["_home_nav_mode"] = False
@@ -4424,32 +4452,53 @@ setTimeout(function() {{
 
             for _ci, _cname in enumerate(_cat_list):
                 _dd_tasks = _cat_tasks_display(_cname)
-                _header_opt   = f"{_CAT_PREFIX} {_cname}"
-                _dd_options   = [_header_opt] + _dd_tasks
                 _prev_sel = st.session_state.get("task_sel", None)
-                if _cname == _active_cat and _prev_sel in _dd_tasks:
-                    _dd_idx = _dd_options.index(_prev_sel)
-                else:
-                    _dd_idx = 0
 
                 with _dd_cols[_ci]:
-                    _chosen = st.selectbox(
-                        label=_cname,
-                        options=_dd_options,
-                        index=_dd_idx,
-                        key=f"dd_cat_{_ci}",
-                        label_visibility="collapsed",
-                        format_func=lambda x, _h=_header_opt: (
-                            x if not x.startswith(_CAT_PREFIX)
-                            else x.replace(f"{_CAT_PREFIX} ", "")
-                        ),
-                        help=f"Select a {_cname.split()[-1]} task",
-                    )
-                    if _chosen != _header_opt:
-                        if st.session_state.task_cat != _cname or st.session_state.get("task_sel") != _chosen:
-                            st.session_state.task_cat   = _cname
-                            st.session_state["task_sel"] = _chosen
-                            st.rerun()
+                    if _cname == "📋 Planning":
+                        # Render as labelled buttons with hover tooltips
+                        st.markdown(
+                            f'<div style="font-size:.72rem;font-weight:700;letter-spacing:.07em;'
+                            f'text-transform:uppercase;color:#64748b;margin-bottom:4px">📋 Planning</div>',
+                            unsafe_allow_html=True
+                        )
+                        for _ptask in _dd_tasks:
+                            _is_sel = (_cname == _active_cat and _prev_sel == _ptask)
+                            _tip = _PLANNING_TIPS.get(_ptask, "")
+                            if st.button(
+                                _ptask,
+                                key=f"plan_btn_{_ptask}",
+                                help=_tip,
+                                use_container_width=True,
+                                type="primary" if _is_sel else "secondary",
+                            ):
+                                st.session_state.task_cat   = _cname
+                                st.session_state["task_sel"] = _ptask
+                                st.rerun()
+                    else:
+                        _header_opt   = f"{_CAT_PREFIX} {_cname}"
+                        _dd_options   = [_header_opt] + _dd_tasks
+                        if _cname == _active_cat and _prev_sel in _dd_tasks:
+                            _dd_idx = _dd_options.index(_prev_sel)
+                        else:
+                            _dd_idx = 0
+                        _chosen = st.selectbox(
+                            label=_cname,
+                            options=_dd_options,
+                            index=_dd_idx,
+                            key=f"dd_cat_{_ci}",
+                            label_visibility="collapsed",
+                            format_func=lambda x, _h=_header_opt: (
+                                x if not x.startswith(_CAT_PREFIX)
+                                else x.replace(f"{_CAT_PREFIX} ", "")
+                            ),
+                            help=f"Select a {_cname.split()[-1]} task",
+                        )
+                        if _chosen != _header_opt:
+                            if st.session_state.task_cat != _cname or st.session_state.get("task_sel") != _chosen:
+                                st.session_state.task_cat   = _cname
+                                st.session_state["task_sel"] = _chosen
+                                st.rerun()
 
         # Resolve the current task from session state
         _active_tasks = _cat_tasks_display(st.session_state.task_cat)
@@ -4685,6 +4734,17 @@ setTimeout(function() {{
                 f'<span style="color:#D0D8E8"> — Options limited to exam-relevant choices.</span></div>',
                 unsafe_allow_html=True
             )
+        elif _task_val == "detailed lesson plan":
+            with st.expander(f"⚙️ Options for {task} — add extras"):
+                _duration_opts = {
+                    "Single period (30-40 min)": "single period",
+                    "Weekly":                    "weekly",
+                    "Full day":                  "full day",
+                }
+                _sel_durations = [v for label, v in _duration_opts.items()
+                                  if st.checkbox(label, key=f"dur_{v}")]
+                if _sel_durations:
+                    exs = _sel_durations
         # === AI Agent Selection ===
         _avail_agents=[]
         if OPENAI_API_KEY: _avail_agents.append("ChatGPT")
