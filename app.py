@@ -3904,25 +3904,12 @@ def main():
         line-height:1.2 !important;
     }
 }
-/* ── Config panel: selectbox labels ─────────────────────────────────────── */
-div[data-testid="stSelectbox"] > label,
-div[data-baseweb="select"] ~ label {
-    font-size: clamp(.72rem, 1.4vw, .82rem) !important;
+/* ── Config panel: selectbox placeholder text ────────────────────────────── */
+div[data-testid="stSelectbox"] div[data-baseweb="select"] span[data-testid="stSelectboxPlaceholder"] {
+    font-size: clamp(.80rem, 1.6vw, .92rem) !important;
     font-weight: 700 !important;
     color: #8aaad4 !important;
-    letter-spacing: .04em !important;
-    text-transform: uppercase !important;
-    margin-bottom: 2px !important;
-}
-@media (max-width: 768px) {
-    div[data-testid="stSelectbox"] > label {
-        font-size: clamp(.70rem, 2.5vw, .78rem) !important;
-    }
-}
-@media (max-width: 480px) {
-    div[data-testid="stSelectbox"] > label {
-        font-size: clamp(.68rem, 3vw, .75rem) !important;
-    }
+    letter-spacing: .02em !important;
 }
 /* ── Config panel: selectbox widget text ─────────────────────────────────── */
 div[data-testid="stSelectbox"] div[data-baseweb="select"] {
@@ -3932,10 +3919,16 @@ div[data-testid="stSelectbox"] div[data-baseweb="select"] {
     div[data-testid="stSelectbox"] div[data-baseweb="select"] {
         font-size: clamp(.80rem, 2.8vw, .90rem) !important;
     }
+    div[data-testid="stSelectbox"] div[data-baseweb="select"] span[data-testid="stSelectboxPlaceholder"] {
+        font-size: clamp(.76rem, 2.8vw, .86rem) !important;
+    }
 }
 @media (max-width: 480px) {
     div[data-testid="stSelectbox"] div[data-baseweb="select"] {
         font-size: clamp(.76rem, 3.5vw, .86rem) !important;
+    }
+    div[data-testid="stSelectbox"] div[data-baseweb="select"] span[data-testid="stSelectboxPlaceholder"] {
+        font-size: clamp(.72rem, 3.5vw, .82rem) !important;
     }
 }
 /* ── Global responsive body font ─────────────────────────────────────────── */
@@ -3971,7 +3964,8 @@ html, body, [class*="css"] {
             _crow1, _crow2 = st.columns([3, 2])
             with _crow1:
                 _country_sel = st.selectbox("Country", COUNTRIES, key="country_sel",
-                    label_visibility="visible", format_func=lambda x: f"🌍 {x}", help="Your country",
+                    index=None, placeholder="🌍 Country",
+                    label_visibility="collapsed", format_func=lambda x: f"🌍 {x}", help="Your country",
                     on_change=lambda: st.session_state.update({"_saved_country_sel": st.session_state["country_sel"]}))
                 # Always auto-set language when country changes (no once-only guard)
                 _prev_country = st.session_state.get("_last_country_sel")
@@ -3982,29 +3976,35 @@ html, body, [class*="css"] {
                     else: st.session_state.lang_sel = "English"
             with _crow2:
                 st.selectbox("Language", list(LANGS.keys()), key="lang_sel",
-                    label_visibility="visible", format_func=lambda x: f"🗣️ {x}", help="Response language",
+                    index=None, placeholder="🗣️ Language",
+                    label_visibility="collapsed", format_func=lambda x: f"🗣️ {x}", help="Response language",
                     on_change=lambda: st.session_state.update({"_saved_lang_sel": st.session_state["lang_sel"]}))
             _cb1, _cb2, _cb3 = st.columns(3)
             with _cb1:
                 st.selectbox("Setting", list(_regions().keys()), key="cfg_region",
-                    label_visibility="visible", format_func=lambda x: f"📍 {x}", help="Setting",
+                    index=None, placeholder="📍 Setting",
+                    label_visibility="collapsed", format_func=lambda x: f"📍 {x}", help="Setting",
                     on_change=lambda: st.session_state.update({"_saved_cfg_region": st.session_state["cfg_region"]}))
             with _cb2:
                 st.selectbox("Grade", _grades(), key="cfg_grade",
-                    label_visibility="visible", format_func=lambda x: f"🎓 {x}", help="Grade",
+                    index=None, placeholder="🎓 Grade",
+                    label_visibility="collapsed", format_func=lambda x: f"🎓 {x}", help="Grade",
                     on_change=lambda: st.session_state.update({"_saved_cfg_grade": st.session_state["cfg_grade"]}))
             with _cb3:
                 st.selectbox("Subject", _subjects(), key="cfg_subject",
-                    label_visibility="visible", format_func=lambda x: f"📚 {x}", help="Subject",
+                    index=None, placeholder="📚 Subject",
+                    label_visibility="collapsed", format_func=lambda x: f"📚 {x}", help="Subject",
                     on_change=lambda: st.session_state.update({"_saved_cfg_subject": st.session_state["cfg_subject"]}))
             _cb4, _cb5 = st.columns(2)
             with _cb4:
                 st.selectbox("Class Size", list(_sizes().keys()), key="cfg_clsz",
-                    label_visibility="visible", format_func=lambda x: f"👥 {x}", help="Class size",
+                    index=None, placeholder="👥 Class Size",
+                    label_visibility="collapsed", format_func=lambda x: f"👥 {x}", help="Class size",
                     on_change=lambda: st.session_state.update({"_saved_cfg_clsz": st.session_state["cfg_clsz"]}))
             with _cb5:
                 st.selectbox("Student Academic Level", list(_ability().keys()), key="cfg_abl",
-                    label_visibility="visible", format_func=lambda x: f"📊 {x}", help="Level",
+                    index=None, placeholder="📊 Student Academic Level",
+                    label_visibility="collapsed", format_func=lambda x: f"📊 {x}", help="Level",
                     on_change=lambda: st.session_state.update({"_saved_cfg_abl": st.session_state["cfg_abl"]}))
             st.markdown('<hr style="margin:6px 0;border-color:#1e2a3a">', unsafe_allow_html=True)
             _pc1, _pc2, _pc3 = st.columns([2, 2, 1])
