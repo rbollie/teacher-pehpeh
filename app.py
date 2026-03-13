@@ -1139,7 +1139,7 @@ UI_TEXT={
   "country":"Country","setting":"Setting","class_size":"Class Size",
   "language":"Language","student_level":"Student Level","school_name":"🏫 School Name",
   "school_placeholder":"e.g., Bahn, St. Martin's","my_classroom":"My Classroom","my_students":"My Students",
-  "gen_btn":"Ask the AI","clear":"🗑️ Clear","hear":"🔊 Hear Results","grade_work":"Grade Work",
+  "gen_btn":"Generate","clear":"🗑️ Clear","hear":"🔊 Hear Results","grade_work":"Grade Work",
   "grade_btn":"Grade","students_work":"Student's work:","offline_title":"📴 Offline — Practice Quiz",
   "offline_msg":"No internet? These quizzes work offline!","practice_quiz":"Practice Quiz",
   "adaptive":"Adaptive. Works offline too!","score":"Score","level":"Level","next":"➡️ Next",
@@ -1185,7 +1185,7 @@ UI_TEXT={
   "country":"Pays","setting":"Contexte","class_size":"Taille de classe",
   "language":"Langue","student_level":"Niveau des élèves","school_name":"🏫 Nom de l'école",
   "school_placeholder":"ex: Bahn, St. Martin's","my_classroom":"Ma Classe","my_students":"Mes Élèves",
-  "gen_btn":"Demander à l'IA","clear":"🗑️ Effacer","hear":"🔊 Écouter","grade_work":"Noter le travail",
+  "gen_btn":"Générer","clear":"🗑️ Effacer","hear":"🔊 Écouter","grade_work":"Noter le travail",
   "grade_btn":"Noter","students_work":"Travail de l'élève :","offline_title":"📴 Hors ligne — Quiz pratique",
   "offline_msg":"Pas d'internet ? Ces quiz fonctionnent hors ligne !","practice_quiz":"Quiz pratique",
   "adaptive":"Adaptatif. Fonctionne hors ligne aussi !","score":"Score","level":"Niveau","next":"➡️ Suivant",
@@ -1231,7 +1231,7 @@ UI_TEXT={
   "country":"Nchi","setting":"Mazingira","class_size":"Ukubwa wa darasa",
   "language":"Lugha","student_level":"Kiwango cha wanafunzi","school_name":"🏫 Jina la shule",
   "school_placeholder":"k.m., Bahn, St. Martin's","my_classroom":"Darasa Langu","my_students":"Wanafunzi Wangu",
-  "gen_btn":"Uliza AI","clear":"🗑️ Futa","hear":"🔊 Sikiliza","grade_work":"Sahihisha Kazi",
+  "gen_btn":"Tengeneza","clear":"🗑️ Futa","hear":"🔊 Sikiliza","grade_work":"Sahihisha Kazi",
   "grade_btn":"Sahihisha","students_work":"Kazi ya mwanafunzi:","offline_title":"📴 Nje ya mtandao — Maswali ya mazoezi",
   "offline_msg":"Hakuna mtandao? Maswali haya yanafanya kazi nje ya mtandao!","practice_quiz":"Maswali ya Mazoezi",
   "adaptive":"Yanabadilika. Yanafanya kazi nje ya mtandao pia!","score":"Alama","level":"Kiwango","next":"➡️ Ifuatayo",
@@ -3904,6 +3904,44 @@ def main():
         line-height:1.2 !important;
     }
 }
+/* ── Config panel: selectbox labels ─────────────────────────────────────── */
+div[data-testid="stSelectbox"] > label,
+div[data-baseweb="select"] ~ label {
+    font-size: clamp(.72rem, 1.4vw, .82rem) !important;
+    font-weight: 700 !important;
+    color: #8aaad4 !important;
+    letter-spacing: .04em !important;
+    text-transform: uppercase !important;
+    margin-bottom: 2px !important;
+}
+@media (max-width: 768px) {
+    div[data-testid="stSelectbox"] > label {
+        font-size: clamp(.70rem, 2.5vw, .78rem) !important;
+    }
+}
+@media (max-width: 480px) {
+    div[data-testid="stSelectbox"] > label {
+        font-size: clamp(.68rem, 3vw, .75rem) !important;
+    }
+}
+/* ── Config panel: selectbox widget text ─────────────────────────────────── */
+div[data-testid="stSelectbox"] div[data-baseweb="select"] {
+    font-size: clamp(.82rem, 1.6vw, .93rem) !important;
+}
+@media (max-width: 768px) {
+    div[data-testid="stSelectbox"] div[data-baseweb="select"] {
+        font-size: clamp(.80rem, 2.8vw, .90rem) !important;
+    }
+}
+@media (max-width: 480px) {
+    div[data-testid="stSelectbox"] div[data-baseweb="select"] {
+        font-size: clamp(.76rem, 3.5vw, .86rem) !important;
+    }
+}
+/* ── Global responsive body font ─────────────────────────────────────────── */
+html, body, [class*="css"] {
+    font-size: clamp(13px, 1.5vw, 16px) !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -3932,8 +3970,8 @@ def main():
             st.markdown('<div style="background:#131f38;border:1px solid #2a3f6a;border-radius:12px;padding:14px 16px;margin:6px 0 4px">', unsafe_allow_html=True)
             _crow1, _crow2 = st.columns([3, 2])
             with _crow1:
-                _country_sel = st.selectbox(T("country"), COUNTRIES, key="country_sel",
-                    label_visibility="collapsed", format_func=lambda x: f"🌍 {x}", help="Your country",
+                _country_sel = st.selectbox("Country", COUNTRIES, key="country_sel",
+                    label_visibility="visible", format_func=lambda x: f"🌍 {x}", help="Your country",
                     on_change=lambda: st.session_state.update({"_saved_country_sel": st.session_state["country_sel"]}))
                 # Always auto-set language when country changes (no once-only guard)
                 _prev_country = st.session_state.get("_last_country_sel")
@@ -3944,29 +3982,29 @@ def main():
                     else: st.session_state.lang_sel = "English"
             with _crow2:
                 st.selectbox("Language", list(LANGS.keys()), key="lang_sel",
-                    label_visibility="collapsed", format_func=lambda x: f"🗣️ {x}", help="Response language",
+                    label_visibility="visible", format_func=lambda x: f"🗣️ {x}", help="Response language",
                     on_change=lambda: st.session_state.update({"_saved_lang_sel": st.session_state["lang_sel"]}))
             _cb1, _cb2, _cb3 = st.columns(3)
             with _cb1:
-                st.selectbox(T("setting"), list(_regions().keys()), key="cfg_region",
-                    label_visibility="collapsed", format_func=lambda x: f"📍 {x}", help="Setting",
+                st.selectbox("Setting", list(_regions().keys()), key="cfg_region",
+                    label_visibility="visible", format_func=lambda x: f"📍 {x}", help="Setting",
                     on_change=lambda: st.session_state.update({"_saved_cfg_region": st.session_state["cfg_region"]}))
             with _cb2:
-                st.selectbox(T("grade"), _grades(), key="cfg_grade",
-                    label_visibility="collapsed", format_func=lambda x: f"🎓 {x}", help="Grade",
+                st.selectbox("Grade", _grades(), key="cfg_grade",
+                    label_visibility="visible", format_func=lambda x: f"🎓 {x}", help="Grade",
                     on_change=lambda: st.session_state.update({"_saved_cfg_grade": st.session_state["cfg_grade"]}))
             with _cb3:
-                st.selectbox(T("subject"), _subjects(), key="cfg_subject",
-                    label_visibility="collapsed", format_func=lambda x: f"📚 {x}", help="Subject",
+                st.selectbox("Subject", _subjects(), key="cfg_subject",
+                    label_visibility="visible", format_func=lambda x: f"📚 {x}", help="Subject",
                     on_change=lambda: st.session_state.update({"_saved_cfg_subject": st.session_state["cfg_subject"]}))
             _cb4, _cb5 = st.columns(2)
             with _cb4:
-                st.selectbox(T("class_size"), list(_sizes().keys()), key="cfg_clsz",
-                    label_visibility="collapsed", format_func=lambda x: f"👥 {x}", help="Class size",
+                st.selectbox("Class Size", list(_sizes().keys()), key="cfg_clsz",
+                    label_visibility="visible", format_func=lambda x: f"👥 {x}", help="Class size",
                     on_change=lambda: st.session_state.update({"_saved_cfg_clsz": st.session_state["cfg_clsz"]}))
             with _cb5:
-                st.selectbox(T("student_level"), list(_ability().keys()), key="cfg_abl",
-                    label_visibility="collapsed", format_func=lambda x: f"📊 {x}", help="Level",
+                st.selectbox("Student Academic Level", list(_ability().keys()), key="cfg_abl",
+                    label_visibility="visible", format_func=lambda x: f"📊 {x}", help="Level",
                     on_change=lambda: st.session_state.update({"_saved_cfg_abl": st.session_state["cfg_abl"]}))
             st.markdown('<hr style="margin:6px 0;border-color:#1e2a3a">', unsafe_allow_html=True)
             _pc1, _pc2, _pc3 = st.columns([2, 2, 1])
@@ -4285,7 +4323,7 @@ setTimeout(function() {{
                         break
         _TASK_CATEGORIES = {
             "📋 Planning":     ["Lesson Plan","Weekly Scheme","Term Scheme","Strategy Guide"],
-            "📝 Assessment":   ["Quiz (10 Q)","Quiz (20 Q)","WASSCE MCQ (50)","WASSCE Theory"],
+            "📝 Assessment":   ["Quiz (10 Q)","Quiz (20 Q)","WASSCE MCQ (50)","WASSCE Theory","BECE Exam","Rubric"],
             "🎯 Activities":   ["Homework","Group Activity","Reading Comprehension","No-Lab Practical","Educational Game","Illustrated Lesson (AI image)"],
             "📚 Study Support":["Study Notes","Remedial Material"],
         }
@@ -4326,30 +4364,6 @@ setTimeout(function() {{
             "Term Scheme":    "Full term roadmap",
             "Strategy Guide": "Teaching tips hub",
         }
-        _ASSESSMENT_TIPS = {
-            "Quiz (10 Q)":     "10 graded questions",
-            "Quiz (20 Q)":     "20 graded questions",
-            "WASSCE MCQ (50)": "50 exam-style MCQs",
-            "WASSCE Theory":   "Long-answer exam",
-        }
-        _ACTIVITIES_TIPS = {
-            "Homework":                    "Take-home practice",
-            "Group Activity":              "Team learning task",
-            "Reading Comprehension":       "Passage with questions",
-            "No-Lab Practical":            "Zero-cost experiment",
-            "Educational Game":            "Fun learning game",
-            "Illustrated Lesson (AI image)": "Lesson with visuals",
-        }
-        _STUDY_TIPS = {
-            "Study Notes":     "Quick revision guide",
-            "Remedial Material": "Catch-up support",
-        }
-        _CAT_TIPS = {
-            "📋 Planning":      _PLANNING_TIPS,
-            "📝 Assessment":    _ASSESSMENT_TIPS,
-            "🎯 Activities":    _ACTIVITIES_TIPS,
-            "📚 Study Support": _STUDY_TIPS,
-        }
 
         if _home_mode:
             # Single-category focused view — just the one dropdown for this category
@@ -4373,7 +4387,7 @@ setTimeout(function() {{
                                 x if not x.startswith(_CAT_PREFIX)
                                 else x.replace(f"{_CAT_PREFIX} ", "")
                             ),
-                            help="\n".join(f"{k}: {v}" for k, v in _CAT_TIPS.get(_cname, {}).items()),
+                            help="\n".join(f"{k}: {v}" for k, v in _PLANNING_TIPS.items()),
                         )
                         if _chosen != _header_opt:
                             if st.session_state.task_cat != _cname or st.session_state.get("task_sel") != _chosen:
@@ -4394,7 +4408,7 @@ setTimeout(function() {{
                                 x if not x.startswith(_CAT_PREFIX)
                                 else x.replace(f"{_CAT_PREFIX} ", "")
                             ),
-                            help="\n".join(f"{k}: {v}" for k, v in _CAT_TIPS.get(_cname, {}).items()),
+                            help=f"Select a task",
                         )
                         if _chosen != _header_opt:
                             if st.session_state.task_cat != _cname or st.session_state.get("task_sel") != _chosen:
@@ -4433,7 +4447,7 @@ setTimeout(function() {{
                                 x if not x.startswith(_CAT_PREFIX)
                                 else x.replace(f"{_CAT_PREFIX} ", "")
                             ),
-                            help="\n".join(f"{k}: {v}" for k, v in _CAT_TIPS.get(_cname, {}).items()),
+                            help="\n".join(f"{k}: {v}" for k, v in _PLANNING_TIPS.items()),
                         )
                         if _chosen != _header_opt:
                             if st.session_state.task_cat != _cname or st.session_state.get("task_sel") != _chosen:
@@ -4457,7 +4471,7 @@ setTimeout(function() {{
                                 x if not x.startswith(_CAT_PREFIX)
                                 else x.replace(f"{_CAT_PREFIX} ", "")
                             ),
-                            help="\n".join(f"{k}: {v}" for k, v in _CAT_TIPS.get(_cname, {}).items()),
+                            help=f"Select a {_cname.split()[-1]} task",
                         )
                         if _chosen != _header_opt:
                             if st.session_state.task_cat != _cname or st.session_state.get("task_sel") != _chosen:
@@ -4712,7 +4726,7 @@ setTimeout(function() {{
         if GOOGLE_API_KEY: _avail_agents.append("Gemini")
         if _avail_agents:
             _n=len(_avail_agents)
-            _all_label=f"AI Agent Selection" if _n>1 else f"{_avail_agents[0]}"
+            _all_label=f"Best answer — all {_n} agents" if _n>1 else f"{_avail_agents[0]}"
             _agent_opts=[_all_label]+[f"{a} only" for a in _avail_agents]
             # Styled agent selector header
             st.markdown(
