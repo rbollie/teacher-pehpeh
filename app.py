@@ -3946,26 +3946,15 @@ html, body, [class*="css"] {
                 _opening = st.session_state.get("_home_active") != "config"
                 st.session_state["_home_active"] = "config" if _opening else None
                 if _opening:
-                    # New panel session: stamp a fresh ID and clear touched set
-                    import random as _rnd
-                    st.session_state["_cfg_panel_id"] = _rnd.randint(0, 999999)
-                    st.session_state["_cfg_touched"] = set()
+                    # Delete widget keys so selectboxes open showing placeholder labels
+                    for _wk in ["country_sel","lang_sel","cfg_region","cfg_grade","cfg_subject","cfg_clsz","cfg_abl"]:
+                        st.session_state.pop(_wk, None)
                 st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
         # ── CONFIG SUBMENU ────────────────────────────────────────────────
         _active = st.session_state.get("_home_active")
         if _active == "config":
-            # Ensure panel session tracking exists (handles page reload without button click)
-            if "cfg_panel_id" not in st.session_state:
-                import random as _rnd
-                st.session_state["_cfg_panel_id"] = _rnd.randint(0, 999999)
-                st.session_state["_cfg_touched"] = set()
-            _cfg_touched = st.session_state.setdefault("_cfg_touched", set())
-            # Force any widget NOT yet touched this session to None so the placeholder label shows
-            for _wk in ["country_sel","lang_sel","cfg_region","cfg_grade","cfg_subject","cfg_clsz","cfg_abl"]:
-                if _wk not in _cfg_touched:
-                    st.session_state[_wk] = None
             _sn = st.session_state["_school_confirmed"]
             _tn = st.session_state["_teacher_confirmed"]
             _pn = st.session_state["_phone_confirmed"]
@@ -3975,7 +3964,7 @@ html, body, [class*="css"] {
                 _country_sel = st.selectbox("Country", COUNTRIES, key="country_sel",
                     index=None, placeholder="🌍 Country",
                     label_visibility="collapsed", format_func=lambda x: f"🌍 {x}", help="Your country",
-                    on_change=lambda _k="country_sel", _m="_saved_country_sel": [st.session_state.update({_m: st.session_state[_k]}), st.session_state.update({"_cfg_touched": st.session_state.get("_cfg_touched", set()) | {_k}})])
+                    on_change=lambda: st.session_state.update({"_saved_country_sel": st.session_state["country_sel"]}))
                 # Always auto-set language when country changes (no once-only guard)
                 _prev_country = st.session_state.get("_last_country_sel")
                 if _country_sel != _prev_country:
@@ -3987,34 +3976,34 @@ html, body, [class*="css"] {
                 st.selectbox("Language", list(LANGS.keys()), key="lang_sel",
                     index=None, placeholder="🗣️ Language",
                     label_visibility="collapsed", format_func=lambda x: f"🗣️ {x}", help="Response language",
-                    on_change=lambda _k="lang_sel", _m="_saved_lang_sel": [st.session_state.update({_m: st.session_state[_k]}), st.session_state.update({"_cfg_touched": st.session_state.get("_cfg_touched", set()) | {_k}})])
+                    on_change=lambda: st.session_state.update({"_saved_lang_sel": st.session_state["lang_sel"]}))
             _cb1, _cb2, _cb3 = st.columns(3)
             with _cb1:
                 st.selectbox("Setting", list(_regions().keys()), key="cfg_region",
                     index=None, placeholder="📍 Setting",
                     label_visibility="collapsed", format_func=lambda x: f"📍 {x}", help="Setting",
-                    on_change=lambda _k="cfg_region", _m="_saved_cfg_region": [st.session_state.update({_m: st.session_state[_k]}), st.session_state.update({"_cfg_touched": st.session_state.get("_cfg_touched", set()) | {_k}})])
+                    on_change=lambda: st.session_state.update({"_saved_cfg_region": st.session_state["cfg_region"]}))
             with _cb2:
                 st.selectbox("Grade", _grades(), key="cfg_grade",
                     index=None, placeholder="🎓 Grade",
                     label_visibility="collapsed", format_func=lambda x: f"🎓 {x}", help="Grade",
-                    on_change=lambda _k="cfg_grade", _m="_saved_cfg_grade": [st.session_state.update({_m: st.session_state[_k]}), st.session_state.update({"_cfg_touched": st.session_state.get("_cfg_touched", set()) | {_k}})])
+                    on_change=lambda: st.session_state.update({"_saved_cfg_grade": st.session_state["cfg_grade"]}))
             with _cb3:
                 st.selectbox("Subject", _subjects(), key="cfg_subject",
                     index=None, placeholder="📚 Subject",
                     label_visibility="collapsed", format_func=lambda x: f"📚 {x}", help="Subject",
-                    on_change=lambda _k="cfg_subject", _m="_saved_cfg_subject": [st.session_state.update({_m: st.session_state[_k]}), st.session_state.update({"_cfg_touched": st.session_state.get("_cfg_touched", set()) | {_k}})])
+                    on_change=lambda: st.session_state.update({"_saved_cfg_subject": st.session_state["cfg_subject"]}))
             _cb4, _cb5 = st.columns(2)
             with _cb4:
                 st.selectbox("Class Size", list(_sizes().keys()), key="cfg_clsz",
                     index=None, placeholder="👥 Class Size",
                     label_visibility="collapsed", format_func=lambda x: f"👥 {x}", help="Class size",
-                    on_change=lambda _k="cfg_clsz", _m="_saved_cfg_clsz": [st.session_state.update({_m: st.session_state[_k]}), st.session_state.update({"_cfg_touched": st.session_state.get("_cfg_touched", set()) | {_k}})])
+                    on_change=lambda: st.session_state.update({"_saved_cfg_clsz": st.session_state["cfg_clsz"]}))
             with _cb5:
                 st.selectbox("Student Academic Level", list(_ability().keys()), key="cfg_abl",
                     index=None, placeholder="📊 Student Academic Level",
                     label_visibility="collapsed", format_func=lambda x: f"📊 {x}", help="Level",
-                    on_change=lambda _k="cfg_abl", _m="_saved_cfg_abl": [st.session_state.update({_m: st.session_state[_k]}), st.session_state.update({"_cfg_touched": st.session_state.get("_cfg_touched", set()) | {_k}})])
+                    on_change=lambda: st.session_state.update({"_saved_cfg_abl": st.session_state["cfg_abl"]}))
             st.markdown('<hr style="margin:6px 0;border-color:#1e2a3a">', unsafe_allow_html=True)
             _pc1, _pc2, _pc3 = st.columns([2, 2, 1])
             with _pc1:
