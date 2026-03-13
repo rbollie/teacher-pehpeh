@@ -3950,13 +3950,10 @@ html, body, [class*="css"] {
         # ── CONFIG SUBMENU ────────────────────────────────────────────────
         _active = st.session_state.get("_home_active")
         if _active == "config":
-            # Restore all widget keys from mirrors so reopening always shows last selection
-            for _wk, _mk in [("country_sel","_saved_country_sel"),("lang_sel","_saved_lang_sel"),
-                              ("cfg_region","_saved_cfg_region"),("cfg_grade","_saved_cfg_grade"),
-                              ("cfg_subject","_saved_cfg_subject"),("cfg_clsz","_saved_cfg_clsz"),
-                              ("cfg_abl","_saved_cfg_abl")]:
-                if _mk in st.session_state:
-                    st.session_state[_wk] = st.session_state[_mk]
+            # Force widget keys to None so labels/placeholders always show on open.
+            # Mirrors (_saved_*) still hold the real values for AI generation.
+            for _wk in ["country_sel","lang_sel","cfg_region","cfg_grade","cfg_subject","cfg_clsz","cfg_abl"]:
+                st.session_state[_wk] = None
             _sn = st.session_state["_school_confirmed"]
             _tn = st.session_state["_teacher_confirmed"]
             _pn = st.session_state["_phone_confirmed"]
