@@ -4401,23 +4401,25 @@ setTimeout(function() {{
                 _prev_sel = st.session_state.get("task_sel", None)
                 with _dd_cols_focused[0]:
                     if _cname == "📋 Planning":
-                        st.markdown(
-                            f'<div style="font-size:.72rem;font-weight:700;letter-spacing:.07em;'
-                            f'text-transform:uppercase;color:#64748b;margin-bottom:4px">📋 Planning</div>',
-                            unsafe_allow_html=True
+                        _header_opt = f"{_CAT_PREFIX} {_cname}"
+                        _dd_options = [_header_opt] + _dd_tasks
+                        _dd_idx = _dd_options.index(_prev_sel) if (_cname == _active_cat and _prev_sel in _dd_tasks) else 0
+                        _chosen = st.selectbox(
+                            label=_cname,
+                            options=_dd_options,
+                            index=_dd_idx,
+                            key=f"dd_cat_0",
+                            label_visibility="collapsed",
+                            format_func=lambda x, _h=_header_opt: (
+                                x if not x.startswith(_CAT_PREFIX)
+                                else x.replace(f"{_CAT_PREFIX} ", "")
+                            ),
+                            help="\n".join(f"{k}: {v}" for k, v in _PLANNING_TIPS.items()),
                         )
-                        for _ptask in _dd_tasks:
-                            _is_sel = (_cname == _active_cat and _prev_sel == _ptask)
-                            _tip = _PLANNING_TIPS.get(_ptask, "")
-                            if st.button(
-                                _ptask,
-                                key=f"plan_hm_btn_{_ptask}",
-                                help=_tip,
-                                use_container_width=True,
-                                type="primary" if _is_sel else "secondary",
-                            ):
+                        if _chosen != _header_opt:
+                            if st.session_state.task_cat != _cname or st.session_state.get("task_sel") != _chosen:
                                 st.session_state.task_cat   = _cname
-                                st.session_state["task_sel"] = _ptask
+                                st.session_state["task_sel"] = _chosen
                                 st.rerun()
                     else:
                         _header_opt = f"{_CAT_PREFIX} {_cname}"
@@ -4456,24 +4458,28 @@ setTimeout(function() {{
 
                 with _dd_cols[_ci]:
                     if _cname == "📋 Planning":
-                        # Render as labelled buttons with hover tooltips
-                        st.markdown(
-                            f'<div style="font-size:.72rem;font-weight:700;letter-spacing:.07em;'
-                            f'text-transform:uppercase;color:#64748b;margin-bottom:4px">📋 Planning</div>',
-                            unsafe_allow_html=True
+                        _header_opt   = f"{_CAT_PREFIX} {_cname}"
+                        _dd_options   = [_header_opt] + _dd_tasks
+                        if _cname == _active_cat and _prev_sel in _dd_tasks:
+                            _dd_idx = _dd_options.index(_prev_sel)
+                        else:
+                            _dd_idx = 0
+                        _chosen = st.selectbox(
+                            label=_cname,
+                            options=_dd_options,
+                            index=_dd_idx,
+                            key=f"dd_cat_{_ci}",
+                            label_visibility="collapsed",
+                            format_func=lambda x, _h=_header_opt: (
+                                x if not x.startswith(_CAT_PREFIX)
+                                else x.replace(f"{_CAT_PREFIX} ", "")
+                            ),
+                            help="\n".join(f"{k}: {v}" for k, v in _PLANNING_TIPS.items()),
                         )
-                        for _ptask in _dd_tasks:
-                            _is_sel = (_cname == _active_cat and _prev_sel == _ptask)
-                            _tip = _PLANNING_TIPS.get(_ptask, "")
-                            if st.button(
-                                _ptask,
-                                key=f"plan_btn_{_ptask}",
-                                help=_tip,
-                                use_container_width=True,
-                                type="primary" if _is_sel else "secondary",
-                            ):
+                        if _chosen != _header_opt:
+                            if st.session_state.task_cat != _cname or st.session_state.get("task_sel") != _chosen:
                                 st.session_state.task_cat   = _cname
-                                st.session_state["task_sel"] = _ptask
+                                st.session_state["task_sel"] = _chosen
                                 st.rerun()
                     else:
                         _header_opt   = f"{_CAT_PREFIX} {_cname}"
@@ -4519,12 +4525,7 @@ setTimeout(function() {{
             if st.button("📋 Open Answer Sheet Guide", key="wassce_guide_btn", use_container_width=False):
                 wassce_shading_modal()
 
-        # Time selector — shown as its own row below the dropdowns
-        if _show_time:
-            tm = st.selectbox(T("time"), _times(), label_visibility="collapsed",
-                              format_func=lambda x: f"\u23f1\ufe0f Time: {x}", help="How long your lesson or activity will run")
-        else:
-            tm = "N/A"
+        tm = "N/A"
 
         _parent_letter_override=None
         _pl_delivery=None
