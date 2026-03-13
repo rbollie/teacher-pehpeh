@@ -3268,7 +3268,7 @@ def main():
         /* Tab font size */
         .stTabs [data-baseweb="tab"] {{
             padding: 7px 12px !important;
-            font-size: .80rem !important;
+            font-size: .95rem !important;
         }}
     }}
 
@@ -3291,9 +3291,9 @@ def main():
             min-width: calc(50% - 0.4rem) !important;
             flex: 1 1 calc(50% - 0.4rem) !important;
         }}
-        h1 {{ font-size: 1.5rem !important; }}
-        h2 {{ font-size: 1.15rem !important; }}
-        h3 {{ font-size: 1rem !important; }}
+        h1 {{ font-size: 1.7rem !important; }}
+        h2 {{ font-size: 1.3rem !important; }}
+        h3 {{ font-size: 1.1rem !important; }}
     }}
 
     /* ── 5. PHONE (≤480px) — full single-column stack ───────────── */
@@ -3317,10 +3317,10 @@ def main():
         /* Logo */
         .block-container img {{ max-height: 100px !important; }}
         /* Typography */
-        h1 {{ font-size: 1.3rem !important; }}
-        h2 {{ font-size: 1.05rem !important; }}
-        h3 {{ font-size: .9rem !important; }}
-        p, li, label {{ font-size: .88rem !important; }}
+        h1 {{ font-size: 1.5rem !important; }}
+        h2 {{ font-size: 1.2rem !important; }}
+        h3 {{ font-size: 1.05rem !important; }}
+        p, li, label {{ font-size: 1rem !important; font-weight: 500 !important; }}
         .status-bar {{
             font-size: .68rem !important;
             padding: 3px 8px !important;
@@ -3341,7 +3341,7 @@ def main():
         .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {{ display: none !important; }}
         .stTabs [data-baseweb="tab"] {{
             padding: 6px 9px !important;
-            font-size: .70rem !important;
+            font-size: .85rem !important;
             white-space: nowrap !important;
             min-width: fit-content !important;
             flex-shrink: 0 !important;
@@ -3355,7 +3355,8 @@ def main():
         [data-testid="baseButton-primary"],
         [data-testid="baseButton-secondary"] {{
             min-height: 46px !important;
-            font-size: .88rem !important;
+            font-size: 1rem !important;
+            font-weight: 700 !important;
             padding: 10px 14px !important;
         }}
         .stSelectbox > div > div,
@@ -3860,7 +3861,7 @@ def main():
 .tp-tile button {
     border-radius:12px !important;
     height:auto !important; min-height:80px !important;
-    font-size:clamp(1rem,2.2vw,1.3rem) !important; font-weight:800 !important;
+    font-size:clamp(1.1rem,2.5vw,1.45rem) !important; font-weight:800 !important;
     border:none !important;
     color:#fff !important;
     text-shadow:0 1px 4px rgba(0,0,0,.55) !important;
@@ -3901,7 +3902,7 @@ def main():
 /* Small utility buttons */
 .tp-sm button {
     height:40px !important; min-height:40px !important;
-    font-size:clamp(.75rem,.9vw,.88rem) !important; font-weight:600 !important;
+    font-size:clamp(.88rem,1.1vw,1rem) !important; font-weight:700 !important;
     background:linear-gradient(135deg,#1a2a4a,#2a3f6a) !important;
     border:1px solid #3a5080 !important; color:#fff !important;
 }
@@ -3909,28 +3910,28 @@ def main():
 @media (max-width:768px) {
     .tp-tile button {
         min-height:68px !important;
-        font-size:clamp(.92rem,3.5vw,1.1rem) !important;
+        font-size:clamp(1rem,4vw,1.2rem) !important;
         padding:10px 10px !important;
     }
 }
 @media (max-width:480px) {
     .tp-tile button {
         min-height:58px !important;
-        font-size:clamp(.85rem,4vw,1rem) !important;
+        font-size:clamp(.95rem,4.5vw,1.1rem) !important;
         padding:8px 8px !important;
         line-height:1.2 !important;
     }
 }
 /* ── Config panel: selectbox placeholder text ────────────────────────────── */
 div[data-testid="stSelectbox"] div[data-baseweb="select"] span[data-testid="stSelectboxPlaceholder"] {
-    font-size: clamp(.80rem, 1.6vw, .92rem) !important;
+    font-size: clamp(.92rem, 1.8vw, 1.05rem) !important;
     font-weight: 700 !important;
     color: #8aaad4 !important;
     letter-spacing: .02em !important;
 }
 /* ── Config panel: selectbox widget text ─────────────────────────────────── */
 div[data-testid="stSelectbox"] div[data-baseweb="select"] {
-    font-size: clamp(.82rem, 1.6vw, .93rem) !important;
+    font-size: clamp(.94rem, 1.8vw, 1.06rem) !important;
 }
 @media (max-width: 768px) {
     div[data-testid="stSelectbox"] div[data-baseweb="select"] {
@@ -3950,7 +3951,8 @@ div[data-testid="stSelectbox"] div[data-baseweb="select"] {
 }
 /* ── Global responsive body font ─────────────────────────────────────────── */
 html, body, [class*="css"] {
-    font-size: clamp(13px, 1.5vw, 16px) !important;
+    font-size: clamp(15px, 1.8vw, 18px) !important;
+    font-weight: 500 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -4765,14 +4767,15 @@ setTimeout(function() {{
                 _agent_pick=_avail_agents
             else:
                 _agent_pick=[_agent_sel]
-            # Soft advisory when all agents selected and more than one available
+            # Friendly advisory when all engines selected
             if len(_agent_pick)>1:
                 st.markdown(
-                    f'<div style="background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.3);' +
-                    f'border-radius:8px;padding:8px 12px;margin:4px 0 2px;font-size:.78rem;color:#a5b4fc;display:flex;align-items:center;gap:8px">' +
-                    f'<span style="font-size:1rem">⚡</span>'
-                    f'<span><strong style="color:#c7d2fe">Richer results mode on</strong> — all {len(_agent_pick)} agents will answer and Teacher Pehpeh picks the best. '
-                    f'May take a little longer on slower connections.</span></div>',
+                    f'<div style="background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.3);' +
+                    f'border-radius:8px;padding:10px 14px;margin:6px 0 4px;font-size:.85rem;color:#F5D98E;display:flex;align-items:flex-start;gap:10px">' +
+                    f'<span style="font-size:1.2rem;line-height:1.3">💡</span>' +
+                    f'<span><strong style="color:#D4A843">Good choice!</strong> All {len(_agent_pick)} AI engines will work together and Teacher Pehpeh picks the best answer for you. '
+                    f'It may take a few extra seconds and use a little more data — totally worth it for important lessons. '
+                    f'If your connection is slow today, you can always pick just one engine below.</span></div>',
                     unsafe_allow_html=True
                 )
         else: _agent_pick=[]
