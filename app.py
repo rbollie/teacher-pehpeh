@@ -3636,20 +3636,23 @@ def main():
         if _mk not in st.session_state: st.session_state[_mk] = _mv
 
     # ── Widget keys: seed from mirror so reopening the menu shows last selection ──
-    # Use "if not in" so we don't overwrite a value Streamlit already has for a
-    # currently-rendered widget (that would cause a flash/reset mid-session).
-    _widget_to_mirror = [
-        ("country_sel",  "_saved_country_sel"),
-        ("lang_sel",     "_saved_lang_sel"),
-        ("cfg_region",   "_saved_cfg_region"),
-        ("cfg_grade",    "_saved_cfg_grade"),
-        ("cfg_subject",  "_saved_cfg_subject"),
-        ("cfg_clsz",     "_saved_cfg_clsz"),
-        ("cfg_abl",      "_saved_cfg_abl"),
-    ]
-    for _wk, _mk in _widget_to_mirror:
-        if _wk not in st.session_state:
-            st.session_state[_wk] = st.session_state[_mk]
+    # Skip seeding on the rerun immediately after fresh-open (keys were just popped
+    # so placeholders/labels show). Clear the flag after skipping once.
+    if st.session_state.pop("_cfg_skip_seed", False):
+        pass  # keys stay absent → placeholders show
+    else:
+        _widget_to_mirror = [
+            ("country_sel",  "_saved_country_sel"),
+            ("lang_sel",     "_saved_lang_sel"),
+            ("cfg_region",   "_saved_cfg_region"),
+            ("cfg_grade",    "_saved_cfg_grade"),
+            ("cfg_subject",  "_saved_cfg_subject"),
+            ("cfg_clsz",     "_saved_cfg_clsz"),
+            ("cfg_abl",      "_saved_cfg_abl"),
+        ]
+        for _wk, _mk in _widget_to_mirror:
+            if _wk not in st.session_state:
+                st.session_state[_wk] = st.session_state[_mk]
     if st.session_state.get("_pending_grade_from_sheet"):
         st.session_state["cfg_grade"]=st.session_state.pop("_pending_grade_from_sheet")
     _res_val="standard resources"
@@ -3946,9 +3949,11 @@ html, body, [class*="css"] {
                 _opening = st.session_state.get("_home_active") != "config"
                 st.session_state["_home_active"] = "config" if _opening else None
                 if _opening:
-                    # Delete widget keys so selectboxes open showing placeholder labels
+                    # Delete widget keys and set skip flag so seeding block doesn't
+                    # immediately refill them from mirrors on the next rerun
                     for _wk in ["country_sel","lang_sel","cfg_region","cfg_grade","cfg_subject","cfg_clsz","cfg_abl"]:
                         st.session_state.pop(_wk, None)
+                    st.session_state["_cfg_skip_seed"] = True
                 st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
