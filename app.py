@@ -1274,7 +1274,7 @@ UI_TEXT={
 }
 def _lang_key():
     """Get current UI language key from session state."""
-    lk=st.session_state.get("lang_sel","English")
+    lk=st.session_state.get("lang_sel","English") or "English"
     if "Français" in lk or "French" in lk: return "fr"
     if "Kiswahili" in lk or "Swahili" in lk: return "sw"
     return "en"
@@ -3654,13 +3654,13 @@ def main():
         st.session_state["cfg_grade"]=st.session_state.pop("_pending_grade_from_sheet")
     _res_val="standard resources"
     # Read all config vars early from session_state (widgets will update them later in the run)
-    country  = st.session_state.get("country_sel","Liberia")
-    lang     = st.session_state.get("lang_sel","English")
-    region   = st.session_state.get("cfg_region", list(_regions().keys())[0])
-    grade    = st.session_state.get("cfg_grade", _grades()[0])
-    subject  = st.session_state.get("cfg_subject", _subjects()[0])
-    clsz     = st.session_state.get("cfg_clsz", list(_sizes().keys())[0])
-    abl      = st.session_state.get("cfg_abl", list(_ability().keys())[0])
+    country  = st.session_state.get("country_sel","Liberia") or "Liberia"
+    lang     = st.session_state.get("lang_sel","English") or "English"
+    region   = st.session_state.get("cfg_region", list(_regions().keys())[0]) or list(_regions().keys())[0]
+    grade    = st.session_state.get("cfg_grade", _grades()[0]) or _grades()[0]
+    subject  = st.session_state.get("cfg_subject", _subjects()[0]) or _subjects()[0]
+    clsz     = st.session_state.get("cfg_clsz", list(_sizes().keys())[0]) or list(_sizes().keys())[0]
+    abl      = st.session_state.get("cfg_abl", list(_ability().keys())[0]) or list(_ability().keys())[0]
     school_name   = st.session_state.get("_school_confirmed","")
     teacher_name  = st.session_state.get("_teacher_confirmed","")
     teacher_phone = st.session_state.get("_phone_confirmed","")
@@ -4034,8 +4034,8 @@ html, body, [class*="css"] {
                 else: moe_on = False
             with _tog2:
                 mano_on = False
-                _reg_val_now = _regions().get(st.session_state.get("cfg_region", list(_regions().keys())[0]))
-                if st.session_state.get("country_sel","Liberia") == "Liberia" and _reg_val_now == "rural" and MANO_AVAILABLE:
+                _reg_val_now = _regions().get(st.session_state.get("cfg_region", list(_regions().keys())[0]) or list(_regions().keys())[0])
+                if (st.session_state.get("country_sel","Liberia") or "Liberia") == "Liberia" and _reg_val_now == "rural" and MANO_AVAILABLE:
                     mano_on = st.checkbox("🗣️ Mano Language", value=False, key="mano_toggle")
                     if mano_on:
                         _ms = get_mano_stats()
@@ -4043,10 +4043,10 @@ html, body, [class*="css"] {
             _sf1, _sf2 = st.columns(2)
             with _sf1:
                 if st.button("💾  Save Config", use_container_width=True, key="sv_prof", type="primary"):
-                    _c=st.session_state.get("country_sel","Liberia"); _l=st.session_state.get("lang_sel","English")
-                    _r=st.session_state.get("cfg_region",list(_regions().keys())[0]); _g=st.session_state.get("cfg_grade",_grades()[0])
-                    _s=st.session_state.get("cfg_subject",_subjects()[0]); _z=st.session_state.get("cfg_clsz",list(_sizes().keys())[0])
-                    _a=st.session_state.get("cfg_abl",list(_ability().keys())[0])
+                    _c=st.session_state.get("country_sel","Liberia") or "Liberia"; _l=st.session_state.get("lang_sel","English") or "English"
+                    _r=st.session_state.get("cfg_region",list(_regions().keys())[0]) or list(_regions().keys())[0]; _g=st.session_state.get("cfg_grade",_grades()[0]) or _grades()[0]
+                    _s=st.session_state.get("cfg_subject",_subjects()[0]) or _subjects()[0]; _z=st.session_state.get("cfg_clsz",list(_sizes().keys())[0]) or list(_sizes().keys())[0]
+                    _a=st.session_state.get("cfg_abl",list(_ability().keys())[0]) or list(_ability().keys())[0]
                     st.session_state.saved_profile={"school":school_name,"teacher":teacher_name,"phone":teacher_phone,"country":_c,"lang":_l,"region":_r,"grade":_g,"subject":_s,"class_size":_z,"ability":_a,"moe_on":moe_on,"mano_on":mano_on,"task_cat":st.session_state.get("task_cat","📋 Planning"),"task":st.session_state.get("task_sel",""),"agent":st.session_state.get("agent_pick","")}
                     st.session_state.profile_set=True; st.session_state["_show_save_opts"]=True; st.rerun()
             with _sf2:
