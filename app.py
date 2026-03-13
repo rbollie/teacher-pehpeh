@@ -3784,13 +3784,14 @@ def main():
         keys=sum([bool(OPENAI_API_KEY),bool(ANTHROPIC_API_KEY),bool(GOOGLE_API_KEY)])
 
     # ── Re-read all vars from session_state after widgets ─────────────────
-    country      = st.session_state["country_sel"]
-    lang         = st.session_state["lang_sel"]
-    region       = st.session_state["cfg_region"]
-    grade        = st.session_state["cfg_grade"]
-    subject      = st.session_state["cfg_subject"]
-    clsz         = st.session_state["cfg_clsz"]
-    abl          = st.session_state["cfg_abl"]
+    # Use saved mirrors as fallback when widget keys are absent (placeholder state)
+    country      = st.session_state.get("country_sel") or st.session_state.get("_saved_country_sel","Liberia")
+    lang         = st.session_state.get("lang_sel") or st.session_state.get("_saved_lang_sel","English")
+    region       = st.session_state.get("cfg_region") or st.session_state.get("_saved_cfg_region", list(_regions().keys())[0])
+    grade        = st.session_state.get("cfg_grade") or st.session_state.get("_saved_cfg_grade", _grades()[0])
+    subject      = st.session_state.get("cfg_subject") or st.session_state.get("_saved_cfg_subject", _subjects()[0])
+    clsz         = st.session_state.get("cfg_clsz") or st.session_state.get("_saved_cfg_clsz", list(_sizes().keys())[0])
+    abl          = st.session_state.get("cfg_abl") or st.session_state.get("_saved_cfg_abl", list(_ability().keys())[0])
     moe_on       = st.session_state.get("moe_toggle", False)
     mano_on      = st.session_state.get("mano_toggle", False)
     school_name  = st.session_state.get("_school_confirmed","")
