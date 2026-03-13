@@ -4685,55 +4685,6 @@ setTimeout(function() {{
                 f'<span style="color:#D0D8E8"> — Options limited to exam-relevant choices.</span></div>',
                 unsafe_allow_html=True
             )
-            with st.expander(f"⚙️ Options for {task} — add extras"):
-                _wassce_extras_en = list(_WASSCE_VALID_EXTRAS)
-                exs = [e for e in _wassce_extras_en if st.checkbox(e, key=f"wx_{e}")]
-        elif _show_options:
-            # Options label and available checkboxes adapt to the selected task
-            _TASK_OPTIONS_MAP = {
-                "detailed lesson plan":         ["differentiation","formative","takehome","wassce_align","local_ex","literacy","large_class","cross_curr","ai_visual"],
-                "homework with minimal resources": ["differentiation","local_ex","literacy","large_class"],
-                "group activity":               ["differentiation","formative","local_ex","large_class","cross_curr","ai_visual"],
-                "hands-on zero-cost activity":  ["differentiation","local_ex","large_class"],
-                "5-day scheme of work":         ["differentiation","formative","wassce_align","local_ex","literacy","cross_curr"],
-                "term plan":                    ["wassce_align","local_ex","cross_curr"],
-                "catch-up material":            ["differentiation","formative","local_ex","literacy"],
-                "zero-cost teaching game":      ["differentiation","local_ex","large_class"],
-                "lesson with AI-generated visual": ["differentiation","local_ex","ai_visual"],
-                "reading passage with questions":  ["differentiation","formative","wassce_align","local_ex","literacy"],
-                "revision guide":               ["differentiation","wassce_align","local_ex","literacy"],
-            }
-            _active_opt_keys = _TASK_OPTIONS_MAP.get(_task_val, ["differentiation","local_ex","wassce_align"])
-            _ALL_EXTRAS_KEYS = ["differentiation","formative","takehome","wassce_align","local_ex","literacy","large_class","cross_curr","ai_visual"]
-            with st.expander(f"⚙️ Options for {task} — add extras"):
-                _extras_labels = [T(k) for k in _active_opt_keys]
-                exs = [EXTRAS[_ALL_EXTRAS_KEYS.index(k)] for k, lbl in zip(_active_opt_keys, _extras_labels)
-                       if st.checkbox(lbl, key=f"x_{k}")]
-                if _show_img:
-                    _img_col1, _img_col2 = st.columns([2, 3])
-                    with _img_col1:
-                        add_img = st.checkbox(T("include_img"), key="add_img", help=T("img_help"))
-                    if add_img:
-                        with _img_col2:
-                            _img_agent_opts = []
-                            if OPENAI_API_KEY: _img_agent_opts.append("🟢 ChatGPT")
-                            if GOOGLE_API_KEY: _img_agent_opts.append("🔵 Nano Banana")
-                            if len(_img_agent_opts) > 1:
-                                _img_agent_opts.insert(0, "⚡ Auto (best available)")
-                            _img_agent_sel = st.selectbox(
-                                "Image agent:",
-                                _img_agent_opts,
-                                key="img_agent_pick",
-                                label_visibility="collapsed",
-                                help="Choose which AI generates the image. ChatGPT (DALL·E 3) = near-photorealistic. Nano Banana (Gemini/Imagen) = alternative style."
-                            )
-                            # Normalise to gen_image() agent string
-                            if "ChatGPT" in _img_agent_sel: _img_agent_choice = "ChatGPT"
-                            elif "Nano Banana" in _img_agent_sel: _img_agent_choice = "Nano Banana"
-                            else: _img_agent_choice = "Auto"
-                            st.session_state["_img_agent_choice"] = _img_agent_choice
-                    else:
-                        st.session_state.setdefault("_img_agent_choice", "Auto")
         # === AI Agent Selection ===
         _avail_agents=[]
         if OPENAI_API_KEY: _avail_agents.append("ChatGPT")
