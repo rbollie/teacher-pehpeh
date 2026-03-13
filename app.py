@@ -7766,7 +7766,8 @@ Be factual. Do not invent data. Keep each section focused and practical."""
     50%      {{ box-shadow: 0 0 18px rgba(211,47,47,.8); }}
 }}
 </style>""", unsafe_allow_html=True)
-            chat_audio = st.audio_input("🎤", key="chat_mic", label_visibility="collapsed")
+            _chat_mic_key = f"chat_mic_{st.session_state.get('_chat_mic_gen', 0)}"
+            chat_audio = st.audio_input("🎤", key=_chat_mic_key, label_visibility="collapsed")
             # Dynamic label via components.html — runs in its own iframe so uses window.parent.document
             import streamlit.components.v1 as _mic_comp
             _mic_comp.html("""<div id="lbl" style="font-size:.74rem;font-weight:700;text-align:center;color:#EF5350;font-family:sans-serif;margin-top:2px">🎤 Tap to record</div>
@@ -7993,6 +7994,10 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                         st.session_state["_show_img_debug"] = True
                 status.update(label=T("response_ready"),state="complete",expanded=False)
             st.session_state.chat_messages.append(msg_data)
+            # Reset audio widget key so it mounts fresh (avoids "An error occurred" on rerun)
+            if voice_text:
+                st.session_state["_chat_mic_gen"] = st.session_state.get("_chat_mic_gen", 0) + 1
+                st.session_state.pop("_last_audio_hash", None)
             # Auto-generate TTS when input came from voice — plays once on next render
             if voice_text and ELEVENLABS_API_KEY:
                 _auto_content = msg_data.get("content", "")
