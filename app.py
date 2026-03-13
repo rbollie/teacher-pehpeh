@@ -4749,13 +4749,13 @@ setTimeout(function() {{
         if GOOGLE_API_KEY: _avail_agents.append("Gemini")
         if _avail_agents:
             _n=len(_avail_agents)
-            _all_label=f"Best answer — all {_n} agents" if _n>1 else f"{_avail_agents[0]}"
-            _agent_opts=[_all_label]+[f"{a} only" for a in _avail_agents]
+            _all_label=f"Best Answer — All {_n} AI Engines" if _n>1 else f"{_avail_agents[0]}"
+            _agent_opts=[_all_label]+[f"{a}" for a in _avail_agents]
             # Styled agent selector header
             st.markdown(
                 f'<div style="display:flex;align-items:center;gap:8px;margin:8px 0 4px">'
                 f'<span style="font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b">AI Engine</span>'
-                f'<span style="font-size:10px;padding:1px 7px;border-radius:10px;background:rgba(99,102,241,.2);color:#a5b4fc;font-weight:600;border:1px solid rgba(99,102,241,.3)">⚡ {_n} agent{"s" if _n != 1 else ""} available</span>'
+                f'<span style="font-size:10px;padding:1px 7px;border-radius:10px;background:rgba(99,102,241,.2);color:#a5b4fc;font-weight:600;border:1px solid rgba(99,102,241,.3)">⚡ {_n} AI engine{"s" if _n != 1 else ""} available</span>'
                 f'</div>',
                 unsafe_allow_html=True
             )
@@ -4764,7 +4764,7 @@ setTimeout(function() {{
             if "all" in _agent_sel or _agent_sel==_all_label and _n>1:
                 _agent_pick=_avail_agents
             else:
-                _agent_pick=[_agent_sel.replace(" only","")]
+                _agent_pick=[_agent_sel]
             # Soft advisory when all agents selected and more than one available
             if len(_agent_pick)>1:
                 st.markdown(
@@ -4778,7 +4778,7 @@ setTimeout(function() {{
         else: _agent_pick=[]
         gen_col, clr_col = st.columns([3,1])
         with gen_col:
-            gen_btn=st.button(f"✨ {T('gen_btn')}",type="primary",use_container_width=True,key="gen")
+            gen_btn=st.button("✨ Ask AI",type="primary",use_container_width=True,key="gen")
         with clr_col:
             if st.button(T("clear"),use_container_width=True,key="gen_clr"):
                 st.session_state.gen_result=None; st.rerun()
