@@ -1208,7 +1208,7 @@ LANGS={"English":"English","Français":"French","Kiswahili":"Swahili"}
 # UI Translations
 UI_TEXT={
  "en":{
-  "generate":"✏️ Create","chat":"💬 Chat","quiz":"Quiz","students":"🧑‍🎓 Students",
+  "generate":"✏️ Create","chat":"💬 Chat with Teacher Pehpeh","quiz":"Quiz","students":"🧑‍🎓 Students",
   "task":"Task","time":"Time","topic":"Topic","options":"Options","subject":"Subject","grade":"Grade",
   "country":"Country","setting":"Setting","class_size":"Class Size",
   "language":"Language","student_level":"Student Level","school_name":"🏫 School Name",
@@ -1641,7 +1641,7 @@ def _render_intervention_bubble(student_name, avg_score=None, profile=None, subj
     nt   = p.get("nt", "")
 
     # ── Tab indices (must match st.tabs() order: generate,chat,quiz,students,academic,ibt) ──
-    _TAB = {"generate": 0, "students": 1, "academic": 2, "ibt": 3, "chat": 4, "quiz": 5}
+    _TAB = {"generate": 0, "chat": 1, "quiz": 2, "students": 3, "academic": 4, "ibt": 5}
 
     # ── Derive urgency level ───────────────────────────────
     risk_count = sum([
@@ -5166,7 +5166,7 @@ html, body, [class*="css"] {
 
 </style>
 """, unsafe_allow_html=True)
-        t1,t2,t5,t6,t3,t4=st.tabs([T("generate"),T("students"),"📊 Academic Report","📈 IBT Reports",T("chat"),T("quiz")])
+        t1,t3,t4,t2,t5,t6=st.tabs([T("generate"),T("chat"),T("quiz"),T("students"),"📊 Academic Report","📈 IBT Reports"])
         t5=t5  # Academic Report tab
         t6=t6  # IBT Reports tab
 
