@@ -3639,7 +3639,20 @@ def main():
     # Skip seeding on the rerun immediately after fresh-open (keys were just popped
     # so placeholders/labels show). Clear the flag after skipping once.
     if st.session_state.pop("_cfg_skip_seed", False):
-        pass  # keys stay absent → placeholders show
+        pass  # keys stay absent → placeholders show on fresh open
+    elif st.session_state.get("profile_set", False):
+        # Profile saved: always restore widget keys from mirrors so reopening shows saved values
+        _widget_to_mirror = [
+            ("country_sel",  "_saved_country_sel"),
+            ("lang_sel",     "_saved_lang_sel"),
+            ("cfg_region",   "_saved_cfg_region"),
+            ("cfg_grade",    "_saved_cfg_grade"),
+            ("cfg_subject",  "_saved_cfg_subject"),
+            ("cfg_clsz",     "_saved_cfg_clsz"),
+            ("cfg_abl",      "_saved_cfg_abl"),
+        ]
+        for _wk, _mk in _widget_to_mirror:
+            st.session_state[_wk] = st.session_state[_mk]
     else:
         _widget_to_mirror = [
             ("country_sel",  "_saved_country_sel"),
@@ -4053,6 +4066,11 @@ html, body, [class*="css"] {
                     _s=st.session_state.get("cfg_subject",_subjects()[0]) or _subjects()[0]; _z=st.session_state.get("cfg_clsz",list(_sizes().keys())[0]) or list(_sizes().keys())[0]
                     _a=st.session_state.get("cfg_abl",list(_ability().keys())[0]) or list(_ability().keys())[0]
                     st.session_state.saved_profile={"school":school_name,"teacher":teacher_name,"phone":teacher_phone,"country":_c,"lang":_l,"region":_r,"grade":_g,"subject":_s,"class_size":_z,"ability":_a,"moe_on":moe_on,"mano_on":mano_on,"task_cat":st.session_state.get("task_cat","📋 Planning"),"task":st.session_state.get("task_sel",""),"agent":st.session_state.get("agent_pick","")}
+                    # Keep mirrors in sync with saved values so seeding block restores correctly on reopen
+                    st.session_state["_saved_country_sel"]=_c; st.session_state["_saved_lang_sel"]=_l
+                    st.session_state["_saved_cfg_region"]=_r; st.session_state["_saved_cfg_grade"]=_g
+                    st.session_state["_saved_cfg_subject"]=_s; st.session_state["_saved_cfg_clsz"]=_z
+                    st.session_state["_saved_cfg_abl"]=_a
                     st.session_state.profile_set=True; st.session_state["_show_save_opts"]=True; st.rerun()
             with _sf2:
                 if st.button("📂  Load Config", use_container_width=True, key="ld_prof", type="primary"):
