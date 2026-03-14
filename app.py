@@ -4340,6 +4340,130 @@ def main():
   _obs.observe(document.body, {{childList:true, subtree:true}});
 }})();
 </script>""", unsafe_allow_html=True)
+
+    # -- Light-mode inline style patcher --
+    # CSS cannot override inline style= attributes; MutationObserver patches
+    # every re-rendered Streamlit node, remapping dark colors to light equivalents.
+    st.markdown(r"""
+<script>
+(function(){
+  var BG={
+    "#050c1c":"#eef2fa","#050C1C":"#eef2fa",
+    "#0a0e1a":"#eef2fa","#0A0E1A":"#eef2fa",
+    "#061228":"#eef2fa",
+    "#0b1e3d":"#e8f0fb","#0B1E3D":"#e8f0fb",
+    "#0e1e38":"#e8f0fb","#0E1E38":"#e8f0fb",
+    "#0f2247":"#e8f0fb","#0F2247":"#e8f0fb",
+    "#0d1a30":"#f0f4fb","#0D1A30":"#f0f4fb",
+    "#162b50":"#f0f5ff","#162B50":"#f0f5ff",
+    "#1a2744":"#f0f5ff","#1A2744":"#f0f5ff",
+    "#111c35":"#f0f5ff","#111C35":"#f0f5ff",
+    "#0d1b2a":"#f8fafc","#0D1B2A":"#f8fafc",
+    "#111e30":"#f8fafc","#111E30":"#f8fafc",
+    "#131f38":"#f1f5f9","#131F38":"#f1f5f9",
+    "#1e3a6a":"#dbeafe","#1E3A6A":"#dbeafe",
+    "#3d0c0c":"#fff0f0","#3D0C0C":"#fff0f0",
+    "#0d3b14":"#f0fdf4","#0D3B14":"#f0fdf4",
+    "#1b5e20":"#dcfce7","#1B5E20":"#dcfce7",
+    "#2e7d32":"#bbf7d0","#2E7D32":"#bbf7d0",
+    "#1565c0":"#dbeafe","#1565C0":"#dbeafe",
+    "#0d47a1":"#dbeafe","#0D47A1":"#dbeafe",
+    "#4a148c":"#ede9fe","#4A148C":"#ede9fe",
+    "#6a1b9a":"#ede9fe","#6A1B9A":"#ede9fe",
+    "#8b1a1a":"#fee2e2","#8B1A1A":"#fee2e2",
+    "#b22234":"#fee2e2","#B22234":"#fee2e2",
+    "#4a0e0e":"#fee2e2","#4A0E0E":"#fee2e2"
+  };
+  var FG={
+    "#d0d8e8":"#1a1a2e","#D0D8E8":"#1a1a2e",
+    "#e4eaf4":"#1a1a2e","#E4EAF4":"#1a1a2e",
+    "#c0cedf":"#374151","#C0CEDF":"#374151",
+    "#8899bb":"#4b5568","#8899BB":"#4b5568",
+    "#6677aa":"#6b7280","#6677AA":"#6b7280",
+    "#8899aa":"#6b7280","#8899AA":"#6b7280",
+    "#a0b8d0":"#4b5568","#A0B8D0":"#4b5568",
+    "#a0b4cc":"#6b7280","#A0B4CC":"#6b7280",
+    "#8aaad4":"#4b5568","#8AAAD4":"#4b5568",
+    "#b0bec5":"#374151","#B0BEC5":"#374151",
+    "#b0c8e8":"#374151","#B0C8E8":"#374151",
+    "#90caf9":"#1d4ed8","#90CAF9":"#1d4ed8",
+    "#f0d5d5":"#7f1d1d","#F0D5D5":"#7f1d1d",
+    "#ffe8e8":"#7f1d1d","#FFE8E8":"#7f1d1d",
+    "#81c784":"#166534","#81C784":"#166534",
+    "#a5d6a7":"#166534","#A5D6A7":"#166534",
+    "#ef9a9a":"#991b1b","#EF9A9A":"#991b1b",
+    "#ffb74d":"#92400e","#FFB74D":"#92400e",
+    "#f5d98e":"#78350f","#F5D98E":"#78350f",
+    "#8baad0":"#374151","#8BAAD0":"#374151"
+  };
+  var GR=[
+    ["linear-gradient(160deg,#050C1C","linear-gradient(160deg,#e8f0fb"],
+    ["linear-gradient(160deg,#050c1c","linear-gradient(160deg,#e8f0fb"],
+    ["linear-gradient(135deg,#0E1E38","linear-gradient(135deg,#f0f5ff"],
+    ["linear-gradient(135deg,#0e1e38","linear-gradient(135deg,#f0f5ff"],
+    ["linear-gradient(135deg,#0D1A30","linear-gradient(135deg,#f0f4fb"],
+    ["linear-gradient(135deg,#1A2744","linear-gradient(135deg,#f0f5ff"],
+    ["linear-gradient(180deg,#4A0E0E","linear-gradient(180deg,#fee2e2"],
+    ["linear-gradient(135deg,#2E7D32","linear-gradient(135deg,#bbf7d0"],
+    ["linear-gradient(135deg,#1B5E20","linear-gradient(135deg,#dcfce7"],
+    ["linear-gradient(135deg,#0D3B14","linear-gradient(135deg,#f0fdf4"],
+    ["linear-gradient(135deg,#1565C0","linear-gradient(135deg,#dbeafe"],
+    ["linear-gradient(135deg,#0D47A1","linear-gradient(135deg,#dbeafe"],
+    ["linear-gradient(135deg,#4A148C","linear-gradient(135deg,#ede9fe"],
+    ["linear-gradient(135deg,#6A1B9A","linear-gradient(135deg,#ede9fe"],
+    ["linear-gradient(135deg,#8B1A1A","linear-gradient(135deg,#fee2e2"],
+    ["linear-gradient(135deg,rgba(8,18,40","linear-gradient(135deg,rgba(240,245,255"],
+    ["linear-gradient(135deg,rgba(14,30,60","linear-gradient(135deg,rgba(230,240,255"]
+  ];
+  function isLight(){
+    if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches) return true;
+    var a=document.querySelector('[data-testid="stAppViewContainer"]');
+    if(!a) return false;
+    var bg=window.getComputedStyle(a).backgroundColor||'';
+    var m=bg.match(/rgb\(([0-9]+),\s*([0-9]+),\s*([0-9]+)\)/);
+    if(!m) return false;
+    return(0.299*+m[1]+0.587*+m[2]+0.114*+m[3])/255>0.5;
+  }
+  function patchEl(el){
+    if(!el||el.nodeType!==1)return;
+    var s=el.getAttribute('style');
+    if(!s)return;
+    var o=s;
+    GR.forEach(function(p){s=s.split(p[0]).join(p[1]);});
+    s=s.replace(/rgba\(([0-9]+),([0-9]+),([0-9]+),[^)]+\)/g,function(m,r,g,b){
+      return(0.299*+r+0.587*+g+0.114*+b)/255<0.25?'rgba(200,215,240,0.35)':m;
+    });
+    Object.keys(BG).forEach(function(k){
+      s=s.replace(new RegExp('(background(?:-color)?\\s*:\\s*)'+k+'(?=[;\\s!"\']|$)','gi'),function(m,p){return p+BG[k];});
+    });
+    Object.keys(FG).forEach(function(k){
+      s=s.replace(new RegExp('((?:^|;)\\s*color\\s*:\\s*)'+k+'(?=[;\\s!"\']|$)','gi'),function(m,p){return p+FG[k];});
+    });
+    s=s.replace(/(border(?:-color)?:\s*)#[01][0-9a-fA-F]{5}/g,'$1rgba(43,125,233,.35)');
+    if(s!==o)el.setAttribute('style',s);
+  }
+  function patchTree(r){
+    if(!isLight())return;
+    if(r&&r.querySelectorAll)Array.from(r.querySelectorAll('[style]')).forEach(patchEl);
+    if(r&&r.getAttribute&&r.getAttribute('style'))patchEl(r);
+  }
+  var obs=new MutationObserver(function(muts){
+    if(!isLight())return;
+    muts.forEach(function(m){
+      m.addedNodes.forEach(function(n){patchTree(n);});
+      if(m.type==='attributes'&&m.attributeName==='style')patchEl(m.target);
+    });
+  });
+  obs.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style']});
+  function init(){patchTree(document.body);}
+  document.readyState==='loading'
+    ?document.addEventListener('DOMContentLoaded',init)
+    :init();
+  if(window.matchMedia)
+    window.matchMedia('(prefers-color-scheme:light)').addEventListener('change',init);
+})();
+</script>""", unsafe_allow_html=True)
+
     # ── Session state defaults (sidebar removed — all UI in main content) ──────
     if "profile_set" not in st.session_state: st.session_state.profile_set=False
     for _ck in ["_school_confirmed","_teacher_confirmed","_phone_confirmed"]:
