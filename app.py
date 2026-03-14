@@ -180,109 +180,6 @@ def _restore_session_from_token():
         pass
     return False
 
-def _capture_client_gps():
-    """
-    Silently request the client's GPS coordinates via browser JS.
-    On user approval, injects ?_lat=X&_lon=Y into the Streamlit URL
-    which triggers a rerun; coords are then stored in session_state.
-    Runs once per session after login. No UI is shown to the user.
-    Requires HTTPS in production (Streamlit Cloud satisfies this).
-    """
-    import streamlit.components.v1 as _gps_comp
-
-    # Already captured this session — nothing to do
-    if st.session_state.get("_gps_lat") and st.session_state.get("_gps_lon"):
-        return
-
-    # Coords may have arrived via query params from a previous JS redirect
-    _lat = st.query_params.get("_lat", "")
-    _lon = st.query_params.get("_lon", "")
-    _net = st.query_params.get("_net", "")
-    if _lat and _lon:
-        try:
-            st.session_state["_gps_lat"] = float(_lat)
-            st.session_state["_gps_lon"] = float(_lon)
-        except Exception:
-            pass
-    if _net:
-        st.session_state["_net_type"] = _net.lower().strip()
-    if _lat or _net:
-        # Clean the params out of the URL so they don't persist
-        try:
-            del st.query_params["_lat"]
-            del st.query_params["_lon"]
-        except Exception:
-            pass
-        try:
-            del st.query_params["_net"]
-        except Exception:
-            pass
-        return
-
-    # Inject JS — runs silently in the iframe, zero visible height
-    _gps_comp.html("""
-<script>
-(function(){
-  // Guard: only request once per page-load
-  if (window._tpGPSRequested) return;
-  window._tpGPSRequested = true;
-
-  // --- Network type (Network Information API, ~75% browser coverage) ---
-  var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-  var netType = conn ? (conn.effectiveType || conn.type || "unknown") : "unknown";
-
-  function _pushToParent(lat, lon) {
-    var url = new URL(window.parent.location.href);
-    if (lat !== null) { url.searchParams.set('_lat', lat); url.searchParams.set('_lon', lon); }
-    url.searchParams.set('_net', netType);
-    window.parent.location.href = url.toString();
-  }
-
-  if (!navigator.geolocation) {
-    // No GPS support — still push network type
-    _pushToParent(null, null);
-    return;
-  }
-  navigator.geolocation.getCurrentPosition(
-    function(pos){
-      var lat = pos.coords.latitude.toFixed(6);
-      var lon = pos.coords.longitude.toFixed(6);
-      _pushToParent(lat, lon);
-    },
-    function(err){
-      // GPS denied or unavailable — still push network type
-      _pushToParent(null, null);
-    },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
-  );
-})();
-</script>
-""", height=0)
-
-_SLOW_NETWORKS = {"2g", "slow-2g", "3g"}
-
-def _bandwidth_prompt_addon() -> str:
-    """
-    Returns a SYSTEM instruction fragment that tells the AI to be concise
-    when the teacher is on a slow mobile connection (2G/3G).
-    Returns an empty string on fast or unknown connections.
-    """
-    net = st.session_state.get("_net_type", "unknown").lower()
-    if net in _SLOW_NETWORKS:
-        return (
-            f"\n\nSYSTEM ALERT: This teacher is currently on a {net.upper()} mobile connection — "
-            "bandwidth is extremely limited. You MUST optimise your response:\n"
-            "1. Be concise. Remove all filler, lengthy introductions, and padding.\n"
-            "2. Use short, tight bullet points instead of long paragraphs wherever possible.\n"
-            "3. Keep the total response to the minimum needed to deliver a complete, usable output.\n"
-            "Do NOT sacrifice educational quality — but cut every unnecessary word."
-        )
-    return ""
-
-def _is_slow_connection() -> bool:
-    """True only when we have a confirmed slow network type (not 'unknown')."""
-    return st.session_state.get("_net_type", "unknown").lower() in _SLOW_NETWORKS
-
 def _login_required():
     """True if the app has login credentials configured."""
     return len(_get_credentials()) > 0
@@ -543,6 +440,49 @@ def check_conn():
     elif a<2000: r.update(quality="low",label="Slow (server→API)",emoji="🟠")
     else: r.update(quality="very_low",label="Very Slow",emoji="🟠")
     return r
+
+# === CLIENT IP & BANDWIDTH HELPERS ===
+
+def _get_client_ip() -> str:
+    """
+    Return the browser's public IP from Streamlit request headers.
+    Checks X-Forwarded-For first (Streamlit Cloud / reverse proxy),
+    then X-Real-Ip and CF-Connecting-IP (Cloudflare).
+    Falls back to empty string — never raises.
+    """
+    try:
+        hdrs = st.context.headers          # requires Streamlit >= 1.31
+        for _h in ("x-forwarded-for", "x-real-ip", "cf-connecting-ip"):
+            _v = hdrs.get(_h, "")
+            if _v:
+                return _v.split(",")[0].strip()
+    except Exception:
+        pass
+    return ""
+
+# Confirmed-slow network types reported by navigator.connection.effectiveType
+_SLOW_NETWORKS = {"2g", "slow-2g", "3g"}
+
+def _is_slow_connection() -> bool:
+    """
+    Returns True only when the browser has reported a confirmed slow network
+    type (2g, slow-2g, 3g).  Never fires on 'unknown' so Safari / iOS users
+    are never penalised for their browser not supporting the Network Info API.
+    """
+    return st.session_state.get("_net_type", "").lower() in _SLOW_NETWORKS
+
+def _bandwidth_prompt_addon() -> str:
+    """
+    Returns a SYSTEM instruction telling the AI to be concise and bullet-heavy
+    on slow connections.  Returns empty string on fast or unknown connections.
+    """
+    if _is_slow_connection():
+        return (
+            "\n[SYSTEM: The teacher is on a slow mobile connection (2G/3G). "
+            "Keep your response SHORT. Use brief bullet points. "
+            "Avoid long paragraphs, tables, or excessive formatting.]"
+        )
+    return ""
 
 # === IMAGE GENERATION ===
 def _enhance_image_prompt(raw_prompt, openai_client):
@@ -2747,8 +2687,10 @@ def synth(sp,q,resps):
 
 _CONN_LOG_FIELDS = [
     "timestamp", "school_code",
-    # Client-side (browser GPS)
-    "client_lat", "client_lon", "client_accuracy_m",
+    # Client-side (browser GPS + IP)
+    "client_ip", "client_lat", "client_lon", "client_accuracy_m",
+    # Client-side network (navigator.connection)
+    "client_net_type",
     # Server-side (IP geolocation)
     "server_ip", "ip_city", "ip_region", "ip_country", "isp", "ip_lat", "ip_lon",
     # Connectivity quality
@@ -3014,9 +2956,14 @@ def _run_connectivity_snapshot():
             "(function(){"
             "if(window.__tp_geo_done)return;"
             "window.__tp_geo_done=true;"
+            # Capture network type synchronously — works independently of GPS
+            "var _net=(navigator.connection&&navigator.connection.effectiveType)"
+            "?navigator.connection.effectiveType:\"unknown\";"
             "function done(lat,lon,acc){"
             "var u=new URL(window.location.href);"
             "u.searchParams.set(\"_geo_captured\",\"1\");"
+            # Always push _net so network detection works even without GPS
+            "u.searchParams.set(\"_net\",_net);"
             "if(lat!==null){"
             "u.searchParams.set(\"_geo_lat\",lat.toFixed(6));"
             "u.searchParams.set(\"_geo_lon\",lon.toFixed(6));"
@@ -3030,8 +2977,8 @@ def _run_connectivity_snapshot():
             "}"
             "if(navigator.geolocation){"
             "navigator.geolocation.getCurrentPosition("
-            "function(p){done(p.coords.latitude,p.coords.longitude,p.coords.accuracy);}," 
-            "function(){done(null,null,null);}," 
+            "function(p){done(p.coords.latitude,p.coords.longitude,p.coords.accuracy);},"
+            "function(){done(null,null,null);},"
             "{enableHighAccuracy:true,timeout:8000,maximumAge:0}"
             ");"
             "}else{done(null,null,null);}"
@@ -3056,7 +3003,12 @@ def _run_connectivity_snapshot():
     if _client_lat in ("denied", ""):
         _client_lat = _client_lon = _client_acc = ""
 
-    for _pk in ("_geo_captured", "_geo_lat", "_geo_lon", "_geo_acc"):
+    # Network type reported by navigator.connection.effectiveType
+    # "unknown" means the browser (e.g. Safari/iOS) doesn't support the API
+    _client_net = st.query_params.get("_net", "")
+    st.session_state["_net_type"] = _client_net   # used by _is_slow_connection()
+
+    for _pk in ("_geo_captured", "_geo_lat", "_geo_lon", "_geo_acc", "_net"):
         try:
             del st.query_params[_pk]
         except Exception:
@@ -3154,11 +3106,25 @@ def _run_connectivity_snapshot():
     _draw(2, _res)
     _conn_info = check_conn()
     _lat_ms = _conn_info.get("latency_ms") or 9_999
-    if _lat_ms < 60:      _tech_type = "Fixed Broadband / Wi-Fi"
-    elif _lat_ms < 150:   _tech_type = "4G LTE"
-    elif _lat_ms < 400:   _tech_type = "3G"
-    elif _lat_ms < 1_500: _tech_type = "2G / Edge"
-    else:                 _tech_type = "Very Slow / Offline"
+    # Latency-based inference (server→API — used as fallback)
+    if _lat_ms < 60:      _tech_type_latency = "Fixed Broadband / Wi-Fi"
+    elif _lat_ms < 150:   _tech_type_latency = "4G LTE"
+    elif _lat_ms < 400:   _tech_type_latency = "3G"
+    elif _lat_ms < 1_500: _tech_type_latency = "2G / Edge"
+    else:                 _tech_type_latency = "Very Slow / Offline"
+    # Prefer browser-reported network type (client-side, more accurate)
+    _net_label_map = {
+        "4g":      "4G LTE",
+        "3g":      "3G",
+        "2g":      "2G / Edge",
+        "slow-2g": "2G / Edge (Slow)",
+    }
+    if _client_net and _client_net.lower() in _net_label_map:
+        _tech_type = _net_label_map[_client_net.lower()]
+    elif _client_net and _client_net.lower() not in ("unknown", ""):
+        _tech_type = _client_net.upper()          # pass through unrecognised values
+    else:
+        _tech_type = _tech_type_latency           # Safari / no Network Info API
     _res[2] = _tech_type
 
     _draw(3, _res)
@@ -3180,9 +3146,11 @@ def _run_connectivity_snapshot():
     _record = {
         "timestamp":              _dt.datetime.now().isoformat(),
         "school_code":            str(st.session_state.get("_login_label", "unknown")),
+        "client_ip":              _get_client_ip(),
         "client_lat":             _client_lat,
         "client_lon":             _client_lon,
         "client_accuracy_m":      _client_acc,
+        "client_net_type":        _client_net,
         "server_ip":              str(_geo.get("ip", "")),
         "ip_city":                _ip_city,
         "ip_region":              _ip_region,
@@ -3248,13 +3216,6 @@ def main():
             _run_connectivity_snapshot()
     # Admin bypasses consent and snapshot entirely
 
-    # ── GPS CAPTURE (silent, once per session) ───────────────────────
-    # Requests the browser's GPS coordinates after login.
-    # Stored in st.session_state["_gps_lat"] / ["_gps_lon"].
-    # Access anywhere in the app with:
-    #   lat = st.session_state.get("_gps_lat")
-    #   lon = st.session_state.get("_gps_lon")
-    _capture_client_gps()
 
     # ── IBT LOGO + CONTACT BANNER (fixed top-right) ─────────────────
     st.markdown(
@@ -6151,24 +6112,6 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     if local_notes:
                         q += f"\nContextualization: {local_notes}"
             want_img=add_img or "image" in task.lower() or "AI visual" in str(exs)
-            # === Bandwidth-aware: block image gen on slow connections ===
-            if _is_slow_connection() and want_img:
-                want_img = False
-                st.info(
-                    f"⚡ **{st.session_state.get('_net_type','').upper()} connection detected.** "
-                    "Image generation has been skipped to reduce data usage. "
-                    "Switch to Wi-Fi or a stronger signal to enable visuals."
-                )
-            # === Bandwidth-aware: append concise-mode instruction to prompt ===
-            _bw_addon = _bandwidth_prompt_addon()
-            if _bw_addon:
-                q += _bw_addon
-                if not _is_slow_connection() or "⚡" not in (st.session_state.get("_bw_banner_shown", "")):
-                    st.info(
-                        f"⚡ **{st.session_state.get('_net_type','').upper()} connection detected.** "
-                        "Teacher Pehpeh is optimising the lesson plan for faster loading."
-                    )
-                    st.session_state["_bw_banner_shown"] = st.session_state.get("_net_type","")
             keys=len(_agent_pick)
             rs={}; ph=st.empty(); s=0; tot=keys+(2 if want_img else 1)
             ph.markdown(pprog(0,tot,T("generating_content")),unsafe_allow_html=True)
