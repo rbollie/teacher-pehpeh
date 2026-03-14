@@ -2911,10 +2911,13 @@ def _run_connectivity_snapshot():
         )
         # Call navigator.geolocation directly inside the _comp.html iframe.
         # Injecting into window.parent.document is blocked by CSP in modern
-        # browsers — the script tag is created but the geolocation API is never
-        # called. Instead we call it from within the iframe itself and use
-        # window.parent.location.replace() to write the coords back to the URL
-        # (same-site navigation from a child frame IS permitted by browsers).
+        # browsers. Instead we call geolocation from within the iframe itself
+        # and use window.parent.location.replace() to write coords back to the
+        # URL (same-site child→parent navigation is permitted by browsers).
+        #
+        # IMPORTANT — preserve the _s session token so the user stays logged in
+        # after the page reload. We read existing params from the parent URL and
+        # carry them forward, only adding/overwriting the _geo_* keys.
         _comp.html("""
 <script>
 (function() {
@@ -2922,17 +2925,19 @@ def _run_connectivity_snapshot():
   window.__tpGeoDone = true;
 
   function done(lat, lon, acc) {
-    // Build new URL on the PARENT window, then navigate it there
-    var base = window.parent.location.href.split('?')[0];
-    var url  = base + '?_geo_captured=1';
+    // Start from the current parent URL so we keep _s and other params
+    var u = new URL(window.parent.location.href);
+    u.searchParams.set('_geo_captured', '1');
     if (lat !== null) {
-      url += '&_geo_lat=' + lat.toFixed(6)
-           + '&_geo_lon=' + lon.toFixed(6)
-           + '&_geo_acc=' + Math.round(acc);
+      u.searchParams.set('_geo_lat', lat.toFixed(6));
+      u.searchParams.set('_geo_lon', lon.toFixed(6));
+      u.searchParams.set('_geo_acc', String(Math.round(acc)));
     } else {
-      url += '&_geo_lat=denied';
+      u.searchParams.set('_geo_lat', 'denied');
+      u.searchParams.delete('_geo_lon');
+      u.searchParams.delete('_geo_acc');
     }
-    window.parent.location.replace(url);
+    window.parent.location.replace(u.toString());
   }
 
   if (navigator.geolocation) {
@@ -2947,8 +2952,11 @@ def _run_connectivity_snapshot():
 })();
 </script>
 """, height=0)
-        # Halt this Streamlit run — the JS will reload the parent page with
-        # _geo_captured set, triggering a fresh run that enters Pass 2.
+        # Give the browser enough time to load the iframe, execute the JS,
+        # and trigger the geolocation permission prompt before we halt.
+        # Without this sleep st.stop() tears down the component before the
+        # script has a chance to run, causing the "stuck on detecting" freeze.
+        _t.sleep(12)   # covers: iframe load + permission prompt + GPS fix + reload
         st.stop()
         return
 
