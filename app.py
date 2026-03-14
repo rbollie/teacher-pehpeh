@@ -2884,126 +2884,13 @@ def _run_connectivity_snapshot():
     if st.session_state.get("_conn_snapshot_done"):
         return
 
-    # ── GPS capture via streamlit-js-eval ────────────────────────────
-    # Uses Streamlit's own component message-passing (bidirectional) so it works
-    # on Streamlit Cloud where iframe sandbox blocks window.parent navigation.
-    # Pattern: first call returns None (JS running) → show overlay → st.stop()
-    # Browser responds → Streamlit reruns → second call returns the location dict.
-    # Result is cached in session_state so we only ask the browser once per session.
+    # ── Client GPS ───────────────────────────────────────────────────
+    # navigator.geolocation is blocked inside Streamlit Cloud's sandboxed
+    # iframes regardless of method (URL redirect, DOM inject, JS eval).
+    # IP-based coordinates are captured in Step 3 via ipapi.co — those are
+    # the coordinates that end up in the connectivity log.
     _client_lat = _client_lon = _client_acc = ""
-    _geo_cached = st.session_state.get("_tp_geo_result", "pending")
 
-    if _geo_cached == "pending":
-        try:
-            from streamlit_js_eval import get_geolocation as _get_geo
-            _loc = _get_geo(key="tp_geo_once")
-            if _loc is None:
-                # First call: browser JS is running, show waiting overlay
-                st.markdown(
-                    '<div style="position:fixed;top:0;left:0;width:100%;height:100%;'
-                    'background:linear-gradient(160deg,#050C1C 0%,#0B1E3D 60%,#061228 100%);'
-                    'display:flex;align-items:center;justify-content:center;z-index:999999">'
-                    '<div style="background:linear-gradient(135deg,#0E1E38,#162B50);'
-                    'border:1px solid rgba(212,168,67,.35);border-radius:20px;'
-                    'padding:36px 44px;max-width:440px;width:94%;text-align:center;'
-                    'box-shadow:0 12px 60px rgba(212,168,67,.18);color:#D4A843;'
-                    'font-weight:800;font-size:1.1rem">'
-                    '📍 Requesting classroom location…'
-                    '<div style="color:#8899BB;font-size:.82rem;font-weight:400;margin-top:8px">'
-                    'Please allow location access if prompted.</div>'
-                    '</div></div>',
-                    unsafe_allow_html=True,
-                )
-                st.stop()
-                return
-            # Got a response (coords dict or error/None coords)
-            st.session_state["_tp_geo_result"] = _loc
-            _geo_cached = _loc
-        except ImportError:
-            # streamlit-js-eval not installed — skip GPS, proceed without coords
-            st.session_state["_tp_geo_result"] = None
-            _geo_cached = None
-        except Exception:
-            st.session_state["_tp_geo_result"] = None
-            _geo_cached = None
-
-    # Extract coords from cached result
-    if _geo_cached and isinstance(_geo_cached, dict):
-        try:
-            _c = _geo_cached.get("coords", {}) or {}
-            if _c.get("latitude") is not None:
-                _client_lat = str(round(float(_c["latitude"]),  6))
-                _client_lon = str(round(float(_c["longitude"]), 6))
-                _client_acc = str(round(float(_c.get("accuracy", 0))))
-        except Exception:
-            pass
-
-    if False:  # dead code — old overlay markup retained for reference only
-        _ov0 = st.empty()
-        _ov0.markdown(
-            '<div style="position:fixed;top:0;left:0;width:100%;height:100%;'
-            'background:linear-gradient(160deg,#050C1C 0%,#0B1E3D 60%,#061228 100%);'
-            'display:flex;align-items:center;justify-content:center;z-index:999999">'
-            '<div style="background:linear-gradient(135deg,#0E1E38,#162B50);'
-            'border:1px solid rgba(212,168,67,.35);border-radius:20px;'
-            'padding:36px 44px;max-width:440px;width:94%;text-align:center;'
-            'box-shadow:0 12px 60px rgba(212,168,67,.18)">'
-            f'<img src="data:image/png;base64,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" '
-            'style="width:64px;height:64px;object-fit:contain;'
-            'filter:drop-shadow(0 3px 10px rgba(212,168,67,.5));margin-bottom:6px">'
-            '<div style="color:#D4A843;font-weight:800;font-size:1.18rem;margin-bottom:6px">Teacher Pehpeh by IBT</div>'
-            '<div style="color:#8899BB;font-size:.84rem;margin-bottom:18px">Detecting your classroom location…</div>'
-            '<div style="display:flex;align-items:center;justify-content:center;gap:8px;color:#D0D8E8;font-size:.82rem">'
-            '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#D4A843;'
-            'animation:blink 1s ease-in-out infinite"></span>Requesting GPS permission</div>'
-            '<style>@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}</style>'
-            '</div></div>',
-            unsafe_allow_html=True,
-        )
-        # Call navigator.geolocation directly inside the _comp.html iframe.
-        # Injecting into window.parent.document is blocked by CSP in modern
-        # browsers. Instead we call geolocation from within the iframe itself
-        # and use window.parent.location.replace() to write coords back to the
-        # URL (same-site child→parent navigation is permitted by browsers).
-        #
-        # IMPORTANT — preserve the _s session token so the user stays logged in
-        # after the page reload. We read existing params from the parent URL and
-        # carry them forward, only adding/overwriting the _geo_* keys.
-        _comp.html("""
-<script>
-(function() {
-  if (window.__tpGeoDone) return;
-  window.__tpGeoDone = true;
-
-  function done(lat, lon, acc) {
-    // Start from the current parent URL so we keep _s and other params
-    var u = new URL(window.parent.location.href);
-    u.searchParams.set('_geo_captured', '1');
-    if (lat !== null) {
-      u.searchParams.set('_geo_lat', lat.toFixed(6));
-      u.searchParams.set('_geo_lon', lon.toFixed(6));
-      u.searchParams.set('_geo_acc', String(Math.round(acc)));
-    } else {
-      u.searchParams.set('_geo_lat', 'denied');
-      u.searchParams.delete('_geo_lon');
-      u.searchParams.delete('_geo_acc');
-    }
-    window.parent.location.replace(u.toString());
-  }
-
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      function(p) { done(p.coords.latitude, p.coords.longitude, p.coords.accuracy); },
-      function()  { done(null, null, null); },
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
-    );
-  } else {
-    done(null, null, null);
-  }
-})();
-</script>
-""", height=0)
-        pass  # end of dead-code block
 
     # ── 4-step snapshot (server-side; GPS already in _client_lat/lon above) ──
     # Animated 4-step overlay
@@ -4170,6 +4057,208 @@ def main():
         margin: 10px 0 4px !important;
         padding-left: 2px !important;
     }}
+
+    /* ═══════════════════════════════════════════════════════════════
+       LIGHT MODE ADAPTIVE OVERRIDES
+       Targets both OS-level prefers-color-scheme:light AND Streamlit's
+       own theme toggle (detected via inline background-color style).
+       All hardcoded dark navy/midnight colors are remapped to readable
+       light-mode equivalents. CSS variables are re-declared so every
+       component that uses var(--text-primary) etc. adapts automatically.
+       ═══════════════════════════════════════════════════════════════ */
+
+    /* ── 1. Selector shorthand — matches Streamlit light theme bg values ── */
+    @media (prefers-color-scheme: light) {{
+        :root {{
+            --bg-main: #F4F7FB;
+            --bg-card: #FFFFFF;
+            --text-primary: #1a1a2e;
+            --text-secondary: #374151;
+            --text-muted: #6b7280;
+            --border-color: #d1d5db;
+            --chat-user-bg: rgba(43,125,233,.07);
+            --chat-user-border: rgba(43,125,233,.28);
+            --chat-ai-bg: rgba(139,26,26,.06);
+            --chat-ai-border: rgba(178,34,52,.22);
+            --tip-color: #4b5563;
+        }}
+    }}
+
+    /* ── 2. Streamlit theme-toggle detection (inline style on container) ── */
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"],
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(240"],
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(248"],
+    [data-testid="stAppViewContainer"][style*="background-color: white"] {{
+        --bg-main: #F4F7FB !important;
+        --bg-card: #FFFFFF !important;
+        --text-primary: #1a1a2e !important;
+        --text-secondary: #374151 !important;
+        --text-muted: #6b7280 !important;
+        --border-color: #d1d5db !important;
+        --chat-user-bg: rgba(43,125,233,.07) !important;
+        --chat-user-border: rgba(43,125,233,.28) !important;
+        --chat-ai-bg: rgba(139,26,26,.06) !important;
+        --chat-ai-border: rgba(178,34,52,.22) !important;
+        --tip-color: #4b5563 !important;
+    }}
+
+    /* ── 3. Core Streamlit text nodes ── */
+    @media (prefers-color-scheme: light) {{
+        [data-testid="stAppViewContainer"] p,
+        [data-testid="stAppViewContainer"] li,
+        [data-testid="stAppViewContainer"] label,
+        [data-testid="stAppViewContainer"] span:not([data-baseweb]),
+        [data-testid="stAppViewContainer"] .stMarkdown,
+        [data-testid="stAppViewContainer"] .stText,
+        [data-testid="stAppViewContainer"] h1,
+        [data-testid="stAppViewContainer"] h2,
+        [data-testid="stAppViewContainer"] h3,
+        [data-testid="stAppViewContainer"] h4 {{
+            color: var(--text-primary) !important;
+        }}
+        [data-testid="stAppViewContainer"] .stCaption,
+        [data-testid="stAppViewContainer"] small {{
+            color: var(--text-muted) !important;
+        }}
+    }}
+
+    /* ── 4. Tab bar ── */
+    @media (prefers-color-scheme: light) {{
+        .stTabs [data-baseweb="tab-list"] {{
+            background: #e2e8f4 !important;
+            border-color: #b8c8df !important;
+        }}
+        .stTabs [data-baseweb="tab"]:not([aria-selected="true"]) {{
+            color: #374151 !important;
+        }}
+    }}
+
+    /* ── 5. Main area expanders ── */
+    @media (prefers-color-scheme: light) {{
+        [data-testid="stMain"] .stExpander,
+        [data-testid="stMainBlockContainer"] .stExpander {{
+            background: #f0f5ff !important;
+            border-color: rgba(43,125,233,.45) !important;
+        }}
+        [data-testid="stMain"] .stExpander [data-testid="stExpanderDetails"],
+        [data-testid="stMainBlockContainer"] .stExpander [data-testid="stExpanderDetails"] {{
+            background: #f8fafc !important;
+        }}
+    }}
+
+    /* ── 6. Result / chat / quiz cards ── */
+    @media (prefers-color-scheme: light) {{
+        .ct, .cp, .qbox, .qok, .qno, .sc, .rb {{
+            color: var(--text-primary) !important;
+        }}
+        .rb {{ background: var(--bg-card) !important; border-color: var(--border-color) !important; }}
+        .sc {{ background: #f0f5ff !important; border-color: #b8c8df !important; color: #1a2744 !important; }}
+        .qtip {{ color: var(--text-secondary) !important; }}
+        .ft {{ color: var(--text-muted) !important; border-color: var(--border-color) !important; }}
+    }}
+
+    /* ── 7. Secondary buttons ── */
+    @media (prefers-color-scheme: light) {{
+        .stButton > button:not([kind="primary"]) {{
+            background: #f1f5f9 !important;
+            color: #1D5CBF !important;
+            border-color: #2B7DE9 !important;
+        }}
+        .stButton > button:not([kind="primary"]):hover {{
+            background: #e8f0fe !important;
+            color: #1a4fa8 !important;
+            border-color: #1D5CBF !important;
+        }}
+    }}
+
+    /* ── 8. Text inputs / textareas in main area ── */
+    @media (prefers-color-scheme: light) {{
+        [data-testid="stMain"] .stTextInput > div > div > input,
+        [data-testid="stMainBlockContainer"] .stTextInput > div > div > input {{
+            background: #ffffff !important;
+            color: #1a1a2e !important;
+            border-color: #93afd4 !important;
+        }}
+        [data-testid="stMain"] .stTextInput > div > div > input::placeholder,
+        [data-testid="stMainBlockContainer"] .stTextInput > div > div > input::placeholder {{
+            color: #9ca3af !important;
+        }}
+        [data-testid="stMain"] .stTextArea > div > div > textarea,
+        [data-testid="stMainBlockContainer"] .stTextArea > div > div > textarea {{
+            background: #ffffff !important;
+            color: #1a1a2e !important;
+            border-color: #93afd4 !important;
+        }}
+    }}
+
+    /* ── 9. Status bar ── */
+    @media (prefers-color-scheme: light) {{
+        .status-bar {{
+            color: var(--text-muted) !important;
+            border-color: #c5d0e0 !important;
+        }}
+    }}
+
+    /* ── 10. IBT logo/contact banner top-right — stays dark regardless ── */
+    /* (intentional brand element — no override needed) */
+
+    /* ── 11. Repeat selectors for Streamlit theme toggle (not OS-level) ── */
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] p,
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] li,
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] label,
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] h1,
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] h2,
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] h3,
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] .stMarkdown {{
+        color: #1a1a2e !important;
+    }}
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] .stTabs [data-baseweb="tab-list"] {{
+        background: #e2e8f4 !important;
+        border-color: #b8c8df !important;
+    }}
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] .stTabs [data-baseweb="tab"]:not([aria-selected="true"]) {{
+        color: #374151 !important;
+    }}
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] [data-testid="stMain"] .stExpander {{
+        background: #f0f5ff !important;
+        border-color: rgba(43,125,233,.45) !important;
+    }}
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] [data-testid="stMain"] .stExpander [data-testid="stExpanderDetails"] {{
+        background: #f8fafc !important;
+    }}
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] .stButton > button:not([kind="primary"]) {{
+        background: #f1f5f9 !important;
+        color: #1D5CBF !important;
+        border-color: #2B7DE9 !important;
+    }}
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] .ct,
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] .cp,
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] .qbox,
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] .sc,
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] .rb {{
+        color: #1a1a2e !important;
+    }}
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] .sc {{
+        background: #f0f5ff !important;
+        border-color: #b8c8df !important;
+    }}
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] .rb {{
+        background: #ffffff !important;
+        border-color: #d1d5db !important;
+    }}
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] [data-testid="stMain"] .stTextInput > div > div > input,
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] [data-testid="stMainBlockContainer"] .stTextInput > div > div > input {{
+        background: #ffffff !important;
+        color: #1a1a2e !important;
+        border-color: #93afd4 !important;
+    }}
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] [data-testid="stMain"] .stTextArea > div > div > textarea,
+    [data-testid="stAppViewContainer"][style*="background-color: rgb(255"] [data-testid="stMainBlockContainer"] .stTextArea > div > div > textarea {{
+        background: #ffffff !important;
+        color: #1a1a2e !important;
+        border-color: #93afd4 !important;
+    }}
+
     </style>""",unsafe_allow_html=True)
 
 
