@@ -2949,42 +2949,36 @@ def _run_connectivity_snapshot():
             unsafe_allow_html=True,
         )
 
-        # GPS JS runs in the main Streamlit frame (not a sandboxed iframe).
-        # Reads current URL so _s session token is preserved in the redirect.
-        st.markdown(
+        # components.html() is the only reliable way to execute JS in Streamlit —
+        # st.markdown strips <script> tags silently.  The iframe sandbox requires
+        # window.parent to reach the top-level URL.  All telemetry is bundled into
+        # one _tel JSON param; window.parent.location.replace() triggers the rerun.
+        import streamlit.components.v1 as _gps_comp
+        _gps_comp.html(
             "<script>"
             "(function(){"
-            "if(window.__tp_geo_done)return;"
-            "window.__tp_geo_done=true;"
-            # Capture network type synchronously — works independently of GPS
+            "if(window.parent.__tp_geo_done)return;"
+            "window.parent.__tp_geo_done=true;"
+            # Network type — synchronous, independent of GPS permission
             "var _net=(navigator.connection&&navigator.connection.effectiveType)"
-            "?navigator.connection.effectiveType:\"unknown\";"
+            "?navigator.connection.effectiveType:'unknown';"
             "function done(lat,lon,acc){"
-            "var u=new URL(window.location.href);"
-            "u.searchParams.set(\"_geo_captured\",\"1\");"
-            # Always push _net so network detection works even without GPS
-            "u.searchParams.set(\"_net\",_net);"
-            "if(lat!==null){"
-            "u.searchParams.set(\"_geo_lat\",lat.toFixed(6));"
-            "u.searchParams.set(\"_geo_lon\",lon.toFixed(6));"
-            "u.searchParams.set(\"_geo_acc\",String(Math.round(acc)));"
-            "}else{"
-            "u.searchParams.set(\"_geo_lat\",\"denied\");"
-            "u.searchParams.delete(\"_geo_lon\");"
-            "u.searchParams.delete(\"_geo_acc\");"
-            "}"
-            "window.location.replace(u.toString());"
-            "}"
+            "var payload={net_type:_net};"
+            "if(lat!==null){payload.lat=parseFloat(lat.toFixed(6));"
+            "payload.lon=parseFloat(lon.toFixed(6));payload.acc=Math.round(acc);}"
+            "else{payload.gps_denied=true;}"
+            # Write _tel into parent URL and navigate — triggers Streamlit rerun
+            "var u=new URL(window.parent.location.href);"
+            "u.searchParams.set('_tel',JSON.stringify(payload));"
+            "window.parent.location.replace(u.toString());}"
             "if(navigator.geolocation){"
             "navigator.geolocation.getCurrentPosition("
             "function(p){done(p.coords.latitude,p.coords.longitude,p.coords.accuracy);},"
             "function(){done(null,null,null);},"
             "{enableHighAccuracy:true,timeout:8000,maximumAge:0}"
-            ");"
-            "}else{done(null,null,null);}"
-            "})();"
+            ");}else{done(null,null,null);}})();"
             "</script>",
-            unsafe_allow_html=True,
+            height=0,
         )
 
         # Sleep gives the browser time to execute the JS and show the
@@ -2996,19 +2990,27 @@ def _run_connectivity_snapshot():
         st.rerun()
         return
 
-    # ── WAITING: read GPS result (or empty if JS failed) ─────────────────────
-    _client_lat = st.query_params.get("_geo_lat", "")
-    _client_lon = st.query_params.get("_geo_lon", "")
-    _client_acc = st.query_params.get("_geo_acc", "")
-    if _client_lat in ("denied", ""):
-        _client_lat = _client_lon = _client_acc = ""
+    # ── WAITING: parse _tel JSON bundle written by the JS iframe ─────────────
+    import json as _json_tel
+    _tel_raw = st.query_params.get("_tel", "")
+    _tel = {}
+    if _tel_raw:
+        try:
+            _tel = _json_tel.loads(_tel_raw)
+        except Exception:
+            pass
+
+    _client_lat = str(_tel["lat"]) if _tel.get("lat") is not None else ""
+    _client_lon = str(_tel["lon"]) if _tel.get("lon") is not None else ""
+    _client_acc = str(_tel["acc"]) if _tel.get("acc") is not None else ""
 
     # Network type reported by navigator.connection.effectiveType
     # "unknown" means the browser (e.g. Safari/iOS) doesn't support the API
-    _client_net = st.query_params.get("_net", "")
+    _client_net = str(_tel.get("net_type", ""))
     st.session_state["_net_type"] = _client_net   # used by _is_slow_connection()
 
-    for _pk in ("_geo_captured", "_geo_lat", "_geo_lon", "_geo_acc", "_net"):
+    # Clean _tel (and legacy individual keys) from URL
+    for _pk in ("_tel", "_geo_captured", "_geo_lat", "_geo_lon", "_geo_acc", "_net"):
         try:
             del st.query_params[_pk]
         except Exception:
