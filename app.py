@@ -2949,38 +2949,71 @@ def _run_connectivity_snapshot():
             unsafe_allow_html=True,
         )
 
-        # components.html() is the only reliable way to execute JS in Streamlit —
-        # st.markdown strips <script> tags silently.  The iframe sandbox requires
-        # window.parent to reach the top-level URL.  All telemetry is bundled into
-        # one _tel JSON param; window.parent.location.replace() triggers the rerun.
+        # DOM Injection Escape Hatch:
+        # components.html() runs inside a sandboxed iframe. Instead of fighting
+        # the sandbox with window.parent.* calls (which some browsers restrict),
+        # we inject a <script> tag directly into the parent document's <head>.
+        # That script runs in the MAIN window context — full access to
+        # navigator.geolocation, navigator.connection, window.history, and
+        # window.dispatchEvent — no sandbox restrictions at all.
         import streamlit.components.v1 as _gps_comp
         _gps_comp.html(
-            "<script>"
-            "(function(){"
-            "if(window.parent.__tp_geo_done)return;"
-            "window.parent.__tp_geo_done=true;"
-            # Network type — synchronous, independent of GPS permission
-            "var _net=(navigator.connection&&navigator.connection.effectiveType)"
-            "?navigator.connection.effectiveType:'unknown';"
-            "function done(lat,lon,acc){"
-            "var payload={net_type:_net};"
-            "if(lat!==null){payload.lat=parseFloat(lat.toFixed(6));"
-            "payload.lon=parseFloat(lon.toFixed(6));payload.acc=Math.round(acc);}"
-            "else{payload.gps_denied=true;}"
-            # URL-encode payload so {, ", : don't break the query string
-            # replaceState+popstate updates URL WITHOUT a full page reload,
-            # keeping the Streamlit WebSocket session alive
-            "var u=new URL(window.parent.location.href);"
-            "u.searchParams.set('_tel',encodeURIComponent(JSON.stringify(payload)));"
-            "window.parent.history.replaceState({},'',u.toString());"
-            "window.parent.dispatchEvent(new Event('popstate'));}"
-            "if(navigator.geolocation){"
-            "navigator.geolocation.getCurrentPosition("
-            "function(p){done(p.coords.latitude,p.coords.longitude,p.coords.accuracy);},"
-            "function(){done(null,null,null);},"
-            "{enableHighAccuracy:true,timeout:8000,maximumAge:0}"
-            ");}else{done(null,null,null);}})();"
-            "</script>",
+            """<script>
+if (window !== window.parent) {
+  var _pd = window.parent.document;
+  if (!_pd.getElementById('tp-telemetry-script')) {
+    var _s = _pd.createElement('script');
+    _s.id = 'tp-telemetry-script';
+    _s.innerHTML = `
+      (function() {
+        if (window.location.search.includes('_tel=')) return;
+
+        // Network type — read synchronously before async GPS call
+        var _net = 'unknown';
+        if (navigator.connection) {
+          _net = navigator.connection.effectiveType
+                 || navigator.connection.type
+                 || 'unknown';
+        }
+
+        function sendToStreamlit(data) {
+          var encoded = encodeURIComponent(JSON.stringify(data));
+          var u = new URL(window.location.href);
+          u.searchParams.set('_tel', encoded);
+          // replaceState keeps WebSocket alive — no full reload
+          window.history.replaceState({}, '', u.toString());
+          window.dispatchEvent(new Event('popstate'));
+        }
+
+        var payload = { net_type: _net };
+
+        // isSecureContext guards against GPS permission errors on HTTP
+        if (window.isSecureContext && navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            function(pos) {
+              payload.lat = parseFloat(pos.coords.latitude.toFixed(6));
+              payload.lon = parseFloat(pos.coords.longitude.toFixed(6));
+              payload.acc = Math.round(pos.coords.accuracy);
+              sendToStreamlit(payload);
+            },
+            function(err) {
+              payload.gps_error = err.message;
+              sendToStreamlit(payload);
+            },
+            { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+          );
+        } else {
+          payload.gps_error = window.isSecureContext
+            ? 'Geolocation disabled by browser.'
+            : 'Blocked: HTTPS required for GPS.';
+          sendToStreamlit(payload);
+        }
+      })();
+    `;
+    _pd.head.appendChild(_s);
+  }
+}
+</script>""",
             height=0,
         )
 
