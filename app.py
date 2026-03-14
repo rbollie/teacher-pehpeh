@@ -2985,11 +2985,36 @@ def _run_connectivity_snapshot():
     else:                  _tech_type = "Very Slow / Offline"
     _res[2] = _tech_type
 
-    # ── Step 3: IP geolocation ────────────────────────────────────────────────
+    # ── Step 3: Client IP geolocation ────────────────────────────────────────
+    # Get the CLIENT's IP from request headers (X-Forwarded-For is set by
+    # Streamlit Cloud / reverse proxies with the real browser IP).
+    # Then call ipapi.co/{client_ip}/json/ so coordinates are for the school,
+    # not the Streamlit server datacenter.
     _draw(3, _res)
+    _client_ip = ""
+    try:
+        # st.context.headers available in Streamlit >= 1.29
+        _hdrs = st.context.headers
+        _client_ip = (
+            _hdrs.get("X-Forwarded-For", "")
+            or _hdrs.get("X-Real-Ip", "")
+            or _hdrs.get("Remote-Addr", "")
+        )
+        # X-Forwarded-For can be a comma-separated list; take the first
+        if _client_ip:
+            _client_ip = _client_ip.split(",")[0].strip()
+    except Exception:
+        pass
+
+    # Fall back to server IP only if we could not get the client IP
+    _geo_url = (
+        f"https://ipapi.co/{_client_ip}/json/"
+        if _client_ip else
+        "https://ipapi.co/json/"
+    )
     _geo = {}
     try:
-        _geo_req = _ur.Request("https://ipapi.co/json/",
+        _geo_req = _ur.Request(_geo_url,
                                headers={"User-Agent": "TeacherPehpeh/1.0"})
         _geo = _json.loads(_ur.urlopen(_geo_req, timeout=6).read().decode())
     except Exception:
@@ -3014,6 +3039,7 @@ def _run_connectivity_snapshot():
         "client_lon":             _ip_lon,
         "client_accuracy_m":      "IP-based",
         "server_ip":              str(_geo.get("ip", "")),
+        "client_ip_header":       _client_ip,
         "ip_city":                _ip_city,
         "ip_region":              _ip_region,
         "ip_country":             _ip_country,
