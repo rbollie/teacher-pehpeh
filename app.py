@@ -2871,35 +2871,27 @@ def _show_consent_gate() -> bool:
 
 def _run_connectivity_snapshot():
     """
-    Two-pass startup sequence.
+    GPS state machine using session_state across reruns.
 
-    Pass 1  GPS capture via st.markdown <script> (main Streamlit frame, NOT an
-            iframe) so navigator.geolocation works on Streamlit Cloud.
-            JS writes coords to URL params then calls window.location.replace()
-            to reload with ?_geo_captured=1&_geo_lat=...&_geo_lon=...
-            Pass 1 ends with st.stop() so the overlay renders before halting.
-
-    Pass 2  Reads GPS coords from URL params, runs the 4-step server-side
-            speed/geo snapshot, logs the record, clears URL params.
-
-    Guard: st.session_state["_conn_snapshot_done"] prevents re-running.
+      _gps_state == "idle"    -> inject GPS JS, set state="waiting", sleep+rerun
+      _gps_state == "waiting" -> JS had its chance; read URL params and run snapshot
     """
     import urllib.request as _ur, json as _json, datetime as _dt, time as _t
 
     if st.session_state.get("_conn_snapshot_done"):
         return
 
-    # ── PASS 1: GPS via st.markdown <script> (main frame, not iframe) ────────
-    # st.components.v1.html() creates a sandboxed iframe where geolocation is
-    # blocked by the browser regardless of any workaround. st.markdown with
-    # unsafe_allow_html=True injects into the MAIN page frame where
-    # navigator.geolocation and window.location.replace() both work freely.
-    if "_geo_captured" not in st.query_params:
-        # Waiting overlay
+    _gps_state = st.session_state.get("_gps_state", "idle")
+
+    # ── IDLE: inject GPS JS and show waiting overlay ──────────────────────────
+    if _gps_state == "idle":
+        st.session_state["_gps_state"] = "waiting"
+
         st.markdown(
             "<div style=\"position:fixed;top:0;left:0;width:100%;height:100%;"
             "background:linear-gradient(160deg,#050C1C 0%,#0B1E3D 60%,#061228 100%);"
-            "display:flex;align-items:center;justify-content:center;z-index:999999\">"
+            "display:flex;align-items:center;justify-content:center;z-index:999999;"
+            "font-family:sans-serif\">"
             "<div style=\"background:linear-gradient(135deg,#0E1E38,#162B50);"
             "border:1px solid rgba(212,168,67,.35);border-radius:20px;"
             "padding:36px 44px;max-width:440px;width:94%;text-align:center;"
@@ -2907,13 +2899,13 @@ def _run_connectivity_snapshot():
             "<div style=\"color:#D4A843;font-weight:800;font-size:1.1rem;margin-bottom:8px\">"
             "\U0001f4cd Detecting classroom location</div>"
             "<div style=\"color:#8899BB;font-size:.84rem\">"
-            "Allow location access if prompted.</div>"
+            "Allow location access if prompted &#8212; or wait to skip.</div>"
             "</div></div>",
             unsafe_allow_html=True,
         )
-        # GPS JS injected into the main Streamlit frame via st.markdown.
-        # The script reads the current URL (preserving _s session token),
-        # appends _geo_* params, then navigates the main window to reload.
+
+        # GPS JS runs in the main Streamlit frame (not a sandboxed iframe).
+        # Reads current URL so _s session token is preserved in the redirect.
         st.markdown(
             "<script>"
             "(function(){"
@@ -2944,18 +2936,28 @@ def _run_connectivity_snapshot():
             "</script>",
             unsafe_allow_html=True,
         )
-        # Give browser time to execute the GPS JS before Python halts.
-        # window.location.replace() triggers Streamlit to rerun (Pass 2).
+
+        # Sleep gives the browser time to execute the JS and show the
+        # permission dialog. st.rerun() then re-runs Python in the same
+        # session where _gps_state is already "waiting". By then the JS
+        # will have either redirected (setting _geo_captured in URL) or
+        # timed out, so we drop through to the 4-step snapshot either way.
         _t.sleep(10)
-        st.stop()
+        st.rerun()
         return
 
-    # ── PASS 2: Read GPS coords from URL params ───────────────────────────────
+    # ── WAITING: read GPS result (or empty if JS failed) ─────────────────────
     _client_lat = st.query_params.get("_geo_lat", "")
     _client_lon = st.query_params.get("_geo_lon", "")
     _client_acc = st.query_params.get("_geo_acc", "")
     if _client_lat in ("denied", ""):
         _client_lat = _client_lon = _client_acc = ""
+
+    for _pk in ("_geo_captured", "_geo_lat", "_geo_lon", "_geo_acc"):
+        try:
+            del st.query_params[_pk]
+        except Exception:
+            pass
 
     # ── Animated 4-step overlay ───────────────────────────────────────────────
     _ov = st.empty()
@@ -3032,7 +3034,6 @@ def _run_connectivity_snapshot():
 
     _res = {}
 
-    # ── Step 1: Download Speed Test ──────────────────────────────────────────
     _draw(1)
     _download_mbps = None
     try:
@@ -3047,7 +3048,6 @@ def _run_connectivity_snapshot():
         pass
     _res[1] = f"{_download_mbps} Mbps" if _download_mbps is not None else "Could not measure"
 
-    # ── Step 2: Tech Type Inference ──────────────────────────────────────────
     _draw(2, _res)
     _conn_info = check_conn()
     _lat_ms = _conn_info.get("latency_ms") or 9_999
@@ -3058,7 +3058,6 @@ def _run_connectivity_snapshot():
     else:                 _tech_type = "Very Slow / Offline"
     _res[2] = _tech_type
 
-    # ── Step 3: Server-side IP Geolocation & ISP ─────────────────────────────
     _draw(3, _res)
     _geo = {}
     try:
@@ -3074,7 +3073,6 @@ def _run_connectivity_snapshot():
     _client_label = "Client GPS ✓" if _client_lat else "Client GPS: not granted"
     _res[3] = (", ".join(_loc_parts) or "IP logged") + " · " + _client_label
 
-    # ── Step 4: Log & Timestamp ──────────────────────────────────────────────
     _draw(4, _res)
     _record = {
         "timestamp":              _dt.datetime.now().isoformat(),
@@ -3099,15 +3097,9 @@ def _run_connectivity_snapshot():
     _draw(5, _res)
     _t.sleep(1.1)
 
-    # ── Clean up geo URL params & mark done ──────────────────────────────────
     _ov.empty()
-    for _pk in ("_geo_captured", "_geo_lat", "_geo_lon", "_geo_acc"):
-        try:
-            del st.query_params[_pk]
-        except Exception:
-            pass
     st.session_state["_conn_snapshot_done"] = True
-
+    st.session_state.pop("_gps_state", None)
 # === MAIN ===
 def main():
     # Load Teacher Pehpeh logo as PIL Image for taskbar/tab icon
