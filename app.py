@@ -180,6 +180,62 @@ def _restore_session_from_token():
         pass
     return False
 
+def _capture_client_gps():
+    """
+    Silently request the client's GPS coordinates via browser JS.
+    On user approval, injects ?_lat=X&_lon=Y into the Streamlit URL
+    which triggers a rerun; coords are then stored in session_state.
+    Runs once per session after login. No UI is shown to the user.
+    Requires HTTPS in production (Streamlit Cloud satisfies this).
+    """
+    import streamlit.components.v1 as _gps_comp
+
+    # Already captured this session — nothing to do
+    if st.session_state.get("_gps_lat") and st.session_state.get("_gps_lon"):
+        return
+
+    # Coords may have arrived via query params from a previous JS redirect
+    _lat = st.query_params.get("_lat", "")
+    _lon = st.query_params.get("_lon", "")
+    if _lat and _lon:
+        try:
+            st.session_state["_gps_lat"] = float(_lat)
+            st.session_state["_gps_lon"] = float(_lon)
+        except Exception:
+            pass
+        # Clean the params out of the URL so they don't persist
+        try:
+            del st.query_params["_lat"]
+            del st.query_params["_lon"]
+        except Exception:
+            pass
+        return
+
+    # Inject JS — runs silently in the iframe, zero visible height
+    _gps_comp.html("""
+<script>
+(function(){
+  // Guard: only request once per page-load
+  if (window._tpGPSRequested) return;
+  window._tpGPSRequested = true;
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(
+    function(pos){
+      var lat = pos.coords.latitude.toFixed(6);
+      var lon = pos.coords.longitude.toFixed(6);
+      // Append coords to the parent Streamlit URL → triggers Python rerun
+      var url = new URL(window.parent.location.href);
+      url.searchParams.set('_lat', lat);
+      url.searchParams.set('_lon', lon);
+      window.parent.location.href = url.toString();
+    },
+    function(err){ /* User denied or GPS unavailable — fail silently */ },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+  );
+})();
+</script>
+""", height=0)
+
 def _login_required():
     """True if the app has login credentials configured."""
     return len(_get_credentials()) > 0
@@ -2871,45 +2927,120 @@ def _show_consent_gate() -> bool:
 
 def _run_connectivity_snapshot():
     """
-    4-step connectivity snapshot: speed, tech type, IP geolocation, log.
-    Location comes from ipapi.co (IP-based). navigator.geolocation is
-    unavailable on Streamlit Cloud: st.markdown strips script tags and
-    st.components.v1.html() iframes are sandboxed without geolocation.
+    GPS state machine using session_state across reruns.
+
+      _gps_state == "idle"    -> inject GPS JS, set state="waiting", sleep+rerun
+      _gps_state == "waiting" -> JS had its chance; read URL params and run snapshot
     """
     import urllib.request as _ur, json as _json, datetime as _dt, time as _t
 
     if st.session_state.get("_conn_snapshot_done"):
         return
 
-    # Clean up any leftover GPS state from previous attempts
-    st.session_state.pop("_gps_state", None)
-    for _pk in ("_geo_captured", "_geo_lat", "_geo_lon", "_geo_acc"):
-        try: del st.query_params[_pk]
-        except Exception: pass
+    _gps_state = st.session_state.get("_gps_state", "idle")
 
+    # ── IDLE: inject GPS JS and show waiting overlay ──────────────────────────
+    if _gps_state == "idle":
+        st.session_state["_gps_state"] = "waiting"
+
+        st.markdown(
+            "<div style=\"position:fixed;top:0;left:0;width:100%;height:100%;"
+            "background:linear-gradient(160deg,#050C1C 0%,#0B1E3D 60%,#061228 100%);"
+            "display:flex;align-items:center;justify-content:center;z-index:999999;"
+            "font-family:sans-serif\">"
+            "<div style=\"background:linear-gradient(135deg,#0E1E38,#162B50);"
+            "border:1px solid rgba(212,168,67,.35);border-radius:20px;"
+            "padding:36px 44px;max-width:440px;width:94%;text-align:center;"
+            "box-shadow:0 12px 60px rgba(212,168,67,.18)\">"
+            "<div style=\"color:#D4A843;font-weight:800;font-size:1.1rem;margin-bottom:8px\">"
+            "\U0001f4cd Detecting classroom location</div>"
+            "<div style=\"color:#8899BB;font-size:.84rem\">"
+            "Allow location access if prompted &#8212; or wait to skip.</div>"
+            "</div></div>",
+            unsafe_allow_html=True,
+        )
+
+        # GPS JS runs in the main Streamlit frame (not a sandboxed iframe).
+        # Reads current URL so _s session token is preserved in the redirect.
+        st.markdown(
+            "<script>"
+            "(function(){"
+            "if(window.__tp_geo_done)return;"
+            "window.__tp_geo_done=true;"
+            "function done(lat,lon,acc){"
+            "var u=new URL(window.location.href);"
+            "u.searchParams.set(\"_geo_captured\",\"1\");"
+            "if(lat!==null){"
+            "u.searchParams.set(\"_geo_lat\",lat.toFixed(6));"
+            "u.searchParams.set(\"_geo_lon\",lon.toFixed(6));"
+            "u.searchParams.set(\"_geo_acc\",String(Math.round(acc)));"
+            "}else{"
+            "u.searchParams.set(\"_geo_lat\",\"denied\");"
+            "u.searchParams.delete(\"_geo_lon\");"
+            "u.searchParams.delete(\"_geo_acc\");"
+            "}"
+            "window.location.replace(u.toString());"
+            "}"
+            "if(navigator.geolocation){"
+            "navigator.geolocation.getCurrentPosition("
+            "function(p){done(p.coords.latitude,p.coords.longitude,p.coords.accuracy);}," 
+            "function(){done(null,null,null);}," 
+            "{enableHighAccuracy:true,timeout:8000,maximumAge:0}"
+            ");"
+            "}else{done(null,null,null);}"
+            "})();"
+            "</script>",
+            unsafe_allow_html=True,
+        )
+
+        # Sleep gives the browser time to execute the JS and show the
+        # permission dialog. st.rerun() then re-runs Python in the same
+        # session where _gps_state is already "waiting". By then the JS
+        # will have either redirected (setting _geo_captured in URL) or
+        # timed out, so we drop through to the 4-step snapshot either way.
+        _t.sleep(10)
+        st.rerun()
+        return
+
+    # ── WAITING: read GPS result (or empty if JS failed) ─────────────────────
+    _client_lat = st.query_params.get("_geo_lat", "")
+    _client_lon = st.query_params.get("_geo_lon", "")
+    _client_acc = st.query_params.get("_geo_acc", "")
+    if _client_lat in ("denied", ""):
+        _client_lat = _client_lon = _client_acc = ""
+
+    for _pk in ("_geo_captured", "_geo_lat", "_geo_lon", "_geo_acc"):
+        try:
+            del st.query_params[_pk]
+        except Exception:
+            pass
+
+    # ── Animated 4-step overlay ───────────────────────────────────────────────
     _ov = st.empty()
 
-    def _draw(active_step, results={}, ip_lat="", ip_lon=""):
+    def _draw(active_step: int, results: dict = {}):
         _steps = [
             ("01", "Speed Test",           "Measuring download speed in Mbps"),
             ("02", "Technology Type",      "Identifying Wi-Fi, 5G, 4G LTE, 3G or broadband"),
-            ("03", "Geotag & Location",    "Logging IP-based location, city & ISP"),
+            ("03", "Geotag & Location",    "Logging client GPS + server IP location & ISP"),
             ("04", "Logged & Timestamped", "Saving secure school-level connectivity record"),
         ]
         _rows_html = ""
         for i, (num, label, detail) in enumerate(_steps):
             si = i + 1
             if si < active_step:
-                _nc, _bdr, _op, _bg = "#81C784","#81C78455",".68","rgba(46,125,50,.18)"
+                _nc, _bdr, _op, _bg = "#81C784", "#81C78455", ".68", "rgba(46,125,50,.18)"
                 _badge = "&#10003;"
             elif si == active_step:
-                _nc, _bdr, _op, _bg = "#D4A843","#D4A843","1","rgba(212,168,67,.12)"
+                _nc, _bdr, _op, _bg = "#D4A843", "#D4A843", "1", "rgba(212,168,67,.12)"
                 _badge = num
             else:
-                _nc, _bdr, _op, _bg = "#445","#334",".28","transparent"
+                _nc, _bdr, _op, _bg = "#445", "#334", ".28", "transparent"
                 _badge = num
-            _extra = (f'<div style="color:#8899BB;font-size:.74rem;margin-top:2px">{results[si]}</div>'
-                      if results.get(si) else "")
+            _extra = (
+                f'<div style="color:#8899BB;font-size:.74rem;margin-top:2px">{results[si]}</div>'
+                if results.get(si) else ""
+            )
             _rows_html += (
                 f'<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;'
                 f'border-bottom:1px solid rgba(255,255,255,.05);opacity:{_op};transition:all .4s">'
@@ -2921,14 +3052,15 @@ def _run_connectivity_snapshot():
                 f'{_extra}</div></div>'
             )
         _pct = int((active_step - 1) / 4 * 100)
-        _loc_badge = ""
-        if ip_lat and ip_lon:
-            _loc_badge = (
+        _gps_badge = ""
+        if _client_lat:
+            _gps_badge = (
                 f'<div style="display:inline-flex;align-items:center;gap:5px;'
                 f'background:rgba(129,199,132,.12);border:1px solid #81C78444;'
                 f'border-radius:20px;padding:3px 10px;font-size:.72rem;'
                 f'color:#81C784;margin-bottom:14px">'
-                f'\U0001f4cd {ip_lat}, {ip_lon}</div>'
+                f'\U0001f4cd {_client_lat}, {_client_lon}'
+                f'{"&nbsp;\xb1"+_client_acc+"m" if _client_acc else ""}</div>'
             )
         _ov.markdown(
             f'<div style="position:fixed;top:0;left:0;width:100%;height:100%;'
@@ -2942,7 +3074,7 @@ def _run_connectivity_snapshot():
             f'letter-spacing:.5px;margin-bottom:4px">Teacher Pehpeh by IBT</div>'
             f'<div style="color:#8899BB;font-size:.82rem;margin-bottom:16px">'
             f'Initializing your classroom connection…</div>'
-            f'{_loc_badge}'
+            f'{_gps_badge}'
             f'<div style="text-align:left">{_rows_html}</div>'
             f'<div style="height:4px;background:rgba(212,168,67,.12);'
             f'border-radius:99px;margin-top:20px;overflow:hidden">'
@@ -2958,14 +3090,12 @@ def _run_connectivity_snapshot():
 
     _res = {}
 
-    # ── Step 1: Speed ─────────────────────────────────────────────────────────
     _draw(1)
     _download_mbps = None
     try:
+        _speed_url = "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"
         _t0 = _t.time()
-        _req = _ur.Request(
-            "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png",
-            headers={"User-Agent": "TeacherPehpeh/1.0", "Cache-Control": "no-cache"})
+        _req = _ur.Request(_speed_url, headers={"User-Agent": "TeacherPehpeh/1.0", "Cache-Control": "no-cache"})
         _data = _ur.urlopen(_req, timeout=10).read()
         _elapsed = _t.time() - _t0
         if _elapsed > 0 and len(_data) > 0:
@@ -2974,48 +3104,20 @@ def _run_connectivity_snapshot():
         pass
     _res[1] = f"{_download_mbps} Mbps" if _download_mbps is not None else "Could not measure"
 
-    # ── Step 2: Tech type ─────────────────────────────────────────────────────
     _draw(2, _res)
     _conn_info = check_conn()
     _lat_ms = _conn_info.get("latency_ms") or 9_999
-    if   _lat_ms < 60:     _tech_type = "Fixed Broadband / Wi-Fi"
-    elif _lat_ms < 150:    _tech_type = "4G LTE"
-    elif _lat_ms < 400:    _tech_type = "3G"
-    elif _lat_ms < 1_500:  _tech_type = "2G / Edge"
-    else:                  _tech_type = "Very Slow / Offline"
+    if _lat_ms < 60:      _tech_type = "Fixed Broadband / Wi-Fi"
+    elif _lat_ms < 150:   _tech_type = "4G LTE"
+    elif _lat_ms < 400:   _tech_type = "3G"
+    elif _lat_ms < 1_500: _tech_type = "2G / Edge"
+    else:                 _tech_type = "Very Slow / Offline"
     _res[2] = _tech_type
 
-    # ── Step 3: Client IP geolocation ────────────────────────────────────────
-    # Get the CLIENT's IP from request headers (X-Forwarded-For is set by
-    # Streamlit Cloud / reverse proxies with the real browser IP).
-    # Then call ipapi.co/{client_ip}/json/ so coordinates are for the school,
-    # not the Streamlit server datacenter.
     _draw(3, _res)
-    _client_ip = ""
-    try:
-        # st.context.headers available in Streamlit >= 1.29
-        _hdrs = st.context.headers
-        _client_ip = (
-            _hdrs.get("X-Forwarded-For", "")
-            or _hdrs.get("X-Real-Ip", "")
-            or _hdrs.get("Remote-Addr", "")
-        )
-        # X-Forwarded-For can be a comma-separated list; take the first
-        if _client_ip:
-            _client_ip = _client_ip.split(",")[0].strip()
-    except Exception:
-        pass
-
-    # Fall back to server IP only if we could not get the client IP
-    _geo_url = (
-        f"https://ipapi.co/{_client_ip}/json/"
-        if _client_ip else
-        "https://ipapi.co/json/"
-    )
     _geo = {}
     try:
-        _geo_req = _ur.Request(_geo_url,
-                               headers={"User-Agent": "TeacherPehpeh/1.0"})
+        _geo_req = _ur.Request("https://ipapi.co/json/", headers={"User-Agent": "TeacherPehpeh/1.0"})
         _geo = _json.loads(_ur.urlopen(_geo_req, timeout=6).read().decode())
     except Exception:
         pass
@@ -3023,29 +3125,24 @@ def _run_connectivity_snapshot():
     _ip_region  = _geo.get("region", "")
     _ip_country = _geo.get("country_name", "Liberia")
     _isp        = _geo.get("org", "")
-    _ip_lat     = str(_geo.get("latitude",  ""))
-    _ip_lon     = str(_geo.get("longitude", ""))
     _loc_parts  = [x for x in [_ip_city, _ip_region] if x]
-    _loc_str    = ", ".join(_loc_parts) if _loc_parts else "IP logged"
-    _res[3]     = _loc_str + (" · " + _ip_lat + ", " + _ip_lon if _ip_lat else "")
-    _draw(3, _res, ip_lat=_ip_lat, ip_lon=_ip_lon)
+    _client_label = "Client GPS ✓" if _client_lat else "Client GPS: not granted"
+    _res[3] = (", ".join(_loc_parts) or "IP logged") + " · " + _client_label
 
-    # ── Step 4: Log ───────────────────────────────────────────────────────────
-    _draw(4, _res, ip_lat=_ip_lat, ip_lon=_ip_lon)
+    _draw(4, _res)
     _record = {
         "timestamp":              _dt.datetime.now().isoformat(),
         "school_code":            str(st.session_state.get("_login_label", "unknown")),
-        "client_lat":             _ip_lat,
-        "client_lon":             _ip_lon,
-        "client_accuracy_m":      "IP-based",
+        "client_lat":             _client_lat,
+        "client_lon":             _client_lon,
+        "client_accuracy_m":      _client_acc,
         "server_ip":              str(_geo.get("ip", "")),
-        "client_ip_header":       _client_ip,
         "ip_city":                _ip_city,
         "ip_region":              _ip_region,
         "ip_country":             _ip_country,
         "isp":                    _isp,
-        "ip_lat":                 _ip_lat,
-        "ip_lon":                 _ip_lon,
+        "ip_lat":                 str(_geo.get("latitude", "")),
+        "ip_lon":                 str(_geo.get("longitude", "")),
         "latency_ms":             str(_conn_info.get("latency_ms", "")),
         "server_quality":         str(_conn_info.get("quality", "")),
         "measured_download_mbps": str(_download_mbps or ""),
@@ -3053,13 +3150,13 @@ def _run_connectivity_snapshot():
     }
     _save_connectivity_log(_record)
     _res[4] = "Saved · " + _dt.datetime.now().strftime("%H:%M:%S")
-    _draw(5, _res, ip_lat=_ip_lat, ip_lon=_ip_lon)
+    _draw(5, _res)
     _t.sleep(1.1)
 
     _ov.empty()
     st.session_state["_conn_snapshot_done"] = True
-
-
+    st.session_state.pop("_gps_state", None)
+# === MAIN ===
 def main():
     # Load Teacher Pehpeh logo as PIL Image for taskbar/tab icon
     try:
@@ -3104,6 +3201,13 @@ def main():
             _run_connectivity_snapshot()
     # Admin bypasses consent and snapshot entirely
 
+    # ── GPS CAPTURE (silent, once per session) ───────────────────────
+    # Requests the browser's GPS coordinates after login.
+    # Stored in st.session_state["_gps_lat"] / ["_gps_lon"].
+    # Access anywhere in the app with:
+    #   lat = st.session_state.get("_gps_lat")
+    #   lon = st.session_state.get("_gps_lon")
+    _capture_client_gps()
 
     # ── IBT LOGO + CONTACT BANNER (fixed top-right) ─────────────────
     st.markdown(
