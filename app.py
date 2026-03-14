@@ -2884,16 +2884,61 @@ def _run_connectivity_snapshot():
     if st.session_state.get("_conn_snapshot_done"):
         return
 
-    # ── PASS 1 (bypassed): GPS capture via _comp.html JS is unreliable on
-    # Streamlit Cloud because the iframe sandbox blocks window.parent navigation.
-    # All four snapshot steps (speed, tech, geotag, log) are server-side anyway.
-    # Skip straight to Pass 2 by setting _geo_captured from Python.
-    if "_geo_captured" not in st.query_params:
-        st.query_params["_geo_captured"] = "1"
-        st.query_params["_geo_lat"] = "denied"
-        st.rerun()
+    # ── GPS capture via streamlit-js-eval ────────────────────────────
+    # Uses Streamlit's own component message-passing (bidirectional) so it works
+    # on Streamlit Cloud where iframe sandbox blocks window.parent navigation.
+    # Pattern: first call returns None (JS running) → show overlay → st.stop()
+    # Browser responds → Streamlit reruns → second call returns the location dict.
+    # Result is cached in session_state so we only ask the browser once per session.
+    _client_lat = _client_lon = _client_acc = ""
+    _geo_cached = st.session_state.get("_tp_geo_result", "pending")
 
-    if False:  # dead code retained for reference only — never executes
+    if _geo_cached == "pending":
+        try:
+            from streamlit_js_eval import get_geolocation as _get_geo
+            _loc = _get_geo(key="tp_geo_once")
+            if _loc is None:
+                # First call: browser JS is running, show waiting overlay
+                st.markdown(
+                    '<div style="position:fixed;top:0;left:0;width:100%;height:100%;'
+                    'background:linear-gradient(160deg,#050C1C 0%,#0B1E3D 60%,#061228 100%);'
+                    'display:flex;align-items:center;justify-content:center;z-index:999999">'
+                    '<div style="background:linear-gradient(135deg,#0E1E38,#162B50);'
+                    'border:1px solid rgba(212,168,67,.35);border-radius:20px;'
+                    'padding:36px 44px;max-width:440px;width:94%;text-align:center;'
+                    'box-shadow:0 12px 60px rgba(212,168,67,.18);color:#D4A843;'
+                    'font-weight:800;font-size:1.1rem">'
+                    '📍 Requesting classroom location…'
+                    '<div style="color:#8899BB;font-size:.82rem;font-weight:400;margin-top:8px">'
+                    'Please allow location access if prompted.</div>'
+                    '</div></div>',
+                    unsafe_allow_html=True,
+                )
+                st.stop()
+                return
+            # Got a response (coords dict or error/None coords)
+            st.session_state["_tp_geo_result"] = _loc
+            _geo_cached = _loc
+        except ImportError:
+            # streamlit-js-eval not installed — skip GPS, proceed without coords
+            st.session_state["_tp_geo_result"] = None
+            _geo_cached = None
+        except Exception:
+            st.session_state["_tp_geo_result"] = None
+            _geo_cached = None
+
+    # Extract coords from cached result
+    if _geo_cached and isinstance(_geo_cached, dict):
+        try:
+            _c = _geo_cached.get("coords", {}) or {}
+            if _c.get("latitude") is not None:
+                _client_lat = str(round(float(_c["latitude"]),  6))
+                _client_lon = str(round(float(_c["longitude"]), 6))
+                _client_acc = str(round(float(_c.get("accuracy", 0))))
+        except Exception:
+            pass
+
+    if False:  # dead code — old overlay markup retained for reference only
         _ov0 = st.empty()
         _ov0.markdown(
             '<div style="position:fixed;top:0;left:0;width:100%;height:100%;'
@@ -2960,14 +3005,7 @@ def _run_connectivity_snapshot():
 """, height=0)
         pass  # end of dead-code block
 
-    # ── PASS 2: GPS coords available in URL params — run full snapshot ──
-    # Read client GPS from query params (set by Pass 1 JS)
-    _client_lat = st.query_params.get("_geo_lat", "")
-    _client_lon = st.query_params.get("_geo_lon", "")
-    _client_acc = st.query_params.get("_geo_acc", "")
-    if _client_lat in ("denied", ""):
-        _client_lat = _client_lon = _client_acc = ""
-
+    # ── 4-step snapshot (server-side; GPS already in _client_lat/lon above) ──
     # Animated 4-step overlay
     _ov = st.empty()
 
@@ -3107,11 +3145,6 @@ def _run_connectivity_snapshot():
 
     # ── Clean up geo URL params & finish ────────────────────────────
     _ov.empty()
-    for _pk in ("_geo_captured", "_geo_lat", "_geo_lon", "_geo_acc"):
-        try:
-            del st.query_params[_pk]
-        except Exception:
-            pass
     st.session_state["_conn_snapshot_done"] = True
 
 
