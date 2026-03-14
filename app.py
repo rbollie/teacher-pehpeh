@@ -197,16 +197,24 @@ def _capture_client_gps():
     # Coords may have arrived via query params from a previous JS redirect
     _lat = st.query_params.get("_lat", "")
     _lon = st.query_params.get("_lon", "")
+    _net = st.query_params.get("_net", "")
     if _lat and _lon:
         try:
             st.session_state["_gps_lat"] = float(_lat)
             st.session_state["_gps_lon"] = float(_lon)
         except Exception:
             pass
+    if _net:
+        st.session_state["_net_type"] = _net.lower().strip()
+    if _lat or _net:
         # Clean the params out of the URL so they don't persist
         try:
             del st.query_params["_lat"]
             del st.query_params["_lon"]
+        except Exception:
+            pass
+        try:
+            del st.query_params["_net"]
         except Exception:
             pass
         return
@@ -218,23 +226,62 @@ def _capture_client_gps():
   // Guard: only request once per page-load
   if (window._tpGPSRequested) return;
   window._tpGPSRequested = true;
-  if (!navigator.geolocation) return;
+
+  // --- Network type (Network Information API, ~75% browser coverage) ---
+  var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  var netType = conn ? (conn.effectiveType || conn.type || "unknown") : "unknown";
+
+  function _pushToParent(lat, lon) {
+    var url = new URL(window.parent.location.href);
+    if (lat !== null) { url.searchParams.set('_lat', lat); url.searchParams.set('_lon', lon); }
+    url.searchParams.set('_net', netType);
+    window.parent.location.href = url.toString();
+  }
+
+  if (!navigator.geolocation) {
+    // No GPS support — still push network type
+    _pushToParent(null, null);
+    return;
+  }
   navigator.geolocation.getCurrentPosition(
     function(pos){
       var lat = pos.coords.latitude.toFixed(6);
       var lon = pos.coords.longitude.toFixed(6);
-      // Append coords to the parent Streamlit URL → triggers Python rerun
-      var url = new URL(window.parent.location.href);
-      url.searchParams.set('_lat', lat);
-      url.searchParams.set('_lon', lon);
-      window.parent.location.href = url.toString();
+      _pushToParent(lat, lon);
     },
-    function(err){ /* User denied or GPS unavailable — fail silently */ },
+    function(err){
+      // GPS denied or unavailable — still push network type
+      _pushToParent(null, null);
+    },
     { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
   );
 })();
 </script>
 """, height=0)
+
+_SLOW_NETWORKS = {"2g", "slow-2g", "3g"}
+
+def _bandwidth_prompt_addon() -> str:
+    """
+    Returns a SYSTEM instruction fragment that tells the AI to be concise
+    when the teacher is on a slow mobile connection (2G/3G).
+    Returns an empty string on fast or unknown connections.
+    """
+    net = st.session_state.get("_net_type", "unknown").lower()
+    if net in _SLOW_NETWORKS:
+        return (
+            f"\n\nSYSTEM ALERT: This teacher is currently on a {net.upper()} mobile connection — "
+            "bandwidth is extremely limited. You MUST optimise your response:\n"
+            "1. Be concise. Remove all filler, lengthy introductions, and padding.\n"
+            "2. Use short, tight bullet points instead of long paragraphs wherever possible.\n"
+            "3. Keep the total response to the minimum needed to deliver a complete, usable output.\n"
+            "Do NOT sacrifice educational quality — but cut every unnecessary word."
+        )
+    return ""
+
+def _is_slow_connection() -> bool:
+    """True only when we have a confirmed slow network type (not 'unknown')."""
+    return st.session_state.get("_net_type", "unknown").lower() in _SLOW_NETWORKS
 
 def _login_required():
     """True if the app has login credentials configured."""
@@ -6104,6 +6151,24 @@ Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Theme
                     if local_notes:
                         q += f"\nContextualization: {local_notes}"
             want_img=add_img or "image" in task.lower() or "AI visual" in str(exs)
+            # === Bandwidth-aware: block image gen on slow connections ===
+            if _is_slow_connection() and want_img:
+                want_img = False
+                st.info(
+                    f"⚡ **{st.session_state.get('_net_type','').upper()} connection detected.** "
+                    "Image generation has been skipped to reduce data usage. "
+                    "Switch to Wi-Fi or a stronger signal to enable visuals."
+                )
+            # === Bandwidth-aware: append concise-mode instruction to prompt ===
+            _bw_addon = _bandwidth_prompt_addon()
+            if _bw_addon:
+                q += _bw_addon
+                if not _is_slow_connection() or "⚡" not in (st.session_state.get("_bw_banner_shown", "")):
+                    st.info(
+                        f"⚡ **{st.session_state.get('_net_type','').upper()} connection detected.** "
+                        "Teacher Pehpeh is optimising the lesson plan for faster loading."
+                    )
+                    st.session_state["_bw_banner_shown"] = st.session_state.get("_net_type","")
             keys=len(_agent_pick)
             rs={}; ph=st.empty(); s=0; tot=keys+(2 if want_img else 1)
             ph.markdown(pprog(0,tot,T("generating_content")),unsafe_allow_html=True)
