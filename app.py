@@ -2909,51 +2909,48 @@ def _run_connectivity_snapshot():
             '</div></div>',
             unsafe_allow_html=True,
         )
-        # Inject geolocation into the PARENT page, not the iframe.
-        # st.components.v1.html iframes are blocked from navigator.geolocation
-        # by Feature-Policy unless allow="geolocation" is set (Streamlit does
-        # not set it). Injecting a <script> into window.parent.document runs
-        # the code in the top-level page context where geolocation works freely.
+        # Call navigator.geolocation directly inside the _comp.html iframe.
+        # Injecting into window.parent.document is blocked by CSP in modern
+        # browsers — the script tag is created but the geolocation API is never
+        # called. Instead we call it from within the iframe itself and use
+        # window.parent.location.replace() to write the coords back to the URL
+        # (same-site navigation from a child frame IS permitted by browsers).
         _comp.html("""
 <script>
 (function() {
-  var pd = window.parent.document;
-  // Remove stale copy
-  var _old = pd.getElementById('__tp_geo');
-  if (_old) _old.remove();
-  var s = pd.createElement('script');
-  s.id = '__tp_geo';
-  s.textContent = [
-    "(function(){",
-    "  if(window.__tpGeoDone)return;",
-    "  window.__tpGeoDone=true;",
-    "  function done(lat,lon,acc){",
-    "    var u=new URL(window.location.href);",
-    "    u.searchParams.set('_geo_captured','1');",
-    "    if(lat!==null){",
-    "      u.searchParams.set('_geo_lat',lat.toFixed(6));",
-    "      u.searchParams.set('_geo_lon',lon.toFixed(6));",
-    "      u.searchParams.set('_geo_acc',Math.round(acc));",
-    "    } else {",
-    "      u.searchParams.set('_geo_lat','denied');",
-    "    }",
-    "    window.location.replace(u.toString());",
-    "  }",
-    "  if(navigator.geolocation){",
-    "    navigator.geolocation.getCurrentPosition(",
-    "      function(p){done(p.coords.latitude,p.coords.longitude,p.coords.accuracy);},",
-    "      function(){done(null,null,null);},",
-    "      {enableHighAccuracy:true,timeout:8000,maximumAge:300000}",
-    "    );",
-    "  } else { done(null,null,null); }",
-    "})();"
-  ].join("\n");
-  pd.head.appendChild(s);
+  if (window.__tpGeoDone) return;
+  window.__tpGeoDone = true;
+
+  function done(lat, lon, acc) {
+    // Build new URL on the PARENT window, then navigate it there
+    var base = window.parent.location.href.split('?')[0];
+    var url  = base + '?_geo_captured=1';
+    if (lat !== null) {
+      url += '&_geo_lat=' + lat.toFixed(6)
+           + '&_geo_lon=' + lon.toFixed(6)
+           + '&_geo_acc=' + Math.round(acc);
+    } else {
+      url += '&_geo_lat=denied';
+    }
+    window.parent.location.replace(url);
+  }
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(p) { done(p.coords.latitude, p.coords.longitude, p.coords.accuracy); },
+      function()  { done(null, null, null); },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
+    );
+  } else {
+    done(null, null, null);
+  }
 })();
 </script>
 """, height=0)
-        _t.sleep(9)   # parent script + browser permission prompt + page reload
-        _ov0.empty()
+        # Halt this Streamlit run — the JS will reload the parent page with
+        # _geo_captured set, triggering a fresh run that enters Pass 2.
+        st.stop()
+        return
 
     # ── PASS 2: GPS coords available in URL params — run full snapshot ──
     # Read client GPS from query params (set by Pass 1 JS)
@@ -7766,8 +7763,7 @@ Be factual. Do not invent data. Keep each section focused and practical."""
     50%      {{ box-shadow: 0 0 18px rgba(211,47,47,.8); }}
 }}
 </style>""", unsafe_allow_html=True)
-            _chat_mic_key = f"chat_mic_{st.session_state.get('_chat_mic_gen', 0)}"
-            chat_audio = st.audio_input("🎤", key=_chat_mic_key, label_visibility="collapsed")
+            chat_audio = st.audio_input("🎤", key="chat_mic", label_visibility="collapsed")
             # Dynamic label via components.html — runs in its own iframe so uses window.parent.document
             import streamlit.components.v1 as _mic_comp
             _mic_comp.html("""<div id="lbl" style="font-size:.74rem;font-weight:700;text-align:center;color:#EF5350;font-family:sans-serif;margin-top:2px">🎤 Tap to record</div>
@@ -7800,7 +7796,7 @@ Be factual. Do not invent data. Keep each section focused and practical."""
             st.session_state["chat_ask_all_ai"] = False
             _avail_ais = [n for k,n in [(OPENAI_API_KEY,"ChatGPT"),(ANTHROPIC_API_KEY,"Claude"),(GOOGLE_API_KEY,"Gemini")] if k]
             _default_ai = next(iter(_avail_ais), "AI")
-
+            st.markdown(f'<div style="background:rgba(43,125,233,.08);border:1px solid rgba(43,125,233,.2);border-radius:8px;padding:6px 10px;margin-top:4px"><span style="font-size:.78rem;color:#7BB8F5">🤖 Powered by: {_default_ai}</span></div>', unsafe_allow_html=True)
 
         # Photo upload / camera area (shown when toggled on)
         chat_photo_b64 = None
@@ -7994,10 +7990,6 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                         st.session_state["_show_img_debug"] = True
                 status.update(label=T("response_ready"),state="complete",expanded=False)
             st.session_state.chat_messages.append(msg_data)
-            # Reset audio widget key so it mounts fresh (avoids "An error occurred" on rerun)
-            if voice_text:
-                st.session_state["_chat_mic_gen"] = st.session_state.get("_chat_mic_gen", 0) + 1
-                st.session_state.pop("_last_audio_hash", None)
             # Auto-generate TTS when input came from voice — plays once on next render
             if voice_text and ELEVENLABS_API_KEY:
                 _auto_content = msg_data.get("content", "")
