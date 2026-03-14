@@ -2967,10 +2967,13 @@ def _run_connectivity_snapshot():
             "if(lat!==null){payload.lat=parseFloat(lat.toFixed(6));"
             "payload.lon=parseFloat(lon.toFixed(6));payload.acc=Math.round(acc);}"
             "else{payload.gps_denied=true;}"
-            # Write _tel into parent URL and navigate — triggers Streamlit rerun
+            # URL-encode payload so {, ", : don't break the query string
+            # replaceState+popstate updates URL WITHOUT a full page reload,
+            # keeping the Streamlit WebSocket session alive
             "var u=new URL(window.parent.location.href);"
-            "u.searchParams.set('_tel',JSON.stringify(payload));"
-            "window.parent.location.replace(u.toString());}"
+            "u.searchParams.set('_tel',encodeURIComponent(JSON.stringify(payload)));"
+            "window.parent.history.replaceState({},'',u.toString());"
+            "window.parent.dispatchEvent(new Event('popstate'));}"
             "if(navigator.geolocation){"
             "navigator.geolocation.getCurrentPosition("
             "function(p){done(p.coords.latitude,p.coords.longitude,p.coords.accuracy);},"
@@ -2990,31 +2993,60 @@ def _run_connectivity_snapshot():
         st.rerun()
         return
 
-    # ── WAITING: parse _tel JSON bundle written by the JS iframe ─────────────
+    # ── WAITING: bulletproof telemetry decode ────────────────────────────────
+    # A teacher's phone on 2G may deliver a truncated or mangled _tel string.
+    # The try/except/finally structure guarantees:
+    #   • JSONDecodeError  → caught silently, defaults applied, app continues
+    #   • Any other error  → same silent catch, app continues
+    #   • finally          → _tel is ALWAYS wiped from the URL, even on failure,
+    #                        preventing an infinite error-loop on manual refresh
     import json as _json_tel
+    import urllib.parse as _urlparse
+
     _tel_raw = st.query_params.get("_tel", "")
     _tel = {}
+
     if _tel_raw:
         try:
-            _tel = _json_tel.loads(_tel_raw)
+            # Step 1: urllib.parse.unquote guarantees clean decode across all
+            # browsers — Streamlit's auto-decode can miss edge cases on older
+            # Android WebViews where encodeURIComponent isn't fully symmetric.
+            _decoded = _urlparse.unquote(_tel_raw)
+
+            # Step 2: parse JSON — may raise JSONDecodeError on garbage input
+            _tel = _json_tel.loads(_decoded)
+
+            # Step 3: extract fields with safe .get() — no KeyErrors possible
+            _client_lat  = str(_tel["lat"])  if _tel.get("lat")  is not None else ""
+            _client_lon  = str(_tel["lon"])  if _tel.get("lon")  is not None else ""
+            _client_acc  = str(_tel["acc"])  if _tel.get("acc")  is not None else ""
+            _client_net  = str(_tel.get("net_type", ""))
+            st.session_state["_net_type"] = _client_net
+
+        except _json_tel.JSONDecodeError:
+            # Mangled JSON — set safe defaults, let the app continue normally
+            _client_lat = _client_lon = _client_acc = _client_net = ""
+            st.session_state["_net_type"] = "unknown"
+
         except Exception:
-            pass
+            # Catch-all: any unforeseen parsing error treated the same way
+            _client_lat = _client_lon = _client_acc = _client_net = ""
+            st.session_state["_net_type"] = "unknown"
 
-    _client_lat = str(_tel["lat"]) if _tel.get("lat") is not None else ""
-    _client_lon = str(_tel["lon"]) if _tel.get("lon") is not None else ""
-    _client_acc = str(_tel["acc"]) if _tel.get("acc") is not None else ""
+        finally:
+            # Always wipe _tel — runs even if the except branch fired.
+            # Removes the raw JSON from the address bar and prevents the app
+            # from re-reading stale or broken data on a manual page refresh.
+            for _pk in ("_tel", "_geo_captured", "_geo_lat", "_geo_lon", "_geo_acc", "_net"):
+                try:
+                    del st.query_params[_pk]
+                except Exception:
+                    pass
 
-    # Network type reported by navigator.connection.effectiveType
-    # "unknown" means the browser (e.g. Safari/iOS) doesn't support the API
-    _client_net = str(_tel.get("net_type", ""))
-    st.session_state["_net_type"] = _client_net   # used by _is_slow_connection()
-
-    # Clean _tel (and legacy individual keys) from URL
-    for _pk in ("_tel", "_geo_captured", "_geo_lat", "_geo_lon", "_geo_acc", "_net"):
-        try:
-            del st.query_params[_pk]
-        except Exception:
-            pass
+    else:
+        # No _tel at all — safe defaults
+        _client_lat = _client_lon = _client_acc = _client_net = ""
+        st.session_state.setdefault("_net_type", "unknown")
 
     # ── Animated 4-step overlay ───────────────────────────────────────────────
     _ov = st.empty()
