@@ -2884,10 +2884,16 @@ def _run_connectivity_snapshot():
     if st.session_state.get("_conn_snapshot_done"):
         return
 
-    # ── PASS 1: Request client GPS via browser JS ───────────────────
-    # '_geo_captured' param absent → show geo-capture overlay, JS fires,
-    # writes coords to URL, page reloads automatically into Pass 2.
+    # ── PASS 1 (bypassed): GPS capture via _comp.html JS is unreliable on
+    # Streamlit Cloud because the iframe sandbox blocks window.parent navigation.
+    # All four snapshot steps (speed, tech, geotag, log) are server-side anyway.
+    # Skip straight to Pass 2 by setting _geo_captured from Python.
     if "_geo_captured" not in st.query_params:
+        st.query_params["_geo_captured"] = "1"
+        st.query_params["_geo_lat"] = "denied"
+        st.rerun()
+
+    if False:  # dead code retained for reference only — never executes
         _ov0 = st.empty()
         _ov0.markdown(
             '<div style="position:fixed;top:0;left:0;width:100%;height:100%;'
@@ -2952,13 +2958,7 @@ def _run_connectivity_snapshot():
 })();
 </script>
 """, height=0)
-        # Give the browser enough time to load the iframe, execute the JS,
-        # and trigger the geolocation permission prompt before we halt.
-        # Without this sleep st.stop() tears down the component before the
-        # script has a chance to run, causing the "stuck on detecting" freeze.
-        _t.sleep(12)   # covers: iframe load + permission prompt + GPS fix + reload
-        st.stop()
-        return
+        pass  # end of dead-code block
 
     # ── PASS 2: GPS coords available in URL params — run full snapshot ──
     # Read client GPS from query params (set by Pass 1 JS)
