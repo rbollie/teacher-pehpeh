@@ -2871,153 +2871,45 @@ def _show_consent_gate() -> bool:
 
 def _run_connectivity_snapshot():
     """
-    GPS state machine using session_state across reruns.
-
-      _gps_state == "idle"    -> inject GPS JS, set state="waiting", sleep+rerun
-      _gps_state == "waiting" -> JS had its chance; read URL params and run snapshot
+    4-step connectivity snapshot: speed, tech type, IP geolocation, log.
+    Location comes from ipapi.co (IP-based). navigator.geolocation is
+    unavailable on Streamlit Cloud: st.markdown strips script tags and
+    st.components.v1.html() iframes are sandboxed without geolocation.
     """
     import urllib.request as _ur, json as _json, datetime as _dt, time as _t
 
     if st.session_state.get("_conn_snapshot_done"):
         return
 
-    _gps_state = st.session_state.get("_gps_state", "idle")
-
-    # ── IDLE: inject GPS JS and show waiting overlay ──────────────────────────
-    if _gps_state == "idle":
-        st.session_state["_gps_state"] = "waiting"
-
-        st.markdown(
-            "<div style=\"position:fixed;top:0;left:0;width:100%;height:100%;"
-            "background:linear-gradient(160deg,#050C1C 0%,#0B1E3D 60%,#061228 100%);"
-            "display:flex;align-items:center;justify-content:center;z-index:999999;"
-            "font-family:sans-serif\">"
-            "<div style=\"background:linear-gradient(135deg,#0E1E38,#162B50);"
-            "border:1px solid rgba(212,168,67,.35);border-radius:20px;"
-            "padding:36px 44px;max-width:440px;width:94%;text-align:center;"
-            "box-shadow:0 12px 60px rgba(212,168,67,.18)\">"
-            "<div style=\"color:#D4A843;font-weight:800;font-size:1.1rem;margin-bottom:8px\">"
-            "\U0001f4cd Detecting classroom location</div>"
-            "<div style=\"color:#8899BB;font-size:.84rem\">"
-            "Allow location access if prompted &#8212; or wait to skip.</div>"
-            "</div></div>",
-            unsafe_allow_html=True,
-        )
-
-        # GPS JS — runs in main Streamlit frame (not a sandboxed iframe).
-        # console.log lines appear in browser DevTools > Console.
-        st.markdown(
-            "<script>"
-            "(function(){"
-            "console.log(\"[TP-GPS] script started, __tp_geo_done=\"+window.__tp_geo_done);"
-            "if(window.__tp_geo_done)return;"
-            "window.__tp_geo_done=true;"
-            "function done(lat,lon,acc){"
-            "console.log(\"[TP-GPS] done() lat=\"+lat+\" lon=\"+lon+\" acc=\"+acc);"
-            "var u=new URL(window.location.href);"
-            "u.searchParams.set(\"_geo_captured\",\"1\");"
-            "if(lat!==null){"
-            "u.searchParams.set(\"_geo_lat\",lat.toFixed(6));"
-            "u.searchParams.set(\"_geo_lon\",lon.toFixed(6));"
-            "u.searchParams.set(\"_geo_acc\",String(Math.round(acc)));"
-            "}else{"
-            "u.searchParams.set(\"_geo_lat\",\"denied\");"
-            "u.searchParams.delete(\"_geo_lon\");"
-            "u.searchParams.delete(\"_geo_acc\");"
-            "}"
-            "console.log(\"[TP-GPS] replacing location: \"+u.toString());"
-            "window.location.replace(u.toString());"
-            "}"
-            "if(navigator.geolocation){"
-            "console.log(\"[TP-GPS] calling getCurrentPosition\");"
-            "navigator.geolocation.getCurrentPosition("
-            "function(p){"
-            "console.log(\"[TP-GPS] position SUCCESS\");"
-            "done(p.coords.latitude,p.coords.longitude,p.coords.accuracy);}," 
-            "function(e){"
-            "console.log(\"[TP-GPS] position ERROR code=\"+e.code+\" msg=\"+e.message);"
-            "done(null,null,null);}," 
-            "{enableHighAccuracy:true,timeout:8000,maximumAge:0}"
-            ");"
-            "}else{"
-            "console.log(\"[TP-GPS] navigator.geolocation not available\");"
-            "done(null,null,null);}"
-            "})();"
-            "</script>",
-            unsafe_allow_html=True,
-        )
-
-        # Sleep gives the browser time to execute the JS and show the
-        # permission dialog. st.rerun() then re-runs Python in the same
-        # session where _gps_state is already "waiting". By then the JS
-        # will have either redirected (setting _geo_captured in URL) or
-        # timed out, so we drop through to the 4-step snapshot either way.
-        _t.sleep(10)
-        st.rerun()
-        return
-
-    # ── WAITING: read GPS result (or empty if JS failed) ─────────────────────
-    _raw_geo_lat = st.query_params.get("_geo_lat", "ABSENT")
-    _raw_geo_lon = st.query_params.get("_geo_lon", "ABSENT")
-    _raw_geo_acc = st.query_params.get("_geo_acc", "ABSENT")
-    _raw_captured = st.query_params.get("_geo_captured", "ABSENT")
-    _all_params   = dict(st.query_params)
-
-    # ── DEBUG PANEL — remove after GPS is confirmed working ──────────────────
-    st.markdown(
-        f'<div style="position:fixed;bottom:8px;right:8px;z-index:99999;'
-        f'background:rgba(0,0,0,.85);border:1px solid #D4A843;border-radius:10px;'
-        f'padding:10px 14px;font-family:monospace;font-size:.72rem;color:#D4A843;'
-        f'max-width:360px;line-height:1.7">'
-        f'<b style="color:#F0C94A">GPS DEBUG</b><br>'
-        f'_gps_state: {st.session_state.get("_gps_state","?")} <br>'
-        f'_geo_captured: {_raw_captured}<br>'
-        f'_geo_lat: {_raw_geo_lat}<br>'
-        f'_geo_lon: {_raw_geo_lon}<br>'
-        f'_geo_acc: {_raw_geo_acc}<br>'
-        f'all_params: {list(_all_params.keys())}</div>',
-        unsafe_allow_html=True,
-    )
-    # ── END DEBUG PANEL ──────────────────────────────────────────────────────
-
-    _client_lat = st.query_params.get("_geo_lat", "")
-    _client_lon = st.query_params.get("_geo_lon", "")
-    _client_acc = st.query_params.get("_geo_acc", "")
-    if _client_lat in ("denied", ""):
-        _client_lat = _client_lon = _client_acc = ""
-
+    # Clean up any leftover GPS state from previous attempts
+    st.session_state.pop("_gps_state", None)
     for _pk in ("_geo_captured", "_geo_lat", "_geo_lon", "_geo_acc"):
-        try:
-            del st.query_params[_pk]
-        except Exception:
-            pass
+        try: del st.query_params[_pk]
+        except Exception: pass
 
-    # ── Animated 4-step overlay ───────────────────────────────────────────────
     _ov = st.empty()
 
-    def _draw(active_step: int, results: dict = {}):
+    def _draw(active_step, results={}, ip_lat="", ip_lon=""):
         _steps = [
             ("01", "Speed Test",           "Measuring download speed in Mbps"),
             ("02", "Technology Type",      "Identifying Wi-Fi, 5G, 4G LTE, 3G or broadband"),
-            ("03", "Geotag & Location",    "Logging client GPS + server IP location & ISP"),
+            ("03", "Geotag & Location",    "Logging IP-based location, city & ISP"),
             ("04", "Logged & Timestamped", "Saving secure school-level connectivity record"),
         ]
         _rows_html = ""
         for i, (num, label, detail) in enumerate(_steps):
             si = i + 1
             if si < active_step:
-                _nc, _bdr, _op, _bg = "#81C784", "#81C78455", ".68", "rgba(46,125,50,.18)"
+                _nc, _bdr, _op, _bg = "#81C784","#81C78455",".68","rgba(46,125,50,.18)"
                 _badge = "&#10003;"
             elif si == active_step:
-                _nc, _bdr, _op, _bg = "#D4A843", "#D4A843", "1", "rgba(212,168,67,.12)"
+                _nc, _bdr, _op, _bg = "#D4A843","#D4A843","1","rgba(212,168,67,.12)"
                 _badge = num
             else:
-                _nc, _bdr, _op, _bg = "#445", "#334", ".28", "transparent"
+                _nc, _bdr, _op, _bg = "#445","#334",".28","transparent"
                 _badge = num
-            _extra = (
-                f'<div style="color:#8899BB;font-size:.74rem;margin-top:2px">{results[si]}</div>'
-                if results.get(si) else ""
-            )
+            _extra = (f'<div style="color:#8899BB;font-size:.74rem;margin-top:2px">{results[si]}</div>'
+                      if results.get(si) else "")
             _rows_html += (
                 f'<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;'
                 f'border-bottom:1px solid rgba(255,255,255,.05);opacity:{_op};transition:all .4s">'
@@ -3029,15 +2921,14 @@ def _run_connectivity_snapshot():
                 f'{_extra}</div></div>'
             )
         _pct = int((active_step - 1) / 4 * 100)
-        _gps_badge = ""
-        if _client_lat:
-            _gps_badge = (
+        _loc_badge = ""
+        if ip_lat and ip_lon:
+            _loc_badge = (
                 f'<div style="display:inline-flex;align-items:center;gap:5px;'
                 f'background:rgba(129,199,132,.12);border:1px solid #81C78444;'
                 f'border-radius:20px;padding:3px 10px;font-size:.72rem;'
                 f'color:#81C784;margin-bottom:14px">'
-                f'\U0001f4cd {_client_lat}, {_client_lon}'
-                f'{"&nbsp;\xb1"+_client_acc+"m" if _client_acc else ""}</div>'
+                f'\U0001f4cd {ip_lat}, {ip_lon}</div>'
             )
         _ov.markdown(
             f'<div style="position:fixed;top:0;left:0;width:100%;height:100%;'
@@ -3051,7 +2942,7 @@ def _run_connectivity_snapshot():
             f'letter-spacing:.5px;margin-bottom:4px">Teacher Pehpeh by IBT</div>'
             f'<div style="color:#8899BB;font-size:.82rem;margin-bottom:16px">'
             f'Initializing your classroom connection…</div>'
-            f'{_gps_badge}'
+            f'{_loc_badge}'
             f'<div style="text-align:left">{_rows_html}</div>'
             f'<div style="height:4px;background:rgba(212,168,67,.12);'
             f'border-radius:99px;margin-top:20px;overflow:hidden">'
@@ -3067,12 +2958,14 @@ def _run_connectivity_snapshot():
 
     _res = {}
 
+    # ── Step 1: Speed ─────────────────────────────────────────────────────────
     _draw(1)
     _download_mbps = None
     try:
-        _speed_url = "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"
         _t0 = _t.time()
-        _req = _ur.Request(_speed_url, headers={"User-Agent": "TeacherPehpeh/1.0", "Cache-Control": "no-cache"})
+        _req = _ur.Request(
+            "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png",
+            headers={"User-Agent": "TeacherPehpeh/1.0", "Cache-Control": "no-cache"})
         _data = _ur.urlopen(_req, timeout=10).read()
         _elapsed = _t.time() - _t0
         if _elapsed > 0 and len(_data) > 0:
@@ -3081,20 +2974,23 @@ def _run_connectivity_snapshot():
         pass
     _res[1] = f"{_download_mbps} Mbps" if _download_mbps is not None else "Could not measure"
 
+    # ── Step 2: Tech type ─────────────────────────────────────────────────────
     _draw(2, _res)
     _conn_info = check_conn()
     _lat_ms = _conn_info.get("latency_ms") or 9_999
-    if _lat_ms < 60:      _tech_type = "Fixed Broadband / Wi-Fi"
-    elif _lat_ms < 150:   _tech_type = "4G LTE"
-    elif _lat_ms < 400:   _tech_type = "3G"
-    elif _lat_ms < 1_500: _tech_type = "2G / Edge"
-    else:                 _tech_type = "Very Slow / Offline"
+    if   _lat_ms < 60:     _tech_type = "Fixed Broadband / Wi-Fi"
+    elif _lat_ms < 150:    _tech_type = "4G LTE"
+    elif _lat_ms < 400:    _tech_type = "3G"
+    elif _lat_ms < 1_500:  _tech_type = "2G / Edge"
+    else:                  _tech_type = "Very Slow / Offline"
     _res[2] = _tech_type
 
+    # ── Step 3: IP geolocation ────────────────────────────────────────────────
     _draw(3, _res)
     _geo = {}
     try:
-        _geo_req = _ur.Request("https://ipapi.co/json/", headers={"User-Agent": "TeacherPehpeh/1.0"})
+        _geo_req = _ur.Request("https://ipapi.co/json/",
+                               headers={"User-Agent": "TeacherPehpeh/1.0"})
         _geo = _json.loads(_ur.urlopen(_geo_req, timeout=6).read().decode())
     except Exception:
         pass
@@ -3102,24 +2998,28 @@ def _run_connectivity_snapshot():
     _ip_region  = _geo.get("region", "")
     _ip_country = _geo.get("country_name", "Liberia")
     _isp        = _geo.get("org", "")
+    _ip_lat     = str(_geo.get("latitude",  ""))
+    _ip_lon     = str(_geo.get("longitude", ""))
     _loc_parts  = [x for x in [_ip_city, _ip_region] if x]
-    _client_label = "Client GPS ✓" if _client_lat else "Client GPS: not granted"
-    _res[3] = (", ".join(_loc_parts) or "IP logged") + " · " + _client_label
+    _loc_str    = ", ".join(_loc_parts) if _loc_parts else "IP logged"
+    _res[3]     = _loc_str + (" · " + _ip_lat + ", " + _ip_lon if _ip_lat else "")
+    _draw(3, _res, ip_lat=_ip_lat, ip_lon=_ip_lon)
 
-    _draw(4, _res)
+    # ── Step 4: Log ───────────────────────────────────────────────────────────
+    _draw(4, _res, ip_lat=_ip_lat, ip_lon=_ip_lon)
     _record = {
         "timestamp":              _dt.datetime.now().isoformat(),
         "school_code":            str(st.session_state.get("_login_label", "unknown")),
-        "client_lat":             _client_lat,
-        "client_lon":             _client_lon,
-        "client_accuracy_m":      _client_acc,
+        "client_lat":             _ip_lat,
+        "client_lon":             _ip_lon,
+        "client_accuracy_m":      "IP-based",
         "server_ip":              str(_geo.get("ip", "")),
         "ip_city":                _ip_city,
         "ip_region":              _ip_region,
         "ip_country":             _ip_country,
         "isp":                    _isp,
-        "ip_lat":                 str(_geo.get("latitude", "")),
-        "ip_lon":                 str(_geo.get("longitude", "")),
+        "ip_lat":                 _ip_lat,
+        "ip_lon":                 _ip_lon,
         "latency_ms":             str(_conn_info.get("latency_ms", "")),
         "server_quality":         str(_conn_info.get("quality", "")),
         "measured_download_mbps": str(_download_mbps or ""),
@@ -3127,13 +3027,13 @@ def _run_connectivity_snapshot():
     }
     _save_connectivity_log(_record)
     _res[4] = "Saved · " + _dt.datetime.now().strftime("%H:%M:%S")
-    _draw(5, _res)
+    _draw(5, _res, ip_lat=_ip_lat, ip_lon=_ip_lon)
     _t.sleep(1.1)
 
     _ov.empty()
     st.session_state["_conn_snapshot_done"] = True
-    st.session_state.pop("_gps_state", None)
-# === MAIN ===
+
+
 def main():
     # Load Teacher Pehpeh logo as PIL Image for taskbar/tab icon
     try:
