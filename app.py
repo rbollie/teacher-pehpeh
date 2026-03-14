@@ -2904,14 +2904,16 @@ def _run_connectivity_snapshot():
             unsafe_allow_html=True,
         )
 
-        # GPS JS runs in the main Streamlit frame (not a sandboxed iframe).
-        # Reads current URL so _s session token is preserved in the redirect.
+        # GPS JS — runs in main Streamlit frame (not a sandboxed iframe).
+        # console.log lines appear in browser DevTools > Console.
         st.markdown(
             "<script>"
             "(function(){"
+            "console.log(\"[TP-GPS] script started, __tp_geo_done=\"+window.__tp_geo_done);"
             "if(window.__tp_geo_done)return;"
             "window.__tp_geo_done=true;"
             "function done(lat,lon,acc){"
+            "console.log(\"[TP-GPS] done() lat=\"+lat+\" lon=\"+lon+\" acc=\"+acc);"
             "var u=new URL(window.location.href);"
             "u.searchParams.set(\"_geo_captured\",\"1\");"
             "if(lat!==null){"
@@ -2923,15 +2925,23 @@ def _run_connectivity_snapshot():
             "u.searchParams.delete(\"_geo_lon\");"
             "u.searchParams.delete(\"_geo_acc\");"
             "}"
+            "console.log(\"[TP-GPS] replacing location: \"+u.toString());"
             "window.location.replace(u.toString());"
             "}"
             "if(navigator.geolocation){"
+            "console.log(\"[TP-GPS] calling getCurrentPosition\");"
             "navigator.geolocation.getCurrentPosition("
-            "function(p){done(p.coords.latitude,p.coords.longitude,p.coords.accuracy);}," 
-            "function(){done(null,null,null);}," 
+            "function(p){"
+            "console.log(\"[TP-GPS] position SUCCESS\");"
+            "done(p.coords.latitude,p.coords.longitude,p.coords.accuracy);}," 
+            "function(e){"
+            "console.log(\"[TP-GPS] position ERROR code=\"+e.code+\" msg=\"+e.message);"
+            "done(null,null,null);}," 
             "{enableHighAccuracy:true,timeout:8000,maximumAge:0}"
             ");"
-            "}else{done(null,null,null);}"
+            "}else{"
+            "console.log(\"[TP-GPS] navigator.geolocation not available\");"
+            "done(null,null,null);}"
             "})();"
             "</script>",
             unsafe_allow_html=True,
@@ -2947,6 +2957,29 @@ def _run_connectivity_snapshot():
         return
 
     # ── WAITING: read GPS result (or empty if JS failed) ─────────────────────
+    _raw_geo_lat = st.query_params.get("_geo_lat", "ABSENT")
+    _raw_geo_lon = st.query_params.get("_geo_lon", "ABSENT")
+    _raw_geo_acc = st.query_params.get("_geo_acc", "ABSENT")
+    _raw_captured = st.query_params.get("_geo_captured", "ABSENT")
+    _all_params   = dict(st.query_params)
+
+    # ── DEBUG PANEL — remove after GPS is confirmed working ──────────────────
+    st.markdown(
+        f'<div style="position:fixed;bottom:8px;right:8px;z-index:99999;'
+        f'background:rgba(0,0,0,.85);border:1px solid #D4A843;border-radius:10px;'
+        f'padding:10px 14px;font-family:monospace;font-size:.72rem;color:#D4A843;'
+        f'max-width:360px;line-height:1.7">'
+        f'<b style="color:#F0C94A">GPS DEBUG</b><br>'
+        f'_gps_state: {st.session_state.get("_gps_state","?")} <br>'
+        f'_geo_captured: {_raw_captured}<br>'
+        f'_geo_lat: {_raw_geo_lat}<br>'
+        f'_geo_lon: {_raw_geo_lon}<br>'
+        f'_geo_acc: {_raw_geo_acc}<br>'
+        f'all_params: {list(_all_params.keys())}</div>',
+        unsafe_allow_html=True,
+    )
+    # ── END DEBUG PANEL ──────────────────────────────────────────────────────
+
     _client_lat = st.query_params.get("_geo_lat", "")
     _client_lon = st.query_params.get("_geo_lon", "")
     _client_acc = st.query_params.get("_geo_acc", "")
