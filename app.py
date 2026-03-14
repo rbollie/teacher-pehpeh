@@ -441,48 +441,48 @@ def check_conn():
     else: r.update(quality="very_low",label="Very Slow",emoji="🟠")
     return r
 
-# === CLIENT IP & BANDWIDTH HELPERS ===
-
-def _get_client_ip() -> str:
-    """
-    Return the browser's public IP from Streamlit request headers.
-    Checks X-Forwarded-For first (Streamlit Cloud / reverse proxy),
-    then X-Real-Ip and CF-Connecting-IP (Cloudflare).
-    Falls back to empty string — never raises.
-    """
-    try:
-        hdrs = st.context.headers          # requires Streamlit >= 1.31
-        for _h in ("x-forwarded-for", "x-real-ip", "cf-connecting-ip"):
-            _v = hdrs.get(_h, "")
-            if _v:
-                return _v.split(",")[0].strip()
-    except Exception:
-        pass
-    return ""
-
-# Confirmed-slow network types reported by navigator.connection.effectiveType
+# ── BANDWIDTH / ADMIN ZONE HELPERS ───────────────────────────────────────────
 _SLOW_NETWORKS = {"2g", "slow-2g", "3g"}
 
-def _is_slow_connection() -> bool:
-    """
-    Returns True only when the browser has reported a confirmed slow network
-    type (2g, slow-2g, 3g).  Never fires on 'unknown' so Safari / iOS users
-    are never penalised for their browser not supporting the Network Info API.
-    """
-    return st.session_state.get("_net_type", "").lower() in _SLOW_NETWORKS
+def _get_client_ip():
+    """Return best-guess client IP from request headers (server-side, no JS needed)."""
+    try:
+        hdrs = getattr(st.context, "headers", {}) or {}
+        for h in ("x-forwarded-for", "x-real-ip", "cf-connecting-ip", "remote-addr"):
+            v = hdrs.get(h, "")
+            if v:
+                return v.split(",")[0].strip()
+    except Exception:
+        pass
+    return "unknown"
 
-def _bandwidth_prompt_addon() -> str:
+def _is_slow_connection():
+    """True when the server-side connectivity check reports a slow / absent link."""
+    try:
+        q = (st.session_state.get("conn_info") or {}).get("quality", "none")
+        return q in ("low", "very_low", "none")
+    except Exception:
+        return False
+
+def _bandwidth_prompt_addon():
     """
-    Returns a SYSTEM instruction telling the AI to be concise and bullet-heavy
-    on slow connections.  Returns empty string on fast or unknown connections.
+    Return an instruction block to append to any system prompt when the
+    connection is slow OR the IBT admin has forced low-bandwidth mode.
+    Returns empty string when not needed so existing callers are unaffected.
     """
-    if _is_slow_connection():
-        return (
-            "\n[SYSTEM: The teacher is on a slow mobile connection (2G/3G). "
-            "Keep your response SHORT. Use brief bullet points. "
-            "Avoid long paragraphs, tables, or excessive formatting.]"
-        )
-    return ""
+    try:
+        is_slow = _is_slow_connection() or st.session_state.get("_force_low_bw", False)
+    except Exception:
+        is_slow = False
+    if not is_slow:
+        return ""
+    return (
+        "\n\nLOW-BANDWIDTH MODE (active): This school has a slow or limited internet "
+        "connection. Keep ALL responses at least 40% shorter than normal. "
+        "Use plain text only — no markdown tables, no nested bullet lists, no "
+        "multi-column layouts. Short paragraphs, simple vocabulary. "
+        "Students need the core content fast, not decoration."
+    )
 
 # === IMAGE GENERATION ===
 def _enhance_image_prompt(raw_prompt, openai_client):
@@ -2687,10 +2687,8 @@ def synth(sp,q,resps):
 
 _CONN_LOG_FIELDS = [
     "timestamp", "school_code",
-    # Client-side (browser GPS + IP)
-    "client_ip", "client_lat", "client_lon", "client_accuracy_m",
-    # Client-side network (navigator.connection)
-    "client_net_type",
+    # Client-side (browser GPS)
+    "client_lat", "client_lon", "client_accuracy_m",
     # Server-side (IP geolocation)
     "server_ip", "ip_city", "ip_region", "ip_country", "isp", "ip_lat", "ip_lon",
     # Connectivity quality
@@ -2949,72 +2947,37 @@ def _run_connectivity_snapshot():
             unsafe_allow_html=True,
         )
 
-        # DOM Injection Escape Hatch:
-        # components.html() runs inside a sandboxed iframe. Instead of fighting
-        # the sandbox with window.parent.* calls (which some browsers restrict),
-        # we inject a <script> tag directly into the parent document's <head>.
-        # That script runs in the MAIN window context — full access to
-        # navigator.geolocation, navigator.connection, window.history, and
-        # window.dispatchEvent — no sandbox restrictions at all.
-        import streamlit.components.v1 as _gps_comp
-        _gps_comp.html(
-            """<script>
-if (window !== window.parent) {
-  var _pd = window.parent.document;
-  if (!_pd.getElementById('tp-telemetry-script')) {
-    var _s = _pd.createElement('script');
-    _s.id = 'tp-telemetry-script';
-    _s.innerHTML = `
-      (function() {
-        if (window.location.search.includes('_tel=')) return;
-
-        // Network type — read synchronously before async GPS call
-        var _net = 'unknown';
-        if (navigator.connection) {
-          _net = navigator.connection.effectiveType
-                 || navigator.connection.type
-                 || 'unknown';
-        }
-
-        function sendToStreamlit(data) {
-          var encoded = encodeURIComponent(JSON.stringify(data));
-          var u = new URL(window.location.href);
-          u.searchParams.set('_tel', encoded);
-          // replaceState keeps WebSocket alive — no full reload
-          window.history.replaceState({}, '', u.toString());
-          window.dispatchEvent(new Event('popstate'));
-        }
-
-        var payload = { net_type: _net };
-
-        // isSecureContext guards against GPS permission errors on HTTP
-        if (window.isSecureContext && navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            function(pos) {
-              payload.lat = parseFloat(pos.coords.latitude.toFixed(6));
-              payload.lon = parseFloat(pos.coords.longitude.toFixed(6));
-              payload.acc = Math.round(pos.coords.accuracy);
-              sendToStreamlit(payload);
-            },
-            function(err) {
-              payload.gps_error = err.message;
-              sendToStreamlit(payload);
-            },
-            { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
-          );
-        } else {
-          payload.gps_error = window.isSecureContext
-            ? 'Geolocation disabled by browser.'
-            : 'Blocked: HTTPS required for GPS.';
-          sendToStreamlit(payload);
-        }
-      })();
-    `;
-    _pd.head.appendChild(_s);
-  }
-}
-</script>""",
-            height=0,
+        # GPS JS runs in the main Streamlit frame (not a sandboxed iframe).
+        # Reads current URL so _s session token is preserved in the redirect.
+        st.markdown(
+            "<script>"
+            "(function(){"
+            "if(window.__tp_geo_done)return;"
+            "window.__tp_geo_done=true;"
+            "function done(lat,lon,acc){"
+            "var u=new URL(window.location.href);"
+            "u.searchParams.set(\"_geo_captured\",\"1\");"
+            "if(lat!==null){"
+            "u.searchParams.set(\"_geo_lat\",lat.toFixed(6));"
+            "u.searchParams.set(\"_geo_lon\",lon.toFixed(6));"
+            "u.searchParams.set(\"_geo_acc\",String(Math.round(acc)));"
+            "}else{"
+            "u.searchParams.set(\"_geo_lat\",\"denied\");"
+            "u.searchParams.delete(\"_geo_lon\");"
+            "u.searchParams.delete(\"_geo_acc\");"
+            "}"
+            "window.location.replace(u.toString());"
+            "}"
+            "if(navigator.geolocation){"
+            "navigator.geolocation.getCurrentPosition("
+            "function(p){done(p.coords.latitude,p.coords.longitude,p.coords.accuracy);}," 
+            "function(){done(null,null,null);}," 
+            "{enableHighAccuracy:true,timeout:8000,maximumAge:0}"
+            ");"
+            "}else{done(null,null,null);}"
+            "})();"
+            "</script>",
+            unsafe_allow_html=True,
         )
 
         # Sleep gives the browser time to execute the JS and show the
@@ -3026,60 +2989,18 @@ if (window !== window.parent) {
         st.rerun()
         return
 
-    # ── WAITING: bulletproof telemetry decode ────────────────────────────────
-    # A teacher's phone on 2G may deliver a truncated or mangled _tel string.
-    # The try/except/finally structure guarantees:
-    #   • JSONDecodeError  → caught silently, defaults applied, app continues
-    #   • Any other error  → same silent catch, app continues
-    #   • finally          → _tel is ALWAYS wiped from the URL, even on failure,
-    #                        preventing an infinite error-loop on manual refresh
-    import json as _json_tel
-    import urllib.parse as _urlparse
+    # ── WAITING: read GPS result (or empty if JS failed) ─────────────────────
+    _client_lat = st.query_params.get("_geo_lat", "")
+    _client_lon = st.query_params.get("_geo_lon", "")
+    _client_acc = st.query_params.get("_geo_acc", "")
+    if _client_lat in ("denied", ""):
+        _client_lat = _client_lon = _client_acc = ""
 
-    _tel_raw = st.query_params.get("_tel", "")
-    _tel = {}
-
-    if _tel_raw:
+    for _pk in ("_geo_captured", "_geo_lat", "_geo_lon", "_geo_acc"):
         try:
-            # Step 1: urllib.parse.unquote guarantees clean decode across all
-            # browsers — Streamlit's auto-decode can miss edge cases on older
-            # Android WebViews where encodeURIComponent isn't fully symmetric.
-            _decoded = _urlparse.unquote(_tel_raw)
-
-            # Step 2: parse JSON — may raise JSONDecodeError on garbage input
-            _tel = _json_tel.loads(_decoded)
-
-            # Step 3: extract fields with safe .get() — no KeyErrors possible
-            _client_lat  = str(_tel["lat"])  if _tel.get("lat")  is not None else ""
-            _client_lon  = str(_tel["lon"])  if _tel.get("lon")  is not None else ""
-            _client_acc  = str(_tel["acc"])  if _tel.get("acc")  is not None else ""
-            _client_net  = str(_tel.get("net_type", ""))
-            st.session_state["_net_type"] = _client_net
-
-        except _json_tel.JSONDecodeError:
-            # Mangled JSON — set safe defaults, let the app continue normally
-            _client_lat = _client_lon = _client_acc = _client_net = ""
-            st.session_state["_net_type"] = "unknown"
-
+            del st.query_params[_pk]
         except Exception:
-            # Catch-all: any unforeseen parsing error treated the same way
-            _client_lat = _client_lon = _client_acc = _client_net = ""
-            st.session_state["_net_type"] = "unknown"
-
-        finally:
-            # Always wipe _tel — runs even if the except branch fired.
-            # Removes the raw JSON from the address bar and prevents the app
-            # from re-reading stale or broken data on a manual page refresh.
-            for _pk in ("_tel", "_geo_captured", "_geo_lat", "_geo_lon", "_geo_acc", "_net"):
-                try:
-                    del st.query_params[_pk]
-                except Exception:
-                    pass
-
-    else:
-        # No _tel at all — safe defaults
-        _client_lat = _client_lon = _client_acc = _client_net = ""
-        st.session_state.setdefault("_net_type", "unknown")
+            pass
 
     # ── Animated 4-step overlay ───────────────────────────────────────────────
     _ov = st.empty()
@@ -3173,25 +3094,11 @@ if (window !== window.parent) {
     _draw(2, _res)
     _conn_info = check_conn()
     _lat_ms = _conn_info.get("latency_ms") or 9_999
-    # Latency-based inference (server→API — used as fallback)
-    if _lat_ms < 60:      _tech_type_latency = "Fixed Broadband / Wi-Fi"
-    elif _lat_ms < 150:   _tech_type_latency = "4G LTE"
-    elif _lat_ms < 400:   _tech_type_latency = "3G"
-    elif _lat_ms < 1_500: _tech_type_latency = "2G / Edge"
-    else:                 _tech_type_latency = "Very Slow / Offline"
-    # Prefer browser-reported network type (client-side, more accurate)
-    _net_label_map = {
-        "4g":      "4G LTE",
-        "3g":      "3G",
-        "2g":      "2G / Edge",
-        "slow-2g": "2G / Edge (Slow)",
-    }
-    if _client_net and _client_net.lower() in _net_label_map:
-        _tech_type = _net_label_map[_client_net.lower()]
-    elif _client_net and _client_net.lower() not in ("unknown", ""):
-        _tech_type = _client_net.upper()          # pass through unrecognised values
-    else:
-        _tech_type = _tech_type_latency           # Safari / no Network Info API
+    if _lat_ms < 60:      _tech_type = "Fixed Broadband / Wi-Fi"
+    elif _lat_ms < 150:   _tech_type = "4G LTE"
+    elif _lat_ms < 400:   _tech_type = "3G"
+    elif _lat_ms < 1_500: _tech_type = "2G / Edge"
+    else:                 _tech_type = "Very Slow / Offline"
     _res[2] = _tech_type
 
     _draw(3, _res)
@@ -3213,11 +3120,9 @@ if (window !== window.parent) {
     _record = {
         "timestamp":              _dt.datetime.now().isoformat(),
         "school_code":            str(st.session_state.get("_login_label", "unknown")),
-        "client_ip":              _get_client_ip(),
         "client_lat":             _client_lat,
         "client_lon":             _client_lon,
         "client_accuracy_m":      _client_acc,
-        "client_net_type":        _client_net,
         "server_ip":              str(_geo.get("ip", "")),
         "ip_city":                _ip_city,
         "ip_region":              _ip_region,
@@ -5184,6 +5089,35 @@ html, body, [class*="css"] {
                                     unsafe_allow_html=True)
                     else:
                         st.caption("📡 No school sessions logged yet this session.")
+                    # ── Admin Zone: connection diagnostics + override ──────
+                    with st.expander("⚙️ Admin Diagnostics", expanded=False):
+                        _client_ip_disp = _get_client_ip()
+                        st.markdown(
+                            f'<div style="font-size:.76rem;color:#8899BB;margin-bottom:8px">'
+                            f'<b style="color:#D4A843">Client IP:</b> '
+                            f'<code style="color:#81C784">{_client_ip_disp}</code></div>',
+                            unsafe_allow_html=True)
+                        _conn_q = (st.session_state.get("conn_info") or {}).get("quality", "none")
+                        _conn_lat = (st.session_state.get("conn_info") or {}).get("latency_ms", "—")
+                        _conn_col = {"high":"#81C784","medium":"#FFD54F","low":"#FFA726","very_low":"#EF5350"}.get(_conn_q,"#8899BB")
+                        st.markdown(
+                            f'<div style="font-size:.76rem;color:#8899BB;margin-bottom:10px">'
+                            f'<b style="color:#D4A843">Server→API quality:</b> '
+                            f'<span style="color:{_conn_col}">{_conn_q}</span>'
+                            f'&nbsp;&nbsp;<b style="color:#D4A843">Latency:</b> '
+                            f'<span style="color:#C0CEDF">{_conn_lat} ms</span></div>',
+                            unsafe_allow_html=True)
+                        _force_low_bw = st.checkbox(
+                            "Force 2G/3G Optimisation",
+                            value=st.session_state.get("_force_low_bw", False),
+                            key="_force_low_bw_widget",
+                            help="Tick this to make all AI responses shorter and simpler — use when the school's connection is slow."
+                        )
+                        st.session_state["_force_low_bw"] = _force_low_bw
+                        if _force_low_bw:
+                            st.caption("⚡ Low-bandwidth mode ON — AI responses will be compressed.")
+                        else:
+                            st.caption("AI responses are at full length.")
             if st.session_state.get("_show_save_opts") and "saved_profile" in st.session_state:
                 st.success("✅ Saved! Download below.")
                 _default_name=(school_name.strip().replace(" ","_") or "my_classroom")
@@ -6163,9 +6097,11 @@ Grade:{_grade_en}
 Topic:{_topic_en}
 Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Themes: {lit_info.get('themes','')}. {lit_info.get('wassce','')}."""
                 sp=build_sys(_region_val,country,_grade_en,_subj_en,_task_val,_size_val,_res_val,LANGS[lang],_abl_val,tm,_topic_en,school_name,_mano_prompt_ctx)
+                sp+=_bandwidth_prompt_addon()
                 q=rc_prompt
             else:
                 sp=build_sys(_region_val,country,_grade_en,_subj_en,_task_val,_size_val,_res_val,LANGS[lang],_abl_val,tm,_topic_en,school_name,_mano_prompt_ctx)
+                sp+=_bandwidth_prompt_addon()
                 q=f"Create {_task_val}.\nSubject:{_subj_en}\nGrade:{_grade_en}\nTopic:{_topic_en}\nIMMEDIATELY USABLE."
             if exs: q+="\n"+"; ".join(exs)
             # === MOE Curriculum: inject context into prompts ===
@@ -8367,11 +8303,13 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                 elif _attached_photo:
                     st.write(T("analyzing_photo"))
                     _vision_sp = build_free_chat()
+                    _vision_sp += _bandwidth_prompt_addon()
                     r, m = best_vision(_vision_sp, uq, _attached_photo, _attached_mime or "image/jpeg")
                     allr = {m: r} if m else {"AI": r}
                     msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
                 else:
                     _sp_chat = build_free_chat()
+                    _sp_chat += _bandwidth_prompt_addon()
                     _hist_chat = [{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]]
                     if st.session_state.get("chat_ask_all_ai", False):
                         st.write(f"{T('asking_claude')}")
