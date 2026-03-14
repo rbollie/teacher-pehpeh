@@ -7800,7 +7800,7 @@ Be factual. Do not invent data. Keep each section focused and practical."""
             st.session_state["chat_ask_all_ai"] = False
             _avail_ais = [n for k,n in [(OPENAI_API_KEY,"ChatGPT"),(ANTHROPIC_API_KEY,"Claude"),(GOOGLE_API_KEY,"Gemini")] if k]
             _default_ai = next(iter(_avail_ais), "AI")
-            st.markdown(f'<div style="background:rgba(43,125,233,.08);border:1px solid rgba(43,125,233,.2);border-radius:8px;padding:6px 10px;margin-top:4px"><span style="font-size:.78rem;color:#7BB8F5">🤖 Powered by: {_default_ai}</span></div>', unsafe_allow_html=True)
+
 
         # Photo upload / camera area (shown when toggled on)
         chat_photo_b64 = None
