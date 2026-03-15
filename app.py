@@ -5178,8 +5178,6 @@ html, body, [class*="css"] {
                 st.session_state["_nav_tab"]=0; st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-        st.markdown('<p style="text-align:center;font-size:.72rem;color:#334455;margin-top:1.2rem">Powered by ChatGPT &bull; Claude &bull; Gemini</p>', unsafe_allow_html=True)
-
         # ── JS: colour each tile by its label text ────────────────────────
         import streamlit.components.v1 as _tile_comp
         _tile_comp.html("""
