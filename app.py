@@ -441,121 +441,60 @@ def check_conn():
     else: r.update(quality="very_low",label="Very Slow",emoji="🟠")
     return r
 
-# ── BANDWIDTH / ADMIN ZONE HELPERS ───────────────────────────────────────────
-_SLOW_NETWORKS = {"2g", "slow-2g", "3g"}
-
-def _get_client_ip():
-    """Return best-guess client IP from request headers (server-side, no JS needed)."""
-    try:
-        hdrs = getattr(st.context, "headers", {}) or {}
-        for h in ("x-forwarded-for", "x-real-ip", "cf-connecting-ip", "remote-addr"):
-            v = hdrs.get(h, "")
-            if v:
-                return v.split(",")[0].strip()
-    except Exception:
-        pass
-    return "unknown"
-
-def _is_slow_connection():
-    """True when the server-side connectivity check reports a slow / absent link."""
-    try:
-        q = (st.session_state.get("conn_info") or {}).get("quality", "none")
-        return q in ("low", "very_low", "none")
-    except Exception:
-        return False
-
-def _bandwidth_prompt_addon():
-    """
-    Return an instruction block to append to any system prompt when the
-    connection is slow OR the IBT admin has forced low-bandwidth mode.
-    Returns empty string when not needed so existing callers are unaffected.
-    """
-    try:
-        is_slow = _is_slow_connection() or st.session_state.get("_force_low_bw", False)
-    except Exception:
-        is_slow = False
-    if not is_slow:
-        return ""
-    return (
-        "\n\nLOW-BANDWIDTH MODE (active): This school has a slow or limited internet "
-        "connection. Keep ALL responses at least 40% shorter than normal. "
-        "Use plain text only — no markdown tables, no nested bullet lists, no "
-        "multi-column layouts. Short paragraphs, simple vocabulary. "
-        "Students need the core content fast, not decoration."
-    )
-
 # === IMAGE GENERATION ===
 def _enhance_image_prompt(raw_prompt, openai_client):
     """
-    Mimic ChatGPT's internal behaviour: use GPT-4o to rewrite the raw topic
-    into a rich, detailed, culturally-accurate DALL-E 3 prompt.
-    This is the step a direct API call skips — and why ChatGPT images look better.
+    Creates a high-fidelity, documentary-style prompt for Liberia.
+    Merges strict photography constraints with deep cultural accuracy
+    to avoid 'cartoonish' or 'AI-looking' results.
     """
-    system = (
-        "You are a specialist in writing DALL-E 3 image prompts that produce real photographs, "
-        "not illustrations or drawings. Every prompt you write must read like a photography brief.\n\n"
 
-        "STYLE — absolute, never negotiable:\n"
-        "Describe the scene as a documentary photographer would brief their DSLR shot. "
-        "Use concrete photography terms: camera model, focal length, lighting, depth of field. "
-        "Example suffix: 'Nikon D850, 50mm f/1.8, warm afternoon light, shallow depth of field, "
-        "National Geographic editorial quality.' "
-        "The output must look indistinguishable from a real photograph. "
-        "Write ONLY about what IS in the image — never list what should NOT be there.\n\n"
-
-        "LOCATION — DEFAULT IS MONROVIA, LIBERIA (capital city), unless the topic explicitly calls for a rural setting:\n"
-        "Monrovia details to draw from naturally, as fits the scene:\n"
-        "- Busy streets with yellow taxis, motorbikes, and traders carrying goods on their heads\n"
-        "- Waterside Market or Red Light Market — colourful stalls, hawkers, stacked produce\n"
-        "- Joe bar (roadside food stall) with benches, a charcoal pot, plastic chairs, pepper soup\n"
-        "- Broad Street or Randall Street storefronts, painted concrete buildings, colourful signage\n"
-        "- Monrovia school buildings: concrete block, zinc or corrugated-iron roofs, painted in faded "
-        "yellow or white, crowded classrooms with wooden desks, chalkboard walls\n"
-        "- Atlantic Ocean coastline or Providence Island visible in background where fitting\n"
-        "- Humid tropical air, overcast rainy-season sky OR brilliant dry-season sunshine\n"
-        "- Liberian flag colours (red, white, blue, single star) appearing on uniforms, walls, or cloth\n"
-        "- Street food: cassava leaf, palm butter, fried plantain, rice bread\n"
-        "- People dressed in lappa (tie-dye wrap cloth), business casual, or school uniforms\n\n"
-
-        "PEOPLE — always:\n"
-        "- All people have dark skin tones and West African / Liberian facial features.\n"
-        "- Students in white-shirt dark-trouser or white-shirt dark-skirt Liberian public school uniforms.\n"
-        "- Teachers and adults in smart-casual West African attire or collared shirts.\n\n"
-
-        "CLASSROOM DETAILS (when relevant):\n"
-        "- Hand-drawn chalk diagram on a concrete chalkboard — photographed in situ.\n"
-        "- Students writing in paper exercise books with blue or black biro.\n"
-        "- Atmosphere: aspiring, communal, proud — real Liberian education captured honestly.\n\n"
-
-        "RURAL EXCEPTION: Only use rural setting (zinc-roof village, laterite paths, farm) "
-        "if the prompt explicitly mentions farm, village, rural, bush, countryside, or equivalent.\n\n"
-
-        "OUTPUT: ONE paragraph, under 400 words. No bullets. No preamble. No quotes. Just the prompt."
+    system = """
+    You are a specialist in documentary photography briefs. Your goal is to generate 
+    prompts for an image generator that produce high-fidelity, realistic photographs.
+    
+    CORE DIRECTIVES:
+    - LOCATION: Default to Monrovia, Liberia unless 'rural', 'farm', or 'village' is specified.
+    - VISUALS: Describe Monrovia as a dense, coastal West African capital. Include 
+      weathered concrete buildings, zinc (corrugated iron) roofs, drainage gutters, 
+      and louvered windows. Use tropical humidity cues (hazy light, damp textures).
+    - TRANSPORT: Feature yellow Nissan Sunny taxis, green or yellow 'Kekehs' (Bajaj), 
+      and motorbikes (peh-pehs) weaving through traffic.
+    - PEOPLE: Dark West African skin tones with natural textures (sweat, pores). 
+      Clothing varies: 'lappa' wraps, sharp business casual, or school uniforms 
+      (white shirts with navy or dark green). 
+    - MARKETS: Open-air, chaotic, and vibrant. Mention specific items like red palm oil 
+      in jugs, stacked cassava, or sun-bleached umbrellas.
+    - STYLE: Absolute photorealism. No illustrations. Use 'Nikon D850, 35mm f/1.8, 
+      natural overcast light, shallow depth of field, documentary realism.'
+    
+    OUTPUT: Exactly one paragraph. No bullets. No preamble. Under 300 words.
+    """
+    user_message = (
+        f"Write a photorealistic documentary-style image prompt for: {raw_prompt}. "
+        "Ensure it captures the authentic movement and texture of Liberia."
     )
     try:
         resp = openai_client.chat.completions.create(
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": system},
-                {"role": "user", "content": f"Write a DALL-E 3 photorealistic prompt. Default to Monrovia, Liberia city context unless the topic calls for a rural setting. Topic: {raw_prompt}"}
+                {"role": "user", "content": user_message}
             ],
-            max_tokens=450,
-            temperature=0.6,
+            max_tokens=380,
+            temperature=0.7,
         )
         enhanced = resp.choices[0].message.content.strip()
         if enhanced:
             return enhanced
-    except: pass
-    # Fallback: hardcoded Monrovia-context photorealistic prompt
+    except Exception:
+        pass
+    # High-quality fallback if the API fails
     return (
-        f"Documentary photograph of a Monrovia, Liberia school lesson on '{raw_prompt}'. "
-        "A teacher with dark skin and West African features stands at a concrete chalkboard "
-        "in a crowded urban classroom — concrete block walls, zinc roof, wooden desks packed "
-        "with Liberian students in white-and-dark school uniforms. "
-        "Through the louvred windows: the busy streets of Monrovia, yellow taxis, "
-        "traders carrying goods, colourful painted storefronts. "
-        "Warm humid tropical light, high resolution, Nikon D850, 35mm lens, "
-        "National Geographic documentary photography quality."
+        f"Candid documentary photograph of {raw_prompt} in Liberia. Atmospheric street "
+        "scene with weathered concrete architecture, zinc roofs, and yellow taxis. "
+        "People with West African features in natural, everyday attire. Humid tropical "
+        "lighting, sharp textures, shot on Nikon D850, 35mm lens, f/2.8, editorial quality."
     )
 
 
@@ -5089,35 +5028,6 @@ html, body, [class*="css"] {
                                     unsafe_allow_html=True)
                     else:
                         st.caption("📡 No school sessions logged yet this session.")
-                    # ── Admin Zone: connection diagnostics + override ──────
-                    with st.expander("⚙️ Admin Diagnostics", expanded=False):
-                        _client_ip_disp = _get_client_ip()
-                        st.markdown(
-                            f'<div style="font-size:.76rem;color:#8899BB;margin-bottom:8px">'
-                            f'<b style="color:#D4A843">Client IP:</b> '
-                            f'<code style="color:#81C784">{_client_ip_disp}</code></div>',
-                            unsafe_allow_html=True)
-                        _conn_q = (st.session_state.get("conn_info") or {}).get("quality", "none")
-                        _conn_lat = (st.session_state.get("conn_info") or {}).get("latency_ms", "—")
-                        _conn_col = {"high":"#81C784","medium":"#FFD54F","low":"#FFA726","very_low":"#EF5350"}.get(_conn_q,"#8899BB")
-                        st.markdown(
-                            f'<div style="font-size:.76rem;color:#8899BB;margin-bottom:10px">'
-                            f'<b style="color:#D4A843">Server→API quality:</b> '
-                            f'<span style="color:{_conn_col}">{_conn_q}</span>'
-                            f'&nbsp;&nbsp;<b style="color:#D4A843">Latency:</b> '
-                            f'<span style="color:#C0CEDF">{_conn_lat} ms</span></div>',
-                            unsafe_allow_html=True)
-                        _force_low_bw = st.checkbox(
-                            "Force 2G/3G Optimisation",
-                            value=st.session_state.get("_force_low_bw", False),
-                            key="_force_low_bw_widget",
-                            help="Tick this to make all AI responses shorter and simpler — use when the school's connection is slow."
-                        )
-                        st.session_state["_force_low_bw"] = _force_low_bw
-                        if _force_low_bw:
-                            st.caption("⚡ Low-bandwidth mode ON — AI responses will be compressed.")
-                        else:
-                            st.caption("AI responses are at full length.")
             if st.session_state.get("_show_save_opts") and "saved_profile" in st.session_state:
                 st.success("✅ Saved! Download below.")
                 _default_name=(school_name.strip().replace(" ","_") or "my_classroom")
@@ -5177,6 +5087,8 @@ html, body, [class*="css"] {
                 st.session_state["task_cat"]="📝 Assessment"; st.session_state["task_sel"]="Quiz (10 Q)"
                 st.session_state["_nav_tab"]=0; st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown('<p style="text-align:center;font-size:.72rem;color:#334455;margin-top:1.2rem">Powered by ChatGPT &bull; Claude &bull; Gemini</p>', unsafe_allow_html=True)
 
         # ── JS: colour each tile by its label text ────────────────────────
         import streamlit.components.v1 as _tile_comp
@@ -6095,11 +6007,9 @@ Grade:{_grade_en}
 Topic:{_topic_en}
 Book context: {lit_info.get('genre','')} from {lit_info.get('origin','')}. Themes: {lit_info.get('themes','')}. {lit_info.get('wassce','')}."""
                 sp=build_sys(_region_val,country,_grade_en,_subj_en,_task_val,_size_val,_res_val,LANGS[lang],_abl_val,tm,_topic_en,school_name,_mano_prompt_ctx)
-                sp+=_bandwidth_prompt_addon()
                 q=rc_prompt
             else:
                 sp=build_sys(_region_val,country,_grade_en,_subj_en,_task_val,_size_val,_res_val,LANGS[lang],_abl_val,tm,_topic_en,school_name,_mano_prompt_ctx)
-                sp+=_bandwidth_prompt_addon()
                 q=f"Create {_task_val}.\nSubject:{_subj_en}\nGrade:{_grade_en}\nTopic:{_topic_en}\nIMMEDIATELY USABLE."
             if exs: q+="\n"+"; ".join(exs)
             # === MOE Curriculum: inject context into prompts ===
@@ -8301,13 +8211,11 @@ Be factual. Do not invent data. Keep each section focused and practical."""
                 elif _attached_photo:
                     st.write(T("analyzing_photo"))
                     _vision_sp = build_free_chat()
-                    _vision_sp += _bandwidth_prompt_addon()
                     r, m = best_vision(_vision_sp, uq, _attached_photo, _attached_mime or "image/jpeg")
                     allr = {m: r} if m else {"AI": r}
                     msg_data={"role":"assistant","content":r,"model":m,"all_responses":allr}
                 else:
                     _sp_chat = build_free_chat()
-                    _sp_chat += _bandwidth_prompt_addon()
                     _hist_chat = [{"role":x["role"],"content":x["content"]} for x in st.session_state.chat_messages[-11:-1]]
                     if st.session_state.get("chat_ask_all_ai", False):
                         st.write(f"{T('asking_claude')}")
