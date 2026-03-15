@@ -442,6 +442,95 @@ def check_conn():
     return r
 
 # === IMAGE GENERATION ===
+
+# ── IBT Real Photograph Catalog ─────────────────────────────────────────────
+# Source: institutebasictechnology.org (IBT's own licensed content)
+# These are real photos from IBT's labs and Liberia in Pictures gallery.
+# Used as primary image source when the topic matches; AI generation is fallback.
+_IBT_BASE = "https://institutebasictechnology.org/resources/img/"
+
+IBT_SUBJECT_PHOTOS = {
+    # STEM lab photos — specific subject matches
+    "chemistry":       _IBT_BASE + "lab_tour/lab_tour_imgs/chem-lab2.jpg",
+    "organic":         _IBT_BASE + "lab_tour/lab_tour_imgs/chem-lab2.jpg",
+    "inorganic":       _IBT_BASE + "lab_tour/lab_tour_imgs/chem-lab2.jpg",
+    "titration":       _IBT_BASE + "lab_tour/lab_tour_imgs/chem-lab2.jpg",
+    "reaction":        _IBT_BASE + "lab_tour/lab_tour_imgs/chem-lab2.jpg",
+    "biology":         _IBT_BASE + "lab_tour/lab_tour_imgs/biology-lab.jpg",
+    "cell":            _IBT_BASE + "lab_tour/lab_tour_imgs/biology-lab.jpg",
+    "microscope":      _IBT_BASE + "lab_tour/lab_tour_imgs/biology-lab.jpg",
+    "anatomy":         _IBT_BASE + "lab_tour/lab_tour_imgs/biology-lab.jpg",
+    "genetics":        _IBT_BASE + "lab_tour/lab_tour_imgs/biology-lab.jpg",
+    "photosynthesis":  _IBT_BASE + "lab_tour/lab_tour_imgs/biology-lab.jpg",
+    "physics":         _IBT_BASE + "lab_tour/lab_tour_imgs/phy-lab.jpg",
+    "optics":          _IBT_BASE + "lab_tour/lab_tour_imgs/phy-lab.jpg",
+    "electricity":     _IBT_BASE + "lab_tour/lab_tour_imgs/phy-lab.jpg",
+    "mechanics":       _IBT_BASE + "lab_tour/lab_tour_imgs/phy-lab.jpg",
+    "force":           _IBT_BASE + "lab_tour/lab_tour_imgs/phy-lab.jpg",
+    "motion":          _IBT_BASE + "lab_tour/lab_tour_imgs/phy-lab.jpg",
+    "mathematics":     _IBT_BASE + "lab_tour/lab_tour_imgs/Math-lab.jpg",
+    "algebra":         _IBT_BASE + "lab_tour/lab_tour_imgs/Math-lab.jpg",
+    "geometry":        _IBT_BASE + "lab_tour/lab_tour_imgs/Math-lab.jpg",
+    "calculus":        _IBT_BASE + "lab_tour/lab_tour_imgs/Math-lab.jpg",
+    "statistics":      _IBT_BASE + "lab_tour/lab_tour_imgs/Math-lab.jpg",
+    "trigonometry":    _IBT_BASE + "lab_tour/lab_tour_imgs/Math-lab.jpg",
+    "fractions":       _IBT_BASE + "lab_tour/lab_tour_imgs/Math-lab.jpg",
+    "computer":        _IBT_BASE + "lab_tour/lab_tour_imgs/pc-lab.jpg",
+    "programming":     _IBT_BASE + "lab_tour/lab_tour_imgs/pc-lab.jpg",
+    "python":          _IBT_BASE + "lab_tour/lab_tour_imgs/pc-lab.jpg",
+    "coding":          _IBT_BASE + "lab_tour/lab_tour_imgs/pc-lab.jpg",
+    "networking":      _IBT_BASE + "lab_tour/lab_tour_imgs/pc-lab.jpg",
+    "drone":           _IBT_BASE + "lab_tour/lab_tour_imgs/pc-lab.jpg",
+}
+
+# General Liberia/IBT community photos — pool for random fallback
+IBT_GENERAL_PHOTOS = [
+    _IBT_BASE + "liberia_in_pictures/pic1.jpg",
+    _IBT_BASE + "liberia_in_pictures/pic2.jpg",
+    _IBT_BASE + "liberia_in_pictures/pic3.jpg",
+    _IBT_BASE + "liberia_in_pictures/pic4.jpg",
+    _IBT_BASE + "liberia_in_pictures/pic9.jpg",
+    _IBT_BASE + "liberia_in_pictures/pic6.jpg",
+    _IBT_BASE + "liberia_in_pictures/pic7.jpg",
+    _IBT_BASE + "liberia_in_pictures/pic8.jpg",
+    _IBT_BASE + "liberia_in_pictures/pic10.jpg",
+    _IBT_BASE + "liberia_in_pictures/pic11.jpg",
+    _IBT_BASE + "liberia_in_pictures/pic12.jpg",
+    _IBT_BASE + "liberia_in_pictures/pic13.jpg",
+    _IBT_BASE + "liberia_in_pictures/pic14.jpg",
+    _IBT_BASE + "liberia_in_pictures/pic15.jpg",
+    _IBT_BASE + "liberia_in_pictures/pic16.jpg",
+    _IBT_BASE + "liberia_in_pictures/pic17.jpg",
+    _IBT_BASE + "liberia_in_pictures/pic18.jpg",
+    _IBT_BASE + "liberia_in_pictures/pic19.jpg",
+    _IBT_BASE + "liberia_in_pictures/pic20.jpg",
+    _IBT_BASE + "liberia_in_pictures/IMG_0073.JPG",
+    _IBT_BASE + "liberia_in_pictures/IMG_20260123_163516_226.JPEG",
+    _IBT_BASE + "liberia_in_pictures/IMG_6606.JPEG",
+    _IBT_BASE + "liberia_in_pictures/IMG_6659.JPEG",
+    _IBT_BASE + "liberia_in_pictures/IMG_6728.JPEG",
+    _IBT_BASE + "liberia_in_pictures/IMG_6864.JPEG",
+    _IBT_BASE + "liberia_in_pictures/IMG_6865.JPEG",
+    _IBT_BASE + "liberia_in_pictures/IMG_6915.JPEG",
+    _IBT_BASE + "liberia_in_pictures/IMG_6921.JPEG",
+    _IBT_BASE + "liberia_in_pictures/IMG_6934.JPEG",
+    _IBT_BASE + "liberia_in_pictures/IMG_8860.jpg",
+]
+
+def _get_ibt_image(prompt):
+    """
+    Try to match the prompt to a real IBT photograph.
+    Returns (url, 'IBT Photo') on a subject match, else (None, None).
+    General photos are NOT auto-returned here — AI generation handles
+    non-matching topics; caller may use IBT_GENERAL_PHOTOS as last resort.
+    """
+    p = prompt.lower()
+    for keyword, url in IBT_SUBJECT_PHOTOS.items():
+        if keyword in p:
+            return url, "IBT Photo"
+    return None, None
+
+
 def _enhance_image_prompt(raw_prompt, openai_client):
     """
     Creates a high-fidelity, documentary-style prompt for Liberia.
@@ -504,6 +593,12 @@ def gen_image(prompt, agent="Auto"):
     # Always clear stale errors from previous runs
     st.session_state.pop("_img_gen_errors", None)
 
+    # --- Step 0: IBT real photographs (highest priority) ---
+    # Check IBT's own licensed photos first — real Liberian classrooms beat AI every time.
+    _ibt_url, _ibt_src = _get_ibt_image(prompt)
+    if _ibt_url:
+        return _ibt_url, _ibt_src
+
     # --- ChatGPT image generation (DALL-E) ---
     if agent in ("ChatGPT", "Auto") and OAI and OPENAI_API_KEY:
         c = openai.OpenAI(api_key=OPENAI_API_KEY)
@@ -542,30 +637,28 @@ def gen_image(prompt, agent="Auto"):
                 return f"data:image/png;base64,{b64}", "ChatGPT"
         except: pass
 
-    # Gemini prompt — Monrovia urban context by default, rural only if topic demands it
+    # Gemini prompt — culturally accurate Monrovia context, rural only when explicit
     _rural_keywords = ("farm", "village", "rural", "bush", "countryside", "laterite", "cassava farm")
     _is_rural = any(kw in prompt.lower() for kw in _rural_keywords)
     if _is_rural:
         _location_detail = (
-            "surrounded by tropical vegetation and red laterite paths, "
-            "a zinc-roof village school outside Monrovia"
+            "a zinc-roof village school outside Monrovia, surrounded by tropical vegetation "
+            "and red laterite paths, motorbikes (peh-pehs) parked nearby"
         )
     else:
         _location_detail = (
-            "in Monrovia, Liberia — concrete block walls, zinc roof, wooden desks. "
-            "Through the open louvred windows: busy Monrovia streets, yellow taxis, "
-            "traders with goods on their heads, colourful painted storefronts, "
-            "a joe bar with plastic chairs and a charcoal pot visible across the street"
+            "in Monrovia, Liberia — weathered concrete block walls, zinc corrugated-iron roof, "
+            "louvered windows, drainage gutters outside. Yellow Nissan Sunny taxis and green Kekehs "
+            "(Bajaj tricycles) visible through the windows on the humid, haze-lit street"
         )
     _gemini_prompt = (
-        f"A real documentary photograph of a school lesson on '{prompt}', "
+        f"Candid documentary photograph of a school lesson on '{prompt}', "
         f"{_location_detail}. "
-        "A teacher with dark skin and West African features stands at a concrete chalkboard. "
-        "Liberian students in white-shirt dark-trouser school uniforms sit at worn wooden desks, "
-        "engaged and attentive, writing in paper exercise books with biro. "
-        "Warm tropical light. Chalk diagram visible on the board. "
-        "Photorealistic, high resolution, National Geographic documentary photography. "
-        "Shot on a DSLR with natural light. Real photograph."
+        "A teacher with dark West African skin stands at a concrete chalkboard with a chalk diagram. "
+        "Liberian students in white shirts and navy or dark-green trousers or skirts sit at worn wooden desks, "
+        "writing in exercise books with biro, natural sweat and texture on skin visible. "
+        "Hazy tropical overcast light, damp textures, shallow depth of field. "
+        "Shot on Nikon D850, 35mm f/1.8, documentary realism, no illustrations, real photograph."
     )
 
     # --- Gemini / Nano Banana image generation ---
@@ -694,6 +787,14 @@ def gen_image(prompt, agent="Auto"):
 
         if _img_errs:
             st.session_state["_img_gen_errors"] = _img_errs
+
+    # --- Final fallback: random IBT general photo ---
+    # If all AI generation failed, serve a real IBT community photo rather than nothing.
+    try:
+        _fallback = random.choice(IBT_GENERAL_PHOTOS)
+        return _fallback, "IBT Photo"
+    except Exception:
+        pass
 
     return None, None
 
@@ -1516,7 +1617,28 @@ def _p():
         "- Community, family, and respect for elders are central values — honor this in tone.\n"
         "- IBT (Institute of Basic Technology) built this tool to serve these students. Always represent IBT with pride.\n"
         "- When explaining any concept, default to Liberian/West African context first. No need to explain Western context first.\n"
-        "- All examples should feel like they come from someone who knows Liberia from the inside."
+        "- All examples should feel like they come from someone who knows Liberia from the inside.\n\n"
+
+        # === SYNTHESIS & CULTURAL GROUNDING (CRITICAL) ===
+        "SYNTHESIS RULES — MANDATORY when combining or drawing on results from any AI model:\n"
+        "These rules apply every time you receive, summarise, rewrite, or synthesise content from GPT, Gemini, Claude, or any other external model.\n"
+        "1. VOICE: The final output must always sound like Teacher Pehpeh — warm, elder-like, Liberian. "
+        "Strip out any generic Western tone, corporate language, or AI-sounding phrasing before presenting to the user.\n"
+        "2. EXAMPLES: Replace generic examples with Liberian ones. \'A car on a highway\' becomes \'a peh-peh on the Old Road\'. "
+        "\'Supermarket\' becomes \'Waterside Market\'. \'Salary\' becomes \'what a market woman earns by end of Friday\'. "
+        "\'Factory\' becomes \'palm oil mill\'. \'Train\' becomes \'cargo truck from Ganta to Monrovia\'. Always localise.\n"
+        "3. STUDENT LENS: When any synthesised content mentions students or learners, ground it in IBT reality: "
+        "58% have never used a computer (paper-first always); no reliable internet — all tips must be self-contained; "
+        "Groups 1/2/3 (sibling-based) — tailor depth and difficulty accordingly; WASSCE is the goal.\n"
+        "4. CULTURAL FILTER: Any concept or analogy from a non-African context must be reframed before output. "
+        "Use farming, market trade, fishing, community labour, local transport, cassava preparation, palm butter cooking, "
+        "fetching water, or Koloqua words to ground it. Never output a Western analogy without converting it first.\n"
+        "5. TONE LOCK: No matter how the source AI phrased it, the output must feel like it came from a trusted Liberian "
+        "teacher who loves their students. Warmth is non-negotiable. Encouragement is non-negotiable. Community respect is non-negotiable.\n"
+        "6. IBT PRIDE: When synthesising research, statistics, or recommendations, always elevate IBT\'s own data "
+        "(183 students, 6 Liberian schools) above generic global statistics. IBT data is the ground truth for this context.\n"
+        "7. COMPLETENESS: Never return a raw AI output to the user. Always pass it through this Liberian cultural filter first. "
+        "The user should never feel they are reading something written for another country."
     )
 def _g():
     return "Groups: 1(0-4 siblings,most time), 2(5-8,limited), 3(8+,very little). Consider socioeconomic, computer access, parents' ed."
@@ -1602,9 +1724,43 @@ def best(sp,q,h=None):
     if r and not str(r).startswith("⚠️"): return r,"Gemini"
     return "⚠️ No models responded.",None
 
-# ═══════════════════════════════════════════════════════════
-# INTERVENTION RECOMMENDATION BUBBLE
-# ═══════════════════════════════════════════════════════════
+def pehpeh_synthesize(raw_outputs, context_hint=""):
+    """
+    Teacher Pehpeh Cultural Synthesis Wrapper.
+    Takes a list of (text, model_name) tuples from different AI models,
+    combines them, and re-grounds the result in Liberian/IBT cultural context.
+    """
+    if not raw_outputs:
+        return "⚠️ No AI responses to synthesise.", None
+
+    combined_parts = []
+    for text, model_name in raw_outputs:
+        if text and not str(text).startswith("⚠️"):
+            combined_parts.append("[Source: " + model_name + "]\n" + str(text))
+
+    if not combined_parts:
+        return "⚠️ All AI models returned errors.", None
+
+    combined_draft = "\n\n---\n\n".join(combined_parts)
+    hint_str = (" for: " + context_hint) if context_hint else ""
+
+    synthesis_prompt = (
+        "You have received the following draft responses from different AI models" + hint_str + ".\n\n"
+        + combined_draft +
+        "\n\nYour task:\n"
+        "1. Synthesise the best ideas into ONE cohesive response.\n"
+        "2. Apply your SYNTHESIS RULES fully — rewrite all examples in Liberian/West African context.\n"
+        "3. Output must sound exactly like Teacher Pehpeh: warm, elder-like, culturally grounded.\n"
+        "4. Replace any Western analogies or references with Liberian equivalents.\n"
+        "5. Ground all advice in IBT student reality (no internet, paper-first, Groups 1/2/3).\n"
+        "6. One voice only: Teacher Pehpeh. Never let the user sense multiple sources."
+    )
+
+    result, model_used = best(_p(), synthesis_prompt)
+    if result and not str(result).startswith("⚠️"):
+        return result, "Teacher Pehpeh"
+    return (combined_parts[0] if combined_parts else "⚠️ Synthesis failed."), "Teacher Pehpeh"
+
 
 def _render_intervention_bubble(student_name, avg_score=None, profile=None, subject="", key_suffix=""):
     """
